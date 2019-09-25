@@ -16,7 +16,7 @@ const int dist[station_t][station_t] = {
     { 8, 4, 0 }
 };
 
-broadcast chan stoc_arr[station_t], arr[station_t], dest, done;</declaration>
+broadcast chan stoc_arr[station_t], arr[station_t], done;</declaration>
 	<template>
 		<name>Arrival</name>
 		<location id="id0" x="8" y="0">
