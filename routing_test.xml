@@ -19,8 +19,10 @@ const int dist[station_t][station_t] = {
 broadcast chan stoc_arr[station_t], arr[station_t], done;</declaration>
 	<template>
 		<name>Arrival</name>
+		<declaration>
+const int prob[station_t] = { 1, 3, 5 };</declaration>
 		<location id="id0" x="8" y="0">
-			<label kind="exponentialrate" x="-42" y="-25">1:5</label>
+			<label kind="exponentialrate" x="34" y="-8">1:5</label>
 		</location>
 		<branchpoint id="id1" x="-195" y="0">
 		</branchpoint>
@@ -28,26 +30,11 @@ broadcast chan stoc_arr[station_t], arr[station_t], done;</declaration>
 		<transition>
 			<source ref="id1"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-144" y="136">stoc_arr[3]!</label>
-			<label kind="probability" x="-144" y="153">5</label>
-			<nail x="-195" y="153"/>
-			<nail x="8" y="153"/>
-		</transition>
-		<transition>
-			<source ref="id1"/>
-			<target ref="id0"/>
-			<label kind="synchronisation" x="-136" y="34">stoc_arr[1]!</label>
-			<label kind="probability" x="-110" y="59">1</label>
-			<nail x="-127" y="59"/>
-			<nail x="-59" y="59"/>
-		</transition>
-		<transition>
-			<source ref="id1"/>
-			<target ref="id0"/>
-			<label kind="synchronisation" x="-127" y="93">stoc_arr[2]!</label>
-			<label kind="probability" x="-59" y="110">3</label>
-			<nail x="-144" y="110"/>
-			<nail x="-42" y="111"/>
+			<label kind="select" x="-144" y="68">id : station_t</label>
+			<label kind="synchronisation" x="-144" y="85">stoc_arr[id]!</label>
+			<label kind="probability" x="-144" y="102">prob[id]</label>
+			<nail x="-195" y="59"/>
+			<nail x="8" y="59"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id0"/>
@@ -179,7 +166,7 @@ clock proc;
 			<label kind="guard" x="-636" y="-510">num_in_queue == 0</label>
 			<nail x="-450" y="-476"/>
 		</transition>
-		<transition>
+		<transition controllable="false">
 			<source ref="id7"/>
 			<target ref="id6"/>
 			<label kind="guard" x="-629" y="-306">our_pos==1
@@ -241,7 +228,7 @@ system Robot, Arrival, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=20] (&lt;&gt; Robot.allvisited())</formula>
+			<formula>Pr[&lt;=50] (&lt;&gt; Robot.allvisited())</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -249,7 +236,7 @@ system Robot, Arrival, Station;
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=20] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<formula>Pr[&lt;=50] (&lt;&gt; Robot.allvisited()) under opt</formula>
 			<comment></comment>
 		</query>
 		<query>
