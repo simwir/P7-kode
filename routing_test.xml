@@ -5,22 +5,29 @@
 
 clock total;
 
-const int NUM_STATIONS = 3;
+const int NUM_STATIONS = 10;
 const int MAX_ROBOTS = 5;
 
 typedef int[1,NUM_STATIONS] station_t;
 
-const int dist[station_t][station_t] = { 
-    { 0, 5, 7 },
-    { 2, 0, 9 },
-    { 8, 4, 0 }
+const int dist[station_t][station_t] = {
+    {  0,  5,  7,  5,  4,  8,  2,  3,  9, 12 },
+    {  2,  0,  9, 12,  1,  2,  6,  3,  8,  4 },
+    {  8,  4,  0,  1,  2, 11,  1, 14, 18,  7 },
+    { 20,  4, 13,  0,  3, 12, 10,  6,  5, 16 },
+    {  2,  6, 17,  3,  0,  1,  7,  9, 16, 12 },
+    { 18, 11,  8, 14,  4,  0, 10, 13, 19,  5 },
+    {  9, 18, 14,  8,  3,  7,  0, 13,  6,  2 },
+    { 17, 10, 19,  5,  1, 12, 15,  0, 11, 20 },
+    { 17, 20,  5, 12, 16, 11, 13,  9,  0,  1 },
+    {  8, 10, 18,  7,  4,  6,  3, 14,  2,  0 }
 };
 
 broadcast chan stoc_arr[station_t], arr[station_t], done;</declaration>
 	<template>
 		<name>Arrival</name>
 		<declaration>
-const int prob[station_t] = { 1, 3, 5 };</declaration>
+const int prob[station_t] = { 1, 3, 5, 7, 9, 9, 7, 5, 3, 1 };</declaration>
 		<location id="id0" x="8" y="0">
 			<label kind="exponentialrate" x="34" y="-8">1:5</label>
 		</location>
@@ -45,13 +52,19 @@ const int prob[station_t] = { 1, 3, 5 };</declaration>
 		<name>Robot</name>
 		<declaration>clock x;
 
-bool visited[station_t] = {false, false, false};
+bool visited[station_t] = {false, false, false, false, false, false, false, false, false, false};
 
 station_t curr_loc;
 station_t dest;
 
 bool allvisited() {
-    return visited[1] &amp;&amp; visited[2] &amp;&amp; visited[3];
+    for (id : station_t) {
+        if (!visited[id]) {
+            return false;
+        }
+    }
+
+    return true;
 }</declaration>
 		<location id="id2" x="-637" y="-246">
 			<name x="-714" y="-272">Choose</name>
@@ -228,15 +241,15 @@ system Robot, Arrival, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=50] (&lt;&gt; Robot.allvisited())</formula>
+			<formula>Pr[&lt;=120] (&lt;&gt; Robot.allvisited())</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=50] : &lt;&gt; Robot.allvisited()</formula>
+			<formula>strategy opt = minE (total) [&lt;=100] : &lt;&gt; Robot.allvisited()</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=50] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<formula>Pr[&lt;=120] (&lt;&gt; Robot.allvisited()) under opt</formula>
 			<comment></comment>
 		</query>
 		<query>
