@@ -61,82 +61,52 @@ broadcast chan stoc_arr[station_t], arr[station_t], dest, done;</declaration>
 bool visited[station_t] = {false, false, false};
 
 station_t curr_loc;
+station_t dest;
 
 bool allvisited() {
     return visited[1] &amp;&amp; visited[2] &amp;&amp; visited[3];
 }</declaration>
 		<location id="id2" x="-637" y="-246">
-			<name x="-647" y="-280">Choose</name>
+			<name x="-714" y="-272">Choose</name>
 			<urgent/>
 		</location>
-		<location id="id3" x="-399" y="-323">
-			<name x="-425" y="-357">locA</name>
-			<label kind="invariant" x="-382" y="-374">x &lt;= dist[curr_loc][1] + 2</label>
+		<location id="id3" x="-398" y="-246">
+			<name x="-433" y="-289">EnRoute</name>
+			<label kind="invariant" x="-467" y="-229">x &lt;= dist[curr_loc][dest]+2</label>
 		</location>
-		<location id="id4" x="-399" y="-246">
-			<name x="-409" y="-280">locB</name>
-			<label kind="invariant" x="-442" y="-229">x &lt;= dist[curr_loc][2]+2</label>
-		</location>
-		<location id="id5" x="-399" y="-153">
-			<name x="-409" y="-187">locC</name>
-			<label kind="invariant" x="-374" y="-110">x &lt;= dist[curr_loc][3] + 2</label>
-		</location>
-		<location id="id6" x="-187" y="-246">
-			<name x="-178" y="-289">Arriving</name>
+		<location id="id4" x="-187" y="-246">
+			<name x="-161" y="-255">Arriving</name>
 			<urgent/>
 		</location>
-		<location id="id7" x="-102" y="-246">
-			<name x="-112" y="-280">Waiting</name>
+		<location id="id5" x="-187" y="-51">
+			<name x="-170" y="-59">Waiting</name>
 		</location>
 		<init ref="id2"/>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id7"/>
-			<label kind="synchronisation" x="-178" y="-314">arr[curr_loc]!</label>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-178" y="-178">arr[curr_loc]!</label>
 		</transition>
 		<transition>
-			<source ref="id7"/>
+			<source ref="id5"/>
 			<target ref="id2"/>
 			<label kind="synchronisation" x="-500" y="-68">done?</label>
 			<label kind="assignment" x="-501" y="-102">x=0,
 visited[curr_loc]=true</label>
-			<nail x="-187" y="-51"/>
-			<nail x="-518" y="-51"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id5"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-374" y="-144">x &gt;= dist[curr_loc][3]</label>
-			<label kind="assignment" x="-374" y="-127">curr_loc = 3</label>
-			<nail x="-187" y="-153"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id4"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-365" y="-289">x &gt;= dist[curr_loc][2]</label>
-			<label kind="assignment" x="-365" y="-272">curr_loc = 2</label>
+			<nail x="-637" y="-51"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id3"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-382" y="-357">x &gt;= dist[curr_loc][1]</label>
-			<label kind="assignment" x="-382" y="-340">curr_loc=1</label>
-			<nail x="-187" y="-323"/>
-		</transition>
-		<transition>
-			<source ref="id2"/>
-			<target ref="id5"/>
-			<label kind="guard" x="-552" y="-178">!visited[3]</label>
-		</transition>
-		<transition>
-			<source ref="id2"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-510" y="-280">!visited[2]</label>
+			<label kind="guard" x="-340" y="-289">x &gt;= dist[curr_loc][dest]</label>
+			<label kind="assignment" x="-340" y="-272">curr_loc = dest</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-569" y="-323">!visited[1]</label>
+			<label kind="select" x="-569" y="-297">id : station_t</label>
+			<label kind="guard" x="-569" y="-280">!visited[id]</label>
+			<label kind="assignment" x="-569" y="-263">dest = id</label>
 		</transition>
 	</template>
 	<template>
@@ -150,68 +120,68 @@ int our_pos = 0;
 clock proc;
 
 </declaration>
-		<location id="id8" x="-442" y="-348">
+		<location id="id6" x="-442" y="-348">
 			<label kind="invariant" x="-476" y="-323">proc &lt;= 6</label>
 		</location>
-		<location id="id9" x="-450" y="-153">
+		<location id="id7" x="-450" y="-153">
 			<name x="-476" y="-93">BotWaiting</name>
 			<label kind="invariant" x="-484" y="-110">proc &lt;= 6</label>
 		</location>
-		<location id="id10" x="-654" y="-476">
+		<location id="id8" x="-654" y="-476">
 			<name x="-705" y="-510">CDeQ</name>
 			<committed/>
 		</location>
-		<location id="id11" x="-221" y="-476">
+		<location id="id9" x="-221" y="-476">
 			<name x="-231" y="-510">CEnQ</name>
 			<committed/>
 		</location>
-		<location id="id12" x="-170" y="-263">
+		<location id="id10" x="-170" y="-263">
 			<name x="-180" y="-297">Arrived</name>
 			<committed/>
 		</location>
-		<init ref="id8"/>
+		<init ref="id6"/>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id9"/>
+			<source ref="id10"/>
+			<target ref="id7"/>
 			<label kind="guard" x="-246" y="-178">num_in_queue == 1</label>
 			<label kind="assignment" x="-238" y="-161">proc = 0</label>
 			<nail x="-187" y="-187"/>
 		</transition>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id9"/>
+			<source ref="id10"/>
+			<target ref="id7"/>
 			<label kind="guard" x="-357" y="-229">num_in_queue &gt; 1</label>
 			<nail x="-357" y="-238"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id11"/>
-			<target ref="id8"/>
+			<source ref="id9"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-348" y="-340">num_in_queue &gt; 1</label>
 			<nail x="-221" y="-348"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id11"/>
-			<target ref="id8"/>
+			<source ref="id9"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-416" y="-518">num_in_queue == 1</label>
 			<label kind="assignment" x="-331" y="-501">proc = 0</label>
 			<nail x="-425" y="-476"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id10"/>
-			<target ref="id8"/>
+			<source ref="id8"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-799" y="-399">num_in_queue &gt; 0</label>
 			<label kind="assignment" x="-799" y="-382">num_in_queue--</label>
 			<nail x="-654" y="-348"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id10"/>
-			<target ref="id8"/>
+			<source ref="id8"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-636" y="-510">num_in_queue == 0</label>
 			<nail x="-450" y="-476"/>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id8"/>
+			<source ref="id7"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-629" y="-306">our_pos==1
 &amp;&amp; proc &gt;= 5</label>
 			<label kind="synchronisation" x="-629" y="-272">done!</label>
@@ -221,8 +191,8 @@ proc = 0</label>
 			<nail x="-501" y="-306"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id9"/>
+			<source ref="id7"/>
+			<target ref="id7"/>
 			<label kind="guard" x="-671" y="-136">num_in_queue &gt; 0 
 &amp;&amp; our_pos != 1
 &amp;&amp; proc &gt;= 5</label>
@@ -233,8 +203,8 @@ proc = 0</label>
 			<nail x="-527" y="-76"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id9"/>
+			<source ref="id7"/>
+			<target ref="id7"/>
 			<label kind="guard" x="-432" y="-187">num_in_queue &lt; MAX_QUEUE</label>
 			<label kind="synchronisation" x="-357" y="-153">stoc_arr[id]?</label>
 			<label kind="assignment" x="-357" y="-136">num_in_queue++</label>
@@ -242,8 +212,8 @@ proc = 0</label>
 			<nail x="-366" y="-68"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id12"/>
+			<source ref="id6"/>
+			<target ref="id10"/>
 			<label kind="synchronisation" x="-382" y="-280">arr[id]?</label>
 			<label kind="assignment" x="-381" y="-314">num_in_queue++,
 our_pos = num_in_queue</label>
@@ -251,14 +221,14 @@ our_pos = num_in_queue</label>
 			<nail x="-204" y="-297"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id8"/>
-			<target ref="id10"/>
+			<source ref="id6"/>
+			<target ref="id8"/>
 			<label kind="guard" x="-612" y="-399">proc &gt;= 5</label>
 			<label kind="assignment" x="-612" y="-416">proc = 0</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id8"/>
-			<target ref="id11"/>
+			<source ref="id6"/>
+			<target ref="id9"/>
 			<label kind="guard" x="-408" y="-450">num_in_queue &lt; MAX_QUEUE</label>
 			<label kind="synchronisation" x="-399" y="-433">stoc_arr[id]?</label>
 			<label kind="assignment" x="-408" y="-416">num_in_queue++</label>
