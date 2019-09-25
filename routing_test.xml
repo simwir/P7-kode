@@ -16,26 +16,42 @@ const int dist[station_t][station_t] = {
     { 8, 4, 0 }
 };
 
-broadcast chan stoc_arr, arr[station_t], dest, done;</declaration>
+broadcast chan stoc_arr[station_t], arr[station_t], dest, done;</declaration>
 	<template>
 		<name>Arrival</name>
 		<location id="id0" x="8" y="0">
-			<label kind="exponentialrate" x="0" y="25">1:5</label>
+			<label kind="exponentialrate" x="-42" y="-25">1:5</label>
 		</location>
-		<location id="id1" x="-110" y="0">
-			<urgent/>
-		</location>
+		<branchpoint id="id1" x="-195" y="0">
+		</branchpoint>
 		<init ref="id0"/>
-		<transition controllable="false">
+		<transition>
 			<source ref="id1"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="-93" y="-25">stoc_arr!</label>
+			<label kind="synchronisation" x="-144" y="136">stoc_arr[3]!</label>
+			<label kind="probability" x="-144" y="153">5</label>
+			<nail x="-195" y="153"/>
+			<nail x="8" y="153"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-136" y="34">stoc_arr[1]!</label>
+			<label kind="probability" x="-110" y="59">1</label>
+			<nail x="-127" y="59"/>
+			<nail x="-59" y="59"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-127" y="93">stoc_arr[2]!</label>
+			<label kind="probability" x="-59" y="110">3</label>
+			<nail x="-144" y="110"/>
+			<nail x="-42" y="111"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<nail x="42" y="-76"/>
-			<nail x="-136" y="-76"/>
 		</transition>
 	</template>
 	<template>
@@ -50,6 +66,7 @@ bool allvisited() {
     return visited[1] &amp;&amp; visited[2] &amp;&amp; visited[3];
 }</declaration>
 		<location id="id2" x="-637" y="-246">
+			<name x="-647" y="-280">Choose</name>
 			<urgent/>
 		</location>
 		<location id="id3" x="-399" y="-323">
@@ -65,24 +82,26 @@ bool allvisited() {
 			<label kind="invariant" x="-374" y="-110">x &lt;= dist[curr_loc][3] + 2</label>
 		</location>
 		<location id="id6" x="-187" y="-246">
+			<name x="-178" y="-289">Arriving</name>
 			<urgent/>
 		</location>
 		<location id="id7" x="-102" y="-246">
+			<name x="-112" y="-280">Waiting</name>
 		</location>
 		<init ref="id2"/>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id7"/>
-			<label kind="synchronisation" x="-170" y="-229">arr[curr_loc]!</label>
+			<label kind="synchronisation" x="-178" y="-314">arr[curr_loc]!</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id2"/>
-			<label kind="synchronisation" x="-500" y="-425">done?</label>
-			<label kind="assignment" x="-501" y="-459">x=0,
+			<label kind="synchronisation" x="-500" y="-68">done?</label>
+			<label kind="assignment" x="-501" y="-102">x=0,
 visited[curr_loc]=true</label>
-			<nail x="-187" y="-408"/>
-			<nail x="-518" y="-408"/>
+			<nail x="-187" y="-51"/>
+			<nail x="-518" y="-51"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id5"/>
@@ -123,7 +142,9 @@ visited[curr_loc]=true</label>
 	<template>
 		<name>Station</name>
 		<parameter>station_t id</parameter>
-		<declaration>int num_in_queue = 2;
+		<declaration>const int MAX_QUEUE = 10;
+
+int num_in_queue = 2;
 int our_pos = 0;
 
 clock proc;
@@ -133,15 +154,19 @@ clock proc;
 			<label kind="invariant" x="-476" y="-323">proc &lt;= 6</label>
 		</location>
 		<location id="id9" x="-450" y="-153">
+			<name x="-476" y="-93">BotWaiting</name>
 			<label kind="invariant" x="-484" y="-110">proc &lt;= 6</label>
 		</location>
 		<location id="id10" x="-654" y="-476">
+			<name x="-705" y="-510">CDeQ</name>
 			<committed/>
 		</location>
 		<location id="id11" x="-221" y="-476">
+			<name x="-231" y="-510">CEnQ</name>
 			<committed/>
 		</location>
 		<location id="id12" x="-170" y="-263">
+			<name x="-180" y="-297">Arrived</name>
 			<committed/>
 		</location>
 		<init ref="id8"/>
@@ -187,10 +212,11 @@ clock proc;
 		<transition>
 			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-646" y="-263">our_pos==1
+			<label kind="guard" x="-629" y="-306">our_pos==1
 &amp;&amp; proc &gt;= 5</label>
-			<label kind="synchronisation" x="-646" y="-229">done!</label>
-			<label kind="assignment" x="-646" y="-280">num_in_queue--</label>
+			<label kind="synchronisation" x="-629" y="-272">done!</label>
+			<label kind="assignment" x="-629" y="-255">num_in_queue--,
+proc = 0</label>
 			<nail x="-501" y="-212"/>
 			<nail x="-501" y="-306"/>
 		</transition>
@@ -209,7 +235,8 @@ proc = 0</label>
 		<transition controllable="false">
 			<source ref="id9"/>
 			<target ref="id9"/>
-			<label kind="synchronisation" x="-357" y="-153">stoc_arr?</label>
+			<label kind="guard" x="-432" y="-187">num_in_queue &lt; MAX_QUEUE</label>
+			<label kind="synchronisation" x="-357" y="-153">stoc_arr[id]?</label>
 			<label kind="assignment" x="-357" y="-136">num_in_queue++</label>
 			<nail x="-366" y="-153"/>
 			<nail x="-366" y="-68"/>
@@ -232,8 +259,9 @@ our_pos = num_in_queue</label>
 		<transition controllable="false">
 			<source ref="id8"/>
 			<target ref="id11"/>
-			<label kind="synchronisation" x="-391" y="-433">stoc_arr?</label>
-			<label kind="assignment" x="-391" y="-416">num_in_queue++</label>
+			<label kind="guard" x="-408" y="-450">num_in_queue &lt; MAX_QUEUE</label>
+			<label kind="synchronisation" x="-399" y="-433">stoc_arr[id]?</label>
+			<label kind="assignment" x="-408" y="-416">num_in_queue++</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
@@ -243,15 +271,23 @@ system Robot, Arrival, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=20] (&lt;&gt; allvisited())</formula>
+			<formula>Pr[&lt;=20] (&lt;&gt; Robot.allvisited())</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=50] : &lt;&gt; allvisited()</formula>
+			<formula>strategy opt = minE (total) [&lt;=50] : &lt;&gt; Robot.allvisited()</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=20] (&lt;&gt; allvisited()) under opt</formula>
+			<formula>Pr[&lt;=20] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Robot.allvisited()</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy Safe = control: A&lt;&gt; Robot.allvisited()</formula>
 			<comment></comment>
 		</query>
 		<query>
