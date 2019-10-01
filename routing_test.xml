@@ -5,11 +5,10 @@
 
 clock total;
 
-const int TOTAL_STATIONS = 10;
-const int NUM_STATIONS = 4;
+const int NUM_STATIONS = 10;
 const int MAX_ROBOTS = 5;
+const bool STOCHASTIC_ROBOTS = false;
 
-typedef int[1, TOTAL_STATIONS] total_station_t;
 typedef int[1, NUM_STATIONS] station_t;
 typedef int[1, MAX_ROBOTS + 1] robot_t;
 
@@ -18,7 +17,7 @@ const robot_t CUR_ROBOT = 2;
 
 typedef int[CUR_ROBOT + 1, MAX_ROBOTS + 1] other_robot_t;
 
-const int dist[total_station_t][total_station_t] = {
+const int dist[station_t][station_t] = {
     {  0,  5,  7,  5,  4,  8,  2,  3,  9, 12 },
     {  2,  0,  9, 12,  1,  2,  6,  3,  8,  4 },
     {  8,  4,  0,  1,  2, 11,  1, 14, 18,  7 },
@@ -35,7 +34,13 @@ const int arrival_rate[station_t][2] = {
     {1, 1 * 6},
     {1, 3 * 6},
     {1, 5 * 6},
-    {1, 7 * 6}
+    {1, 7 * 6},
+    {1, 9 * 6},
+    {1, 9 * 6},
+    {1, 7 * 6},
+    {1, 5 * 6},
+    {1, 3 * 6},
+    {1, 1 * 6}
 };
 
 broadcast chan arr[station_t][robot_t], done[robot_t], place[station_t];
@@ -43,7 +48,7 @@ bool full[station_t];</declaration>
 	<template>
 		<name>OtherRobot</name>
 		<parameter>other_robot_t id</parameter>
-		<declaration>const int[0, TOTAL_STATIONS] order[other_robot_t][total_station_t] = {
+		<declaration>const int[0, NUM_STATIONS] order[other_robot_t][station_t] = {
     {8,  7,  3,  9,  4,  0,  0,  0,  0,  0},
     {2,  1,  6,  4,  3, 10,  8,  9,  7,  0},
     {8,  6,  2,  7,  0,  0,  0,  0,  0,  0},
@@ -52,11 +57,11 @@ bool full[station_t];</declaration>
 
 clock x;
 
-int[1, TOTAL_STATIONS] step_index = 1;
-total_station_t curr_loc;
-int[0, TOTAL_STATIONS] dest;
+int[1, NUM_STATIONS] step_index = 1;
+station_t curr_loc;
+int[0, NUM_STATIONS] dest;
 
-int[0, TOTAL_STATIONS] next_station() {
+int[0, NUM_STATIONS] next_station() {
     return order[id][step_index++];
 }</declaration>
 		<location id="id0" x="-398" y="-246">
@@ -73,16 +78,12 @@ int[0, TOTAL_STATIONS] next_station() {
 		<location id="id3" x="-25" y="-170">
 			<name x="-8" y="-187">WaitForQueue</name>
 		</location>
-		<location id="id4" x="-637" y="-365">
-			<name x="-647" y="-399">Choose</name>
+		<location id="id4" x="-637" y="-246">
+			<name x="-647" y="-280">Choose</name>
 			<urgent/>
 		</location>
-		<location id="id5" x="-493" y="-365">
-			<name x="-503" y="-399">Done</name>
-		</location>
-		<location id="id6" x="-799" y="-365">
-			<name x="-809" y="-399">OtherStation</name>
-			<label kind="invariant" x="-1054" y="-374">x &lt;= dist[curr_loc][dest] + 8</label>
+		<location id="id5" x="-765" y="-246">
+			<name x="-775" y="-280">Done</name>
 		</location>
 		<init ref="id4"/>
 		<transition controllable="false">
@@ -92,23 +93,9 @@ int[0, TOTAL_STATIONS] next_station() {
 			<nail x="-25" y="-246"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id6"/>
-			<target ref="id4"/>
-			<label kind="guard" x="-875" y="-263">x &gt;= dist[curr_loc][dest] + 5</label>
-			<label kind="assignment" x="-875" y="-246">curr_loc = dest,
-x=0,
-dest = next_station()</label>
-			<nail x="-799" y="-263"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id4"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-841" y="-416">dest &gt; NUM_STATIONS</label>
-		</transition>
-		<transition controllable="false">
 			<source ref="id4"/>
 			<target ref="id5"/>
-			<label kind="guard" x="-620" y="-382">dest == 0</label>
+			<label kind="guard" x="-731" y="-238">dest == 0</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id1"/>
@@ -138,20 +125,20 @@ dest = next_station()</label>
 		<transition controllable="false">
 			<source ref="id4"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-518" y="-340">dest &lt;= NUM_STATIONS
-&amp;&amp; dest != 0</label>
+			<label kind="guard" x="-561" y="-238">dest != 0</label>
 		</transition>
 	</template>
 	<template>
 		<name>Arrival</name>
 		<parameter>station_t id</parameter>
-		<location id="id7" x="8" y="0">
+		<location id="id6" x="8" y="0">
 			<label kind="exponentialrate" x="34" y="-8">arrival_rate[id][0]:arrival_rate[id][1]</label>
 		</location>
-		<init ref="id7"/>
+		<init ref="id6"/>
 		<transition controllable="false">
-			<source ref="id7"/>
-			<target ref="id7"/>
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-170" y="17">STOCHASTIC_ROBOTS</label>
 			<label kind="synchronisation" x="-127" y="-136">arr[id][PROB_ROBOT]!</label>
 			<nail x="-170" y="0"/>
 			<nail x="-170" y="-119"/>
@@ -162,7 +149,7 @@ dest = next_station()</label>
 		<name>Robot</name>
 		<declaration>clock x;
 
-bool visited[station_t] = {false, false, false, false};
+bool visited[station_t] = {false, false, false, false, false, false, false, false, false, false };
 
 station_t curr_loc;
 station_t dest;
@@ -176,59 +163,59 @@ bool allvisited() {
 
     return true;
 }</declaration>
-		<location id="id8" x="59" y="-153">
+		<location id="id7" x="59" y="-153">
 			<name x="76" y="-161">WaitForQueue</name>
 		</location>
-		<location id="id9" x="-637" y="-246">
+		<location id="id8" x="-637" y="-246">
 			<name x="-714" y="-272">Choose</name>
 			<urgent/>
 		</location>
-		<location id="id10" x="-398" y="-246">
+		<location id="id9" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
 			<label kind="invariant" x="-467" y="-229">x &lt;= dist[curr_loc][dest]+2</label>
 		</location>
-		<location id="id11" x="-187" y="-246">
+		<location id="id10" x="-187" y="-246">
 			<name x="-170" y="-263">Arriving</name>
 			<urgent/>
 		</location>
-		<location id="id12" x="-187" y="-51">
+		<location id="id11" x="-187" y="-51">
 			<name x="-170" y="-59">Waiting</name>
 		</location>
-		<init ref="id9"/>
+		<init ref="id8"/>
 		<transition controllable="false">
-			<source ref="id8"/>
-			<target ref="id11"/>
+			<source ref="id7"/>
+			<target ref="id10"/>
 			<label kind="synchronisation" x="-127" y="-212">place[curr_loc]?</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id11"/>
-			<target ref="id8"/>
+			<source ref="id10"/>
+			<target ref="id7"/>
 			<label kind="guard" x="-68" y="-263">full[curr_loc]</label>
 			<nail x="59" y="-246"/>
 		</transition>
 		<transition>
-			<source ref="id11"/>
-			<target ref="id12"/>
+			<source ref="id10"/>
+			<target ref="id11"/>
 			<label kind="guard" x="-178" y="-178">!full[curr_loc]</label>
 			<label kind="synchronisation" x="-178" y="-161">arr[curr_loc][CUR_ROBOT]!</label>
 		</transition>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id9"/>
+			<source ref="id11"/>
+			<target ref="id8"/>
 			<label kind="synchronisation" x="-500" y="-68">done[CUR_ROBOT]?</label>
 			<label kind="assignment" x="-501" y="-102">x=0,
 visited[curr_loc]=true</label>
 			<nail x="-637" y="-51"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id10"/>
-			<target ref="id11"/>
+			<source ref="id9"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-340" y="-289">x &gt;= dist[curr_loc][dest]</label>
 			<label kind="assignment" x="-340" y="-272">curr_loc = dest</label>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id10"/>
+			<source ref="id8"/>
+			<target ref="id9"/>
 			<label kind="select" x="-569" y="-297">id : station_t</label>
 			<label kind="guard" x="-569" y="-280">!visited[id]</label>
 			<label kind="assignment" x="-569" y="-263">dest = id</label>
@@ -280,26 +267,26 @@ robot_t tail()
 {
    return list[num_in_queue - 1];
 }</declaration>
-		<location id="id13" x="-442" y="-348">
+		<location id="id12" x="-442" y="-348">
 			<name x="-476" y="-382">Idle</name>
 			<label kind="invariant" x="-476" y="-331">proc &lt;= 6</label>
 		</location>
-		<location id="id14" x="-654" y="-476">
+		<location id="id13" x="-654" y="-476">
 			<name x="-705" y="-510">CDeQ</name>
 			<committed/>
 		</location>
-		<location id="id15" x="-654" y="-348">
+		<location id="id14" x="-654" y="-348">
 			<committed/>
 		</location>
-		<init ref="id13"/>
+		<init ref="id12"/>
 		<transition controllable="false">
-			<source ref="id15"/>
-			<target ref="id13"/>
+			<source ref="id14"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="-620" y="-365">place[station_id]!</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id13"/>
-			<target ref="id13"/>
+			<source ref="id12"/>
+			<target ref="id12"/>
 			<label kind="select" x="-654" y="-263">other : other_robot_t</label>
 			<label kind="synchronisation" x="-654" y="-246">arr[station_id][other]?</label>
 			<label kind="assignment" x="-654" y="-229">enqueue(other)</label>
@@ -309,21 +296,21 @@ robot_t tail()
 			<nail x="-476" y="-331"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id14"/>
-			<target ref="id15"/>
+			<source ref="id13"/>
+			<target ref="id14"/>
 			<label kind="guard" x="-799" y="-433">num_in_queue &gt; 0</label>
 			<label kind="synchronisation" x="-799" y="-416">done[front()]!</label>
 			<label kind="assignment" x="-799" y="-399">dequeue()</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id14"/>
-			<target ref="id13"/>
+			<source ref="id13"/>
+			<target ref="id12"/>
 			<label kind="guard" x="-636" y="-510">num_in_queue == 0</label>
 			<nail x="-459" y="-476"/>
 		</transition>
 		<transition>
-			<source ref="id13"/>
-			<target ref="id13"/>
+			<source ref="id12"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="-408" y="-263">arr[station_id][CUR_ROBOT]?</label>
 			<label kind="assignment" x="-408" y="-246">enqueue(CUR_ROBOT)</label>
 			<nail x="-416" y="-272"/>
@@ -332,14 +319,14 @@ robot_t tail()
 			<nail x="-416" y="-331"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id13"/>
-			<target ref="id14"/>
+			<source ref="id12"/>
+			<target ref="id13"/>
 			<label kind="guard" x="-612" y="-399">proc &gt;= 5</label>
 			<label kind="assignment" x="-612" y="-416">proc = 0</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id13"/>
-			<target ref="id13"/>
+			<source ref="id12"/>
+			<target ref="id12"/>
 			<label kind="guard" x="-391" y="-535">num_in_queue &lt; MAX_QUEUE</label>
 			<label kind="synchronisation" x="-391" y="-518">arr[station_id][PROB_ROBOT]?</label>
 			<label kind="assignment" x="-391" y="-501">enqueue(PROB_ROBOT)</label>
@@ -355,15 +342,15 @@ system OtherRobot, Robot, Arrival, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=50] (&lt;&gt; Robot.allvisited())</formula>
+			<formula>Pr[&lt;=140] (&lt;&gt; Robot.allvisited())</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=50] : &lt;&gt; Robot.allvisited()</formula>
+			<formula>strategy opt = minE (total) [&lt;=120] : &lt;&gt; Robot.allvisited()</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=50] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<formula>Pr[&lt;=140] (&lt;&gt; Robot.allvisited()) under opt</formula>
 			<comment></comment>
 		</query>
 		<query>
