@@ -495,15 +495,15 @@ system Waypoint, OtherRobot, Robot, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=1500] (&lt;&gt; Robot.allvisited())</formula>
+			<formula>Pr[&lt;=1500] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=1500] : &lt;&gt; Robot.allvisited()</formula>
+			<formula>strategy opt = minE (total) [&lt;=1500] : &lt;&gt; Robot.Done</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1500] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<formula>Pr[&lt;=1500] (&lt;&gt; Robot.Done) under opt</formula>
 			<comment></comment>
 		</query>
 		<query>
