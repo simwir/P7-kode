@@ -12,9 +12,9 @@ string inputFile, outputFile;
 
 int main(int argc, char **argv)
 {
-    AST ast { { {"foo", {1, 1, 0} }, {"bar", {0, 0, 0}}, {"baz", {1, 2, 0}} } };
-    distance_matrix dist{ast};
-    cout << dist.to_uppaal_declaration();
+  //AST ast { { {"foo", {1, 1, 0} }, {"bar", {0, 0, 0}}, {"baz", {1, 2, 0}} } };
+  //distance_matrix dist{ast};
+  //cout << dist.to_uppaal_declaration();
 
     if (argc == 1 || argc > 3) {
         std::cout << "Usage: " << argv[0] << " INPUT_FILE [OUTPUT_FILE]\n";
@@ -35,4 +35,7 @@ int main(int argc, char **argv)
         cout << "The file " << inputFile << " could not be opened.\n";
         exit(1);
     }
+    AST ast = Parser{infile}.parse_stream();
+    distance_matrix dist{ast};
+    cout << dist.to_uppaal_declaration();
 }

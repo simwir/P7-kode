@@ -6,13 +6,18 @@
 #include <vector>
 
 struct Translation {
-    int x, y, z;
+    double x, y, z;
 };
 
+enum WaypointType {Waypoint, Station, EndPoint};
+
 struct Waypoint {
-    std::string name;
+    int id;
+  std::vector<int> adjList;
     Translation translation;
+    WaypointType waypointType;
 };
+
 
 struct AST {
     std::vector<Waypoint> nodes;
@@ -28,12 +33,19 @@ class EndOfStreamException;
 class Parser {
   public:
     AST parse_stream();
-
+  Parser(std::istream inputStream){
+    stream = inputStream;
+  }
   private:
     std::istream stream;
     AST ast;
 
     std::string read_token();
+  std::string read_string();
+  Waypoint parse_waypoint(std::string);
+  Translation parse_translation();
+  int parse_id();
+  std::vector<int> parse_ajdList();
 
 };
 
