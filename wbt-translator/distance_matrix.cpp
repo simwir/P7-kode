@@ -30,10 +30,9 @@ std::ostream &write_comma_separated(const TContainer &container, std::ostream &o
 {
     auto b = std::begin(container), e = std::end(container);
     while (b != e) {
-        os << *b;
+        os << *b++;
         if (b != e)
             os << ',';
-        b++;
     }
     return os;
 }
@@ -46,11 +45,12 @@ std::string distance_matrix::to_uppaal_declaration() const
     auto iter = std::begin(_data);
     while (iter != std::end(_data)) {
         ss << "  {";
-        write_comma_separated(*iter, ss);
+        write_comma_separated(*iter++, ss);
         ss << "}";
         if (iter != std::end(_data))
             ss << ",\n";
-        iter++;
+        //iter++;
     }
+    ss << "\n}\n";
     return ss.str();
 }
