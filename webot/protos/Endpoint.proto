@@ -87,7 +87,5 @@ Solid {
   }
   %{ end }%
   locked IS locked
-  id IS id
-  adjList IS adjList
 }
 }
