@@ -14,8 +14,8 @@ typedef int[1, MAX_ROBOTS] robot_t;
 
 const robot_t CUR_ROBOT = 1;
 
-const int[0, 1 &lt;&lt; NUM_STATIONS] endstations = 18; // Encoding 0b00_0001_0010.
-const int[0, 1 &lt;&lt; NUM_STATIONS] ALL = (1 &lt;&lt; NUM_STATIONS) - 1; // Encoding 0b11_1111_1111. We use this variable to simulate bitwise not since UPPAAL does not support this out of the box.
+const int ALL = (1 &lt;&lt; NUM_STATIONS) - 1; // Encoding 0b11_1111_1111. We use this variable to simulate bitwise not since UPPAAL does not support this out of the box.
+const int[0, ALL] endstations = 18; // Encoding 0b00_0001_0010.
 
 bool is_endstation(station_t id) {
     int[0, 1 &lt;&lt; NUM_STATIONS] is = endstations &amp; (1 &lt;&lt; (id - 1));
@@ -118,16 +118,16 @@ dest = next_station()</label>
 		<name>Robot</name>
 		<declaration>clock x;
 
-int[0, 1 &lt;&lt; NUM_STATIONS] visited = 0;
-const int[0, 1 &lt;&lt; NUM_STATIONS] init_visited = 0;
+int[0, ALL] visited = 0;
+const int[0, ALL] init_visited = 0;
 
 station_t cur_loc;
 station_t dest;
 
 bool all_nonend() {
-    int[0, 1 &lt;&lt; NUM_STATIONS] not_end = endstations ^ ALL;
-    int[0, 1 &lt;&lt; NUM_STATIONS] not_visited = visited ^ ALL;
-    int[0, 1 &lt;&lt; NUM_STATIONS] missing = not_end &amp; not_visited;
+    int[0, ALL] not_end = endstations ^ ALL;
+    int[0, ALL] not_visited = visited ^ ALL;
+    int[0, ALL] missing = not_end &amp; not_visited;
 
     return missing == 0;
 }
@@ -143,7 +143,7 @@ bool allvisited() {
 }
 
 bool not_visited(station_t id) {
-    int[0, 1 &lt;&lt; NUM_STATIONS] is = visited &amp; (1 &lt;&lt; (id - 1));
+    int[0, ALL] is = visited &amp; (1 &lt;&lt; (id - 1));
 
     return is == 0;
 }
@@ -166,7 +166,7 @@ bool can_visit(station_t id) {
 }
 
 bool more_visited() {
-    int[0, 1 &lt;&lt; NUM_STATIONS] n = init_visited ^ visited;
+    int[0, ALL] n = init_visited ^ visited;
 
     int[0, NUM_STATIONS] count = 0; 
     while (n) 
