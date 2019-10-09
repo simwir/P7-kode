@@ -1,24 +1,25 @@
 #include "distance_matrix.hpp"
 
 #include <iostream>
+#include <iterator>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <map>
-#include <iterator>
 
 distance_matrix::distance_matrix(const AST &ast)
 {
     rows = columns = ast.nodes.size();
-    //TODO: Handle non consecutive ids
+    // TODO: Handle non consecutive ids
     for (size_t i = 1; i < rows; ++i) {
         _data.push_back(std::vector<double>{});
         for (size_t j = 1; j < columns; ++j) {
             if (!ast.are_connected(i, j)) {
-                _data[_data.size()-1].push_back(-1);
+                _data[_data.size() - 1].push_back(-1);
             }
             else {
-                _data[_data.size()-1].push_back(euclidean_distance(ast.nodes.at(i), ast.nodes.at(j)));
+                _data[_data.size() - 1].push_back(
+                    euclidean_distance(ast.nodes.at(i), ast.nodes.at(j)));
             }
         }
     }
@@ -42,9 +43,13 @@ std::string distance_matrix::to_uppaal_declaration() const
     std::stringstream ss;
     ss << "const int NUM_WAYPOINTS = " << rows << "\n"
        << "const int dist[NUM_WAYPOINTS][NUM_WAYPOINTS] = {\n";
-    for (auto iter = std::begin(_data); iter != std::end(_data); ++iter) {
-        ss << "  {"; write_comma_separated(*iter, ss); ss << "}"; 
-        if (iter != std::end(_data)) ss << ",\n";
+    auto iter = std::begin(_data);
+    while (iter != std::end(_data)) {
+        ss << "  {";
+        write_comma_separated(*iter, ss);
+        ss << "}";
+        if (iter != std::end(_data))
+            ss << ",\n";
         iter++;
     }
     return ss.str();
