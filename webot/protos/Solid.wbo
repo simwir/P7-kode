@@ -1,0 +1,26 @@
+#VRML_OBJ R2019b utf8
+DEF wayPoint_1 Solid {
+  translation -0.421172 0.03 -0.395575
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          ambientIntensity 0
+          diffuseColor 1 0 0
+          emissiveColor 1 0 0
+          shininess 0
+          specularColor 1 0 0
+        }
+        texture ImageTexture {
+        }
+        name "waypoint"
+      }
+      geometry Sphere {
+        radius 0.02
+      }
+    }
+  ]
+  model "waypoint_{id}"
+  description "[2,3,4]"
+  rotationStep 0.261799
+}
