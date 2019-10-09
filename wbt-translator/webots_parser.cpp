@@ -1,34 +1,32 @@
 
 
 #include "webots_parser.hpp"
-
+#include <iomanip>
 
 std::string Parser::read_token()
 {
     std::string token;
     if (!(stream >> token)) {
         if (stream.eof()) {
-          throw EndOfStreamException();
+          throw EndOfStreamException("The stream ended while trying to read a token.");
         }
     }
     return token;
 }
 
 std::string Parser::read_string(){
-  std::string line = std::getline(stream);
-  if (stream.eof())
-    throw EndOfStreamException();
-  return std::qouted(line);
+  std::string line;
+  stream >> std::quoted(line);
+  return line;
 }
 
 AST Parser::parse_stream(){
   try {
     while (true) {
       std::string token = read_token();
-      if (token == "DEF"){
-        read_token();
-      } else if (token == "Waypoint" || token == "Station" || token == "EndPoint") {
-        ast.nodes.push_back(parse_waypoint(token));
+      if (token == "Waypoint" || token == "Station" || token == "Endpoint") {
+        Waypoint waypoint = parse_waypoint(token);
+        ast.nodes.insert(std::make_pair(waypoint.id, waypoint));
       }
     };
   } catch (EndOfStreamException& e) {
@@ -39,13 +37,14 @@ AST Parser::parse_stream(){
 Waypoint Parser::parse_waypoint(std::string token){
   Waypoint waypoint;
   if (token == "Waypoint") {
-    waypoint.waypointType = Waypoint;
+    waypoint.waypointType = eWaypoint;
   } else if (token == "Station") {
-    waypoint.waypointType = Station;
-  } else if (token == "EndPoint") {
-    waypoint.waypointType = EndPoint;
+    waypoint.waypointType = eStation;
+  } else if (token == "Endpoint") {
+    waypoint.waypointType = eEndPoint;
   } else {
-    throw std::exception("Unexpected waypoint type.");
+    //TODO: Create custom error
+    throw std::logic_error("Unexpected waypoint type.");
   }
   bool needId = true, needAdj = true, needTranslation = true;
   try {
@@ -58,12 +57,13 @@ Waypoint Parser::parse_waypoint(std::string token){
         waypoint.id = parse_id();
         needId = false;
       } else if (token == "adjList") {
-        waypoint.ajdList = parse_ajdList();
+        waypoint.adjList = parse_adjList();
         needAdj = false;
       }
     }
   } catch (EndOfStreamException& e) {
-    throw std::exception("Unexpected End of stream. World file malformed?");
+    //TODO: Use custom error
+    throw std::logic_error("Unexpected End of stream. World file malformed?");
   }
   return waypoint;
 }
@@ -80,14 +80,18 @@ int Parser::parse_id(){
   return std::stoi(read_token());
 }
 
-std::vector<int> Parser::parse_ajdList(){
+std::vector<int> Parser::parse_adjList(){
   std::string adjString = read_string();
   size_t pos = 0;
-  vector<int> adjList;
-  while ((pos = adjString.find(",")) != std::string::npos) {
-    adjlist.push_back(std::stoi(adjString.substr(0, pos)));
-    adjString.erase(0, pos + 1);
+  std::vector<int> adjList;
+  try {
+    while ((pos = adjString.find(",")) != std::string::npos) {
+      adjList.push_back(std::stoi(adjString.substr(0, pos)));
+      adjString.erase(0, pos + 1);
+    }
+    adjList.push_back(std::stoi(adjString));
+  } catch (std::invalid_argument& e){
+    throw MalformedWorldFileError("Adjlist is not a list of integers. At: " + adjString);
   }
-  adjList.push_back(std::stoi(adjString));
   return adjList;
 }

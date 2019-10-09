@@ -14,7 +14,7 @@ public:
     double& data(size_t i, size_t j) { return _data[i][j]; }
 
 private:
-    size_t rows, columns;
+    int rows, columns;
     std::vector<std::vector<double>> _data;
 
     double euclidean_distance(const Waypoint& p1, const Waypoint& p2) {

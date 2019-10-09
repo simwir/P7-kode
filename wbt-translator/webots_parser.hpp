@@ -4,12 +4,37 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <algorithm>
+
+class EndOfStreamException : public std::exception{
+    std::string message;
+public:
+    EndOfStreamException(const std::string inmessage){
+        message = inmessage;
+    }
+
+    const char* what() const noexcept override{
+        return message.c_str();
+    }
+};
+class MalformedWorldFileError : public std::exception{
+    std::string message;
+public:
+    MalformedWorldFileError(const std::string inmessage){
+        message = inmessage;
+    }
+
+    const char* what() const noexcept override{
+        return message.c_str();
+    }
+};
 
 struct Translation {
     double x, y, z;
 };
 
-enum WaypointType {Waypoint, Station, EndPoint};
+enum WaypointType {eWaypoint, eStation, eEndPoint};
 
 struct Waypoint {
     int id;
@@ -20,24 +45,27 @@ struct Waypoint {
 
 
 struct AST {
-    std::vector<Waypoint> nodes;
+    std::map<size_t, Waypoint> nodes;
 
     bool are_connected(size_t i, size_t j) const {
-        // TODO implement edge logic
-        return i != j;
+        auto start = nodes.find(i);
+        if (start != std::end(nodes)) {
+            std::vector<int> adjList = start->second.adjList;
+            //Does the adjList contain the element j?
+            return std::find(std::begin(adjList), std::end(adjList), j) != std::end(adjList);
+        } else {
+            throw MalformedWorldFileError("The waypoint " + std::to_string(i) + " Could not be found");
+        }
     }
 };
-
-class EndOfStreamException;
 
 class Parser {
   public:
     AST parse_stream();
-  Parser(std::istream inputStream){
-    stream = inputStream;
-  }
+  Parser(std::istream& inputStream)
+    :stream(inputStream){}
   private:
-    std::istream stream;
+    std::istream& stream;
     AST ast;
 
     std::string read_token();
@@ -45,7 +73,7 @@ class Parser {
   Waypoint parse_waypoint(std::string);
   Translation parse_translation();
   int parse_id();
-  std::vector<int> parse_ajdList();
+  std::vector<int> parse_adjList();
 
 };
 
