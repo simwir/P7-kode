@@ -56,7 +56,7 @@ bool full[station_t];</declaration>
 clock x;
 
 int[1, NUM_STATIONS + 1] step_index = 1;
-station_t curr_loc;
+station_t cur_loc;
 int[0, NUM_STATIONS] dest;
 
 int[0, NUM_STATIONS] next_station() {
@@ -68,7 +68,7 @@ int[0, NUM_STATIONS] next_station() {
 }</declaration>
 		<location id="id0" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
-			<label kind="invariant" x="-467" y="-229">x &lt;= dist[curr_loc][dest]+2</label>
+			<label kind="invariant" x="-467" y="-229">x &lt;= dist[cur_loc][dest]</label>
 		</location>
 		<location id="id1" x="-187" y="-246">
 			<name x="-170" y="-272">Arriving</name>
@@ -101,7 +101,7 @@ dest = next_station()</label>
 		<transition controllable="false">
 			<source ref="id3"/>
 			<target ref="id1"/>
-			<label kind="synchronisation" x="-17" y="-255">place[curr_loc]?</label>
+			<label kind="synchronisation" x="-17" y="-255">place[cur_loc]?</label>
 			<nail x="-25" y="-246"/>
 		</transition>
 		<transition controllable="false">
@@ -112,13 +112,13 @@ dest = next_station()</label>
 		<transition controllable="false">
 			<source ref="id1"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-153" y="-212">full[curr_loc]</label>
+			<label kind="guard" x="-153" y="-212">full[cur_loc]</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id1"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-178" y="-170">!full[curr_loc]</label>
-			<label kind="synchronisation" x="-178" y="-153">arr[curr_loc][id]!</label>
+			<label kind="guard" x="-178" y="-170">!full[cur_loc]</label>
+			<label kind="synchronisation" x="-178" y="-153">arr[cur_loc][id]!</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id2"/>
@@ -131,8 +131,8 @@ dest = next_station()</label>
 		<transition controllable="false">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-340" y="-289">x &gt;= dist[curr_loc][dest]</label>
-			<label kind="assignment" x="-340" y="-272">curr_loc = dest</label>
+			<label kind="guard" x="-340" y="-289">x &gt;= dist[cur_loc][dest]</label>
+			<label kind="assignment" x="-340" y="-272">cur_loc = dest</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id4"/>
@@ -147,7 +147,7 @@ dest = next_station()</label>
 bool visited[station_t] = {false, false, false, false, false, false, false, false, false, false};
 
 
-station_t curr_loc;
+station_t cur_loc;
 station_t dest;
 
 bool missing_nonend() {
@@ -185,6 +185,16 @@ bool can_visit(station_t id) {
     }
 
     return !visited[id];
+}
+
+int[0,NUM_STATIONS] completed() {
+    int[0,NUM_STATIONS] i = 0;
+
+    for (id : station_t) {
+        i += visited[id];
+    }
+
+    return i;
 }</declaration>
 		<location id="id7" x="59" y="-153">
 			<name x="76" y="-161">WaitForQueue</name>
@@ -195,7 +205,7 @@ bool can_visit(station_t id) {
 		</location>
 		<location id="id9" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
-			<label kind="invariant" x="-467" y="-229">x &lt;= dist[curr_loc][dest]+2</label>
+			<label kind="invariant" x="-467" y="-229">x &lt;= dist[cur_loc][dest]</label>
 		</location>
 		<location id="id10" x="-187" y="-246">
 			<name x="-170" y="-263">Arriving</name>
@@ -216,33 +226,33 @@ bool can_visit(station_t id) {
 		<transition controllable="false">
 			<source ref="id7"/>
 			<target ref="id10"/>
-			<label kind="synchronisation" x="-127" y="-212">place[curr_loc]?</label>
+			<label kind="synchronisation" x="-127" y="-212">place[cur_loc]?</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id10"/>
 			<target ref="id7"/>
-			<label kind="guard" x="-68" y="-263">full[curr_loc]</label>
+			<label kind="guard" x="-68" y="-263">full[cur_loc]</label>
 			<nail x="59" y="-246"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id11"/>
-			<label kind="guard" x="-178" y="-178">!full[curr_loc]</label>
-			<label kind="synchronisation" x="-178" y="-161">arr[curr_loc][CUR_ROBOT]!</label>
+			<label kind="guard" x="-178" y="-178">!full[cur_loc]</label>
+			<label kind="synchronisation" x="-178" y="-161">arr[cur_loc][CUR_ROBOT]!</label>
 		</transition>
 		<transition>
 			<source ref="id11"/>
 			<target ref="id8"/>
 			<label kind="synchronisation" x="-500" y="-68">done[CUR_ROBOT]?</label>
 			<label kind="assignment" x="-501" y="-102">x=0,
-visited[curr_loc]=true</label>
+visited[cur_loc]=true</label>
 			<nail x="-637" y="-51"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id9"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-340" y="-289">x &gt;= dist[curr_loc][dest]</label>
-			<label kind="assignment" x="-340" y="-272">curr_loc = dest</label>
+			<label kind="guard" x="-340" y="-289">x &gt;= dist[cur_loc][dest]</label>
+			<label kind="assignment" x="-340" y="-272">cur_loc = dest</label>
 		</transition>
 		<transition>
 			<source ref="id8"/>
@@ -341,7 +351,7 @@ robot_t tail()
 		<transition controllable="false">
 			<source ref="id13"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-612" y="-399">proc &gt;= 5</label>
+			<label kind="guard" x="-612" y="-399">proc &gt;= 6</label>
 			<label kind="assignment" x="-612" y="-416">proc = 0</label>
 		</transition>
 	</template>
@@ -352,7 +362,7 @@ system OtherRobot, Robot, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=1000] (&lt;&gt; Robot.Done)</formula>
+			<formula>Pr[&lt;=1000] (&lt;&gt; Robot.completed() == 0)</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -369,6 +379,10 @@ system OtherRobot, Robot, Station;
 		</query>
 		<query>
 			<formula>strategy Safe = control: A&lt;&gt; Robot.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Robot.Done &amp;&amp; total &lt; 150</formula>
 			<comment></comment>
 		</query>
 		<query>
