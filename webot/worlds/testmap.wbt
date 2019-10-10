@@ -6,8 +6,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.9999917005256733 -0.001965658870387601 -0.003568622279954164 4.904876051337985
-  position 0.17390468198436862 6.017679927252111 1.187116546930772
+  orientation 1 0 0 4.71238898038469
+  position 0.0002492460910784943 4.1767104556886 8.048954320648118e-06
 }
 TexturedBackground {
 }
@@ -18,18 +18,18 @@ RectangleArena {
   floorTileSize 0.2 0.2
 }
 Elisa3 {
-  hidden position_0_0 28279.538568665597
-  hidden position_0_1 24964.497664094844
-  hidden linearVelocity_0 -0.05686390020592409 -4.971966826453213e-08 -0.009768896755892823
-  hidden angularVelocity_0 -6.59395706985738e-06 -0.009413829346960983 3.8009170408130808e-06
-  hidden rotation_2 0 0 1 0.28562114045314124
-  hidden linearVelocity_2 -0.0570484707902801 6.363674443772475e-08 -0.009806306071192969
-  hidden angularVelocity_2 -2.179055483747866 -0.007515652530430261 12.678124188656911
-  hidden rotation_3 0 0 -1 5.0051511351149625
-  hidden linearVelocity_3 -0.056677974813440085 -1.6602210521929086e-07 -0.009738468382262382
-  hidden angularVelocity_3 -2.164245830674702 -0.007665225521957179 12.593340446617539
-  translation 0.07110530916430018 -1.2506275133113143e-05 0.06381452816135819
-  rotation 0.018293943558864604 0.9998314275918093 0.0015646177774380854 2.971054278626862
+  hidden position_0_0 46659.560584443156
+  hidden position_0_1 41487.72173711963
+  hidden linearVelocity_0 -0.02804829268282586 4.035868772968532e-08 0.050049686617713154
+  hidden angularVelocity_0 -9.055440240228213e-06 -0.09777426153719643 -8.843095363819809e-06
+  hidden rotation_2 0 0 1 4.863814170364764
+  hidden linearVelocity_2 -0.028972711729409448 -2.647098810134933e-08 0.05177349184749674
+  hidden angularVelocity_2 11.498997295210081 -0.10478027252222742 6.433701560341838
+  hidden rotation_3 0 0 -1 3.4518662775893043
+  hidden linearVelocity_3 -0.02705855456326818 9.90615962249727e-08 0.04836283618222155
+  hidden angularVelocity_3 10.738627994821808 -0.10453649842427658 6.00832299970321
+  translation -0.10355656493980467 -1.2497131974733428e-05 0.3471445545848676
+  rotation -0.01829326756995419 0.9997754796758629 0.010693296989801222 -2.083927217357992
 }
 OilBarrel {
   translation -0.44999999999999996 0.19999999999999998 0.49
@@ -42,143 +42,143 @@ SolidBox {
 }
 DEF Station_1 Station {
   translation -1.17 0.05 0.51
-  adjList "1,2,3,4"
+  adjList "17"
   id 1
 }
 DEF Station_2 Station {
-  translation -0.83 0.049999999999999996 -1.17
+  translation -0.83 0.05 -1.17
   name "wooden box(1)"
-  adjList "7,8,9"
+  adjList "2"
   id 2
 }
 DEF Station_3 Station {
   translation -0.19 0.05 0.48
   name "wooden box(2)"
-  adjList "4,9,10"
+  adjList "16"
   id 3
 }
 DEF Station_4 Station {
   translation -0.3 0.05 -1.18
   name "wooden box(3)"
-  adjList "2,8,7"
+  adjList "23"
   id 4
 }
 DEF Station_5 Station {
   translation 0.47 0.05 -1.18
   name "wooden box(4)"
-  adjList "12,9,2"
+  adjList "24"
   id 5
 }
 DEF Station_6 Station {
-  translation -1.16 0.049999999999999996 -0.49
+  translation -1.16 0.05 -0.49
   name "wooden box(5)"
-  adjList "9,7,2"
+  adjList "13"
   id 6
 }
 DEF Station_7 Station {
   translation 0.52 0.049999999999999996 -0.13
   name "wooden box(6)"
-  adjList "2,8,4,2"
+  adjList "15"
   id 7
 }
 DEF Station_8 Station {
   translation 0.21 0.05 -0.51
   name "wooden box(8)"
-  adjList "9,8,2,4"
+  adjList "14"
   id 8
 }
 Endpoint {
   translation 0 0.06999999999999999 1.17
   name "Endpoint(1)"
-  adjList "2,8,3,4,7"
+  adjList "20"
   id 9
 }
 Endpoint {
-  translation -0.99 0.06999999999999999 1.17
+  translation -0.99 0.07 1.17
   name "Endpoint(2)"
-  adjList "2,8,3,4,7"
+  adjList "21"
   id 10
 }
 Endpoint {
   translation 1.17 0.07 -1.03
   name "Endpoint(3)"
-  adjList "2,8,3,4,7"
+  adjList "25"
   id 11
 }
 Endpoint {
   translation 1.0899999999999999 0.06999999999999999 1.17
   name "Endpoint(4)"
-  adjList "2,8,3,4,7"
+  adjList "19"
   id 12
 }
 Waypoint {
   id 13
-  adjList "2,3,4,6"
-  translation -0.89 0.09999999999999999 -0.49
+  adjList "22,14,17,16,23"
+  translation -0.89 0.1 -0.49
 }
 Waypoint {
   id 14
-  adjList "2,3,4,6"
+  adjList "13,23,22,16,24"
   translation 0 0.09999999999999999 -0.49
   name "waypoint(1)"
 }
 Waypoint {
   id 15
-  adjList "2,3,4,6"
+  adjList "16,19,20"
   translation 0.48 0.09999999999999999 0.09999999999999999
   name "waypoint(2)"
 }
 Waypoint {
   id 16
-  adjList "2,3,4,6"
+  adjList "13,14,15,20,19"
   translation 0 0.09999999999999999 0.49
   name "waypoint(3)"
 }
 Waypoint {
   id 17
-  adjList "2,3,4,6"
+  adjList "13,23,21"
   translation -0.89 0.09999999999999999 0.5
   name "waypoint(4)"
 }
 Waypoint {
   id 19
-  adjList "2,3,4,6"
+  adjList "25,15,16,20"
   translation 1.05 0.09999999999999999 0.7999999999999999
   name "waypoint(5)"
 }
 Waypoint {
   id 20
-  adjList "2,3,4,6"
+  adjList "21,16,15,19"
   translation 0 0.09999999999999999 0.7999999999999999
   name "waypoint(6)"
 }
 Waypoint {
   id 21
-  adjList "2,3,4,6"
+  adjList "17,20"
   translation -0.89 0.09999999999999999 0.7899999999999999
   name "waypoint(7)"
 }
 Waypoint {
   id 22
-  adjList "2,3,4,6"
+  adjList "13,14,23"
   translation -0.82 0.09999999999999999 -0.97
   name "waypoint(8)"
 }
 Waypoint {
   id 23
-  adjList "2,3,4,6"
+  adjList "22,13,14,24,17"
   translation -0.3 0.09999999999999999 -0.95
   name "waypoint(9)"
 }
 Waypoint {
   id 24
-  adjList "2,3,4,6"
+  adjList "23,14,25"
   translation 0.47 0.09999999999999999 -0.96
   name "waypoint(10)"
 }
 Waypoint {
   id 25
-  adjList "2,3,4,6"
+  adjList "24,19"
   translation 0.98 0.09999999999999999 -0.99
   name "waypoint(11)"
 }
