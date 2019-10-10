@@ -22,45 +22,6 @@ Solid {
     local size = fields.size.value
     local volume = size.x * size.y * size.z
     local mass = fields.mass.value
-
-    local max_size = 3
-    local min_size = 0.01
-
-    if size.x > max_size then
-      io.stderr:write("'size.x' greater than " .. max_size .. "\n")
-      size.x = max_size
-    elseif size.x < min_size then
-      io.stderr:write("'size.x' less than " .. min_size .. "\n")
-      size.x = min_size
-    end
-    if size.y > max_size then
-      io.stderr:write("'size.y' greater than " .. max_size .. "\n")
-      size.y = max_size
-    elseif size.y < min_size then
-      io.stderr:write("'size.y' less than " .. min_size .. "\n")
-      size.y = min_size
-    end
-    if size.z > max_size then
-      io.stderr:write("'size.z' greater than " .. max_size .. "\n")
-      size.z = max_size
-    elseif size.z < min_size then
-      io.stderr:write("'size.z' less than " .. min_size .. "\n")
-      size.z = min_size
-    end
-
-    -- we want the mass for a 1000cm3 box be comprised between 0.01 and 10 kg inclusive,
-    -- hence the following min_mass and max_mass values:
-    local epsilon = 0.000001  -- one milligram
-    local min_mass = volume^(2/3)
-    local max_mass = min_mass*1000 + epsilon
-    min_mass = min_mass - epsilon
-    if mass > 0 and mass < min_mass then
-      io.stderr:write("'mass' less than " .. min_mass .. "\n")
-      mass = min_mass
-    elseif mass > max_mass then
-      io.stderr:write("'mass' greater than " .. max_mass .. "\n")
-      mass = max_mass
-    end
   }%
   translation IS translation
   rotation IS rotation
@@ -80,12 +41,6 @@ Solid {
   boundingObject Box {
     size %{= size.x }% %{= size.y }% %{= size.z }%
   }
-  %{ if mass > 0 then }%
-  physics Physics {
-    density -1
-    mass %{= mass}%
-  }
-  %{ end }%
   locked IS locked
 }
 }
