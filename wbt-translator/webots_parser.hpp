@@ -70,7 +70,7 @@ class Parser {
 
     std::string read_token();
   std::string read_string();
-  Waypoint parse_waypoint(std::string);
+  Waypoint parse_waypoint(const std::string&);
   Translation parse_translation();
   int parse_id();
   std::vector<int> parse_adjList();
