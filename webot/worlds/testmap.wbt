@@ -6,8 +6,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 1 0 0 4.71238898038469
-  position 0.0002492460910784943 4.1767104556886 8.048954320648118e-06
+  orientation 0.9999649895922277 0.006709763308977417 0.004999866613584324 5.002355431120649
+  position -0.17607561507926073 5.303821650613406 1.0484573131325186
 }
 TexturedBackground {
 }
@@ -18,13 +18,13 @@ RectangleArena {
   floorTileSize 0.2 0.2
 }
 Elisa3 {
-  hidden position_0_0 46659.560584443156
-  hidden position_0_1 41487.72173711963
   hidden linearVelocity_0 -0.02804829268282586 4.035868772968532e-08 0.050049686617713154
   hidden angularVelocity_0 -9.055440240228213e-06 -0.09777426153719643 -8.843095363819809e-06
+  hidden translation_2 0 0.0045 -0.02
   hidden rotation_2 0 0 1 4.863814170364764
   hidden linearVelocity_2 -0.028972711729409448 -2.647098810134933e-08 0.05177349184749674
   hidden angularVelocity_2 11.498997295210081 -0.10478027252222742 6.433701560341838
+  hidden translation_3 0 0.0045 0.02
   hidden rotation_3 0 0 -1 3.4518662775893043
   hidden linearVelocity_3 -0.02705855456326818 9.90615962249727e-08 0.04836283618222155
   hidden angularVelocity_3 10.738627994821808 -0.10453649842427658 6.00832299970321
@@ -102,7 +102,7 @@ Endpoint {
 Endpoint {
   translation 1.17 0.07 -1.03
   name "Endpoint(3)"
-  adjList "25"
+  adjList "18"
   id 11
 }
 Endpoint {
@@ -142,7 +142,7 @@ Waypoint {
 }
 Waypoint {
   id 19
-  adjList "25,15,16,20"
+  adjList "18,15,16,20"
   translation 1.05 0.09999999999999999 0.7999999999999999
   name "waypoint(5)"
 }
@@ -172,12 +172,12 @@ Waypoint {
 }
 Waypoint {
   id 24
-  adjList "23,14,25"
+  adjList "23,14,18"
   translation 0.47 0.09999999999999999 -0.96
   name "waypoint(10)"
 }
 Waypoint {
-  id 25
+  id 11
   adjList "24,19"
   translation 0.98 0.09999999999999999 -0.99
   name "waypoint(11)"
