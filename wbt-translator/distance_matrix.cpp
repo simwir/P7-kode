@@ -54,3 +54,10 @@ std::string distance_matrix::to_uppaal_declaration() const
     ss << "\n}\n";
     return ss.str();
 }
+
+double euclidean_distance(const Waypoint &p1, const Waypoint &p2)
+{
+    auto xdist = p1.translation.x - p2.translation.x;
+    auto ydist = p1.translation.y - p2.translation.y;
+    return std::sqrt(xdist * xdist + ydist * ydist);
+}
