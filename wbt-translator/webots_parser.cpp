@@ -22,7 +22,7 @@ std::string Parser::read_string(){
 
 AST Parser::parse_stream(){
   try {
-    while (true) {
+    while (!stream.eof()) {
       std::string token = read_token();
       if (token == "Waypoint" || token == "Station" || token == "Endpoint") {
         Waypoint waypoint = parse_waypoint(token);
@@ -34,7 +34,7 @@ AST Parser::parse_stream(){
   }
 }
 
-Waypoint Parser::parse_waypoint(std::string token){
+Waypoint Parser::parse_waypoint(const std::string& token){
   Waypoint waypoint;
   if (token == "Waypoint") {
     waypoint.waypointType = eWaypoint;
