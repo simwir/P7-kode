@@ -63,9 +63,9 @@ class Parser {
   public:
     AST parse_stream();
   Parser(std::istream& inputStream)
-    :stream(inputStream){}
+    :is(inputStream){}
   private:
-    std::istream& stream;
+    std::istream& is;
     AST ast;
 
     std::string read_token();

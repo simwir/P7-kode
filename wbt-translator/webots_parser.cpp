@@ -6,8 +6,8 @@
 std::string Parser::read_token()
 {
     std::string token;
-    if (!(stream >> token)) {
-        if (stream.eof()) {
+    if (!(is >> token)) {
+        if (is.eof()) {
           throw EndOfStreamException("The stream ended while trying to read a token.");
         }
     }
@@ -16,13 +16,13 @@ std::string Parser::read_token()
 
 std::string Parser::read_string(){
   std::string line;
-  stream >> std::quoted(line);
+  is >> std::quoted(line);
   return line;
 }
 
 AST Parser::parse_stream(){
   try {
-    while (!stream.eof()) {
+    while (!is.eof()) {
       std::string token = read_token();
       if (token == "Waypoint" || token == "Station" || token == "Endpoint") {
         Waypoint waypoint = parse_waypoint(token);
@@ -42,8 +42,7 @@ Waypoint Parser::parse_waypoint(const std::string& waypointType){
   } else if (waypointType == "Endpoint") {
     waypoint.waypointType = eEndPoint;
   } else {
-    //TODO: Create custom error
-    throw std::logic_error("Unexpected waypoint type.");
+    throw MalformedWorldFileError("Unexpected waypoint type.");
   }
   bool needId = true, needAdj = true, needTranslation = true;
   try {
@@ -61,8 +60,7 @@ Waypoint Parser::parse_waypoint(const std::string& waypointType){
       }
     }
   } catch (EndOfStreamException& e) {
-    //TODO: Use custom error
-    throw std::logic_error("Unexpected End of stream. World file malformed?");
+    throw MalformedWorldFileError("Unexpected End of stream. World file malformed?");
   }
   return waypoint;
 }
