@@ -1,4 +1,8 @@
-#include <vector>
+#ifndef APSP_HPP
+#define APSP_HPP
+#include <map>
 #include "webots_parser.hpp"
 
-std::vector<std::vector<double>> all_pairs_shortests_path(const AST& ast);
+std::map<int, std::map<int, double>> all_pairs_shortest_path(const AST& ast);
+
+#endif
