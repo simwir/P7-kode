@@ -29,18 +29,17 @@ AST Parser::parse_stream(){
         ast.nodes.insert(std::make_pair(waypoint.id, waypoint));
       }
     };
-  } catch (EndOfStreamException& e) {
-    return ast;
-  }
+  } catch (EndOfStreamException& e) { }
+  return ast;
 }
 
-Waypoint Parser::parse_waypoint(const std::string& token){
+Waypoint Parser::parse_waypoint(const std::string& waypointType){
   Waypoint waypoint;
-  if (token == "Waypoint") {
+  if (waypointType == "Waypoint") {
     waypoint.waypointType = eWaypoint;
-  } else if (token == "Station") {
+  } else if (waypointType == "Station") {
     waypoint.waypointType = eStation;
-  } else if (token == "Endpoint") {
+  } else if (waypointType == "Endpoint") {
     waypoint.waypointType = eEndPoint;
   } else {
     //TODO: Create custom error
@@ -49,7 +48,7 @@ Waypoint Parser::parse_waypoint(const std::string& token){
   bool needId = true, needAdj = true, needTranslation = true;
   try {
     while (needId || needAdj || needTranslation){
-      token = read_token();
+      std::string token = read_token();
       if (token == "translation") {
         waypoint.translation = parse_translation();
         needTranslation = false;
