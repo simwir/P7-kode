@@ -4,5 +4,6 @@
 #include "webots_parser.hpp"
 
 std::map<int, std::map<int, double>> all_pairs_shortest_path(const AST& ast);
+std::string print_all_pairs_shortest_pairs(std::map<int, std::map<int, double>> dist);
 
 #endif

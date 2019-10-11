@@ -36,7 +36,7 @@ int main(int argc, char **argv)
      {"all", no_argument, nullptr, 'a'}
     };
 
-    bool d, p;
+    bool d, p, r;
 
     int opt;
     while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1){
@@ -68,8 +68,12 @@ int main(int argc, char **argv)
         std::cout << dist.to_uppaal_declaration();
     }
 
-    if (p) {
-        auto shortest_path = all_pairs_shortest_path(ast);
+    std::map<int, std::map<int, double>> shortest_path;
+    if (p || r) {
+        shortest_path = all_pairs_shortest_path(ast);
     }
 
+    if (p) {
+        std::cout << print_all_pairs_shortest_pairs(shortest_path);
+    }
 }
