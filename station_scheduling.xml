@@ -298,15 +298,15 @@ system OtherRobot, Robot, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=150] (&lt;&gt; Robot.allvisited())</formula>
+			<formula>Pr[&lt;=200] (&lt;&gt; Robot.allvisited())</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=150] : &lt;&gt; Robot.allvisited()</formula>
+			<formula>strategy opt = minE (total) [&lt;=200] : &lt;&gt; Robot.allvisited()</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=150] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<formula>Pr[&lt;=200] (&lt;&gt; Robot.allvisited()) under opt</formula>
 			<comment></comment>
 		</query>
 		<query>
