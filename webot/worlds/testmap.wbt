@@ -177,7 +177,7 @@ Waypoint {
   name "waypoint(10)"
 }
 Waypoint {
-  id 11
+  id 18
   adjList "24,19"
   translation 0.98 0.09999999999999999 -0.99
   name "waypoint(11)"
