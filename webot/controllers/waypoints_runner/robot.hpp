@@ -11,7 +11,8 @@
 #include "points.hpp"
 
 constexpr auto NUM_SENSORS = 8;
-constexpr auto ANGLE_SENSITIVITY = 0.03;
+constexpr auto ANGLE_SENSITIVITY = 0.1;
+constexpr auto DESTINATION_BUFFER_DISTANCE = 0.2;
 
 struct DestinationNotDefinedException {
 };

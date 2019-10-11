@@ -36,12 +36,12 @@ void robot_controller::run_simulation()
         /*std::cout << gps_reading_to_point(frontGPS) << ' ' << gps_reading_to_point(backGPS)
           << std::endl;*/
         if (angle_delta < -ANGLE_SENSITIVITY) {
-            do_left_turn();
-        }
-        else if (angle_delta > ANGLE_SENSITIVITY) {
             do_right_turn();
         }
-        else if (dist_to_dest > 0.5) {
+        else if (angle_delta > ANGLE_SENSITIVITY) {
+            do_left_turn();
+        }
+        else if (dist_to_dest > DESTINATION_BUFFER_DISTANCE) {
             go_straight_ahead();
         }
         else {
@@ -56,7 +56,7 @@ void robot_controller::update_sensor_values()
                    [](auto *ds) { return ds->getValue(); });
     facing_angle = get_facing_angle();
     dest_angle = get_angle_to_dest();
-    angle_delta = dest_angle - facing_angle;
+    angle_delta = std::atan2(std::sin(facing_angle - dest_angle), std::cos(facing_angle - dest_angle));
     position = get_position();
     dist_to_dest = has_destination ? euclidean_distance(position, destination) : -1;
 }
@@ -64,8 +64,8 @@ void robot_controller::update_sensor_values()
 void robot_controller::go_straight_ahead()
 {
     // adjust by angle-delta so we approach a direct line.
-    left_motor->setVelocity(6 + angle_delta);
-    right_motor->setVelocity(6 - angle_delta);
+    left_motor->setVelocity(6 - angle_delta);
+    right_motor->setVelocity(6 + angle_delta);
 }
 
 void robot_controller::do_left_turn()
