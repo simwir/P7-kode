@@ -59,7 +59,8 @@ broadcast chan arr[station_t][robot_t],
 		<name>Waypoint</name>
 		<parameter>waypoint_t id</parameter>
 		<declaration>const int MAX_QUEUE = MAX_ROBOTS;
-const int NON_STATION_PASSING = 6;
+const int NON_STATION_PASSING = 3;
+const int STATION_PASSING = 6;
 
 clock x;
 
@@ -101,7 +102,7 @@ robot_t tail()
 int passing_time() {
     for (station_id : station_t) {
         if (station_waypoint[station_id] == id) {
-            return 0;
+            return STATION_PASSING;
         }
     }
 
@@ -176,86 +177,57 @@ int[0, NUM_WAYPOINTS] next_waypoint() {
     return order[id][step_index++];
 }
 
-int[0, NUM_STATIONS] station() {
-    for (station_id : station_t) {
-        if (station_waypoint[station_id] == cur) {
-            return station_id;
-        }
-    }
-
-    return 0;
-}
-
 double time_between_waypoints() {
     return waypoint_dist[cur][dest] / robot_speed;
 }</declaration>
-		<location id="id2" x="-484" y="-8">
-			<name x="-501" y="17">Reset</name>
-			<committed/>
-		</location>
-		<location id="id3" x="-484" y="-246">
+		<location id="id2" x="-484" y="-246">
 			<name x="-544" y="-297">BetweenWaypoints</name>
 			<label kind="invariant" x="-544" y="-280">x &lt;= time_between_waypoints()</label>
 		</location>
-		<location id="id4" x="-637" y="-246">
-			<name x="-620" y="-272">Choose</name>
+		<location id="id3" x="-637" y="-246">
+			<name x="-705" y="-272">Choose</name>
 			<committed/>
 		</location>
-		<location id="id5" x="-765" y="-246">
-			<name x="-782" y="-280">Done</name>
+		<location id="id4" x="-637" y="-399">
+			<name x="-654" y="-433">Done</name>
 		</location>
-		<location id="id6" x="-313" y="-8">
-			<name x="-338" y="9">Waiting</name>
-		</location>
-		<location id="id7" x="-323" y="-93">
+		<location id="id5" x="-323" y="-93">
 			<name x="-306" y="-102">AtWaypoint</name>
 		</location>
-		<init ref="id2"/>
-		<transition controllable="false">
-			<source ref="id7"/>
-			<target ref="id2"/>
-			<label kind="synchronisation" x="-450" y="-110">go[id]?</label>
-			<nail x="-484" y="-93"/>
-		</transition>
+		<location id="id6" x="-909" y="-246">
+			<name x="-919" y="-280">Start</name>
+			<committed/>
+		</location>
+		<init ref="id6"/>
 		<transition controllable="false">
 			<source ref="id6"/>
-			<target ref="id2"/>
-			<label kind="synchronisation" x="-433" y="-25">done[id]?</label>
+			<target ref="id3"/>
+			<label kind="assignment" x="-884" y="-238">dest = next_waypoint()</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id3"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-221" y="-280">x &gt;= time_between_waypoints()
-&amp;&amp; station() != 0</label>
-			<label kind="synchronisation" x="-221" y="-246">arr[station()][id]!</label>
-			<label kind="assignment" x="-221" y="-229">cur = dest</label>
-			<nail x="-59" y="-246"/>
-			<nail x="-59" y="-8"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id3"/>
-			<target ref="id7"/>
-			<label kind="guard" x="-467" y="-212">x &gt;= time_between_waypoints()
-&amp;&amp; station() == 0</label>
-			<label kind="synchronisation" x="-467" y="-178">queue[dest][id]!</label>
-			<label kind="assignment" x="-467" y="-161">cur = dest</label>
-			<nail x="-485" y="-178"/>
-			<nail x="-324" y="-178"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id4"/>
-			<target ref="id5"/>
-			<label kind="guard" x="-731" y="-238">dest == 0</label>
-		</transition>
-		<transition controllable="false">
-			<source ref="id2"/>
-			<target ref="id4"/>
-			<label kind="assignment" x="-816" y="-93">dest = next_waypoint()</label>
+			<source ref="id5"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-595" y="-51">go[id]?</label>
+			<label kind="assignment" x="-595" y="-34">dest = next_waypoint()</label>
+			<nail x="-323" y="-8"/>
 			<nail x="-637" y="-8"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id4"/>
-			<target ref="id3"/>
+			<source ref="id2"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-314" y="-212">x &gt;= time_between_waypoints()</label>
+			<label kind="synchronisation" x="-314" y="-195">queue[dest][id]!</label>
+			<label kind="assignment" x="-314" y="-178">cur = dest</label>
+			<nail x="-323" y="-246"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-629" y="-348">dest == 0</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id2"/>
 			<label kind="guard" x="-612" y="-238">dest != 0</label>
 			<label kind="assignment" x="-612" y="-221">x = 0</label>
 		</transition>
@@ -273,43 +245,43 @@ waypoint_t dest_waypoint;
 double time_between_waypoints() {
     return waypoint_dist[cur_waypoint][dest_waypoint] / robot_speed;
 }</declaration>
-		<location id="id8" x="-25" y="-399">
+		<location id="id7" x="-25" y="-399">
 			<name x="0" y="-408">Holding</name>
 		</location>
-		<location id="id9" x="-399" y="-399">
+		<location id="id8" x="-399" y="-399">
 			<name x="-501" y="-442">BetweenWaypoints</name>
 			<label kind="invariant" x="-654" y="-408">x &lt;= time_between_waypoints()</label>
 		</location>
-		<location id="id10" x="-398" y="-246">
+		<location id="id9" x="-398" y="-246">
 			<name x="-476" y="-272">EnRoute</name>
 			<committed/>
 		</location>
-		<location id="id11" x="-399" y="-102">
+		<location id="id10" x="-399" y="-102">
 			<name x="-382" y="-119">Done</name>
 		</location>
-		<init ref="id10"/>
+		<init ref="id9"/>
 		<transition controllable="false">
-			<source ref="id10"/>
-			<target ref="id11"/>
+			<source ref="id9"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-391" y="-204">station_waypoint[dest] == cur_waypoint</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id8"/>
-			<target ref="id10"/>
+			<source ref="id7"/>
+			<target ref="id9"/>
 			<label kind="synchronisation" x="-221" y="-272">go[CUR_ROBOT]?</label>
 			<nail x="-25" y="-246"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id8"/>
+			<source ref="id8"/>
+			<target ref="id7"/>
 			<label kind="guard" x="-331" y="-467">x &gt;= time_between_waypoints()</label>
 			<label kind="synchronisation" x="-331" y="-450">queue[dest_waypoint][CUR_ROBOT]!</label>
 			<label kind="assignment" x="-331" y="-433">cur_waypoint = dest_waypoint,
 visited[dest_waypoint] = true</label>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id9"/>
+			<source ref="id9"/>
+			<target ref="id8"/>
 			<label kind="select" x="-391" y="-374">id : waypoint_t</label>
 			<label kind="guard" x="-391" y="-357">!visited[id] &amp;&amp; 
 waypoint_dist[cur_waypoint][id] != -1 &amp;&amp;
@@ -318,94 +290,10 @@ station_waypoint[dest] != cur_waypoint</label>
 x = 0</label>
 		</transition>
 	</template>
-	<template>
-		<name>Station</name>
-		<parameter>station_t station_id</parameter>
-		<declaration>const int MAX_QUEUE = MAX_ROBOTS;
-
-clock proc;
-
-int[0, MAX_ROBOTS + 1] list[MAX_QUEUE + 1];
-int[0, MAX_QUEUE] num_in_queue = 0;
-
-// Put an element at the end of the queue
-void enqueue(robot_t element)
-{
-    list[num_in_queue++] = element;
-
-    if (num_in_queue == 1) {
-        proc = 0;
-    }
-}
-
-// Remove the front element of the queue
-void dequeue()
-{
-    int i = 0;
-    num_in_queue -= 1;
-    while (i &lt; num_in_queue)
-    {
-        list[i] = list[i + 1];
-        i++;
-    }
-    list[i] = 0;
-}
-
-// Returns the front element of the queue
-robot_t front()
-{
-   return list[0];
-}
-
-// Returns the last element of the queue
-robot_t tail()
-{
-   return list[num_in_queue - 1];
-}</declaration>
-		<location id="id12" x="-442" y="-348">
-			<name x="-433" y="-374">Idle</name>
-			<label kind="invariant" x="-433" y="-340">proc &lt;= 6</label>
-		</location>
-		<location id="id13" x="-654" y="-476">
-			<name x="-705" y="-510">CDeQ</name>
-			<committed/>
-		</location>
-		<init ref="id12"/>
-		<transition controllable="false">
-			<source ref="id12"/>
-			<target ref="id12"/>
-			<label kind="select" x="-425" y="-263">id : robot_t</label>
-			<label kind="synchronisation" x="-425" y="-246">arr[station_id][id]?</label>
-			<label kind="assignment" x="-425" y="-229">enqueue(id)</label>
-			<nail x="-442" y="-272"/>
-			<nail x="-272" y="-272"/>
-			<nail x="-272" y="-348"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id13"/>
-			<target ref="id12"/>
-			<label kind="guard" x="-799" y="-433">num_in_queue &gt; 0</label>
-			<label kind="synchronisation" x="-799" y="-416">done[front()]!</label>
-			<label kind="assignment" x="-799" y="-399">dequeue()</label>
-			<nail x="-654" y="-348"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id13"/>
-			<target ref="id12"/>
-			<label kind="guard" x="-636" y="-510">num_in_queue == 0</label>
-			<nail x="-442" y="-476"/>
-		</transition>
-		<transition controllable="false">
-			<source ref="id12"/>
-			<target ref="id13"/>
-			<label kind="guard" x="-612" y="-399">proc &gt;= 5</label>
-			<label kind="assignment" x="-612" y="-416">proc = 0</label>
-		</transition>
-	</template>
 	<system>// Place template instantiations here.
 
 // List one or more processes to be composed into a system.
-system Waypoint, OtherRobot, Robot, Station;
+system Waypoint, OtherRobot, Robot;
 </system>
 	<queries>
 		<query>
