@@ -32,22 +32,11 @@ class robot_controller {
 
     ~robot_controller() { delete robot; }
 
-    double get_facing_angle() const
-    {
-        return get_angle_of_line(gps_reading_to_point(frontGPS), gps_reading_to_point(backGPS));
-    }
+    double get_facing_angle() const;
 
-    Point get_position() const
-    {
-        return get_average(gps_reading_to_point(frontGPS), gps_reading_to_point(backGPS));
-    }
+    Point get_position() const;
 
-    double get_angle_to_dest() const
-    {
-        if (!has_destination)
-            throw DestinationNotDefinedException{};
-        return get_angle_of_line(destination, gps_reading_to_point(frontGPS));
-    }
+    double get_angle_to_dest() const;
 
     static Point gps_reading_to_point(const webots::GPS *gps)
     {
@@ -56,30 +45,31 @@ class robot_controller {
     }
 
   private:
-    void update_sensor_values();
+    const int time_step;
 
     webots::Robot *robot;
-    const int time_step;
-    webots::Motor *left_motor, *right_motor;
-
-    std::array<webots::DistanceSensor *, NUM_SENSORS> distance_sensors;
-    std::array<double, NUM_SENSORS> sensor_readings;
-
     webots::GPS *frontGPS, *backGPS;
+    webots::Motor *left_motor, *right_motor;
+    std::array<webots::DistanceSensor *, NUM_SENSORS> distance_sensors;
 
     bool has_destination = false;
     Point destination;
-    Point position;
 
+    // actions
     void do_left_turn();
     void do_right_turn();
     void go_straight_ahead();
     void stop();
 
+    void update_sensor_values();
+
+    // current state inforamtion
+    std::array<double, NUM_SENSORS> sensor_readings;
     double dist_to_dest;
     double facing_angle;
     double dest_angle;
     double angle_delta;
+    Point position;
 };
 
 #endif

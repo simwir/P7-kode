@@ -30,18 +30,15 @@ void robot_controller::run_simulation()
     set_destination({0.6, 0, 0.6});
 
     while (robot->step(time_step) != -1) {
-        // Read the sensors:
-        // Enter here functions to read sensor data, like:
-        //  double val = ds->getValue();
         update_sensor_values();
 
         printf("angle: %lf\tdest: %lf\tdelta: %lf\n", facing_angle, dest_angle, angle_delta);
         /*std::cout << gps_reading_to_point(frontGPS) << ' ' << gps_reading_to_point(backGPS)
           << std::endl;*/
-        if (angle_delta < -0.1) {
+        if (angle_delta < -ANGLE_SENSITIVITY) {
             do_left_turn();
         }
-        else if (angle_delta > 0.1) {
+        else if (angle_delta > ANGLE_SENSITIVITY) {
             do_right_turn();
         }
         else if (dist_to_dest > 0.5) {
@@ -50,10 +47,6 @@ void robot_controller::run_simulation()
         else {
             stop();
         }
-        // Process sensor data here.
-
-        // Enter here functions to send actuator commands, like:
-        //  motor->setPosition(10.0);
     }
 }
 
@@ -70,6 +63,7 @@ void robot_controller::update_sensor_values()
 
 void robot_controller::go_straight_ahead()
 {
+    // adjust by angle-delta so we approach a direct line.
     left_motor->setVelocity(6 + angle_delta);
     right_motor->setVelocity(6 - angle_delta);
 }
@@ -90,4 +84,20 @@ void robot_controller::stop()
 {
     left_motor->setVelocity(0);
     right_motor->setVelocity(0);
+}
+double robot_controller::get_facing_angle() const
+{
+    return get_angle_of_line(gps_reading_to_point(frontGPS), gps_reading_to_point(backGPS));
+}
+
+double robot_controller::get_angle_to_dest() const
+{
+    if (!has_destination)
+        throw DestinationNotDefinedException{};
+    return get_angle_of_line(destination, gps_reading_to_point(frontGPS));
+}
+
+Point robot_controller::get_position() const
+{
+    return get_average(gps_reading_to_point(frontGPS), gps_reading_to_point(backGPS));
 }
