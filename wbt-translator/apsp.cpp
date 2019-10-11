@@ -16,7 +16,7 @@ std::map<int, std::map<int, double>> all_pairs_shortest_path(const AST& ast){
         for (auto &[colId, _] : ast.nodes) {
             column[colId] = DBL_MAX;
         }
-        dist[rowId] = std::move(column);
+        dist[rowId] = column;
     }
 
     // For each edge set the distance between the verts to the edge length.
