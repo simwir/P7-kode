@@ -7,7 +7,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation 0.9999649895922277 0.006709763308977417 0.004999866613584324 5.002355431120649
-  position -0.17607561507926073 5.303821650613406 1.0484573131325186
+  position -0.18218197389044466 7.3501349655410895 1.6590728395857415
 }
 TexturedBackground {
 }
@@ -18,18 +18,18 @@ RectangleArena {
   floorTileSize 0.2 0.2
 }
 Elisa3 {
-  hidden linearVelocity_0 -0.02804829268282586 4.035868772968532e-08 0.050049686617713154
-  hidden angularVelocity_0 -9.055440240228213e-06 -0.09777426153719643 -8.843095363819809e-06
-  hidden translation_2 0 0.0045 -0.02
-  hidden rotation_2 0 0 1 4.863814170364764
-  hidden linearVelocity_2 -0.028972711729409448 -2.647098810134933e-08 0.05177349184749674
-  hidden angularVelocity_2 11.498997295210081 -0.10478027252222742 6.433701560341838
-  hidden translation_3 0 0.0045 0.02
-  hidden rotation_3 0 0 -1 3.4518662775893043
-  hidden linearVelocity_3 -0.02705855456326818 9.90615962249727e-08 0.04836283618222155
-  hidden angularVelocity_3 10.738627994821808 -0.10453649842427658 6.00832299970321
-  translation -0.10355656493980467 -1.2497131974733428e-05 0.3471445545848676
-  rotation -0.01829326756995419 0.9997754796758629 0.010693296989801222 -2.083927217357992
+  hidden position_0_0 5532.824387446354
+  hidden position_0_1 4939.808893512619
+  hidden linearVelocity_0 0.05087843927647527 5.584629996621705e-07 0.011771205332344293
+  hidden angularVelocity_0 0.0002146693240742237 -0.3995566878067083 -0.0009244761676384633
+  hidden rotation_2 0 0 1 1.2424970420466688
+  hidden linearVelocity_2 0.058607204790559135 2.6057401303830432e-08 0.013775215098740268
+  hidden angularVelocity_2 3.0508470723814742 -0.43251002569024566 -12.979725869591649
+  hidden rotation_3 0 0 -1 4.677108347053185
+  hidden linearVelocity_3 0.04305860788482722 3.9937631007886377e-07 0.010062443544934368
+  hidden angularVelocity_3 2.2457365180233633 -0.4253858607962031 -9.524732338573553
+  translation 0.11447400084929166 -1.2386554584903689e-05 0.6878200149488567
+  rotation 0.018176944437895668 0.9886452393148396 -0.14916497400866358 -0.24493287110327788
 }
 OilBarrel {
   translation -0.44999999999999996 0.19999999999999998 0.49
@@ -48,7 +48,7 @@ DEF Station_1 Station {
 DEF Station_2 Station {
   translation -0.83 0.05 -1.17
   name "wooden box(1)"
-  adjList "2"
+  adjList "22"
   id 2
 }
 DEF Station_3 Station {
@@ -113,72 +113,72 @@ Endpoint {
 }
 Waypoint {
   id 13
-  adjList "22,14,17,16,23"
+  adjList "22,14,17,16,23,6"
   translation -0.89 0.1 -0.49
 }
 Waypoint {
   id 14
-  adjList "13,23,22,16,24"
+  adjList "13,23,22,16,24,8"
   translation 0 0.09999999999999999 -0.49
   name "waypoint(1)"
 }
 Waypoint {
   id 15
-  adjList "16,19,20"
-  translation 0.48 0.09999999999999999 0.09999999999999999
+  adjList "16,19,20,7"
+  translation 0.48 0.1 0.1
   name "waypoint(2)"
 }
 Waypoint {
   id 16
-  adjList "13,14,15,20,19"
+  adjList "13,14,15,20,19,3"
   translation 0 0.09999999999999999 0.49
   name "waypoint(3)"
 }
 Waypoint {
   id 17
-  adjList "13,23,21"
+  adjList "13,23,21,1"
   translation -0.89 0.09999999999999999 0.5
   name "waypoint(4)"
 }
 Waypoint {
   id 19
-  adjList "18,15,16,20"
+  adjList "18,15,16,20,12"
   translation 1.05 0.09999999999999999 0.7999999999999999
   name "waypoint(5)"
 }
 Waypoint {
   id 20
-  adjList "21,16,15,19"
+  adjList "21,16,15,19,9"
   translation 0 0.09999999999999999 0.7999999999999999
   name "waypoint(6)"
 }
 Waypoint {
   id 21
-  adjList "17,20"
+  adjList "17,20,10"
   translation -0.89 0.09999999999999999 0.7899999999999999
   name "waypoint(7)"
 }
 Waypoint {
   id 22
-  adjList "13,14,23"
+  adjList "13,14,23,2"
   translation -0.82 0.09999999999999999 -0.97
   name "waypoint(8)"
 }
 Waypoint {
   id 23
-  adjList "22,13,14,24,17"
+  adjList "22,13,14,24,17,4"
   translation -0.3 0.09999999999999999 -0.95
   name "waypoint(9)"
 }
 Waypoint {
   id 24
-  adjList "23,14,18"
-  translation 0.47 0.09999999999999999 -0.96
+  adjList "23,14,18,5"
+  translation 0.47 0.1 -0.96
   name "waypoint(10)"
 }
 Waypoint {
-  id 11
-  adjList "24,19"
+  id 18
+  adjList "24,19,11"
   translation 0.98 0.09999999999999999 -0.99
   name "waypoint(11)"
 }
