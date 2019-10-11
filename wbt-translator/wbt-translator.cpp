@@ -7,6 +7,7 @@
 #include "webots_parser.hpp"
 #include "distance_matrix.hpp"
 #include "apsp.hpp"
+#include "uppaal-printer.hpp"
 
 void print_help(const char* const execute_location)
 {
@@ -17,7 +18,7 @@ void print_help(const char* const execute_location)
               << "-s --stations       Emit stations ids" << std::endl
               << "-e --endpoints      Emit endpoint ids" << std::endl
               << "-w --waypoints      Emit waypoint ids" << std::endl
-              << "-n --all-nodes      Emit all node ids" << std::endl
+              << "-n --all-nodes      Same as -sew" << std::endl
               << "-a --all            Same as -dprsewn";
 }
 
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
      {"all", no_argument, nullptr, 'a'}
     };
 
-    bool d, p, r;
+    bool d, p, r, optstations, optendpoints, optwaypoints;
 
     int opt;
     while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1){
@@ -46,6 +47,19 @@ int main(int argc, char **argv)
             break;
         case 'p':
             p = true;
+            break;
+        case 's':
+            optstations = true;
+            break;
+        case 'e':
+            optendpoints = true;
+            break;
+        case 'w':
+            optwaypoints = true;
+            break;
+        case 'n':
+            optstations = optendpoints = optwaypoints = true;
+            break;
         }
     }
 
@@ -75,5 +89,17 @@ int main(int argc, char **argv)
 
     if (p) {
         std::cout << print_all_pairs_shortest_pairs(shortest_path);
+    }
+
+    if (optstations) {
+        std::cout << print_station_of_type(ast, eStation);
+    }
+
+    if (optendpoints) {
+        std::cout << print_station_of_type(ast, eEndPoint);
+    }
+
+    if (optwaypoints) {
+        std::cout << print_station_of_type(ast, eWaypoint);
     }
 }
