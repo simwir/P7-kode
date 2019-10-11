@@ -225,7 +225,7 @@ double time_between_waypoints() {
 		<transition controllable="false">
 			<source ref="id3"/>
 			<target ref="id6"/>
-			<label kind="guard" x="-221" y="-280">x == time_between_waypoints()
+			<label kind="guard" x="-221" y="-280">x &gt;= time_between_waypoints()
 &amp;&amp; station() != 0</label>
 			<label kind="synchronisation" x="-221" y="-246">arr[station()][id]!</label>
 			<label kind="assignment" x="-221" y="-229">cur = dest</label>
@@ -235,7 +235,7 @@ double time_between_waypoints() {
 		<transition controllable="false">
 			<source ref="id3"/>
 			<target ref="id7"/>
-			<label kind="guard" x="-467" y="-212">x == time_between_waypoints()
+			<label kind="guard" x="-467" y="-212">x &gt;= time_between_waypoints()
 &amp;&amp; station() == 0</label>
 			<label kind="synchronisation" x="-467" y="-178">queue[dest][id]!</label>
 			<label kind="assignment" x="-467" y="-161">cur = dest</label>
@@ -267,7 +267,7 @@ double time_between_waypoints() {
 station_t dest;
 
 bool visited[waypoint_t];
-waypoint_t cur_waypoint;
+waypoint_t cur_waypoint = 21;
 waypoint_t dest_waypoint;
 
 double time_between_waypoints() {
@@ -302,7 +302,7 @@ double time_between_waypoints() {
 		<transition controllable="false">
 			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-331" y="-467">x == time_between_waypoints()</label>
+			<label kind="guard" x="-331" y="-467">x &gt;= time_between_waypoints()</label>
 			<label kind="synchronisation" x="-331" y="-450">queue[dest_waypoint][CUR_ROBOT]!</label>
 			<label kind="assignment" x="-331" y="-433">cur_waypoint = dest_waypoint,
 visited[dest_waypoint] = true</label>
@@ -363,8 +363,8 @@ robot_t tail()
    return list[num_in_queue - 1];
 }</declaration>
 		<location id="id12" x="-442" y="-348">
-			<name x="-476" y="-382">Idle</name>
-			<label kind="invariant" x="-476" y="-331">proc &lt;= 6</label>
+			<name x="-433" y="-374">Idle</name>
+			<label kind="invariant" x="-433" y="-340">proc &lt;= 6</label>
 		</location>
 		<location id="id13" x="-654" y="-476">
 			<name x="-705" y="-510">CDeQ</name>
@@ -374,13 +374,12 @@ robot_t tail()
 		<transition controllable="false">
 			<source ref="id12"/>
 			<target ref="id12"/>
-			<label kind="select" x="-654" y="-263">id : robot_t</label>
-			<label kind="synchronisation" x="-654" y="-246">arr[station_id][id]?</label>
-			<label kind="assignment" x="-654" y="-229">enqueue(id)</label>
+			<label kind="select" x="-425" y="-263">id : robot_t</label>
+			<label kind="synchronisation" x="-425" y="-246">arr[station_id][id]?</label>
+			<label kind="assignment" x="-425" y="-229">enqueue(id)</label>
 			<nail x="-442" y="-272"/>
-			<nail x="-654" y="-272"/>
-			<nail x="-654" y="-331"/>
-			<nail x="-476" y="-331"/>
+			<nail x="-272" y="-272"/>
+			<nail x="-272" y="-348"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id13"/>
@@ -410,7 +409,7 @@ system Waypoint, OtherRobot, Robot, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=1500] (&lt;&gt; Robot.Done)</formula>
+			<formula>Pr[&lt;=20] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>
