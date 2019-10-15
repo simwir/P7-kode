@@ -47,7 +47,7 @@ std::map<int, std::map<int, double>> all_pairs_shortest_path(const AST& ast){
     return dist;
 }
 
-std::string print_all_pairs_shortest_pairs(std::map<int, std::map<int, double>> dist){
+std::string print_all_pairs_shortest_pairs(const std::map<int, std::map<int, double>>& dist){
     size_t num_waypoints = dist.size();
     std::stringstream ss;
     ss << "const int NUM_WAYPOINTS = " << num_waypoints << "\n"
