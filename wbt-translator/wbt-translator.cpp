@@ -77,9 +77,13 @@ int main(int argc, char **argv)
     }
     AST ast = Parser{infile}.parse_stream();
 
+    if (ast.nodes.size() == 0){
+        std::cerr << "Malformed world file. No waypoints found.";
+        exit(1);
+    }
+
     if (d) {
-        distance_matrix dist{ast};
-        std::cout << dist.to_uppaal_declaration();
+        std::cout << distance_matrix{ast}.to_uppaal_declaration();
     }
 
     std::map<int, std::map<int, double>> shortest_path;
