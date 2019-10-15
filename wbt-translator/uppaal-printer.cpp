@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-std::string print_station_of_type(const AST& ast, const WaypointType type) {
+std::string print_waypoints_of_type(const AST& ast, const WaypointType type) {
     std::stringstream ss1, ss2;
     int count = 0;
     for (auto it = ast.nodes.begin(); it != ast.nodes.end(); it++){
