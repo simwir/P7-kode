@@ -309,21 +309,5 @@ system Waypoint, OtherRobot, Robot;
 			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under opt</formula>
 			<comment></comment>
 		</query>
-		<query>
-			<formula>E&lt;&gt; Robot.allvisited()</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>strategy Safe = control: A&lt;&gt; Robot.allvisited()</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula></formula>
-			<comment></comment>
-		</query>
 	</queries>
 </nta>
