@@ -14,14 +14,14 @@ std::map<int, std::map<int, double>> all_pairs_shortest_path(const AST& ast){
     for (auto &[rowId, _] : ast.nodes) {
         std::map<int, double> column;
         for (auto &[colId, _] : ast.nodes) {
-            column[colId] = DBL_MAX;
+            column.insert(std::make_pair(colId, DBL_MAX));//[colId] = DBL_MAX;
         }
         dist[rowId] = column;
     }
 
     // For each edge, set the distance between the vertices to the edge length.
     for (auto &[_, from] : ast.nodes) {
-        for (auto adjId : from.adjList) {
+        for (auto adjId : from.adjlist) {
             Waypoint to = ast.nodes.at(adjId);
             dist.at(from.id).at(adjId) = euclidean_distance(from, to);
         }
@@ -34,9 +34,9 @@ std::map<int, std::map<int, double>> all_pairs_shortest_path(const AST& ast){
 
     // Calculate all pairs shortest path
     size_t num_waypoints = ast.nodes.size();
-    for(size_t k = 1; k <= num_waypoints; k++){
-        for(size_t i = 1; i <= num_waypoints; i++){
-            for(size_t j = 1; j <= num_waypoints; j++){
+    for(size_t k = 0; k < num_waypoints; k++){
+        for(size_t i = 0; i < num_waypoints; i++){
+            for(size_t j = 0; j < num_waypoints; j++){
                 double new_dist = dist[i][k] + dist[k][j];
                 if (dist[i][j] > new_dist)
                     dist[i][j] = new_dist;
@@ -55,7 +55,9 @@ std::string print_all_pairs_shortest_pairs(const std::map<int, std::map<int, dou
     for(size_t i = 0; i < num_waypoints; i++){
         ss << "  {";
         for (size_t j = 0; j < num_waypoints; j++){
-            ss << dist[i][j];
+            auto iat = dist.at(i);
+            auto jat = iat.at(j);
+            ss << jat;
             if (j < num_waypoints-1)
                 ss << ",";
         }
