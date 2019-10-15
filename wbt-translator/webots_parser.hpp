@@ -10,7 +10,7 @@
 class EndOfStreamException : public std::exception{
     std::string message;
 public:
-    EndOfStreamException(const std::string inmessage){
+    EndOfStreamException(const std::string& inmessage){
         message = inmessage;
     }
 
@@ -21,7 +21,7 @@ public:
 class MalformedWorldFileError : public std::exception{
     std::string message;
 public:
-    MalformedWorldFileError(const std::string inmessage){
+    MalformedWorldFileError(const std::string& inmessage){
         message = inmessage;
     }
 
