@@ -30,8 +30,8 @@ const int waypoint_dist[waypoint_t][waypoint_t] = {
     {-1, -1, -1, -1, 3, -1, -1, -1, -1, -1, 1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-    {-1, -1, -1, -1, -1, -1, -1, -1, 3, -1, -1, 1, -1, 7, -1, 4, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, -1, -1},
-    {-1, -1, -1, -1, -1, -1, -1, -1, -1, 3, -1, -1, 7, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, 8, -1, -1, -1, -1, 3, -1, -1, 1, -1, 7, -1, 4, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, 8, -1, -1, -1, -1, -1, 3, -1, -1, 7, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1, -1, -1, -1, -1, -1, 1, 3, -1, -1, -1, -1, -1, -1, -1},
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 3, -1, -1, -1, 7, -1, -1, -1, -1, 3, -1, -1, -1, -1, -1},
@@ -174,14 +174,10 @@ int[0, NUM_WAYPOINTS] dest;
 
 int[0, NUM_WAYPOINTS] next_waypoint() {
     return order[id][step_index++];
-}
-
-int time_between_waypoints() {
-    return waypoint_dist[cur][dest];
 }</declaration>
 		<location id="id2" x="-484" y="-246">
 			<name x="-544" y="-297">BetweenWaypoints</name>
-			<label kind="invariant" x="-544" y="-280">x &lt;= time_between_waypoints()</label>
+			<label kind="invariant" x="-544" y="-280">x &lt;= waypoint_dist[cur][dest]</label>
 		</location>
 		<location id="id3" x="-637" y="-246">
 			<name x="-705" y="-272">Choose</name>
@@ -226,7 +222,7 @@ dest = next_waypoint()</label>
 		<transition controllable="false">
 			<source ref="id2"/>
 			<target ref="id5"/>
-			<label kind="guard" x="-314" y="-212">x &gt;= time_between_waypoints()</label>
+			<label kind="guard" x="-314" y="-212">x &gt;= waypoint_dist[cur][dest]</label>
 			<label kind="synchronisation" x="-314" y="-195">queue[dest][id]!</label>
 			<label kind="assignment" x="-314" y="-178">cur = dest</label>
 			<nail x="-323" y="-246"/>
@@ -251,17 +247,13 @@ waypoint_dist[cur][dest] != -1</label>
 station_t dest;
 
 waypoint_t cur_waypoint = 21;
-waypoint_t dest_waypoint;
-
-int time_between_waypoints() {
-    return waypoint_dist[cur_waypoint][dest_waypoint];
-}</declaration>
+waypoint_t dest_waypoint;</declaration>
 		<location id="id8" x="-25" y="-399">
 			<name x="0" y="-408">Holding</name>
 		</location>
 		<location id="id9" x="-399" y="-399">
 			<name x="-501" y="-442">BetweenWaypoints</name>
-			<label kind="invariant" x="-654" y="-408">x &lt;= time_between_waypoints()</label>
+			<label kind="invariant" x="-705" y="-408">x &lt;= waypoint_dist[cur_waypoint][dest]</label>
 		</location>
 		<location id="id10" x="-398" y="-246">
 			<name x="-476" y="-272">EnRoute</name>
@@ -285,7 +277,7 @@ int time_between_waypoints() {
 		<transition controllable="false">
 			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-331" y="-459">x &gt;= time_between_waypoints()</label>
+			<label kind="guard" x="-331" y="-459">x &gt;= waypoint_dist[cur_waypoint][dest]</label>
 			<label kind="synchronisation" x="-331" y="-442">queue[dest_waypoint][CUR_ROBOT]!</label>
 			<label kind="assignment" x="-331" y="-425">cur_waypoint = dest_waypoint</label>
 		</transition>
