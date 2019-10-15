@@ -36,11 +36,11 @@ AST Parser::parse_stream(){
 Waypoint Parser::parse_waypoint(const std::string& waypointType){
   Waypoint waypoint;
   if (waypointType == "Waypoint") {
-    waypoint.waypointType = eWaypoint;
+      waypoint.waypointType = WaypointType::eWaypoint;
   } else if (waypointType == "Station") {
-    waypoint.waypointType = eStation;
+      waypoint.waypointType = WaypointType::eStation;
   } else if (waypointType == "Endpoint") {
-    waypoint.waypointType = eEndPoint;
+      waypoint.waypointType = WaypointType::eEndPoint;
   } else {
     throw MalformedWorldFileError("Unexpected waypoint type.");
   }
@@ -55,7 +55,7 @@ Waypoint Parser::parse_waypoint(const std::string& waypointType){
         waypoint.id = parse_id();
         needId = false;
       } else if (token == "adjList") {
-        waypoint.adjList = parse_adjList();
+        waypoint.adjlist = parse_adjlist();
         needAdj = false;
       }
     }
@@ -77,18 +77,18 @@ int Parser::parse_id(){
   return std::stoi(read_token());
 }
 
-std::vector<int> Parser::parse_adjList(){
+std::vector<int> Parser::parse_adjlist(){
   std::string adjString = read_string();
   size_t pos = 0;
-  std::vector<int> adjList;
+  std::vector<int> adjlist;
   try {
     while ((pos = adjString.find(",")) != std::string::npos) {
-      adjList.push_back(std::stoi(adjString.substr(0, pos)));
+      adjlist.push_back(std::stoi(adjString.substr(0, pos)));
       adjString.erase(0, pos + 1);
     }
-    adjList.push_back(std::stoi(adjString));
+    adjlist.push_back(std::stoi(adjString));
   } catch (std::invalid_argument& e){
     throw MalformedWorldFileError("Adjlist is not a list of integers. At: " + adjString);
   }
-  return adjList;
+  return adjlist;
 }

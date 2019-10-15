@@ -34,11 +34,11 @@ struct Translation {
     double x, y, z;
 };
 
-enum WaypointType {eWaypoint, eStation, eEndPoint};
+enum class WaypointType {eWaypoint, eStation, eEndPoint};
 
 struct Waypoint {
     int id;
-  std::vector<int> adjList;
+  std::vector<int> adjlist;
     Translation translation;
     WaypointType waypointType;
 };
@@ -50,9 +50,9 @@ struct AST {
     bool are_connected(size_t i, size_t j) const {
         auto start = nodes.find(i);
         if (start != std::end(nodes)) {
-            std::vector<int> adjList = start->second.adjList;
-            //Does the adjList contain the element j?
-            return std::find(std::begin(adjList), std::end(adjList), j) != std::end(adjList);
+            std::vector<int> adjlist = start->second.adjlist;
+            //Does the adjlist contain the element j?
+            return std::find(std::begin(adjlist), std::end(adjlist), j) != std::end(adjlist);
         } else {
             throw MalformedWorldFileError("The waypoint " + std::to_string(i) + " Could not be found");
         }
@@ -73,7 +73,7 @@ class Parser {
   Waypoint parse_waypoint(const std::string&);
   Translation parse_translation();
   int parse_id();
-  std::vector<int> parse_adjList();
+  std::vector<int> parse_adjlist();
 
 };
 
