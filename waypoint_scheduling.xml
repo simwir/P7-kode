@@ -306,7 +306,7 @@ system Waypoint, OtherRobot, Robot;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=1000] (&lt;&gt; Robot.Done)</formula>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -314,7 +314,7 @@ system Waypoint, OtherRobot, Robot;
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1000] (&lt;&gt; Robot.Done) under opt</formula>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under opt</formula>
 			<comment></comment>
 		</query>
 		<query>
