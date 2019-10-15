@@ -55,9 +55,7 @@ std::string print_all_pairs_shortest_pairs(const std::map<int, std::map<int, dou
     for(size_t i = 0; i < num_waypoints; i++){
         ss << "  {";
         for (size_t j = 0; j < num_waypoints; j++){
-            auto iat = dist.at(i);
-            auto jat = iat.at(j);
-            ss << jat;
+            ss << dist.at(i).at(j);
             if (j < num_waypoints-1)
                 ss << ",";
         }
