@@ -40,7 +40,7 @@ std::ostream &write_comma_separated(const TContainer &container, std::ostream &o
 std::string distance_matrix::to_uppaal_declaration() const
 {
     std::stringstream ss;
-    ss << "const int NUM_WAYPOINTS = " << rows << "\n"
+    ss << "const int NUM_WAYPOINTS = " << rows << ";\n"
        << "const int dist[NUM_WAYPOINTS][NUM_WAYPOINTS] = {\n";
     auto iter = std::begin(_data);
     while (iter != std::end(_data)) {
@@ -51,6 +51,6 @@ std::string distance_matrix::to_uppaal_declaration() const
             ss << ",\n";
         //iter++;
     }
-    ss << "\n}\n";
+    ss << "\n};\n";
     return ss.str();
 }
