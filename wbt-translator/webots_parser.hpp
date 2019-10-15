@@ -34,7 +34,7 @@ struct Translation {
     double x, y, z;
 };
 
-enum class WaypointType {eWaypoint, eStation, eEndPoint};
+enum class WaypointType {eVia, eStation, eEndPoint};
 
 struct Waypoint {
     int id;

@@ -36,7 +36,7 @@ AST Parser::parse_stream(){
 Waypoint Parser::parse_waypoint(const std::string& waypointType){
   Waypoint waypoint;
   if (waypointType == "Waypoint") {
-      waypoint.waypointType = WaypointType::eWaypoint;
+      waypoint.waypointType = WaypointType::eVia;
   } else if (waypointType == "Station") {
       waypoint.waypointType = WaypointType::eStation;
   } else if (waypointType == "Endpoint") {
