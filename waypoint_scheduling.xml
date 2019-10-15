@@ -8,7 +8,6 @@ clock total;
 const int NUM_STATIONS = 10;
 const int NUM_WAYPOINTS = 28;
 const int MAX_ROBOTS = 5;
-const double robot_speed = 0.7; // Distance per time unit
 
 typedef int[1, NUM_STATIONS] station_t;
 typedef int[1, NUM_WAYPOINTS] waypoint_t;
@@ -177,8 +176,8 @@ int[0, NUM_WAYPOINTS] next_waypoint() {
     return order[id][step_index++];
 }
 
-double time_between_waypoints() {
-    return waypoint_dist[cur][dest] / robot_speed;
+int time_between_waypoints() {
+    return waypoint_dist[cur][dest];
 }</declaration>
 		<location id="id2" x="-484" y="-246">
 			<name x="-544" y="-297">BetweenWaypoints</name>
@@ -242,8 +241,8 @@ bool visited[waypoint_t];
 waypoint_t cur_waypoint = 21;
 waypoint_t dest_waypoint;
 
-double time_between_waypoints() {
-    return waypoint_dist[cur_waypoint][dest_waypoint] / robot_speed;
+int time_between_waypoints() {
+    return waypoint_dist[cur_waypoint][dest_waypoint];
 }</declaration>
 		<location id="id7" x="-25" y="-399">
 			<name x="0" y="-408">Holding</name>
