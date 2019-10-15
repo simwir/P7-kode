@@ -4,7 +4,7 @@
 #include <algorithm>
 
 robot_controller::robot_controller(webots::Robot *robot)
-    : robot(robot), time_step((int)robot->getBasicTimeStep())
+    : time_step((int)robot->getBasicTimeStep()), robot(robot)
 {
     left_motor = robot->getMotor("left wheel motor");
     right_motor = robot->getMotor("right wheel motor");
