@@ -197,11 +197,23 @@ int time_between_waypoints() {
 			<name x="-919" y="-280">Start</name>
 			<committed/>
 		</location>
+		<location id="id7" x="-790" y="-8">
+			<name x="-850" y="-42">InvalidPath</name>
+		</location>
 		<init ref="id6"/>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-909" y="-110">dest != 0 &amp;&amp;
+waypoint_dist[cur][dest] == -1</label>
+			<nail x="-688" y="-195"/>
+			<nail x="-688" y="-8"/>
+		</transition>
 		<transition controllable="false">
 			<source ref="id6"/>
 			<target ref="id3"/>
-			<label kind="assignment" x="-884" y="-238">dest = next_waypoint()</label>
+			<label kind="assignment" x="-884" y="-238">cur = next_waypoint(),
+dest = next_waypoint()</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id5"/>
@@ -227,8 +239,9 @@ int time_between_waypoints() {
 		<transition controllable="false">
 			<source ref="id3"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-612" y="-238">dest != 0</label>
-			<label kind="assignment" x="-612" y="-221">x = 0</label>
+			<label kind="guard" x="-612" y="-238">dest != 0 &amp;&amp;
+waypoint_dist[cur][dest] != -1</label>
+			<label kind="assignment" x="-612" y="-204">x = 0</label>
 		</transition>
 	</template>
 	<template>
@@ -237,55 +250,52 @@ int time_between_waypoints() {
 
 station_t dest;
 
-bool visited[waypoint_t];
 waypoint_t cur_waypoint = 21;
 waypoint_t dest_waypoint;
 
 int time_between_waypoints() {
     return waypoint_dist[cur_waypoint][dest_waypoint];
 }</declaration>
-		<location id="id7" x="-25" y="-399">
+		<location id="id8" x="-25" y="-399">
 			<name x="0" y="-408">Holding</name>
 		</location>
-		<location id="id8" x="-399" y="-399">
+		<location id="id9" x="-399" y="-399">
 			<name x="-501" y="-442">BetweenWaypoints</name>
 			<label kind="invariant" x="-654" y="-408">x &lt;= time_between_waypoints()</label>
 		</location>
-		<location id="id9" x="-398" y="-246">
+		<location id="id10" x="-398" y="-246">
 			<name x="-476" y="-272">EnRoute</name>
 			<committed/>
 		</location>
-		<location id="id10" x="-399" y="-102">
+		<location id="id11" x="-399" y="-102">
 			<name x="-382" y="-119">Done</name>
 		</location>
-		<init ref="id9"/>
+		<init ref="id10"/>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id10"/>
+			<source ref="id10"/>
+			<target ref="id11"/>
 			<label kind="guard" x="-391" y="-204">station_waypoint[dest] == cur_waypoint</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id7"/>
-			<target ref="id9"/>
+			<source ref="id8"/>
+			<target ref="id10"/>
 			<label kind="synchronisation" x="-221" y="-272">go[CUR_ROBOT]?</label>
 			<nail x="-25" y="-246"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id8"/>
-			<target ref="id7"/>
-			<label kind="guard" x="-331" y="-467">x &gt;= time_between_waypoints()</label>
-			<label kind="synchronisation" x="-331" y="-450">queue[dest_waypoint][CUR_ROBOT]!</label>
-			<label kind="assignment" x="-331" y="-433">cur_waypoint = dest_waypoint,
-visited[dest_waypoint] = true</label>
-		</transition>
-		<transition>
 			<source ref="id9"/>
 			<target ref="id8"/>
+			<label kind="guard" x="-331" y="-459">x &gt;= time_between_waypoints()</label>
+			<label kind="synchronisation" x="-331" y="-442">queue[dest_waypoint][CUR_ROBOT]!</label>
+			<label kind="assignment" x="-331" y="-425">cur_waypoint = dest_waypoint</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id9"/>
 			<label kind="select" x="-391" y="-374">id : waypoint_t</label>
-			<label kind="guard" x="-391" y="-357">!visited[id] &amp;&amp; 
-waypoint_dist[cur_waypoint][id] != -1 &amp;&amp;
+			<label kind="guard" x="-391" y="-357">waypoint_dist[cur_waypoint][id] != -1 &amp;&amp;
 station_waypoint[dest] != cur_waypoint</label>
-			<label kind="assignment" x="-391" y="-306">dest_waypoint = id,
+			<label kind="assignment" x="-391" y="-323">dest_waypoint = id,
 x = 0</label>
 		</transition>
 	</template>
@@ -296,15 +306,15 @@ system Waypoint, OtherRobot, Robot;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=20] (&lt;&gt; Robot.Done)</formula>
+			<formula>Pr[&lt;=1000] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=1500] : &lt;&gt; Robot.Done</formula>
+			<formula>strategy opt = minE (total) [&lt;=1000] : &lt;&gt; Robot.Done</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=1500] (&lt;&gt; Robot.Done) under opt</formula>
+			<formula>Pr[&lt;=1000] (&lt;&gt; Robot.Done) under opt</formula>
 			<comment></comment>
 		</query>
 		<query>
