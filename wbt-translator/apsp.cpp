@@ -19,7 +19,7 @@ std::map<int, std::map<int, double>> all_pairs_shortest_path(const AST& ast){
         dist[rowId] = column;
     }
 
-    // For each edge set the distance between the verts to the edge length.
+    // For each edge, set the distance between the vertices to the edge length.
     for (auto &[_, from] : ast.nodes) {
         for (auto adjId : from.adjList) {
             Waypoint to = ast.nodes.at(adjId);
