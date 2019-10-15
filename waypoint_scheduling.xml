@@ -253,7 +253,7 @@ waypoint_t dest_waypoint;</declaration>
 		</location>
 		<location id="id9" x="-399" y="-399">
 			<name x="-501" y="-442">BetweenWaypoints</name>
-			<label kind="invariant" x="-705" y="-408">x &lt;= waypoint_dist[cur_waypoint][dest]</label>
+			<label kind="invariant" x="-773" y="-408">x &lt;= waypoint_dist[cur_waypoint][dest_waypoint]</label>
 		</location>
 		<location id="id10" x="-398" y="-246">
 			<name x="-476" y="-272">EnRoute</name>
@@ -277,7 +277,7 @@ waypoint_t dest_waypoint;</declaration>
 		<transition controllable="false">
 			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-331" y="-459">x &gt;= waypoint_dist[cur_waypoint][dest]</label>
+			<label kind="guard" x="-331" y="-459">x &gt;= waypoint_dist[cur_waypoint][dest_waypoint]</label>
 			<label kind="synchronisation" x="-331" y="-442">queue[dest_waypoint][CUR_ROBOT]!</label>
 			<label kind="assignment" x="-331" y="-425">cur_waypoint = dest_waypoint</label>
 		</transition>
