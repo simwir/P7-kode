@@ -3,6 +3,6 @@
 
 #include "webots_parser.hpp"
 
-std::string print_station_of_type(const AST& ast, const WaypointType type);
+std::string print_waypoints_of_type(const AST& ast, const WaypointType type);
 
 #endif

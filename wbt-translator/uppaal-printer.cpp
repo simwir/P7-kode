@@ -5,23 +5,23 @@
 std::string print_waypoints_of_type(const AST& ast, const WaypointType type) {
     std::stringstream ss1, ss2;
     int count = 0;
-    for (auto it = ast.nodes.begin(); it != ast.nodes.end(); it++){
-        if (it->second.waypointType == type) {
+    for (auto &[id, waypoint] : ast.nodes){
+        if (waypoint.waypointType == type) {
             if (count != 0)
                 ss2 << ",";
             count++;
-            ss2 << it->first;
+            ss2 << id;
         }
     }
     std::string type_name;
     switch (type){
-    case eWaypoint:
-        type_name = "WAYPOINTS";
+    case WaypointType::eVia:
+        type_name = "VIAS";
         break;
-    case eStation:
+    case WaypointType::eStation:
         type_name = "STATIONS";
         break;
-    case eEndPoint:
+    case WaypointType::eEndPoint:
         type_name = "ENDPOINTS";
         break;
     }

@@ -24,7 +24,7 @@ void print_help(const char* const execute_location)
 
 int main(int argc, char **argv)
 {
-    const char* const shortOpts = "dprsewna";
+    const char* const shortOpts = "dprsevna";
     const option longOpts[] =
     {
      {"dist-matrix", no_argument, nullptr, 'd'},
@@ -32,12 +32,12 @@ int main(int argc, char **argv)
      {"shortest-route", no_argument, nullptr, 'r'},
      {"stations", no_argument, nullptr, 's'},
      {"endpoints", no_argument, nullptr, 'e'},
-     {"waypoints", no_argument, nullptr, 'w'},
+     {"vias", no_argument, nullptr, 'v'},
      {"all-nodes", no_argument, nullptr, 'n'},
      {"all", no_argument, nullptr, 'a'}
     };
 
-    bool d, p, r, optstations, optendpoints, optwaypoints;
+    bool d, p, r, optstations, optendpoints, optvias;
 
     int opt;
     while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1){
@@ -54,11 +54,11 @@ int main(int argc, char **argv)
         case 'e':
             optendpoints = true;
             break;
-        case 'w':
-            optwaypoints = true;
+        case 'v':
+            optvias = true;
             break;
         case 'n':
-            optstations = optendpoints = optwaypoints = true;
+            optstations = optendpoints = optvias = true;
             break;
         }
     }
@@ -96,14 +96,14 @@ int main(int argc, char **argv)
     }
 
     if (optstations) {
-        std::cout << print_station_of_type(ast, eStation);
+        std::cout << print_waypoints_of_type(ast, WaypointType::eStation);
     }
 
     if (optendpoints) {
-        std::cout << print_station_of_type(ast, eEndPoint);
+        std::cout << print_waypoints_of_type(ast, WaypointType::eEndPoint);
     }
 
-    if (optwaypoints) {
-        std::cout << print_station_of_type(ast, eWaypoint);
+    if (optvias) {
+        std::cout << print_waypoints_of_type(ast, WaypointType::eVia);
     }
 }
