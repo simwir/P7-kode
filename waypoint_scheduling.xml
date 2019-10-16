@@ -3,7 +3,7 @@
 <nta>
 	<declaration>// Place global declarations here.
 
-clock total;
+hybrid clock total;
 
 const int NUM_STATIONS = 10;
 const int NUM_WAYPOINTS = 28;
@@ -112,7 +112,7 @@ int passing_time() {
 		</location>
 		<location id="id1" x="-93" y="42">
 			<name x="-161" y="17">Queued</name>
-			<label kind="invariant" x="-76" y="42">x &lt;= passing_time()</label>
+			<label kind="invariant" x="-76" y="42">x &lt;= passing_time() + 2</label>
 		</location>
 		<init ref="id0"/>
 		<transition controllable="false">
@@ -177,7 +177,7 @@ int[0, NUM_WAYPOINTS] next_waypoint() {
 }</declaration>
 		<location id="id2" x="-484" y="-246">
 			<name x="-544" y="-297">BetweenWaypoints</name>
-			<label kind="invariant" x="-544" y="-280">x &lt;= waypoint_dist[cur][dest]</label>
+			<label kind="invariant" x="-544" y="-280">x &lt;= waypoint_dist[cur][dest] + 2</label>
 		</location>
 		<location id="id3" x="-637" y="-246">
 			<name x="-705" y="-272">Choose</name>
@@ -244,25 +244,72 @@ waypoint_dist[cur][dest] != -1</label>
 		<name>Robot</name>
 		<declaration>clock x;
 
+bool visited[waypoint_t];
+
 station_t dest;
 
 waypoint_t cur_waypoint = 21;
-waypoint_t dest_waypoint;</declaration>
+waypoint_t dest_waypoint;
+
+bool is_stuck(waypoint_t node) {
+    bool local_visited[waypoint_t];
+    int[0, NUM_WAYPOINTS] stack[waypoint_t];
+    int top = 1;
+    waypoint_t top_waypoint;
+
+    if (node == station_waypoint[dest]) {
+        return false;
+    }
+
+    for (id : waypoint_t) {
+        local_visited[id] = visited[id];
+    }
+
+    stack[top++] = node;
+
+    while (top &gt; 1) {
+        top_waypoint = stack[--top];
+        stack[top + 1] = 0;
+
+        for (id : waypoint_t) {
+            if (!local_visited[id] &amp;&amp; waypoint_dist[top_waypoint][id] != -1) {
+                if (id == station_waypoint[dest]) {
+                    return false;
+                }
+                
+                local_visited[id] = true;
+                stack[top++] = id;
+            }
+        }
+    }
+
+    return true;
+}</declaration>
 		<location id="id8" x="-25" y="-399">
 			<name x="0" y="-408">Holding</name>
 		</location>
 		<location id="id9" x="-399" y="-399">
 			<name x="-501" y="-442">BetweenWaypoints</name>
-			<label kind="invariant" x="-773" y="-408">x &lt;= waypoint_dist[cur_waypoint][dest_waypoint]</label>
+			<label kind="invariant" x="-799" y="-408">x &lt;= waypoint_dist[cur_waypoint][dest_waypoint] + 2</label>
 		</location>
 		<location id="id10" x="-398" y="-246">
-			<name x="-476" y="-272">EnRoute</name>
+			<name x="-467" y="-272">Choose</name>
 			<committed/>
 		</location>
 		<location id="id11" x="-399" y="-102">
-			<name x="-382" y="-119">Done</name>
+			<name x="-374" y="-110">Done</name>
+			<label kind="invariant" x="-374" y="-93">total' == 0</label>
 		</location>
-		<init ref="id10"/>
+		<location id="id12" x="-663" y="-246">
+			<name x="-697" y="-280">Start</name>
+			<committed/>
+		</location>
+		<init ref="id12"/>
+		<transition controllable="false">
+			<source ref="id12"/>
+			<target ref="id10"/>
+			<label kind="assignment" x="-637" y="-238">visited[cur_waypoint] = true</label>
+		</transition>
 		<transition controllable="false">
 			<source ref="id10"/>
 			<target ref="id11"/>
@@ -277,36 +324,72 @@ waypoint_t dest_waypoint;</declaration>
 		<transition controllable="false">
 			<source ref="id9"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-331" y="-459">x &gt;= waypoint_dist[cur_waypoint][dest_waypoint]</label>
-			<label kind="synchronisation" x="-331" y="-442">queue[dest_waypoint][CUR_ROBOT]!</label>
-			<label kind="assignment" x="-331" y="-425">cur_waypoint = dest_waypoint</label>
+			<label kind="guard" x="-331" y="-476">x &gt;= waypoint_dist[cur_waypoint][dest_waypoint]</label>
+			<label kind="synchronisation" x="-331" y="-459">queue[dest_waypoint][CUR_ROBOT]!</label>
+			<label kind="assignment" x="-331" y="-442">cur_waypoint = dest_waypoint,
+visited[cur_waypoint] = true</label>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id9"/>
 			<label kind="select" x="-391" y="-374">id : waypoint_t</label>
 			<label kind="guard" x="-391" y="-357">waypoint_dist[cur_waypoint][id] != -1 &amp;&amp;
-station_waypoint[dest] != cur_waypoint</label>
-			<label kind="assignment" x="-391" y="-323">dest_waypoint = id,
+station_waypoint[dest] != cur_waypoint &amp;&amp;
+!visited[id] &amp;&amp; !is_stuck(id)</label>
+			<label kind="assignment" x="-391" y="-306">dest_waypoint = id,
 x = 0</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
+const int C_RED    = 0;
+const int C_GREEN  = 1;
+const int C_BLUE   = 2;
+const int C_PURPLE = 3;
+const int C_ORANGE = 5;
+const int C_YELLOW = 6;
+const int C_CYAN   = 9;
 
 // List one or more processes to be composed into a system.
 system Waypoint, OtherRobot, Robot;
-</system>
+
+gantt {
+    Waypoint: for (j : waypoint_t) Robot.dest_waypoint == j -&gt; 1;
+}</system>
 	<queries>
 		<query>
 			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=1000] : &lt;&gt; Robot.Done</formula>
+			<formula>strategy opt = minE (total) [&lt;=100] : &lt;&gt; Robot.Done</formula>
 			<comment></comment>
 		</query>
 		<query>
 			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under opt</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 100 [&lt;= 100] {
+    Robot.dest_waypoint
+}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 100 [&lt;= 100] {
+    Robot.dest_waypoint
+} under opt</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total) under opt</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
 			<comment></comment>
 		</query>
 	</queries>
