@@ -66,7 +66,7 @@ DEF Station_4 Station {
 DEF Station_5 Station {
   translation 0.47 0.05 -1.18
   name "wooden box(4)"
-  adjList "24"
+  adjList "0"
   id 5
 }
 DEF Station_6 Station {
@@ -118,7 +118,7 @@ Waypoint {
 }
 Waypoint {
   id 14
-  adjList "13,23,22,16,24,8"
+  adjList "13,23,22,16,0,8"
   translation 0 0.09999999999999999 -0.49
   name "waypoint(1)"
 }
@@ -166,19 +166,19 @@ Waypoint {
 }
 Waypoint {
   id 23
-  adjList "22,13,14,24,17,4"
+  adjList "22,13,14,0,17,4"
   translation -0.3 0.09999999999999999 -0.95
   name "waypoint(9)"
 }
 Waypoint {
-  id 24
+  id 0
   adjList "23,14,18,5"
   translation 0.47 0.1 -0.96
   name "waypoint(10)"
 }
 Waypoint {
   id 18
-  adjList "24,19,11"
+  adjList "0,19,11"
   translation 0.98 0.09999999999999999 -0.99
   name "waypoint(11)"
 }
