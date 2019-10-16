@@ -14,7 +14,7 @@
 
 #include "controller_client.hpp"
 
-void split(std::string &input, char delimiter,
+void split(const std::string &input, char delimiter,
            std::vector<std::string> &result) {
   size_t current, previous = 0;
   current = input.find(delimiter);
