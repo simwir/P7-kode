@@ -14,8 +14,8 @@
 
 #include "controller_client.hpp"
 
-void split(const std::string &input, char delimiter,
-           std::vector<std::string> &result) {
+std::vector<std::string> split(const std::string &input, char delimiter) {
+  std::vector<std::string> result;
   size_t current, previous = 0;
   current = input.find(delimiter);
 
@@ -25,6 +25,8 @@ void split(const std::string &input, char delimiter,
     current = input.find(delimiter, previous);
   }
   result.push_back(input.substr(previous, current - previous));
+
+  return result;
 }
 
 controller_client::controller_client(std::string host, std::string port) {
@@ -60,22 +62,17 @@ std::pair<double, double> controller_client::get_location() {
 
   recv(socketfd, (char *)received.c_str(), received.length(), 0);
 
-  split(received, ' ', result);
+  result = split(received, ' ');
 
   if (result.size() != 3) {
     // Throw exception
   }
 
   if (result.at(0) == "location") {
-    try {
-      double x = std::stod(result.at(1));
-      double y = std::stod(result.at(2));
+    double x = std::stod(result.at(1));
+    double y = std::stod(result.at(2));
 
-      return std::make_pair(x, y);
-    } catch (const std::invalid_argument &exception) {
-      // Rethrow?
-      std::cerr << "Could not parse location\n";
-    }
+    return std::make_pair(x, y);
   } else {
     return std::make_pair(0.0, 0.0);
   }
@@ -83,10 +80,7 @@ std::pair<double, double> controller_client::get_location() {
 
 int main(void) {
   std::string input = "1 2 3";
-  std::vector<std::string> test;
-
-  split(input, ' ', test);
-
+  std::vector<std::string> test = split(input, ' ');
   std::copy(test.begin(), test.end(),
             std::ostream_iterator<std::string>(std::cout, "\n"));
   return 0;
