@@ -34,6 +34,24 @@ robot_controller::robot_controller(webots::Robot *robot)
     }
 }
 
+void robot_controller::update_sensor_values()
+{
+    std::transform(distance_sensors.begin(), distance_sensors.end(), sensor_readings.begin(),
+                   [](auto *ds) { return ds->getValue(); });
+    facing_angle = get_facing_angle();
+    dest_angle = get_angle_to_dest();
+    angle_delta =
+        std::atan2(std::sin(facing_angle - dest_angle), std::cos(facing_angle - dest_angle));
+    position = get_position();
+    dist_to_dest = has_destination ? euclidean_distance(position, destination) : -1;
+
+    const auto *vals = lidar->getRangeImage();
+    std::transform(
+        vals, vals + lidar_num_points(), std::begin(lidar_range_values), [&](auto reading) {
+            return reading > lidar_max_range ? std::nullopt : std::make_optional(reading);
+        });
+}
+
 void robot_controller::run_simulation()
 {
     set_destination({-0.68, 0, 0.79});
@@ -63,24 +81,6 @@ void robot_controller::run_simulation()
             stop();
         }
     }
-}
-
-void robot_controller::update_sensor_values()
-{
-    std::transform(distance_sensors.begin(), distance_sensors.end(), sensor_readings.begin(),
-                   [](auto *ds) { return ds->getValue(); });
-    facing_angle = get_facing_angle();
-    dest_angle = get_angle_to_dest();
-    angle_delta =
-        std::atan2(std::sin(facing_angle - dest_angle), std::cos(facing_angle - dest_angle));
-    position = get_position();
-    dist_to_dest = has_destination ? euclidean_distance(position, destination) : -1;
-
-    const auto *vals = lidar->getRangeImage();
-    std::transform(
-        vals, vals + lidar_num_points(), std::begin(lidar_range_values), [&](auto reading) {
-            return reading > lidar_max_range ? std::nullopt : std::make_optional(reading);
-        });
 }
 
 void robot_controller::go_straight_ahead()
@@ -134,11 +134,25 @@ std::vector<Point> robot_controller::get_discontinuity_points() const
 {
     std::vector<Point> discontinuities;
     bool is_in_range = lidar_range_values[0].has_value();
-    for (size_t i = 0; i < lidar_range_values.size(); ++i) {
+    constexpr float THRESHOLD = 0.5f;
+    float last_range_value =
+        is_in_range ? lidar_range_values[0].value() : std::numeric_limits<float>::max();
+    for (size_t i = 1; i < lidar_range_values.size(); ++i) {
+        // switch from object in range to not in range
         if (is_in_range != lidar_range_values[i].has_value()) {
             is_in_range = !is_in_range;
             discontinuities.push_back(
                 get_coordinate_system().to_global_coordinates(lidar_value_to_point(i)));
+        }
+        // big jump in object distance - assume new object.
+        else if (is_in_range && abs(lidar_range_values[i].value() - last_range_value) > THRESHOLD) {
+            discontinuities.push_back(
+                get_coordinate_system().to_global_coordinates(lidar_value_to_point(i)));
+            discontinuities.push_back(
+                get_coordinate_system().to_global_coordinates(lidar_value_to_point(i - 1)));
+        }
+        if (is_in_range) {
+            last_range_value = lidar_range_values[i].value();
         }
     }
     return discontinuities;
@@ -150,7 +164,7 @@ void robot_controller::tangent_bug_get_destination()
     auto discontinuities = get_discontinuity_points();
     double min_heuristic = std::numeric_limits<double>::max();
     Point best_point;
-    for (auto& point : discontinuities) {
+    for (auto &point : discontinuities) {
         double h = euclidean_distance(position, point) + euclidean_distance(point, destination);
         if (h < min_heuristic) {
             min_heuristic = h;

@@ -9,8 +9,8 @@
 
 #include <array>
 #include <optional>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 #include "points.hpp"
 
@@ -22,9 +22,7 @@ struct DestinationNotDefinedException {
 };
 
 struct bad_bug_routing : std::exception {
-    const char* what() const noexcept override {
-        return "bad_bug_routing";
-    }
+    const char *what() const noexcept override { return "bad_bug_routing"; }
 };
 
 class robot_controller {
@@ -103,7 +101,7 @@ class robot_controller {
             lidar_range_values[idx].has_value() ? lidar_range_values[idx].value() : lidar_max_range;
         double angle = get_lidar_point_angle(idx);
 
-        return {dist * std::cos(angle), 0, dist * std::sin(angle)}; // TODO Implement
+        return {dist * std::cos(angle), 0, dist * std::sin(angle)};
     }
 
     std::vector<Point> get_discontinuity_points() const;
