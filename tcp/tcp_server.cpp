@@ -26,13 +26,33 @@ TCPServer::TCPServer(int port, int backlog = DEFAULT_BACKLOG) {
   server_address.sin_addr.s_addr = htonl(INADDR_ANY);
   server_address.sin_port = htons(port);
 
-  if (bind(socket_fd, (sockaddr *)&server_address, sizeof server_address) ==
-      -1) {
+  if (bind(socket_fd, (sockaddr *)&server_address, sizeof server_address) == -1) {
     throw TCPServerBindException();
   }
 
   if (listen(socket_fd, backlog) == -1) {
     throw TCPServerListenException();
+  }
+}
+
+int TCPServer::accept() {
+  sockaddr_in client_address;
+  int fd = ::accept(socket_fd, (sockaddr *)&client_address,
+                    (socklen_t *)sizeof client_address);
+
+  if (fd == -1) {
+    throw TCPServerAcceptException();
+  }
+
+  return fd;
+}
+
+void TCPServer::receive(int client_fd, char *message_out) {
+  ::read(client_fd, message_out, sizeof message_out);
+}
+
+void TCPServer::send(int client_fd, std::string message) {
+  if (::send(client_fd, message.c_str(), message.length(), 0) == -1) {
   }
 }
 
