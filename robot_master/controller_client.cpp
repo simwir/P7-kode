@@ -24,7 +24,7 @@ std::vector<std::string> split(const std::string &input, char delimiter) {
     previous = current + 1;
     current = input.find(delimiter, previous);
   }
-  result.push_back(input.substr(previous, current - previous));
+  result.push_back(input.substr(previous, std::string::npos));
 
   return result;
 }
