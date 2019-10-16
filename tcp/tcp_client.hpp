@@ -21,8 +21,8 @@ class TCPReceiveException : public std::exception {
 class TCPClient {
  public:
   TCPClient(std::string host, std::string port);
-  bool send(std::string message);
-  void receive(std::string& out_message);
+  ssize_t send(std::string message);
+  ssize_t receive(char* message_out, ssize_t size);
 
  private:
   int socket_fd;

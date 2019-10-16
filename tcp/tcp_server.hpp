@@ -3,6 +3,9 @@
 
 #include <string>
 
+#define DEFAULT_BACKLOG 16
+
+
 class TCPServerSocketException : public std::exception {
   const char* what() const noexcept { return "Could not create socket"; }
 };
@@ -23,12 +26,20 @@ class TCPServerAcceptException : public std::exception {
   const char* what() const noexcept { return "Could not accept"; }
 };
 
+class TCPServerSendException : public std::exception {
+  const char* what() const noexcept { return "Could not send"; }
+};
+
+class TCPServerReceiveException : public std::exception {
+  const char* what() const noexcept { return "Could not receive"; }
+};
+
 class TCPServer {
  public:
-  TCPServer(int port);
+  TCPServer(int port, int backlog = DEFAULT_BACKLOG);
   int accept();
-  void receive(int client_fd, char* message_out);
-  void send(int client_fd, std::string mesage);
+  ssize_t receive(int client_fd, char* message_out, ssize_t size);
+  ssize_t send(int client_fd, std::string mesage);
   void close();
 
  private:

@@ -10,9 +10,7 @@
 #include <unistd.h>
 #include <cstring>
 
-#define DEFAULT_BACKLOG 16
-
-TCPServer::TCPServer(int port, int backlog = DEFAULT_BACKLOG) {
+TCPServer::TCPServer(int port, int backlog) {
   sockaddr_in server_address;
 
   socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -47,13 +45,24 @@ int TCPServer::accept() {
   return fd;
 }
 
-void TCPServer::receive(int client_fd, char *message_out) {
-  ::read(client_fd, message_out, sizeof message_out);
+ssize_t TCPServer::receive(int client_fd, char *message_out, ssize_t size) {
+  ssize_t bytes = recv(client_fd, message_out, size, 0);
+  
+  if (bytes == -1) {
+    throw TCPServerReceiveException();  
+  }
+  
+  return bytes;
 }
 
-void TCPServer::send(int client_fd, std::string message) {
-  if (::send(client_fd, message.c_str(), message.length(), 0) == -1) {
+ssize_t TCPServer::send(int client_fd, std::string message) {
+  ssize_t bytes = ::send(client_fd, message.c_str(), message.length(), 0);
+  
+  if (bytes == -1) {
+      throw TCPServerSendException();
   }
+  
+  return bytes;
 }
 
 void TCPServer::close() {

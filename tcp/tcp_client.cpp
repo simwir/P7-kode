@@ -28,16 +28,22 @@ TCPClient::TCPClient(std::string host, std::string port) {
   freeaddrinfo(res);
 }
 
-bool TCPClient::send(std::string message) {
-  if (::send(socket_fd, (char *)message.c_str(), message.length(), 0) == -1) {
+ssize_t TCPClient::send(std::string message) {
+  ssize_t bytes = ::send(socket_fd, (char *)message.c_str(), message.length(), 0);
+    
+  if (bytes == -1) {
     throw TCPSendException(message);
   }
 
-  return true;
+  return bytes;
 }
 
-void TCPClient::receive(std::string &out_message) {
-  if (recv(socket_fd, (char *)out_message.c_str(), out_message.length(), 0) == -1) {
+ssize_t TCPClient::receive(char* message_out, ssize_t size) {
+  ssize_t bytes = recv(socket_fd, message_out, size, 0);
+  
+  if (bytes == -1) {
     throw TCPReceiveException();
   }
+  
+  return bytes;
 }
