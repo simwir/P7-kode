@@ -179,6 +179,12 @@ Elisa3 {
   extensionSlot [
     Group {
       children [
+        Lidar {
+          translation 0 0.03 0
+          rotationStep 0.261799
+          fieldOfView 3.14159
+          numberOfLayers 1
+        }
         GPS {
           translation 0.02 0.03 0
           name "gps1"

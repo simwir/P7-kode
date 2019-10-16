@@ -10,6 +10,15 @@ struct Point {
     double x, y, z;
 };
 
+struct CoordinateSystem {
+    Point origin;
+    double rotation;
+
+    Point to_global_coordinates(const Point& point) const;
+
+    //Point from_global_coordinates(const Point& point);
+};
+
 double euclidean_distance(const Point &p1, const Point &p2);
 
 /* Get angle of line relative to the x-axis. */
