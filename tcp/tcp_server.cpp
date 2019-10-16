@@ -34,6 +34,27 @@ TCPServer::TCPServer(int port) {
   }
 }
 
+int TCPServer::accept() {
+  sockaddr_in client_address;
+  int fd = ::accept(socket_fd, (sockaddr *)&client_address,
+                    (socklen_t *)sizeof client_address);
+
+  if (fd == -1) {
+    throw TCPServerAcceptException();
+  }
+
+  return fd;
+}
+
+void TCPServer::receive(int client_fd, char *message_out) {
+  ::read(client_fd, message_out, sizeof message_out);
+}
+
+void TCPServer::send(int client_fd, std::string message) {
+  if (::send(client_fd, message.c_str(), message.length(), 0) == -1) {
+  }
+}
+
 void TCPServer::close() {
   if (::close(socket_fd) == -1) {
     throw TCPServerCloseException();
