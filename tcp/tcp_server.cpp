@@ -24,8 +24,7 @@ TCPServer::TCPServer(int port) {
   server_address.sin_addr.s_addr = htonl(INADDR_ANY);
   server_address.sin_port = htons(port);
 
-  if (bind(socket_fd, (sockaddr *)&server_address, sizeof server_address) ==
-      -1) {
+  if (bind(socket_fd, (sockaddr *)&server_address, sizeof server_address) == -1) {
     throw TCPServerBindException();
   }
 
