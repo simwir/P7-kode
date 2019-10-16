@@ -1,21 +1,21 @@
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <vector>
-#include <sstream>
-#include <iterator>
-#include <string>
-#include <utility>
-#include <iostream>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
-#include <netdb.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "controller_client.hpp"
 
-void split(std::string &input, char delimiter, std::vector<std::string> &result) {
+void split(std::string &input, char delimiter,
+           std::vector<std::string> &result) {
   size_t current, previous = 0;
   current = input.find(delimiter);
 
@@ -27,40 +27,30 @@ void split(std::string &input, char delimiter, std::vector<std::string> &result)
   result.push_back(input.substr(previous, current - previous));
 }
 
-controller_client::controller_client(std::string host, std::string port)
-{
+controller_client::controller_client(std::string host, std::string port) {
   struct addrinfo hints, *res;
 
-  // first, load up address structs with getaddrinfo():
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
   getaddrinfo(host.c_str(), port.c_str(), &hints, &res);
 
-  // make a socket:
   socketfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
-  // connect!
   connect(socketfd, res->ai_addr, res->ai_addrlen);
 }
 
-
-bool controller_client::set_destination(std::pair<double, double> coordinate)
-{
+bool controller_client::set_destination(std::pair<double, double> coordinate) {
   std::stringstream message;
 
-  message << "set_destination "
-          << std::get<0>(coordinate)
-          << " "
-          << std::get<1>(coordinate)
-          << std::endl;
+  message << "set_destination " << std::get<0>(coordinate) << " "
+          << std::get<1>(coordinate) << std::endl;
 
   return send(socketfd, message.str().c_str(), message.str().length(), 0) != -1;
 }
 
-std::pair<double, double> controller_client::get_location()
-{
+std::pair<double, double> controller_client::get_location() {
   int bytes_sent;
   std::vector<std::string> result;
   std::string received(256, ' ');
@@ -97,6 +87,7 @@ int main(void) {
 
   split(input, ' ', test);
 
-  std::copy(test.begin(), test.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+  std::copy(test.begin(), test.end(),
+            std::ostream_iterator<std::string>(std::cout, "\n"));
   return 0;
 }

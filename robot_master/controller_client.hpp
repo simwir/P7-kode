@@ -3,18 +3,15 @@
 
 #include <string>
 #include <utility>
-#include <tuple>
 
 class controller_client {
-  public:
-    controller_client(std::string hostname, std::string port);
+ public:
+  controller_client(std::string hostname, std::string port);
+  bool set_destination(std::pair<double, double> coordinate);
+  std::pair<double, double> get_location();
 
-    bool set_destination(std::pair<double, double> coordinate);
-
-    std::pair<double, double> get_location();
-
-  private:
-    int socketfd;
+ private:
+  int socketfd;
 };
 
 #endif
