@@ -1,5 +1,6 @@
 #include "robot.hpp"
 #include "points.hpp"
+#include "controller_server.hpp"
 
 #include <algorithm>
 
@@ -28,8 +29,15 @@ robot_controller::robot_controller(webots::Robot *robot)
 void robot_controller::run_simulation()
 {
     set_destination({0.6, 0, 0.6});
+    controller_server server = controller_server{"46723"};
+    std::string buffer(256, ' ');
+    
 
     while (robot->step(time_step) != -1) {
+        if(time_step % 1000){
+          server.receive(buffer, 256); 
+        }
+        
         update_sensor_values();
 
         printf("angle: %lf\tdest: %lf\tdelta: %lf\n", facing_angle, dest_angle, angle_delta);

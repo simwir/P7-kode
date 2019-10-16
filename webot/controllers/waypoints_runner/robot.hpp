@@ -71,6 +71,7 @@ class robot_controller {
     double dest_angle;
     double angle_delta;
     Point position;
+    
 };
 
 #endif
