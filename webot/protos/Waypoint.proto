@@ -2,7 +2,7 @@
 # tags: static
 
 PROTO Waypoint [
-  field SFInt32    id                  inf
+  field SFInt32    id                  -1
   field SFString   adjList             ""
   field SFVec3f    translation         0 0.1 0
   field SFColor    boxColor            0 0 0
