@@ -2,15 +2,16 @@
 #define CONTROLLER_CLIENT_HPP
 
 #include <string>
+#include <utility>
 #include <tuple>
 
 class controller_client {
   public:
     controller_client(std::string hostname, std::string port);
 
-    bool set_destination(std::tuple<double, double> coordinate);
+    bool set_destination(std::pair<double, double> coordinate);
 
-    std::tuple<double, double> get_location();
+    std::pair<double, double> get_location();
 
   private:
     int socketfd;

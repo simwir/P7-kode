@@ -2,11 +2,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <string>
-#include <tuple>
+#include <utility>
 #include <netdb.h>
-#include <sys/types.h>
 #include <netinet/in.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 
 #include "controller_client.hpp"
 
@@ -29,7 +30,7 @@ controller_client::controller_client(std::string host, std::string port)
 }
 
 
-bool controller_client::set_destination(std::tuple<double, double> coordinate)
+bool controller_client::set_destination(std::pair<double, double> coordinate)
 {
   std::string message;
 
@@ -39,5 +40,14 @@ bool controller_client::set_destination(std::tuple<double, double> coordinate)
           << std::get<1>(coordinate)
           << "\n";
 
-  return send(socketfd, message, message.length(), 0) != -1;
+  return send(socketfd, message.c_str(), message.length(), 0) != -1;
+}
+
+std::pair<double, double> controller_client::get_location()
+{
+  std::string message;
+
+  message << "get_destination\n";
+
+  return send(socketfd, message.c_str(), message.length(), 0);
 }
