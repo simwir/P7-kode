@@ -6,8 +6,8 @@
 
 // Algorithm from: https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
 
-struct apsp_result all_pairs_shortest_path(const AST& ast){
-    struct apsp_result result;
+apsp_result all_pairs_shortest_path(const AST& ast){
+    apsp_result result;
 
     // Initialise dist to DBL_MAX
     // Initialize next to -1
@@ -19,8 +19,8 @@ struct apsp_result all_pairs_shortest_path(const AST& ast){
             column.insert(std::make_pair(colId, DBL_MAX));//[colId] = DBL_MAX;
             next_column.insert(std::make_pair(colId, -1));//[colId] = -1;
         }
-        result.dist[rowId] = column;
-        result.next[rowId] = next_column;
+        result.dist.insert(std::make_pair(rowId, column));
+        result.next.insert(std::make_pair(rowId, next_column));
     }
 
     // For each edge, set the distance between the vertices to the edge length.
@@ -43,10 +43,10 @@ struct apsp_result all_pairs_shortest_path(const AST& ast){
     for(size_t k = 0; k < num_waypoints; k++){
         for(size_t i = 0; i < num_waypoints; i++){
             for(size_t j = 0; j < num_waypoints; j++){
-                double new_dist = result.dist[i][k] + result.dist[k][j];
-                if (result.dist[i][j] > new_dist) {
-                    result.dist[i][j] = new_dist;
-                    result.next[i][j] = result.next[i][k];
+                double new_dist = result.dist.at(i).at(k) + result.dist.at(k).at(j);
+                if (result.dist.at(i).at(j) > new_dist) {
+                    result.dist.at(i).at(j) = new_dist;
+                    result.next.at(i).at(j) = result.next.at(i).at(k);
                 }
             }
         }
