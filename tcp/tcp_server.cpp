@@ -10,7 +10,9 @@
 #include <unistd.h>
 #include <cstring>
 
-TCPServer::TCPServer(int port) {
+#define DEFAULT_BACKLOG 16
+
+TCPServer::TCPServer(int port, int backlog = DEFAULT_BACKLOG) {
   sockaddr_in server_address;
 
   socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -29,7 +31,7 @@ TCPServer::TCPServer(int port) {
     throw TCPServerBindException();
   }
 
-  if (listen(socket_fd, 1) == -1) {
+  if (listen(socket_fd, backlog) == -1) {
     throw TCPServerListenException();
   }
 }

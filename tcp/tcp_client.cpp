@@ -14,7 +14,7 @@
  * Creates a TCP connection to a host on a given port and connects.
  */
 TCPClient::TCPClient(std::string host, std::string port) {
-  struct addrinfo hints, *res;
+  addrinfo hints, *res;
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
@@ -25,6 +25,7 @@ TCPClient::TCPClient(std::string host, std::string port) {
   socket_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
   connect(socket_fd, res->ai_addr, res->ai_addrlen);
+  freeaddrinfo(res);
 }
 
 bool TCPClient::send(std::string message) {
