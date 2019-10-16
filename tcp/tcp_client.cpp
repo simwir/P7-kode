@@ -36,8 +36,7 @@ bool TCPClient::send(std::string message) {
 }
 
 void TCPClient::receive(std::string &out_message) {
-  if (recv(socket_fd, (char *)out_message.c_str(), out_message.length(), 0) ==
-      -1) {
+  if (recv(socket_fd, (char *)out_message.c_str(), out_message.length(), 0) == -1) {
     throw TCPReceiveException();
   }
 }
