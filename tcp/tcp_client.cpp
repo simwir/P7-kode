@@ -30,7 +30,7 @@ TCPClient::TCPClient(std::string host, std::string port) {
 
 ssize_t TCPClient::send(std::string message) {
   ssize_t bytes = ::send(socket_fd, (char *)message.c_str(), message.length(), 0);
-    
+
   if (bytes == -1) {
     throw TCPSendException(message);
   }
@@ -38,12 +38,12 @@ ssize_t TCPClient::send(std::string message) {
   return bytes;
 }
 
-ssize_t TCPClient::receive(char* message_out, ssize_t size) {
-  ssize_t bytes = recv(socket_fd, message_out, size, 0);
-  
+ssize_t TCPClient::receive(char* message_out, ssize_t size, int flags) {
+  ssize_t bytes = recv(socket_fd, message_out, size, flags);
+
   if (bytes == -1) {
     throw TCPReceiveException();
   }
-  
+
   return bytes;
 }
