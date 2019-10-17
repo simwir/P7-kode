@@ -38,7 +38,7 @@ class TCPServer {
  public:
   TCPServer(int port, int backlog = DEFAULT_BACKLOG);
   int accept();
-  ssize_t receive(int client_fd, char* message_out, ssize_t size);
+  ssize_t receive(int client_fd, char* message_out, ssize_t size, int flags = 0);
   ssize_t send(int client_fd, std::string mesage);
   void close();
 
