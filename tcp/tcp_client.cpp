@@ -14,7 +14,7 @@
 /**
  * Creates a TCP connection to a host on a given port and connects.
  */
-TCPClient::TCPClient(std::string host, std::string port) {
+TCPClient::TCPClient(const std::string& host, const std::string& port) : host(host), port(port) {
   addrinfo hints, *res;
 
   memset(&hints, 0, sizeof hints);
@@ -29,9 +29,9 @@ TCPClient::TCPClient(std::string host, std::string port) {
   freeaddrinfo(res);
 }
 
-ssize_t TCPClient::send(std::string message) {
+ssize_t TCPClient::send(const std::string& message) {
   ssize_t bytes =
-      ::send(socket_fd, (char*)message.c_str(), message.length(), 0);
+      ::send(socket_fd, message.c_str(), message.length(), 0);
 
   if (bytes == -1) {
     throw TCPSendException(message);

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#define DEFAULT_BACKLOG 16
+constexpr size_t DEFAULT_BACKLOG = 16
 
 
 class TCPServerSocketException : public std::exception {

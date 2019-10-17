@@ -24,13 +24,15 @@ class TCPCloseException : public std::exception {
 
 class TCPClient {
  public:
-  TCPClient(std::string host, std::string port);
-  ssize_t send(std::string message);
+  TCPClient(const std::string& host, const std::string& port);
+  ssize_t send(const std::string& message);
   ssize_t receive(char* message_out, ssize_t size, int flags = 0);
   void close();
 
  private:
   int socket_fd;
+  std::string host;
+  std::string port;
 };
 
 #endif
