@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include <sstream>
 #include <string>
 
@@ -29,7 +30,8 @@ TCPClient::TCPClient(std::string host, std::string port) {
 }
 
 ssize_t TCPClient::send(std::string message) {
-  ssize_t bytes = ::send(socket_fd, (char *)message.c_str(), message.length(), 0);
+  ssize_t bytes =
+      ::send(socket_fd, (char*)message.c_str(), message.length(), 0);
 
   if (bytes == -1) {
     throw TCPSendException(message);
@@ -46,4 +48,10 @@ ssize_t TCPClient::receive(char* message_out, ssize_t size, int flags) {
   }
 
   return bytes;
+}
+
+void TCPClient::close() {
+  if (::close(socket_fd) == -1) {
+    throw TCPCloseException();
+  };
 }
