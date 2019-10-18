@@ -28,7 +28,7 @@ Point operator*(double scale, const Point &p)
 
 std::ostream &operator<<(std::ostream &os, const Point &p)
 {
-    return os << p.x << ' ' << p.y << ' ' << p.z;
+    return os << "{x:" << p.x << " y:" << p.y << " z:" << p.z << '}';
 }
 
 Point get_average(const Point &p1, const Point &p2)

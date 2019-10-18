@@ -39,11 +39,11 @@
 ###
 ### ---- C++ Sources ----
 ### if your program uses several C++ source files:
-CXX_SOURCES = waypoints_runner.cpp robot.cpp points.cpp
+CXX_SOURCES = waypoints_runner.cpp robot.cpp points.cpp lidar_wrapper.cpp
 ###
 ### ---- Compilation options ----
 ### if special compilation flags are necessary:
-CFLAGS = -Wno-unused-result -std=c++17
+CFLAGS = -UNDEBUG -Wno-unused-result -std=c++17 -O0 -g -n -Wall -pedantic
 ###
 ### ---- Linked libraries ----
 ### if your program needs additional libraries:

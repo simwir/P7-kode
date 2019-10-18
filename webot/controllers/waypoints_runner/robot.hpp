@@ -6,6 +6,7 @@
 #include <webots/Lidar.hpp>
 #include <webots/Motor.hpp>
 #include <webots/Robot.hpp>
+#include <webots/Supervisor.hpp>
 
 #include <array>
 #include <optional>
@@ -13,6 +14,8 @@
 #include <vector>
 
 #include "points.hpp"
+#include "lidar_wrapper.hpp"
+
 
 constexpr auto NUM_SENSORS = 8;
 constexpr auto ANGLE_SENSITIVITY = 0.1;
@@ -27,7 +30,7 @@ struct bad_bug_routing : std::exception {
 
 class robot_controller {
   public:
-    robot_controller(webots::Robot *robot);
+    robot_controller(webots::Supervisor *robot);
 
     void run_simulation();
 
@@ -46,6 +49,7 @@ class robot_controller {
     Point get_position() const;
 
     double get_angle_to_dest() const;
+    double get_angle_to_goal() const;
 
     static Point gps_reading_to_point(const webots::GPS *gps)
     {
@@ -53,22 +57,26 @@ class robot_controller {
         return {reading[0], reading[1], reading[2]};
     }
 
+    void update_sensor_values();
+
   private:
     const int time_step;
 
-    webots::Robot *robot;
+    webots::Supervisor *robot;
     webots::GPS *frontGPS, *backGPS;
     webots::Motor *left_motor, *right_motor;
-    webots::Lidar *lidar;
+    webots::Lidar *_lidar;
+    lidar_wrapper lidar;
     std::array<webots::DistanceSensor *, NUM_SENSORS> distance_sensors;
 
     int lidar_resolution;
     int lidar_max_range;
-    int lidar_num_layers;
+    int lidar_num_layers = 1;
     double lidar_fov;
     double range_threshold;
     inline size_t lidar_num_points() { return lidar_resolution * lidar_num_layers; }
     std::vector<std::optional<float>> lidar_range_values;
+    std::vector<webots::LidarPoint> lidar_point_cloud;
 
     bool has_destination = false;
     Point destination;
@@ -97,11 +105,13 @@ class robot_controller {
 
     Point lidar_value_to_point(int idx) const
     {
-        double dist =
+        /*double dist =
             lidar_range_values[idx].has_value() ? lidar_range_values[idx].value() : lidar_max_range;
         double angle = get_lidar_point_angle(idx);
 
-        return {dist * std::cos(angle), 0, dist * std::sin(angle)};
+        return {dist * std::cos(angle), 0, dist * std::sin(angle)};*/
+        const auto pt = lidar_point_cloud[idx];
+        return Point{pt.x, pt.y, pt.z};
     }
 
     std::vector<Point> get_discontinuity_points() const;
@@ -116,7 +126,6 @@ class robot_controller {
     void go_straight_ahead();
     void stop();
 
-    void update_sensor_values();
     bool destination_unreachable() const;
     void tangent_bug_get_destination();
 
@@ -125,7 +134,7 @@ class robot_controller {
     double dist_to_dest;
     double facing_angle;
     double dest_angle;
-    double angle_delta;
+    double angle_to_dest;
     Point position;
 };
 
