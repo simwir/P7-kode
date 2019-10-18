@@ -33,12 +33,23 @@ class TCPServerReceiveException : public std::exception {
   const char* what() const noexcept { return "Could not receive"; }
 };
 
+class TCPServerMalformedMessageException : public std::exception {
+  std::string message;
+  const char* what() const noexcept {
+    return ("Message malformed: " + message).c_str();
+  }
+
+ public:
+  TCPServerMalformedMessageException(const std::string& in_message) {
+    message = in_message;
+  }
+};
+
 class TCPServer {
  public:
   TCPServer(int port, int backlog = DEFAULT_BACKLOG);
   int accept();
-  ssize_t receive(int client_fd, char* message_out, ssize_t size,
-                  int flags = 0);
+  std::string receive(int client_fd, int flags = 0);
   ssize_t send(int client_fd, std::string mesage);
   void close();
   int get_port();

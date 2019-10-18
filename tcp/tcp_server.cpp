@@ -45,8 +45,9 @@ TCPServer::TCPServer(int in_port, int backlog) {
 
 int TCPServer::accept() {
   sockaddr_in client_address;
-  int fd = ::accept(socket_fd, (sockaddr *)&client_address,
-                    (socklen_t *)sizeof client_address);
+
+  socklen_t client_length = sizeof client_address;
+  int fd = ::accept(socket_fd, (sockaddr *)&client_address, &client_length);
 
   if (fd == -1) {
     throw TCPServerAcceptException();
@@ -55,15 +56,31 @@ int TCPServer::accept() {
   return fd;
 }
 
-ssize_t TCPServer::receive(int client_fd, char *message_out, ssize_t size,
-                           int flags) {
-  ssize_t bytes = recv(client_fd, message_out, size, flags);
+std::string TCPServer::receive(int client_fd, int flags) {
+  std::string output;
+  char buffer[256];
 
-  if (bytes == -1) {
-    throw TCPServerReceiveException();
+  while (true) {
+    memset(buffer, 0, 2);
+    ssize_t bytes = recv(client_fd, buffer, 256, flags);
+
+    if (bytes == -1) {
+      throw TCPServerReceiveException();
+    } else if (bytes == 0) {
+      break;
+    } else {
+      output.append(buffer, bytes);
+    }
   }
 
-  return bytes;
+  int start_pos = output.find('#');
+  int end_pos = output.find_last_of('#');
+
+  if (start_pos == std::string::npos || end_pos == std::string::npos) {
+    throw TCPServerMalformedMessageException(output);
+  }
+
+  return output.substr(start_pos + 1, end_pos - start_pos - 1);
 }
 
 ssize_t TCPServer::send(int client_fd, std::string message) {
