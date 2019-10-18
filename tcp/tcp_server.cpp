@@ -61,8 +61,8 @@ std::string TCPServer::receive(int client_fd, int flags) {
   char buffer[256];
 
   while (true) {
-    memset(buffer, 0, 2);
-    ssize_t bytes = recv(client_fd, buffer, 256, flags);
+    memset(buffer, 0, sizeof buffer);
+    ssize_t bytes = recv(client_fd, buffer, sizeof buffer, flags);
 
     if (bytes == -1) {
       throw TCPServerReceiveException();
