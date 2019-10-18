@@ -357,15 +357,173 @@ gantt {
 }</system>
 	<queries>
 		<query>
+			<formula>strategy omnipotent = minE (total) [&lt;=100] {
+	OtherRobot(2).location,
+	OtherRobot(3).location,
+	OtherRobot(4).location,
+	OtherRobot(5).location,
+	Robot.location,
+	OtherRobot(2).cur,
+	OtherRobot(2).dest,
+	OtherRobot(3).cur,
+	OtherRobot(3).dest,
+	OtherRobot(4).cur,
+	OtherRobot(4).dest,
+	OtherRobot(5).cur,
+	OtherRobot(5).dest,
+	Robot.visited[1],
+	Robot.visited[2],
+	Robot.visited[3],
+	Robot.visited[4],
+	Robot.visited[5],
+	Robot.visited[6],
+	Robot.visited[7],
+	Robot.visited[8],
+	Robot.visited[9],
+	Robot.visited[10],
+	Robot.visited[11],
+	Robot.visited[12],
+	Robot.visited[13],
+	Robot.visited[14],
+	Robot.visited[15],
+	Robot.visited[16],
+	Robot.visited[17],
+	Robot.visited[18],
+	Robot.visited[19],
+	Robot.visited[20],
+	Robot.visited[21],
+	Robot.visited[22],
+	Robot.visited[23],
+	Robot.visited[24],
+	Robot.visited[25],
+	Robot.visited[26],
+	Robot.visited[27],
+	Robot.visited[28],
+	Robot.dest,
+	Robot.cur_waypoint,
+	Robot.dest_waypoint
+} -&gt; {
+	Waypoint(1).num_in_queue,
+	Waypoint(2).num_in_queue,
+	Waypoint(3).num_in_queue,
+	Waypoint(4).num_in_queue,
+	Waypoint(5).num_in_queue,
+	Waypoint(6).num_in_queue,
+	Waypoint(7).num_in_queue,
+	Waypoint(8).num_in_queue,
+	Waypoint(9).num_in_queue,
+	Waypoint(10).num_in_queue,
+	Waypoint(11).num_in_queue,
+	Waypoint(12).num_in_queue,
+	Waypoint(13).num_in_queue,
+	Waypoint(14).num_in_queue,
+	Waypoint(15).num_in_queue,
+	Waypoint(16).num_in_queue,
+	Waypoint(17).num_in_queue,
+	Waypoint(18).num_in_queue,
+	Waypoint(19).num_in_queue,
+	Waypoint(20).num_in_queue,
+	Waypoint(21).num_in_queue,
+	Waypoint(22).num_in_queue,
+	Waypoint(23).num_in_queue,
+	Waypoint(24).num_in_queue,
+	Waypoint(25).num_in_queue,
+	Waypoint(26).num_in_queue,
+	Waypoint(27).num_in_queue,
+	Waypoint(28).num_in_queue,
+	Robot.x
+} : &lt;&gt; Robot.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy realistic = minE (total) [&lt;=100] {
+	OtherRobot(2).location,
+	OtherRobot(3).location,
+	OtherRobot(4).location,
+	OtherRobot(5).location,
+	Robot.location,
+	OtherRobot(2).cur,
+	OtherRobot(2).dest,
+	OtherRobot(3).cur,
+	OtherRobot(3).dest,
+	OtherRobot(4).cur,
+	OtherRobot(4).dest,
+	OtherRobot(5).cur,
+	OtherRobot(5).dest,
+	Robot.visited[1],
+	Robot.visited[2],
+	Robot.visited[3],
+	Robot.visited[4],
+	Robot.visited[5],
+	Robot.visited[6],
+	Robot.visited[7],
+	Robot.visited[8],
+	Robot.visited[9],
+	Robot.visited[10],
+	Robot.visited[11],
+	Robot.visited[12],
+	Robot.visited[13],
+	Robot.visited[14],
+	Robot.visited[15],
+	Robot.visited[16],
+	Robot.visited[17],
+	Robot.visited[18],
+	Robot.visited[19],
+	Robot.visited[20],
+	Robot.visited[21],
+	Robot.visited[22],
+	Robot.visited[23],
+	Robot.visited[24],
+	Robot.visited[25],
+	Robot.visited[26],
+	Robot.visited[27],
+	Robot.visited[28],
+	Robot.dest,
+	Robot.cur_waypoint,
+	Robot.dest_waypoint
+} -&gt; {
+	Waypoint(1).num_in_queue,
+	Waypoint(2).num_in_queue,
+	Waypoint(3).num_in_queue,
+	Waypoint(4).num_in_queue,
+	Waypoint(5).num_in_queue,
+	Waypoint(6).num_in_queue,
+	Waypoint(7).num_in_queue,
+	Waypoint(8).num_in_queue,
+	Waypoint(9).num_in_queue,
+	Waypoint(10).num_in_queue,
+	Waypoint(11).num_in_queue,
+	Waypoint(12).num_in_queue,
+	Waypoint(13).num_in_queue,
+	Waypoint(14).num_in_queue,
+	Waypoint(15).num_in_queue,
+	Waypoint(16).num_in_queue,
+	Waypoint(17).num_in_queue,
+	Waypoint(18).num_in_queue,
+	Waypoint(19).num_in_queue,
+	Waypoint(20).num_in_queue,
+	Waypoint(21).num_in_queue,
+	Waypoint(22).num_in_queue,
+	Waypoint(23).num_in_queue,
+	Waypoint(24).num_in_queue,
+	Waypoint(25).num_in_queue,
+	Waypoint(26).num_in_queue,
+	Waypoint(27).num_in_queue,
+	Waypoint(28).num_in_queue,
+	Robot.x
+} : &lt;&gt; Robot.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
 			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=100] : &lt;&gt; Robot.Done</formula>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under omnipotent</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under opt</formula>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under realistic</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -377,7 +535,13 @@ gantt {
 		<query>
 			<formula>simulate 100 [&lt;= 100] {
     Robot.dest_waypoint
-} under opt</formula>
+} under omnipotent</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 100 [&lt;= 100] {
+    Robot.dest_waypoint
+} under realistic</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -385,11 +549,15 @@ gantt {
 			<comment></comment>
 		</query>
 		<query>
-			<formula>E[&lt;=200; 1000] (max: total) under opt</formula>
+			<formula>E[&lt;=200; 1000] (max: total) under omnipotent</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula></formula>
+			<formula>E[&lt;=200; 1000] (max: total) under realistic</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>saveStrategy("test2.json", realistic)</formula>
 			<comment></comment>
 		</query>
 	</queries>
