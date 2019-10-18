@@ -53,6 +53,8 @@ int TCPServer::accept() {
     throw TCPServerAcceptException();
   }
 
+  clients.push_back(fd);
+
   return fd;
 }
 
@@ -91,6 +93,13 @@ ssize_t TCPServer::send(int client_fd, std::string message) {
   }
 
   return bytes;
+}
+
+void TCPServer::close_client(int client_fd) {
+  if (std::find(clients.begin(), clients.end(), client_fd) != clients.end()) {
+    ::close(client_fd);
+    clients.remove(client_fd);
+  }
 }
 
 void TCPServer::close() {

@@ -2,6 +2,7 @@
 #define TCP_SERVER_HPP
 
 #include <string>
+#include <list>
 
 constexpr size_t DEFAULT_BACKLOG = 16;
 
@@ -52,11 +53,13 @@ class TCPServer {
   std::string receive(int client_fd, int flags = 0);
   ssize_t send(int client_fd, std::string mesage);
   void close();
+  void close_client(int client_fd);
   int get_port();
 
  private:
   int socket_fd;
   int port;
+  std::list<int> clients;
 };
 
 #endif
