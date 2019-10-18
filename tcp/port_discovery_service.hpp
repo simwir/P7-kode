@@ -33,7 +33,7 @@ private:
 
 Functions parseFunction(const std::string& function);
 void parseMessage(const std::string& message);
-void callFunction(Functions function, std::vector<std::string> parameters);
+void callFunction(Functions function, const std::vector<std::string>& parameters);
 int addRobot(int id);
 bool registerRobot(int id, int port);
 

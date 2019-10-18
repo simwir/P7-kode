@@ -83,7 +83,9 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
                 removeRobot(stoi(parameters[1]));
                 break;
         }
-    } catch (std::invalid_argument parameters) {}
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument: " << e.what() << '\n';
+    }
 }
 
 int main(int argc, char** argv){
@@ -97,15 +99,13 @@ int main(int argc, char** argv){
     int client_fd = 0;
 
     while(true) {
-        char messageBuffer[256];
+        std::string message;
         client_fd = server.accept();
 
-        server.receive(client_fd, messageBuffer, 256);
+        message = server.receive(client_fd);
 
-        parseMessage(messageBuffer);
+        parseMessage(message);
 
-        server.close(client_fd);
+        server.close();
     }
-
-    parseMessage(testMessage);
 }
