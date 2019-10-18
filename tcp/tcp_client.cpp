@@ -7,13 +7,15 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include <sstream>
 #include <string>
 
 /**
  * Creates a TCP connection to a host on a given port and connects.
  */
-TCPClient::TCPClient(std::string host, std::string port) {
+TCPClient::TCPClient(const std::string& host, const std::string& port)
+    : host(host), port(port) {
   addrinfo hints, *res;
 
   memset(&hints, 0, sizeof hints);
@@ -28,9 +30,12 @@ TCPClient::TCPClient(std::string host, std::string port) {
   freeaddrinfo(res);
 }
 
-ssize_t TCPClient::send(std::string message) {
-  ssize_t bytes = ::send(socket_fd, (char *)message.c_str(), message.length(), 0);
-    
+ssize_t TCPClient::send(const std::string& message) {
+  std::string prepped_message = "#" + message + "#";
+
+  ssize_t bytes =
+      ::send(socket_fd, prepped_message.c_str(), message.length(), 0);
+
   if (bytes == -1) {
     throw TCPSendException(message);
   }
@@ -38,12 +43,18 @@ ssize_t TCPClient::send(std::string message) {
   return bytes;
 }
 
-ssize_t TCPClient::receive(char* message_out, ssize_t size) {
-  ssize_t bytes = recv(socket_fd, message_out, size, 0);
-  
+ssize_t TCPClient::receive(char* message_out, ssize_t size, int flags) {
+  ssize_t bytes = recv(socket_fd, message_out, size, flags);
+
   if (bytes == -1) {
     throw TCPReceiveException();
   }
-  
+
   return bytes;
+}
+
+void TCPClient::close() {
+  if (::close(socket_fd) == -1) {
+    throw TCPCloseException();
+  };
 }
