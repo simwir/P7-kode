@@ -11,6 +11,9 @@
 #include <sstream>
 #include <string>
 
+#include "receive_exception.hpp"
+#include "send_exception.hpp"
+
 /**
  * Creates a TCP connection to a host on a given port and connects.
  */
@@ -37,7 +40,7 @@ ssize_t TCPClient::send(const std::string& message) {
       ::send(socket_fd, prepped_message.c_str(), message.length(), 0);
 
   if (bytes == -1) {
-    throw TCPSendException(message);
+    throw tcp::SendException(message);
   }
 
   return bytes;
@@ -47,7 +50,7 @@ ssize_t TCPClient::receive(char* message_out, ssize_t size, int flags) {
   ssize_t bytes = recv(socket_fd, message_out, size, flags);
 
   if (bytes == -1) {
-    throw TCPReceiveException();
+    throw tcp::ReceiveException();
   }
 
   return bytes;

@@ -1,8 +1,8 @@
 #ifndef TCP_SERVER_HPP
 #define TCP_SERVER_HPP
 
-#include <string>
 #include <list>
+#include <string>
 
 constexpr size_t DEFAULT_BACKLOG = 16;
 
@@ -24,14 +24,6 @@ class TCPServerCloseException : public std::exception {
 
 class TCPServerAcceptException : public std::exception {
   const char* what() const noexcept { return "Could not accept"; }
-};
-
-class TCPServerSendException : public std::exception {
-  const char* what() const noexcept { return "Could not send"; }
-};
-
-class TCPServerReceiveException : public std::exception {
-  const char* what() const noexcept { return "Could not receive"; }
 };
 
 class TCPServerMalformedMessageException : public std::exception {

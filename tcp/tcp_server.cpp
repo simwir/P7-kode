@@ -10,8 +10,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
+
+#include "receive_exception.hpp"
+#include "send_exception.hpp"
 
 TCPServer::TCPServer(int in_port, int backlog) {
   sockaddr_in server_address;
@@ -67,7 +71,7 @@ std::string TCPServer::receive(int client_fd, int flags) {
     ssize_t bytes = recv(client_fd, buffer, sizeof buffer, flags);
 
     if (bytes == -1) {
-      throw TCPServerReceiveException();
+      throw tcp::ReceiveException();
     } else if (bytes == 0) {
       break;
     } else {
@@ -89,7 +93,7 @@ ssize_t TCPServer::send(int client_fd, std::string message) {
   ssize_t bytes = ::send(client_fd, message.c_str(), message.length(), 0);
 
   if (bytes == -1) {
-    throw TCPServerSendException();
+    throw tcp::SendException(message);
   }
 
   return bytes;
