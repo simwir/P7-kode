@@ -83,16 +83,3 @@ void TCPServer::close() {
 }
 
 int TCPServer::get_port() { return port; }
-
-int main(void) {
-  TCPServer server = TCPServer(0);
-
-  int client_fd = server.accept();
-
-  while (true) {
-    char buffer[256];
-    server.receive(client_fd, buffer, 256);
-  }
-
-  return 1;
-}
