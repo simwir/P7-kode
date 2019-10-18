@@ -82,6 +82,8 @@ void TCPServer::close() {
   }
 }
 
+int TCPServer::get_port() { return port; }
+
 int main(void) {
   TCPServer server = TCPServer(0);
 
