@@ -8,8 +8,8 @@ tcp::tcp(std::string id){
     robot_id = id;
     server = TCPServer{0};
     TCPClient client{PDS_ADDR, PDS_PORT};
-    client.send("addRobot," + id + "," + server.port); //TODO: TCPServer::port does not exist yet.
-    client.close(); //TODO: TCPClient::close does not exist yet.
+    client.send("addRobot," + id + "," + server.get_port());
+    client.close();
     client_fd = server.accept();
 }
 
@@ -18,11 +18,11 @@ tcp::~tcp(){
     // Deregister robot with the port discovery service.
     TCPClient client{PDS_ADDR, PDS_PORT};
     client.send("removeRobot," + robot_id);
-    client.close(); //TODO: TCPClient::close does not exist yet.
+    client.close();
 }
 
 std::optional<Message> tcp::get_message(){
-    std::string raw_payload = server.receive(client_fd); //TODO: No block on receive.
+    std::string raw_payload = server.receive(client_fd, ); //TODO: No block on receive.
 
     if (/*message received*/ true){
         MessageType messageType;
