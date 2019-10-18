@@ -89,23 +89,36 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
 }
 
 int main(int argc, char** argv){
+    /*
+    std::string messagetest = "#1 2 3 4 5 6 7 8 9#";
+
+    int start_pos = messagetest.find('#');
+    int end_pos = messagetest.find_last_of('#');
+
+    std::cout << messagetest.substr(start_pos + 1, end_pos - start_pos - 1);
+    */
+
     std::vector<std::string> result;
+    std::vector<int> clients;
     const int portNumber = 4444;
+    TCPServer server{portNumber};
 
     std::string testMessage = "addRobot,2,4432";
 
-    TCPServer server{portNumber};
+    puts("Waiting for connections ...");
 
-    int client_fd = 0;
-
-    while(true) {
+    while(true){
         std::string message;
-        client_fd = server.accept();
+        try {
+            clients = server.accept();
 
-        message = server.receive(client_fd);
+            message = server.receive(clients);
+            std::cout << message;
+            parseMessage(message);
 
-        parseMessage(message);
+            //std::cout << robotMap.at(22);
 
-        server.close();
+            client_fd = 0;
+        } catch (TCPServerAcceptException){}
     }
 }
