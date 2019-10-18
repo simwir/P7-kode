@@ -4,7 +4,6 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <iterator>
 #include <exception>
 
 std::map<int, int> robotMap;
@@ -79,6 +78,7 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
                 break;
             case Functions::addRobot:
                 addRobot(stoi(parameters[1]),stoi(parameters[2]));
+                break;
             case Functions::removeRobot:
                 removeRobot(stoi(parameters[1]));
                 break;
@@ -99,7 +99,7 @@ int main(int argc, char** argv){
     */
 
     std::vector<std::string> result;
-    std::vector<int> clients;
+    int client_fd;
     const int portNumber = 4444;
     TCPServer server{portNumber};
 
@@ -107,18 +107,15 @@ int main(int argc, char** argv){
 
     puts("Waiting for connections ...");
 
+    parseMessage(testMessage);
+
     while(true){
         std::string message;
-        try {
-            clients = server.accept();
-
-            message = server.receive(clients);
-            std::cout << message;
-            parseMessage(message);
-
-            //std::cout << robotMap.at(22);
-
-            client_fd = 0;
-        } catch (TCPServerAcceptException){}
+        client_fd = server.accept();
+        std::cout << client_fd << "\n";
+        message = server.receive(client_fd);
+        std::cout << message << "\n";
+        parseMessage(message);
+        server.close_client(client_fd);
     }
 }

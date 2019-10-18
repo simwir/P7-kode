@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <algorithm>
 
 constexpr size_t DEFAULT_BACKLOG = 16;
 
