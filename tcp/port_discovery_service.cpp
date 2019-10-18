@@ -5,9 +5,12 @@
 #include <map>
 #include <vector>
 #include <iterator>
+#include <exception>
 
 std::map<int, int> robotMap;
 
+
+//This function is duplicated from feature/tcp-class
 std::vector<std::string> split(const std::string &input, char delimiter) {
     std::vector<std::string> result;
     size_t current, previous = 0;
@@ -23,65 +26,86 @@ std::vector<std::string> split(const std::string &input, char delimiter) {
     return result;
 }
 
-Functions parseFuncton(std::string function){
-    if (function.compare("addRobot")){
+Functions parseFunction(const std::string& function){
+    if (function == ("addRobot")){
         return Functions::addRobot;
-    } else if (function.compare("getRobot")){
+    } else if (function == ("getRobot")){
         return Functions::getRobot;
-    } else if (function.compare("deleteRobot")){
+    } else if (function == ("deleteRobot")){
         return Functions::removeRobot;
     } else{
-        std::cout << "Invalid function";
+        throw UnreadableFunctionException(function);
     }
 }
 
-void parseMessage(std::string message){
+void parseMessage(const std::string& message){
     std::vector<std::string> result;
 
     result = split(message, ',');
 
-    Functions function = parseFuncton(result[0]);
-    callFunction(function, result);
+    try {
+        Functions function = parseFunction(result[0]);
+        callFunction(function, result);
+    } catch (UnreadableFunctionException& e) {
+        std::cout << "Unable to parse function" << std::endl;
+        std::cout << e.what() << std::endl;
+    } catch (UnreadableParametersException& e) {
+        std::cout << "Unable to parse function" << std::endl;
+    }
 
 }
 
-bool addRobot(int id, int port){
-    robotMap[id] = port;
-    std::cout << robotMap[id] << '\n';
-    return true;
+void addRobot(int id, int port){
+    robotMap.insert(std::pair<int,int>(id,port));
 }
 
 int getRobot(int id) {
-    return robotMap.at(id);
+    try {
+        return robotMap.at(id);
+    } catch (std::out_of_range& e){
+        std::cout << "No robot with requested id" << std::endl;
+    }
 }
 
 void removeRobot(int id){
     robotMap.erase(id);
 }
 
-void callFunction(Functions function, std::vector<std::string> parameters){
-    switch (function) {
-        case Functions::getRobot:
-            getRobot(stoi(parameters[1]));
-            break;
-        case Functions::addRobot:
-            addRobot(stoi(parameters[1]),stoi(parameters[2]));
-        case Functions::removeRobot:
-            removeRobot(stoi(parameters[1]));
-            break;
-    }
-
+void callFunction(Functions function, const std::vector<std::string>& parameters){
+    try {
+        switch (function) {
+            case Functions::getRobot:
+                getRobot(stoi(parameters[1]));
+                break;
+            case Functions::addRobot:
+                addRobot(stoi(parameters[1]),stoi(parameters[2]));
+            case Functions::removeRobot:
+                removeRobot(stoi(parameters[1]));
+                break;
+        }
+    } catch (std::invalid_argument parameters) {}
 }
 
 int main(int argc, char** argv){
     std::vector<std::string> result;
+    const int portNumber = 4444;
 
-    int portNumber = 4444;
-    int backlog = 2;
     std::string testMessage = "addRobot,2,4432";
-    //TCPServer server{portNumber, backlog};
+
+    TCPServer server{portNumber};
+
+    int client_fd = 0;
+
+    while(true) {
+        char messageBuffer[256];
+        client_fd = server.accept();
+
+        server.receive(client_fd, messageBuffer, 256);
+
+        parseMessage(messageBuffer);
+
+        server.close(client_fd);
+    }
+
     parseMessage(testMessage);
-    result = split(testMessage, ',');
-    std::copy(result.begin(), result.end(),
-              std::ostream_iterator<std::string>(std::cout, "\n"));
 }
