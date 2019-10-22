@@ -31,6 +31,7 @@ tcp::Client::Client(const std::string& host, const std::string& port)
 
   connect(socket_fd, res->ai_addr, res->ai_addrlen);
   freeaddrinfo(res);
+  freeaddrinfo(&hints);
 }
 
 ssize_t tcp::Client::send(const std::string& message) {

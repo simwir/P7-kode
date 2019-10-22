@@ -21,6 +21,7 @@
 tcp::Server::Server(int in_port, int backlog) {
   sockaddr_in server_address;
 
+  // Should getaddrinfo() be called here?
   socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
   memset(&server_address, 0, sizeof server_address);
