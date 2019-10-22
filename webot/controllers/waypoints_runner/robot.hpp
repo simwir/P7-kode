@@ -18,7 +18,7 @@
 #include "geo/geo.hpp"
 
 constexpr auto NUM_SENSORS = 8;
-constexpr auto ANGLE_SENSITIVITY = 0.1;
+constexpr auto ANGLE_SENSITIVITY = 0.8;
 constexpr auto DESTINATION_BUFFER_DISTANCE = 0.2;
 
 struct DestinationNotDefinedException {
@@ -54,7 +54,7 @@ class robot_controller {
     static geo::Point gps_reading_to_point(const webots::GPS *gps)
     {
         const double *reading = gps->getValues();
-        return {reading[0], reading[2]};
+        return geo::Point{reading[0], reading[2]};
     }
 
     void update_sensor_values();
@@ -136,6 +136,8 @@ class robot_controller {
     geo::Angle dest_angle;
     geo::Angle angle_to_dest;
     geo::Point position;
+
+    size_t num_steps = 0;
 };
 
 #endif

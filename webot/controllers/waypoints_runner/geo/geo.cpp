@@ -5,6 +5,10 @@ Point operator+(const Point &p1, const Point &p2)
 {
     return {p1.x + p2.x, p1.y + p2.y};
 }
+Point operator-(const Point &p1, const Point &p2)
+{
+    return {p1.x - p2.x, p1.y - p2.y};
+}
 
 std::ostream &operator<<(std::ostream &os, const Point &p)
 {
@@ -18,7 +22,7 @@ Point get_average(const Point &p1, const Point &p2)
 
 Angle angle_of_line(const Point2D &p1, const Point2D &p2)
 {
-    return {std::atan2(p2.y - p1.y, p2.x - p1.x)};
+    return {std::atan2(p2.y - p1.y, p2.x - p1.x) + PI};
 }
 
 double euclidean_dist(const Point2D &p1, const Point2D &p2)

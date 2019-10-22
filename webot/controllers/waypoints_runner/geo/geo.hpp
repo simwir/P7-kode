@@ -12,20 +12,29 @@ constexpr double PI = 3.1415926535;
 #endif
 
 namespace geo {
-struct Point2D {
-    double x, y;
-    Point2D() : x(0), y(0) {}
 
-    Point2D(const double x, const double y) : x(x), y(y) {}
-};
 struct Angle {
     double theta;
     Angle(const double angle) : theta(std::fmod(angle + 2 * PI, 2 * PI)) { assert(theta >= 0); }
     Angle() : theta(0) {}
 };
+
+struct Point2D {
+    double x, y;
+    Point2D() : x(0), y(0) {}
+
+    Point2D(const double x, const double y) : x(x), y(y) {}
+
+    static Point2D from_polar(const double r, Angle a)
+    {
+        return Point2D{r * std::cos(a.theta), r * std::sin(a.theta)};
+    }
+};
+
 using Point = Point2D;
 
 Point operator+(const Point &p1, const Point &p2);
+Point operator-(const Point &p1, const Point &p2);
 std::ostream &operator<<(std::ostream &os, const Point &p);
 Point get_average(const Point &p1, const Point &p2);
 Angle angle_of_line(const Point2D &p1, const Point2D &p2);

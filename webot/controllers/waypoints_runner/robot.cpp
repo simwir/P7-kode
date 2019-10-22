@@ -4,10 +4,25 @@
 #include <fstream>
 #include <optional>
 #include <stdexcept>
+#include <iostream>
+
+template <typename Container>
+static void dump_to_csv(const Container &container)
+{
+    std::ofstream csv{"/home/waefwerf/dev/P7/webot/point_cloud.csv"};
+    for (auto pt : container) {
+        csv << pt << std::endl;
+    }
+}
 
 std::ostream &operator<<(std::ostream &os, const webots::LidarPoint &point)
 {
     return os << point.x << ", " << point.z;
+}
+
+geo::Point from_lidar_point(const webots::LidarPoint &point)
+{
+    return {point.x, point.z};
 }
 
 robot_controller::robot_controller(webots::Supervisor *robot)
@@ -55,68 +70,66 @@ void robot_controller::update_sensor_values()
     const auto num_points = lidar.get_number_of_points();
     for (int i = 0; i < num_points; ++i) {
         lidar_point_cloud[i] = point_cloud[i];
+        auto dist = geo::euclidean_dist(position, {lidar_point_cloud[i].x, lidar_point_cloud[i].y});
         lidar_range_values[i] =
-            range_image[i] != lidar_max_range ? std::make_optional(range_image[i]) : std::nullopt;
+            dist >= lidar_max_range * 0.9 ? std::make_optional(dist) : std::nullopt;
     }
 }
 
 void robot_controller::run_simulation()
 {
     set_destination(geo::Point{-0.68, 0.79});
-    try {
-        while (robot->step(time_step) != -1) {
-            update_sensor_values();
-            if (!has_destination)
-                break;
+    while (robot->step(time_step) != -1) {
+        num_steps++;
+        update_sensor_values();
+        /*if (!has_destination)
+          break;*/
 
-            // if (std::abs(angle_to_dest) < PI / 2) {
-            //    tangent_bug_get_destination();
-            //}
+        std::cout << "angle: " << facing_angle.theta << "\tdest: " << dest_angle.theta << "\tdelta: "  << angle_to_dest.theta << std::endl;
+        std::printf("\tdest: {x:%lf, z:%lf}", destination.x, destination.y);
+        std::printf("\tgps:  {x:%lf, z:%lf}", frontGPS->getValues()[0], frontGPS->getValues()[2]);
 
-            printf("angle: %lf\tdest: %lf\tdelta: %lf", facing_angle.theta, dest_angle.theta,
-                   angle_to_dest.theta);
-            printf("\tdest: {x:%lf, z:%lf}", destination.x, destination.y);
-            printf("\tgps:  {x:%lf, z:%lf}", frontGPS->getValues()[0], frontGPS->getValues()[2]);
-            if (angle_to_dest.theta < -ANGLE_SENSITIVITY) {
-                do_right_turn();
-            }
-            else if (angle_to_dest.theta > ANGLE_SENSITIVITY) {
-                do_left_turn();
-            }
-            else if (dist_to_dest > DESTINATION_BUFFER_DISTANCE) {
-                go_straight_ahead();
-            }
-            else {
-                stop();
-            }
+        // if (std::abs(angle_to_dest.theta - PI) < PI / 2) {
+        if (num_steps % 50 == 1)
+            tangent_bug_get_destination();
+        //}
+
+        if (num_steps % 5 == 0) {
+            continue;
         }
-    }
-    catch (bad_bug_routing &) {
-        std::ofstream csv{"/home/waefwerf/dev/P7/webot/point_cloud.csv"};
-        for (auto pt : lidar_point_cloud) {
-            csv << pt << std::endl;
+
+        if (angle_to_dest.theta > PI && angle_to_dest.theta < 2 * PI - ANGLE_SENSITIVITY) {
+            do_right_turn();
         }
-        throw;
+        else if (angle_to_dest.theta > ANGLE_SENSITIVITY) {
+            do_left_turn();
+        }
+        else if (dist_to_dest > DESTINATION_BUFFER_DISTANCE) {
+            go_straight_ahead();
+        }
+        else {
+            stop();
+        }
     }
 }
 
 void robot_controller::go_straight_ahead()
 {
     // adjust by angle-delta so we approach a direct line.
-    left_motor->setVelocity(6 - angle_to_dest.theta);
-    right_motor->setVelocity(6 + angle_to_dest.theta);
+    left_motor->setVelocity(6 - 0.1 * angle_to_dest.theta);
+    right_motor->setVelocity(6 + 0.1 * angle_to_dest.theta);
 }
 
 void robot_controller::do_left_turn()
 {
-    left_motor->setVelocity(-2);
+    left_motor->setVelocity(-4);
     right_motor->setVelocity(4);
 }
 
 void robot_controller::do_right_turn()
 {
     left_motor->setVelocity(4);
-    right_motor->setVelocity(-2);
+    right_motor->setVelocity(-4);
 }
 
 void robot_controller::stop()
@@ -179,17 +192,16 @@ std::vector<geo::Point> robot_controller::get_discontinuity_points() const
         // switch from object in range to not in range
         if (is_in_range != lidar_range_values[i].has_value()) {
             is_in_range = !is_in_range;
-            std::cerr << lidar_value_to_point(i) << '\n';
-            discontinuities.push_back(
-                to_global_coordinates(position, facing_angle, lidar_value_to_point(i)));
+            discontinuities.push_back(geo::to_global_coordinates(
+                position, facing_angle, from_lidar_point(lidar_point_cloud[i])));
         }
         // big jump in object distance - assume new object.
         else if (is_in_range && abs(lidar_range_values[i].value() - last_range_value) > THRESHOLD) {
             std::cerr << lidar_value_to_point(i) << '\t' << lidar_value_to_point(i - 1);
-            discontinuities.push_back(
-                to_global_coordinates(position, facing_angle, lidar_value_to_point(i)));
-            discontinuities.push_back(
-                to_global_coordinates(position, facing_angle, lidar_value_to_point(i - 1)));
+            discontinuities.push_back(geo::to_global_coordinates(
+                position, facing_angle, from_lidar_point(lidar_point_cloud[i])));
+            discontinuities.push_back(geo::to_global_coordinates(
+                position, facing_angle, from_lidar_point(lidar_point_cloud[i - 1])));
         }
         if (is_in_range) {
             last_range_value = lidar_range_values[i].value();
@@ -202,8 +214,8 @@ void robot_controller::tangent_bug_get_destination()
 {
     auto discontinuities = get_discontinuity_points();
     std::cerr << "bugging\tlen " << discontinuities.size() << std::endl;
-    std::for_each(std::begin(discontinuities), std::end(discontinuities),
-                  [](auto pt) { std::cerr << pt << ' '; });
+    // std::for_each(std::begin(discontinuities), std::end(discontinuities),
+    // Y              [](auto pt) { std::cerr << pt << ' '; });
 
     double min_heuristic = std::numeric_limits<double>::max();
     geo::Point best_point;
@@ -214,11 +226,14 @@ void robot_controller::tangent_bug_get_destination()
             best_point = point;
         }
     }
+    std::cerr << "min_heuristic: " << min_heuristic << std::endl;
+    std::cerr << "best point " << best_point << std::endl;
     if (min_heuristic > prev_heuristic_dist) {
 
         // TODO do proper boundary following
-        throw bad_bug_routing{};
+        //        throw bad_bug_routing{};
     }
     bug_destination = best_point;
     prev_heuristic_dist = min_heuristic;
+    dump_to_csv(lidar_point_cloud);
 }
