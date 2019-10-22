@@ -3,7 +3,7 @@
 <nta>
 	<declaration>// Place global declarations here.
 
-clock total;
+hybrid clock total;
 
 const int NUM_STATIONS = 10;
 const int NUM_END_STATIONS = 2;
@@ -43,7 +43,7 @@ broadcast chan arr[station_t][robot_t], done[robot_t];</declaration>
 	<template>
 		<name>OtherRobot</name>
 		<parameter>other_robot_t id</parameter>
-		<declaration>const int[0, NUM_STATIONS] order[other_robot_t][station_t] = {
+		<declaration>const int[0, NUM_STATIONS] schedule[other_robot_t][station_t] = {
     {8,  7,  3,  9,  4,  5,  0,  0,  0,  0},
     {7,  1,  6,  4,  3, 10,  8,  9,  5,  0},
     {8,  6,  7,  2,  0,  0,  0,  0,  0,  0},
@@ -61,7 +61,7 @@ int[0, NUM_STATIONS] next_station() {
         return 0;
     }
 
-    return order[id][step_index++];
+    return schedule[id][step_index++];
 }</declaration>
 		<location id="id0" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
@@ -189,7 +189,16 @@ bool more_visited() {
 		<location id="id7" x="-187" y="-51">
 			<name x="-170" y="-59">Waiting</name>
 		</location>
+		<location id="id8" x="-799" y="-246">
+			<name x="-926" y="-263">Done</name>
+			<label kind="invariant" x="-926" y="-246">total' == 0</label>
+		</location>
 		<init ref="id5"/>
+		<transition controllable="false">
+			<source ref="id5"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-765" y="-272">allvisited()</label>
+		</transition>
 		<transition controllable="false">
 			<source ref="id7"/>
 			<target ref="id5"/>
@@ -252,18 +261,18 @@ robot_t front()
 {
    return list[0];
 }</declaration>
-		<location id="id8" x="-442" y="-348">
+		<location id="id9" x="-442" y="-348">
 			<name x="-425" y="-374">Idle</name>
 			<label kind="invariant" x="-646" y="-340">proc &lt;= 6 * UNCERTAINTY</label>
 		</location>
-		<location id="id9" x="-654" y="-476">
+		<location id="id10" x="-654" y="-476">
 			<name x="-705" y="-510">CDeQ</name>
 			<committed/>
 		</location>
-		<init ref="id8"/>
+		<init ref="id9"/>
 		<transition controllable="false">
-			<source ref="id8"/>
-			<target ref="id8"/>
+			<source ref="id9"/>
+			<target ref="id9"/>
 			<label kind="select" x="-433" y="-255">id : robot_t</label>
 			<label kind="synchronisation" x="-433" y="-238">arr[station_id][id]?</label>
 			<label kind="assignment" x="-433" y="-221">enqueue(id)</label>
@@ -272,22 +281,22 @@ robot_t front()
 			<nail x="-255" y="-348"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id8"/>
+			<source ref="id10"/>
+			<target ref="id9"/>
 			<label kind="guard" x="-799" y="-433">num_in_queue &gt; 0</label>
 			<label kind="synchronisation" x="-799" y="-416">done[front()]!</label>
 			<label kind="assignment" x="-799" y="-399">dequeue()</label>
 			<nail x="-654" y="-348"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id8"/>
+			<source ref="id10"/>
+			<target ref="id9"/>
 			<label kind="guard" x="-636" y="-510">num_in_queue == 0</label>
 			<nail x="-442" y="-476"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id8"/>
-			<target ref="id9"/>
+			<source ref="id9"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-612" y="-399">proc &gt;= 6</label>
 			<label kind="assignment" x="-612" y="-416">proc = 0</label>
 		</transition>
@@ -299,15 +308,39 @@ system OtherRobot, Robot, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=150] (&lt;&gt; Robot.allvisited())</formula>
+			<formula>strategy plan = minE (total) [&lt;=200] : &lt;&gt; Robot.Done</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>strategy opt = minE (total) [&lt;=200] : &lt;&gt; Robot.allvisited()</formula>
+			<formula>Pr[&lt;=150] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=150] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<formula>Pr[&lt;=150] (&lt;&gt; Robot.Done) under plan</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 200] {
+    Robot.cur_loc, Robot.dest
+}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 200] {
+    Robot.cur_loc, Robot.dest
+} under plan</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total) under plan</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>saveStrategy("station_strategy.json", plan)</formula>
 			<comment></comment>
 		</query>
 	</queries>
