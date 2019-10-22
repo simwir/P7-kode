@@ -76,7 +76,7 @@ int main(int argc, char **argv)
         std::cout << distance_matrix{ast}.to_uppaal_declaration();
     }
 
-    struct apsp_result shortest_path;
+    apsp_result shortest_path;
     if (p || r) {
         shortest_path = all_pairs_shortest_path(ast);
         std::cout << print_num_waypoints(shortest_path.dist);
