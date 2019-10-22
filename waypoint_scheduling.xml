@@ -279,48 +279,12 @@ waypoint_dist[cur][next.value] != -1</label>
 		<declaration>clock x;
 
 bool visited[waypoint_t];
-bool has_holded = false;
 
 station_t dest;
 
 const waypoint_t start_waypoint = 21;
 waypoint_t cur_waypoint;
-waypoint_t dest_waypoint;
-
-bool is_stuck(waypoint_t node) {
-    bool local_visited[waypoint_t];
-    int[0, NUM_WAYPOINTS] stack[waypoint_t];
-    int top = 1;
-    waypoint_t top_waypoint;
-
-    if (node == station_waypoint[dest]) {
-        return false;
-    }
-
-    for (id : waypoint_t) {
-        local_visited[id] = visited[id];
-    }
-
-    stack[top++] = node;
-
-    while (top &gt; 1) {
-        top_waypoint = stack[--top];
-        stack[top + 1] = 0;
-
-        for (id : waypoint_t) {
-            if (!local_visited[id] &amp;&amp; waypoint_dist[top_waypoint][id] != -1) {
-                if (id == station_waypoint[dest]) {
-                    return false;
-                }
-                
-                local_visited[id] = true;
-                stack[top++] = id;
-            }
-        }
-    }
-
-    return true;
-}</declaration>
+waypoint_t dest_waypoint;</declaration>
 		<location id="id9" x="-25" y="-246">
 			<name x="-51" y="-221">Waiting</name>
 		</location>
@@ -369,7 +333,7 @@ bool is_stuck(waypoint_t node) {
 		<transition controllable="false">
 			<source ref="id13"/>
 			<target ref="id11"/>
-			<label kind="assignment" x="-637" y="-238">cur_waypoint = start_waypoint,
+			<label kind="assignment" x="-654" y="-238">cur_waypoint = start_waypoint,
 visited[cur_waypoint] = true</label>
 		</transition>
 		<transition controllable="false">
@@ -423,13 +387,17 @@ gantt {
 	OtherRobot(5).location,
 	Robot.location,
 	OtherRobot(2).cur,
-	OtherRobot(2).dest,
+	OtherRobot(2).next.type,
+	OtherRobot(2).next.value,
 	OtherRobot(3).cur,
-	OtherRobot(3).dest,
+	OtherRobot(3).next.type,
+	OtherRobot(3).next.value,
 	OtherRobot(4).cur,
-	OtherRobot(4).dest,
+	OtherRobot(4).next.type,
+	OtherRobot(4).next.value,
 	OtherRobot(5).cur,
-	OtherRobot(5).dest,
+	OtherRobot(5).next.type,
+	OtherRobot(5).next.value,
 	Robot.visited[1],
 	Robot.visited[2],
 	Robot.visited[3],
@@ -502,13 +470,17 @@ gantt {
 	OtherRobot(5).location,
 	Robot.location,
 	OtherRobot(2).cur,
-	OtherRobot(2).dest,
+	OtherRobot(2).next.type,
+	OtherRobot(2).next.value,
 	OtherRobot(3).cur,
-	OtherRobot(3).dest,
+	OtherRobot(3).next.type,
+	OtherRobot(3).next.value,
 	OtherRobot(4).cur,
-	OtherRobot(4).dest,
+	OtherRobot(4).next.type,
+	OtherRobot(4).next.value,
 	OtherRobot(5).cur,
-	OtherRobot(5).dest,
+	OtherRobot(5).next.type,
+	OtherRobot(5).next.value,
 	Robot.visited[1],
 	Robot.visited[2],
 	Robot.visited[3],
