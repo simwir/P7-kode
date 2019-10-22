@@ -254,7 +254,7 @@ robot_t front()
 }</declaration>
 		<location id="id8" x="-442" y="-348">
 			<name x="-425" y="-374">Idle</name>
-			<label kind="invariant" x="-527" y="-340">proc &lt;= 6</label>
+			<label kind="invariant" x="-646" y="-340">proc &lt;= 6 * UNCERTAINTY</label>
 		</location>
 		<location id="id9" x="-654" y="-476">
 			<name x="-705" y="-510">CDeQ</name>
