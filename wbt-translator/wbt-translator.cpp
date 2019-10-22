@@ -18,7 +18,7 @@ void print_help(const char* const execute_location)
               << "-s --stations       Emit stations ids" << std::endl
               << "-e --endpoints      Emit endpoint ids" << std::endl
               << "-w --waypoints      Emit waypoint ids" << std::endl
-              << "-n --all-nodes      Same as -sew" << std::endl
+              << "-n --all-nodes      Same as -sev" << std::endl
               << "-a --all            Same as -dprsewn";
 }
 
