@@ -39,15 +39,15 @@
 ###
 ### ---- C++ Sources ----
 ### if your program uses several C++ source files:
-CXX_SOURCES = waypoints_runner.cpp robot.cpp points.cpp lidar_wrapper.cpp
+CXX_SOURCES = waypoints_runner.cpp robot.cpp lidar_wrapper.cpp geo/geo.cpp
 ###
 ### ---- Compilation options ----
 ### if special compilation flags are necessary:
-CFLAGS = -UNDEBUG -Wno-unused-result -std=c++17 -O0 -g -n -Wall -pedantic
+CFLAGS = -Wno-unused-result -std=c++17 -O0 -g -n -Wall -pedantic
 ###
 ### ---- Linked libraries ----
 ### if your program needs additional libraries:
-### INCLUDE = -I"/my_library_path/include"
+### INCLUDE = -I"../../../geometry"
 ### LIBRARIES = -L"/path/to/my/library" -lmy_library -lmy_other_library
 ###
 ### ---- Linking options ----

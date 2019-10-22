@@ -10,7 +10,7 @@
 #include <webots/Robot.hpp>
 #include <webots/Supervisor.hpp>
 
-#include "points.hpp"
+#include "geo/geo.hpp"
 #include "robot.hpp"
 
 // This is the main program of your controller.

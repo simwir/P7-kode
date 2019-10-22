@@ -44,6 +44,12 @@ double get_relative_angle(const Point &origin, const Point &p1, const Point &p2)
     return std::acos((d1 * d1 + d2 * d2 - (opp * opp)) / (2 * d1 * d2));
 }
 
+// safely calculate angle difference over radians while handling sketchy overflow
+double angle_delta(const double angle1, const double angle2)
+{
+    return std::atan2(std::sin(angle1 - angle2), std::cos(angle1 - angle2));
+}
+
 Point CoordinateSystem::to_global_coordinates(const Point &point) const
 {
     return Point{
