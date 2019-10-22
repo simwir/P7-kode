@@ -8,6 +8,7 @@ clock total;
 const int NUM_STATIONS = 10;
 const int NUM_END_STATIONS = 2;
 const int MAX_ROBOTS = 5;
+const double UNCERTAINTY = 1.1;
 
 typedef int[1, NUM_STATIONS] station_t;
 typedef int[1, MAX_ROBOTS] robot_t;
@@ -64,7 +65,7 @@ int[0, NUM_STATIONS] next_station() {
 }</declaration>
 		<location id="id0" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
-			<label kind="invariant" x="-467" y="-229">x &lt;= dist[cur_loc][dest]</label>
+			<label kind="invariant" x="-484" y="-229">x &lt;= dist[cur_loc][dest] * UNCERTAINTY</label>
 		</location>
 		<location id="id1" x="-187" y="-51">
 			<name x="-170" y="-59">Waiting</name>
@@ -183,7 +184,7 @@ bool more_visited() {
 		</location>
 		<location id="id6" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
-			<label kind="invariant" x="-467" y="-229">x &lt;= dist[cur_loc][dest]</label>
+			<label kind="invariant" x="-527" y="-229">x &lt;= dist[cur_loc][dest] * UNCERTAINTY</label>
 		</location>
 		<location id="id7" x="-187" y="-51">
 			<name x="-170" y="-59">Waiting</name>
@@ -298,7 +299,7 @@ system OtherRobot, Robot, Station;
 </system>
 	<queries>
 		<query>
-			<formula>Pr[&lt;=200] (&lt;&gt; Robot.allvisited())</formula>
+			<formula>Pr[&lt;=150] (&lt;&gt; Robot.allvisited())</formula>
 			<comment></comment>
 		</query>
 		<query>
@@ -306,7 +307,7 @@ system OtherRobot, Robot, Station;
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=200] (&lt;&gt; Robot.allvisited()) under opt</formula>
+			<formula>Pr[&lt;=150] (&lt;&gt; Robot.allvisited()) under opt</formula>
 			<comment></comment>
 		</query>
 	</queries>
