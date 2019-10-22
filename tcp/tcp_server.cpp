@@ -13,6 +13,10 @@
 #include <cstring>
 #include <iostream>
 
+TCPServer::TCPServer(int socket_fd) {
+
+}
+
 TCPServer::TCPServer(int in_port, int backlog) {
   sockaddr_in server_address;
 
@@ -27,8 +31,9 @@ TCPServer::TCPServer(int in_port, int backlog) {
   server_address.sin_addr.s_addr = htonl(INADDR_ANY);
   server_address.sin_port = htons(in_port);
 
-  if (bind(socket_fd, (sockaddr *)&server_address, sizeof server_address) ==
-      -1) {
+  if (bind(socket_fd,
+          (sockaddr *)&server_address,
+          sizeof server_address) == -1) {
     throw TCPServerBindException();
   }
 
@@ -58,7 +63,7 @@ int TCPServer::accept() {
   return fd;
 }
 
-std::string TCPServer::receive(int client_fd, int flags) {
+std::string TCPServer::receive(int c/ient_fd, int flags) {
   std::string output;
   char buffer[256];
 

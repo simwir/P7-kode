@@ -7,35 +7,35 @@
 
 constexpr size_t DEFAULT_BACKLOG = 16;
 
-class TCPServerSocketException : public std::exception {
+struct TCPServerSocketException : public std::exception {
   const char* what() const noexcept { return "Could not create socket"; }
 };
 
-class TCPServerBindException : public std::exception {
+struct TCPServerBindException : public std::exception {
   const char* what() const noexcept { return "Could not bind socket"; }
 };
 
-class TCPServerListenException : public std::exception {
+struct TCPServerListenException : public std::exception {
   const char* what() const noexcept { return "Could not listen"; }
 };
 
-class TCPServerCloseException : public std::exception {
+struct TCPServerCloseException : public std::exception {
   const char* what() const noexcept { return "Could not close"; }
 };
 
-class TCPServerAcceptException : public std::exception {
+struct TCPServerAcceptException : public std::exception {
   const char* what() const noexcept { return "Could not accept"; }
 };
 
-class TCPServerSendException : public std::exception {
+struct TCPServerSendException : public std::exception {
   const char* what() const noexcept { return "Could not send"; }
 };
 
-class TCPServerReceiveException : public std::exception {
+struct TCPServerReceiveException : public std::exception {
   const char* what() const noexcept { return "Could not receive"; }
 };
 
-class TCPServerMalformedMessageException : public std::exception {
+struct TCPServerMalformedMessageException : public std::exception {
   std::string message;
   const char* what() const noexcept {
     return ("Message malformed: " + message).c_str();
@@ -50,6 +50,7 @@ class TCPServerMalformedMessageException : public std::exception {
 class TCPServer {
  public:
   TCPServer(int port, int backlog = DEFAULT_BACKLOG);
+  TCPServer(int socket_fd);
   int accept();
   std::string receive(int client_fd, int flags = 0);
   ssize_t send(int client_fd, std::string mesage);

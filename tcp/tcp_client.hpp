@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-class TCPSendException : public std::exception {
+struct TCPSendException : public std::exception {
   std::string message;
   const char* what() const noexcept { return message.c_str(); }
 
@@ -14,11 +14,11 @@ class TCPSendException : public std::exception {
   TCPSendException(const std::string& in_message) { message = in_message; }
 };
 
-class TCPReceiveException : public std::exception {
+struct TCPReceiveException : public std::exception {
   const char* what() const noexcept { return "Could not receive message"; }
 };
 
-class TCPCloseException : public std::exception {
+struct TCPCloseException : public std::exception {
   const char* what() const noexcept { return "Could not close"; }
 };
 

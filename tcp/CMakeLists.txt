@@ -21,7 +21,7 @@ file(GLOB SOURCES "*.cpp")
 
 #SET(CMAKE_EXE_LINKER_FLAGS "-lxml2")
 
-add_executable(translator ${SOURCES})
+add_executable(translator ${SOURCES} test.cpp)
 #target_link_libraries(translator utap)
 install(TARGETS translator DESTINATION bin)
 

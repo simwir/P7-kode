@@ -25,12 +25,6 @@ public:
     const char* what() const noexcept override { return message.c_str(); }
 };
 
-class port_discovery_service {
-public:
-private:
-    std::map<int, int> robotMap;
-};
-
 Functions parseFunction(const std::string& function);
 void parseMessage(const std::string& message);
 void callFunction(Functions function, const std::vector<std::string>& parameters);

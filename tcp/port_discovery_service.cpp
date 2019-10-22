@@ -5,8 +5,9 @@
 #include <map>
 #include <vector>
 #include <exception>
-
-std::map<int, int> robotMap;
+#include <assert.h>
+#include <unistd.h>
+#include <thread>
 
 
 //This function is duplicated from feature/tcp-class
@@ -37,10 +38,47 @@ Functions parseFunction(const std::string& function){
     }
 }
 
-void parseMessage(const std::string& message){
-    std::vector<std::string> result;
+void addRobot(int id, int port){
+    //robotMap.insert(std::make_pair(id,port));
+}
 
-    result = split(message, ',');
+int getRobot(int id) {
+    try {
+        return 1;//robotMap.at(id);
+    } catch (std::out_of_range& e){
+        std::cout << "No robot with requested id" << std::endl;
+    }
+}
+
+void removeRobot(int id){
+    //robotMap.erase(id);
+}
+
+void callFunction(Functions function, const std::vector<std::string>& parameters){
+    try {
+        switch (function) {
+            case Functions::getRobot:
+                assert(parameters.size()== 2);
+                getRobot(stoi(parameters[1]));
+                break;
+            case Functions::addRobot:
+                assert(parameters.size()== 3);
+                addRobot(stoi(parameters[1]),stoi(parameters[2]));
+                break;
+            case Functions::removeRobot:
+                assert(parameters.size()== 2);
+                removeRobot(stoi(parameters[1]));
+                break;
+        }
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument: " << e.what() << '\n';
+    }
+}
+
+void parseMessage(int fd){
+
+
+    auto result = split(message, ',');
 
     try {
         Functions function = parseFunction(result[0]);
@@ -52,70 +90,28 @@ void parseMessage(const std::string& message){
         std::cout << "Unable to parse function" << std::endl;
     }
 
+    server.close_client(fd);
 }
 
-void addRobot(int id, int port){
-    robotMap.insert(std::pair<int,int>(id,port));
-}
-
-int getRobot(int id) {
-    try {
-        return robotMap.at(id);
-    } catch (std::out_of_range& e){
-        std::cout << "No robot with requested id" << std::endl;
-    }
-}
-
-void removeRobot(int id){
-    robotMap.erase(id);
-}
-
-void callFunction(Functions function, const std::vector<std::string>& parameters){
-    try {
-        switch (function) {
-            case Functions::getRobot:
-                getRobot(stoi(parameters[1]));
-                break;
-            case Functions::addRobot:
-                addRobot(stoi(parameters[1]),stoi(parameters[2]));
-                break;
-            case Functions::removeRobot:
-                removeRobot(stoi(parameters[1]));
-                break;
-        }
-    } catch (const std::invalid_argument& e) {
-        std::cerr << "Invalid argument: " << e.what() << '\n';
-    }
-}
 
 int main(int argc, char** argv){
-    /*
-    std::string messagetest = "#1 2 3 4 5 6 7 8 9#";
-
-    int start_pos = messagetest.find('#');
-    int end_pos = messagetest.find_last_of('#');
-
-    std::cout << messagetest.substr(start_pos + 1, end_pos - start_pos - 1);
-    */
-
-    std::vector<std::string> result;
-    int client_fd;
+    std::map<int, int> robotMap;
     const int portNumber = 4444;
+    int client_fd;
+    std::vector<std::thread> threads;
+
     TCPServer server{portNumber};
 
-    std::string testMessage = "addRobot,2,4432";
 
     puts("Waiting for connections ...");
-
-    parseMessage(testMessage);
-
     while(true){
-        std::string message;
-        client_fd = server.accept();
-        std::cout << client_fd << "\n";
-        message = server.receive(client_fd);
-        std::cout << message << "\n";
-        parseMessage(message);
-        server.close_client(client_fd);
+
+        try {
+            client_fd = server.accept();
+            std::thread t1(parseMessage, client_fd)
+            server.close_client(client_fd);
+        } catch (TCPServerAcceptException& e) {
+            std::cerr << e.what() << "\n";
+        }
     }
 }
