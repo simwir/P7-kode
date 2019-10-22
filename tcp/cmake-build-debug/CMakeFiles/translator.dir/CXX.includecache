@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/anders/datalogi/7semester/project/P7-kode/tcp/port_discovery_service.cpp
+port_discovery_service.hpp
+/home/anders/datalogi/7semester/project/P7-kode/tcp/port_discovery_service.hpp
+tcp_server.hpp
+/home/anders/datalogi/7semester/project/P7-kode/tcp/tcp_server.hpp
+iostream
+-
+map
+-
+vector
+-
+exception
+-
+assert.h
+-
+unistd.h
+-
+thread
+-
+
+/home/anders/datalogi/7semester/project/P7-kode/tcp/port_discovery_service.hpp
+stdio.h
+-
+string
+-
+map
+-
+vector
+-
+
+/home/anders/datalogi/7semester/project/P7-kode/tcp/tcp_server.hpp
+string
+-
+list
+-
+algorithm
+-
+

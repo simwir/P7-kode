@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/libutap"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/libutap.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/libutap-complete.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/build/libs/libutap-0.94/src/libutap-stamp/libutap-install.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/build/libs/libutap-0.94/src/libutap-stamp/libutap-mkdir.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/build/libs/libutap-0.94/src/libutap-stamp/libutap-download.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/build/libs/libutap-0.94/src/libutap-stamp/libutap-update.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/build/libs/libutap-0.94/src/libutap-stamp/libutap-patch.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/build/libs/libutap-0.94/src/libutap-stamp/libutap-configure.rule"
+		},
+		{
+			"file" : "/home/anders/datalogi/7semester/project/P7-kode/tcp/build/libs/libutap-0.94/src/libutap-stamp/libutap-build.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"libutap"
+		],
+		"name" : "libutap"
+	}
+}

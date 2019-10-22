@@ -1,4 +1,4 @@
-#include "tcp_client.hpp"
+#include "client.hpp"
 
 #include <netdb.h>
 #include <netinet/in.h>
@@ -8,13 +8,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <sstream>
 #include <string>
+
+#include "close_exception.hpp"
+#include "receive.hpp"
+#include "send.hpp"
 
 /**
  * Creates a TCP connection to a host on a given port and connects.
  */
-TCPClient::TCPClient(const std::string& host, const std::string& port)
+tcp::Client::Client(const std::string& host, const std::string& port)
     : host(host), port(port) {
   addrinfo hints, *res;
 
@@ -28,33 +31,19 @@ TCPClient::TCPClient(const std::string& host, const std::string& port)
 
   connect(socket_fd, res->ai_addr, res->ai_addrlen);
   freeaddrinfo(res);
+  freeaddrinfo(&hints);
 }
 
-ssize_t TCPClient::send(const std::string& message) {
-  std::string prepped_message = "#" + message + "#";
-
-  ssize_t bytes =
-      ::send(socket_fd, prepped_message.c_str(), message.length(), 0);
-
-  if (bytes == -1) {
-    throw TCPSendException(message);
-  }
-
-  return bytes;
+ssize_t tcp::Client::send(const std::string& message) {
+  return tcp::send(socket_fd, message);
 }
 
-ssize_t TCPClient::receive(char* message_out, ssize_t size, int flags) {
-  ssize_t bytes = recv(socket_fd, message_out, size, flags);
-
-  if (bytes == -1) {
-    throw TCPReceiveException();
-  }
-
-  return bytes;
+std::string tcp::Client::receive(int flags) {
+  return tcp::receive(socket_fd, flags);
 }
 
-void TCPClient::close() {
+void tcp::Client::close() {
   if (::close(socket_fd) == -1) {
-    throw TCPCloseException();
+    throw tcp::CloseException();
   };
 }

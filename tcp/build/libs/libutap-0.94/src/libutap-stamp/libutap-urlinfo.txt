@@ -1,0 +1,3 @@
+repository='external project URL'
+module='http://people.cs.aau.dk/~marius/utap/libutap-0.94.tar.gz'
+tag=''

@@ -1,5 +1,7 @@
 #include "port_discovery_service.hpp"
-#include "tcp_server.hpp"
+#include "server.hpp"
+#include "send.hpp"
+#include "receive.hpp"
 
 #include <iostream>
 #include <map>
@@ -7,6 +9,7 @@
 #include <exception>
 #include <assert.h>
 #include <unistd.h>
+#include <thread>
 #include <thread>
 
 
@@ -27,11 +30,11 @@ std::vector<std::string> split(const std::string &input, char delimiter) {
 }
 
 Functions parseFunction(const std::string& function){
-    if (function == ("addRobot")){
+    if (function == "addRobot"){
         return Functions::addRobot;
-    } else if (function == ("getRobot")){
+    } else if (function == "getRobot"){
         return Functions::getRobot;
-    } else if (function == ("deleteRobot")){
+    } else if (function == "deleteRobot"){
         return Functions::removeRobot;
     } else{
         throw UnreadableFunctionException(function);
@@ -76,8 +79,7 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
 }
 
 void parseMessage(int fd){
-
-
+    auto message = tcp::receive(fd);
     auto result = split(message, ',');
 
     try {
@@ -89,8 +91,6 @@ void parseMessage(int fd){
     } catch (UnreadableParametersException& e) {
         std::cout << "Unable to parse function" << std::endl;
     }
-
-    server.close_client(fd);
 }
 
 
@@ -100,7 +100,7 @@ int main(int argc, char** argv){
     int client_fd;
     std::vector<std::thread> threads;
 
-    TCPServer server{portNumber};
+    tcp::Server server{portNumber};
 
 
     puts("Waiting for connections ...");
@@ -108,9 +108,9 @@ int main(int argc, char** argv){
 
         try {
             client_fd = server.accept();
-            std::thread t1(parseMessage, client_fd)
+            std::thread t1(parseMessage, client_fd);
             server.close_client(client_fd);
-        } catch (TCPServerAcceptException& e) {
+        } catch (tcp::AccpetException& e) {
             std::cerr << e.what() << "\n";
         }
     }

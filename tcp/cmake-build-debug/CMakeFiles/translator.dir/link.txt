@@ -1,0 +1,1 @@
+clang++  -g   CMakeFiles/translator.dir/port_discovery_service.cpp.o CMakeFiles/translator.dir/tcp_client.cpp.o CMakeFiles/translator.dir/tcp_server.cpp.o CMakeFiles/translator.dir/test.cpp.o  -o bin/translator 
