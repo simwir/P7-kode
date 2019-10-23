@@ -22,30 +22,29 @@ Server::~Server(){
     client.close();
 }
 
-std::optional<Message> Server::get_message(){
-    std::string raw_payload = server.receive(client_fd, MSG_DONTWAIT); //TODO: No block on receive.
-
-    if (/*message received*/ true){
+std::vector<Message> Server::get_message(){
+    std::vector<std::string> raw_messages = server.receive(client_fd, MSG_DONTWAIT); 
+    std::vector<Message> messages;
+    for (std::string raw_message : raw_messages){
         MessageType messageType;
-        size_t split_pos = raw_payload.find(",");
+        size_t split_pos = raw_message.find(",");
         if (split_pos == std::string::npos){
-            send_message(Message{raw_payload, MessageType::not_understood});
-            return std::nullopt;
+            send_message(Message{raw_message, MessageType::not_understood});
+            continue;
         }
-        std::string type = raw_payload.substr(0, split_pos);
+        std::string type = raw_message.substr(0, split_pos);
         if (type == "get_position") {
             messageType = MessageType::get_position;
         } else if (type == "set_destination") {
             messageType = MessageType::set_destination;
         } else {
-            send_message(Message{raw_payload, MessageType::not_understood});
-            return std::nullopt;
+            send_message(Message{raw_message, MessageType::not_understood});
+            continue;
         }
-        return Message{raw_payload.substr(split_pos + 1, raw_payload.length()),
-                       messageType};
-    } else {
-        return std::nullopt;
+        messages.push_back(Message{raw_message.substr(split_pos + 1, raw_message.length()),
+                                   messageType});
     }
+    return messages;
 }
 
 void Server::send_message(Message message){

@@ -1,7 +1,7 @@
 #ifndef TCP_HPP
 #define TCP_HPP
 
-#include <optional>
+#include <vector>
 #include <string>
 
 #include "server.hpp"
@@ -17,7 +17,7 @@ class Server {
 public:
     Server(std::string id);
     ~Server();
-    std::optional<Message> get_message();
+    std::vector<Message> get_message();
     void send_message(Message);
 private:
     tcp::Server server;
