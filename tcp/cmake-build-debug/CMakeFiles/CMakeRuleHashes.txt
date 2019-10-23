@@ -1,5 +1,0 @@
-# Hashes of file build rules.
-ed857488578a1b32ac61c84cd6209da7 ../build/libs/libutap-0.94/src/libutap-stamp/libutap-download
-5f46386f54dcb55a7c322574c382dc2d ../build/libs/libutap-0.94/src/libutap-stamp/libutap-mkdir
-6805ab1a2c7667e2d9739922c70362e5 ../build/libs/libutap-0.94/src/libutap-stamp/libutap-patch
-24b85f8aa6f0a0cd8dbca928dd739703 ../build/libs/libutap-0.94/src/libutap-stamp/libutap-update

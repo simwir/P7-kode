@@ -1,7 +1,0 @@
-/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/install/strip.dir
-/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/translator.dir
-/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/install.dir
-/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/list_install_components.dir
-/home/anders/datalogi/7semester/project/P7-kode/tcp/cmake-build-debug/CMakeFiles/install/local.dir
