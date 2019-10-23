@@ -1,20 +1,23 @@
 #include <fstream>
+#include <getopt.h>
 #include <iostream>
 #include <string.h>
 #include <vector>
-#include <getopt.h>
 
-#include "webots_parser.hpp"
-#include "distance_matrix.hpp"
 #include "apsp.hpp"
 #include "uppaal-printer.hpp"
+#include "distance_matrix.hpp"
 
-void print_help(const char* const execute_location)
+#include "webots_parser.hpp"
+void print_help(const char *const execute_location)
 {
     std::cerr << "Usage: " << execute_location << " [options] INPUT_FILE [options]" << std::endl
               << "-d --dist-matrix    Emit uppaal waypoint distance matrix" << std::endl
-              << "-p --shortest-path  Emit the length of the shortest path between all stations and endpoints" << std::endl
-              << "-r --shortest-route Emit the shortest route between all stations and endpoints" << std::endl
+              << "-p --shortest-path  Emit the length of the shortest path between all stations "
+                 "and endpoints"
+              << std::endl
+              << "-r --shortest-route Emit the shortest route between all stations and endpoints"
+              << std::endl
               << "-s --stations       Emit stations ids" << std::endl
               << "-e --endpoints      Emit endpoint ids" << std::endl
               << "-w --waypoints      Emit waypoint ids" << std::endl
@@ -40,8 +43,8 @@ int main(int argc, char **argv)
     bool d, p, r, optstations, optendpoints, optvias;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1){
-        switch(opt){
+    while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1) {
+        switch (opt) {
         case 'd':
             d = true;
             break;
@@ -63,7 +66,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (optind == argc){
+    if (optind == argc) {
         print_help(argv[0]);
         exit(1);
     }
@@ -77,7 +80,7 @@ int main(int argc, char **argv)
     }
     AST ast = Parser{infile}.parse_stream();
 
-    if (ast.nodes.size() == 0){
+    if (ast.nodes.size() == 0) {
         std::cerr << "Malformed world file. No waypoints found.";
         exit(1);
     }

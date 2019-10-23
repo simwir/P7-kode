@@ -51,13 +51,11 @@ std::string print_all_pairs_shortest_pairs(const std::map<int, std::map<int, dou
     size_t num_waypoints = dist.size();
     std::stringstream ss;
     ss << "const int NUM_WAYPOINTS = " << num_waypoints << "\n"
-       << "const int shortest_path_length[NUM_WAYPOINTS][NUM_WAYPOINTS] = {\n";
+       << "const double shortest_path_length[NUM_WAYPOINTS][NUM_WAYPOINTS] = {\n";
     for(size_t i = 0; i < num_waypoints; i++){
         ss << "  {";
         for (size_t j = 0; j < num_waypoints; j++){
-            auto iat = dist.at(i);
-            auto jat = iat.at(j);
-            ss << jat;
+            ss << dist.at(i).at(j);
             if (j < num_waypoints-1)
                 ss << ",";
         }
