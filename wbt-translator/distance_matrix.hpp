@@ -20,5 +20,4 @@ class distance_matrix {
 };
 double euclidean_distance(const Waypoint &p1, const Waypoint &p2);
 
-
 #endif

@@ -1,0 +1,184 @@
+#VRML_SIM R2019b utf8
+WorldInfo {
+  contactProperties [
+    ContactProperties {
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.9999649895922277 0.006709763308977417 0.004999866613584324 5.002355431120649
+  position -0.18218197389044466 7.3501349655410895 1.6590728395857415
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 2.5 2.5
+  floorTileSize 0.2 0.2
+}
+Elisa3 {
+  hidden position_0_0 5532.824387446354
+  hidden position_0_1 4939.808893512619
+  hidden linearVelocity_0 0.05087843927647527 5.584629996621705e-07 0.011771205332344293
+  hidden angularVelocity_0 0.0002146693240742237 -0.3995566878067083 -0.0009244761676384633
+  hidden rotation_2 0 0 1 1.2424970420466688
+  hidden linearVelocity_2 0.058607204790559135 2.6057401303830432e-08 0.013775215098740268
+  hidden angularVelocity_2 3.0508470723814742 -0.43251002569024566 -12.979725869591649
+  hidden rotation_3 0 0 -1 4.677108347053185
+  hidden linearVelocity_3 0.04305860788482722 3.9937631007886377e-07 0.010062443544934368
+  hidden angularVelocity_3 2.2457365180233633 -0.4253858607962031 -9.524732338573553
+  translation 0.11447400084929166 -1.2386554584903689e-05 0.6878200149488567
+  rotation 0.018176944437895668 0.9886452393148396 -0.14916497400866358 -0.24493287110327788
+}
+OilBarrel {
+  translation -0.44999999999999996 0.19999999999999998 0.49
+  height 0.4
+  radius 0.2
+}
+SolidBox {
+  translation 0.53 0.24 -0.44999999999999996
+  size 0.5 0.5 0.5
+}
+DEF Station_1 Station {
+  translation -1.17 0.05 0.51
+  adjList "17"
+  id 1
+}
+DEF Station_2 Station {
+  translation -0.83 0.05 -1.17
+  name "wooden box(1)"
+  adjList "22"
+  id 2
+}
+DEF Station_3 Station {
+  translation -0.19 0.05 0.48
+  name "wooden box(2)"
+  adjList "16"
+  id 3
+}
+DEF Station_4 Station {
+  translation -0.3 0.05 -1.18
+  name "wooden box(3)"
+  adjList "23"
+  id 4
+}
+DEF Station_5 Station {
+  translation 0.47 0.05 -1.18
+  name "wooden box(4)"
+  adjList "0"
+  id 5
+}
+DEF Station_6 Station {
+  translation -1.16 0.05 -0.49
+  name "wooden box(5)"
+  adjList "13"
+  id 6
+}
+DEF Station_7 Station {
+  translation 0.52 0.049999999999999996 -0.13
+  name "wooden box(6)"
+  adjList "15"
+  id 7
+}
+DEF Station_8 Station {
+  translation 0.21 0.05 -0.51
+  name "wooden box(8)"
+  adjList "14"
+  id 8
+}
+Endpoint {
+  translation 0 0.06999999999999999 1.17
+  name "Endpoint(1)"
+  adjList "20"
+  id 9
+}
+Endpoint {
+  translation -0.99 0.07 1.17
+  name "Endpoint(2)"
+  adjList "21"
+  id 10
+}
+Endpoint {
+  translation 1.17 0.07 -1.03
+  name "Endpoint(3)"
+  adjList "18"
+  id 11
+}
+Endpoint {
+  translation 1.0899999999999999 0.06999999999999999 1.17
+  name "Endpoint(4)"
+  adjList "19"
+  id 12
+}
+Waypoint {
+  id 13
+  adjList "22,14,17,16,23,6"
+  translation -0.89 0.1 -0.49
+}
+Waypoint {
+  id 14
+  adjList "13,23,22,16,0,8"
+  translation 0 0.09999999999999999 -0.49
+  name "waypoint(1)"
+}
+Waypoint {
+  id 15
+  adjList "16,19,20,7"
+  translation 0.48 0.1 0.1
+  name "waypoint(2)"
+}
+Waypoint {
+  id 16
+  adjList "13,14,15,20,19,3"
+  translation 0 0.09999999999999999 0.49
+  name "waypoint(3)"
+}
+Waypoint {
+  id 17
+  adjList "13,23,21,1"
+  translation -0.89 0.09999999999999999 0.5
+  name "waypoint(4)"
+}
+Waypoint {
+  id 19
+  adjList "18,15,16,20,12"
+  translation 1.05 0.09999999999999999 0.7999999999999999
+  name "waypoint(5)"
+}
+Waypoint {
+  id 20
+  adjList "21,16,15,19,9"
+  translation 0 0.09999999999999999 0.7999999999999999
+  name "waypoint(6)"
+}
+Waypoint {
+  id 21
+  adjList "17,20,10"
+  translation -0.89 0.09999999999999999 0.7899999999999999
+  name "waypoint(7)"
+}
+Waypoint {
+  id 22
+  adjList "13,14,23,2"
+  translation -0.82 0.09999999999999999 -0.97
+  name "waypoint(8)"
+}
+Waypoint {
+  id 23
+  adjList "22,13,14,0,17,4"
+  translation -0.3 0.09999999999999999 -0.95
+  name "waypoint(9)"
+}
+Waypoint {
+  id 0
+  adjList "23,14,18,5"
+  translation 0.47 0.1 -0.96
+  name "waypoint(10)"
+}
+Waypoint {
+  id 18
+  adjList "0,19,11"
+  translation 0.98 0.09999999999999999 -0.99
+  name "waypoint(11)"
+}
