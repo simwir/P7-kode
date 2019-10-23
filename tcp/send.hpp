@@ -16,7 +16,7 @@ class SendException : public std::exception {
   }
 };
 
-ssize_t send(int fd, const std::string message);
+ssize_t send(int fd, const std::string& message);
 }  // namespace tcp
 
 #endif

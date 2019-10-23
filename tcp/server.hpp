@@ -7,7 +7,7 @@
 constexpr size_t DEFAULT_BACKLOG = 16;
 
 namespace tcp {
-struct AccpetException : std::exception {
+struct AcceptException : std::exception {
   const char* what() const noexcept { return "Could not accept"; }
 };
 
