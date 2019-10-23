@@ -19,9 +19,9 @@ file(GLOB SOURCES "*.cpp")
 
 #link_directories(${PROJECT_SOURCE_DIR}/lib)
 
-#SET(CMAKE_EXE_LINKER_FLAGS "-lxml2")
+set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 
-add_executable(translator ${SOURCES} test.cpp)
+add_executable(translator ${SOURCES} PortService.cpp)
 #target_link_libraries(translator utap)
 install(TARGETS translator DESTINATION bin)
 

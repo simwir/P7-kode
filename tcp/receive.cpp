@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 
 /**
  * Reads the message in a socket buffer until empty.
