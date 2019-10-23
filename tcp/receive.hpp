@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <string>
+#include <vector>
 
 namespace tcp {
 class MalformedMessageException : public std::exception {
@@ -24,7 +25,7 @@ struct ReceiveException : std::exception {
   }
 };
 
-std::string receive(int socket_fd, int flags = 0);
+std::vector<std::string> receive(int socket_fd, int flags = 0);
 }  // namespace tcp
 
 #endif
