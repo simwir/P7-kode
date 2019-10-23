@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DISTANCE_MATRIX_HPP
+#define DISTANCE_MATRIX_HPP
 
 #include "webots_parser.hpp"
 #include <cmath>
@@ -16,11 +17,7 @@ class distance_matrix {
   private:
     int rows, columns;
     std::vector<std::vector<double>> _data;
-
-    double euclidean_distance(const Waypoint &p1, const Waypoint &p2)
-    {
-        auto xdist = p1.translation.x - p2.translation.x;
-        auto ydist = p1.translation.y - p2.translation.y;
-        return std::sqrt(xdist * xdist + ydist * ydist);
-    }
 };
+double euclidean_distance(const Waypoint &p1, const Waypoint &p2);
+
+#endif
