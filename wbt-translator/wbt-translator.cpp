@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "apsp.hpp"
-#include "uppaal-printer.hpp"
 #include "distance_matrix.hpp"
+#include "uppaal-printer.hpp"
 
 #include "webots_parser.hpp"
 void print_help(const char *const execute_location)
@@ -27,18 +27,12 @@ void print_help(const char *const execute_location)
 
 int main(int argc, char **argv)
 {
-    const char* const shortOpts = "dprsevna";
-    const option longOpts[] =
-    {
-     {"dist-matrix", no_argument, nullptr, 'd'},
-     {"shortest-path", no_argument, nullptr, 'p'},
-     {"shortest-route", no_argument, nullptr, 'r'},
-     {"stations", no_argument, nullptr, 's'},
-     {"endpoints", no_argument, nullptr, 'e'},
-     {"vias", no_argument, nullptr, 'v'},
-     {"all-nodes", no_argument, nullptr, 'n'},
-     {"all", no_argument, nullptr, 'a'}
-    };
+    const char *const shortOpts = "dprsevna";
+    const option longOpts[] = {
+        {"dist-matrix", no_argument, nullptr, 'd'},    {"shortest-path", no_argument, nullptr, 'p'},
+        {"shortest-route", no_argument, nullptr, 'r'}, {"stations", no_argument, nullptr, 's'},
+        {"endpoints", no_argument, nullptr, 'e'},      {"vias", no_argument, nullptr, 'v'},
+        {"all-nodes", no_argument, nullptr, 'n'},      {"all", no_argument, nullptr, 'a'}};
 
     bool d, p, r, optstations, optendpoints, optvias;
 

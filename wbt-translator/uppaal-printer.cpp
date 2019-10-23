@@ -2,10 +2,11 @@
 
 #include <sstream>
 
-std::string print_waypoints_of_type(const AST& ast, const WaypointType type) {
+std::string print_waypoints_of_type(const AST &ast, const WaypointType type)
+{
     std::stringstream ss1, ss2;
     int count = 0;
-    for (auto &[id, waypoint] : ast.nodes){
+    for (auto &[id, waypoint] : ast.nodes) {
         if (waypoint.waypointType == type) {
             if (count != 0)
                 ss2 << ",";
@@ -14,7 +15,7 @@ std::string print_waypoints_of_type(const AST& ast, const WaypointType type) {
         }
     }
     std::string type_name;
-    switch (type){
+    switch (type) {
     case WaypointType::eVia:
         type_name = "VIAS";
         break;
