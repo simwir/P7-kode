@@ -19,7 +19,7 @@
 
 constexpr auto NUM_SENSORS = 8;
 constexpr auto ANGLE_SENSITIVITY = 0.8;
-constexpr auto DESTINATION_BUFFER_DISTANCE = 0.2;
+constexpr auto DESTINATION_BUFFER_DISTANCE = 0.05;
 
 struct DestinationNotDefinedException {
 };
@@ -133,8 +133,15 @@ class robot_controller {
     std::array<double, NUM_SENSORS> sensor_readings;
     double dist_to_dest;
     geo::Angle facing_angle;
-    geo::Angle dest_angle;
-    geo::Angle angle_to_dest;
+
+    geo::Angle absolute_goal_angle;
+    geo::Angle absolute_dest_angle;
+
+    geo::Angle relative_goal_angle;
+    geo::Angle relative_dest_angle;
+
+    //geo::Angle dest_angle;
+    //geo::Angle angle_to_dest;
     geo::Point position;
 
     size_t num_steps = 0;

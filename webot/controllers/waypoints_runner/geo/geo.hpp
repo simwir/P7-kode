@@ -40,9 +40,11 @@ Point get_average(const Point &p1, const Point &p2);
 Angle angle_of_line(const Point2D &p1, const Point2D &p2);
 double euclidean_dist(const Point2D &p1, const Point2D &p2);
 
-Angle operator+(Angle a1, Angle a2);
-Angle operator-(Angle a1, Angle a2);
-Angle operator-(Angle);
+Angle operator+(const Angle a1, const Angle a2);
+Angle operator-(const Angle a1, const Angle a2);
+Angle operator-(const Angle);
+std::ostream &operator<<(std::ostream &os, const Angle &a);
+Angle abs_angle(const Angle);
 
 Point rotate_point(const Point &p, const Angle a);
 Point to_global_coordinates(Point rel_orig, Angle rel_angle, Point rel_point);

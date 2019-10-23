@@ -30,19 +30,33 @@ double euclidean_dist(const Point2D &p1, const Point2D &p2)
     return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
 }
 
-Angle operator+(Angle a1, Angle a2)
+Angle operator+(const Angle a1, const Angle a2)
 {
     return Angle{a1.theta + a2.theta};
 }
 
-Angle operator-(Angle a1, Angle a2)
+Angle operator-(const Angle a1, const Angle a2)
 {
     return Angle{a1.theta - a2.theta};
 }
 
-Angle operator-(Angle a)
+Angle operator-(const Angle a)
 {
     return Angle{-a.theta};
+}
+
+Angle abs_angle(const Angle a)
+{
+    if (a.theta > PI) {
+        return {2 * PI - a.theta};
+    }
+    else
+        return {a.theta};
+}
+
+std::ostream &operator<<(std::ostream &os, const Angle &a)
+{
+    return os << a.theta;
 }
 
 Point rotate_point(const Point &p, const Angle a)
