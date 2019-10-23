@@ -1,32 +1,33 @@
+#include <sys/socket.h>
+
 #include "tcp.hpp"
-#include "tcp/tcp_client.hpp"
+#include "client.hpp"
 
-constexpr std::string PDS_PORT = "4444";
-constexpr std::string PDS_ADDR = "127.0.0.1";
+const std::string PDS_PORT = "4444";
+const std::string PDS_ADDR = "127.0.0.1";
 
-tcp::tcp(std::string id){
+Server::Server(std::string id) : server(tcp::Server{0}){
     robot_id = id;
-    server = TCPServer{0};
-    TCPClient client{PDS_ADDR, PDS_PORT};
-    client.send("addRobot," + id + "," + server.get_port());
+    tcp::Client client{PDS_ADDR, PDS_PORT};
+    client.send("addRobot," + id + "," + std::to_string(server.get_port()));
     client.close();
     client_fd = server.accept();
 }
 
-tcp::~tcp(){
+Server::~Server(){
     server.close();
     // Deregister robot with the port discovery service.
-    TCPClient client{PDS_ADDR, PDS_PORT};
+    tcp::Client client{PDS_ADDR, PDS_PORT};
     client.send("removeRobot," + robot_id);
     client.close();
 }
 
-std::optional<Message> tcp::get_message(){
-    std::string raw_payload = server.receive(client_fd, ); //TODO: No block on receive.
+std::optional<Message> Server::get_message(){
+    std::string raw_payload = server.receive(client_fd, MSG_DONTWAIT); //TODO: No block on receive.
 
     if (/*message received*/ true){
         MessageType messageType;
-        size_t split_pos = raw_payload.fint(",");
+        size_t split_pos = raw_payload.find(",");
         if (split_pos == std::string::npos){
             send_message(Message{raw_payload, MessageType::not_understood});
             return std::nullopt;
@@ -47,7 +48,7 @@ std::optional<Message> tcp::get_message(){
     }
 }
 
-void tcp::send_message(Message message){
+void Server::send_message(Message message){
     std::string payload;
     switch (message.type) {
     case MessageType::get_position:

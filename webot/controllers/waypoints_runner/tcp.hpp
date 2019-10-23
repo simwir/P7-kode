@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 
-#include "tcp/tcp_server.hpp"
+#include "server.hpp"
 
 enum class MessageType {get_position, set_destination, not_understood};
 
@@ -13,13 +13,14 @@ struct Message {
     MessageType type;
 };
 
-class tcp {
+class Server {
 public:
-    tcp(std::string id);
+    Server(std::string id);
+    ~Server();
     std::optional<Message> get_message();
     void send_message(Message);
 private:
-    TCPServer server;
+    tcp::Server server;
     std::string robot_id;
     int client_fd;
 };
