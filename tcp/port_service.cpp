@@ -1,4 +1,4 @@
-#include "portService.hpp"
+#include "port_service.hpp"
 #include "server.hpp"
 #include "send.hpp"
 #include "receive.hpp"
@@ -29,62 +29,62 @@ std::vector<std::string> split(const std::string &input, char delimiter) {
     return result;
 }
 
-Functions parseFunction(const std::string& function){
-    if (function == "addRobot"){
-        return Functions::addRobot;
-    } else if (function == "getRobot"){
-        return Functions::getRobot;
-    } else if (function == "removeRobot"){
-        return Functions::removeRobot;
+Functions parse_function(const std::string& function){
+    if (function == "add_robot"){
+        return Functions::add_robot;
+    } else if (function == "get_robot"){
+        return Functions::get_robot;
+    } else if (function == "remove_robot"){
+        return Functions::remove_robot;
     } else{
         throw UnreadableFunctionException(function);
     }
 }
 
-void addRobot(int id, int port, std::map<const int,int> &robotMap) {
+void addRobot(int id, int port, std::map<const int,int> &robot_map) {
     std::mutex mutex;
-    auto search = robotMap.find(id);
-    if (search == robotMap.end()) {
+    auto search = robot_map.find(id);
+    if (search == robot_map.end()) {
         mutex.lock();
         std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
-        robotMap.insert(std::make_pair(id, port));
+        robot_map.insert(std::make_pair(id, port));
         mutex.unlock();
     } else {
         throw IdAlreadyDefinedException(std::to_string(id));
     }
 }
 
-void getRobot(int id, std::map<const int,int> &robotMap, int fd){
+void get_robot(int id, std::map<const int,int> &robot_map, int fd){
     try {
-        const std::string message = std::to_string(robotMap.at(id));
+        const std::string message = std::to_string(robot_map.at(id));
         tcp::send(fd, message);
     } catch (std::out_of_range& e){
         tcp::send(fd, "No robot with Id " + std::to_string(id));
     }
 }
 
-void removeRobot(int id, std::map<const int,int> &robotMap){
+void remove_robot(int id, std::map<const int,int> &robot_map){
     std::mutex mutex;
 
     mutex.lock();
-    robotMap.erase(id);
+    robot_map.erase(id);
     mutex.unlock();
 }
 
 void callFunction(Functions function, const std::vector<std::string>& parameters, std::map<const int,int> &robotMap, int fd){
     try {
         switch (function) {
-            case Functions::getRobot:
+            case Functions::get_robot:
                 assert(parameters.size()== 2);
-                getRobot(stoi(parameters[1]), robotMap, fd);
+                get_robot(stoi(parameters[1]), robotMap, fd);
                 break;
-            case Functions::addRobot:
+            case Functions::add_robot:
                 assert(parameters.size()== 3);
                 addRobot(stoi(parameters[1]),stoi(parameters[2]), robotMap);
                 break;
-            case Functions::removeRobot:
+            case Functions::remove_robot:
                 assert(parameters.size()== 2);
-                removeRobot(stoi(parameters[1]), robotMap);
+                remove_robot(stoi(parameters[1]), robotMap);
                 break;
         }
     } catch (const std::invalid_argument& e) {
@@ -94,15 +94,15 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
     }
 }
 
-void parseMessage(int fd, std::map<const int, int> &robotMap){
+void parseMessage(int fd, std::map<const int, int> &robot_map){
     std::vector<std::string> result;
     try {
         auto messages = tcp::receive(fd, MSG_DONTWAIT);
-        for (std::string message : messages){
+        for (const std::string& message : messages){
             std::cout << message << "\n" << std::endl;
             result = split(message, ',');
-            Functions function = parseFunction(result[0]);
-            callFunction(function, result, robotMap, fd);
+            Functions function = parse_function(result[0]);
+            callFunction(function, result, robot_map, fd);
         }
     } catch (tcp::MalformedMessageException& e) {
         std::cerr << e.what();
@@ -114,13 +114,13 @@ void parseMessage(int fd, std::map<const int, int> &robotMap){
     close(fd);
 }
 
-portService::portService(int port) : server(tcp::Server(port)) {}
+port_service::port_service(int port) : server(tcp::Server(port)) {}
 
-portService::~portService() {
+port_service::~port_service() {
     server.close();
 }
 
-void portService::start_server(){
+void port_service::start_server(){
     std::cout << "Waiting for connections on port: " << server.get_port() << std::endl;
     while(true){
         try {
@@ -134,6 +134,6 @@ void portService::start_server(){
 }
 
 int main(int argc, char** argv){
-    portService portService(0);
+    port_service portService(4444);
     portService.start_server();
 }

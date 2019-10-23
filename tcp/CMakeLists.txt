@@ -22,7 +22,7 @@ file(GLOB SOURCES "*.cpp")
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_CXX_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 
-add_executable(translator ${SOURCES} portService.cpp)
+add_executable(translator ${SOURCES} port_service.cpp)
 #target_link_libraries(translator utap)
 install(TARGETS translator DESTINATION bin)
 
