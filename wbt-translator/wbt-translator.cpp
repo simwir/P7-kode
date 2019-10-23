@@ -3,8 +3,8 @@
 #include <string.h>
 #include <vector>
 
-#include "webots_parser.hpp"
 #include "distance_matrix.hpp"
+#include "webots_parser.hpp"
 
 int main(int argc, char **argv)
 {

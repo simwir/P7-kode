@@ -49,7 +49,7 @@ std::string distance_matrix::to_uppaal_declaration() const
         ss << "}";
         if (iter != std::end(_data))
             ss << ",\n";
-        //iter++;
+        // iter++;
     }
     ss << "\n};\n";
     return ss.str();
