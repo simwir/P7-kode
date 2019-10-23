@@ -3,11 +3,12 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 constexpr size_t DEFAULT_BACKLOG = 16;
 
 namespace tcp {
-struct AccpetException : std::exception {
+struct AcceptException : std::exception {
   const char* what() const noexcept { return "Could not accept"; }
 };
 
@@ -23,7 +24,7 @@ class Server {
  public:
   Server(int port, int backlog = DEFAULT_BACKLOG);
   int accept();
-  std::string receive(int client_fd, int flags = 0);
+  std::vector<std::string> receive(int client_fd, int flags = 0);
   ssize_t send(int client_fd, std::string mesage);
   void close();
   void close_client(int client_fd);

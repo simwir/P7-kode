@@ -1,4 +1,4 @@
-#include "PortService.hpp"
+#include "portService.hpp"
 #include "server.hpp"
 #include "send.hpp"
 #include "receive.hpp"
@@ -9,7 +9,8 @@
 #include <assert.h>
 #include <unistd.h>
 #include <thread>
-#include <pthread.h>
+#include <mutex>
+#include <sys/socket.h>
 
 
 //This function is duplicated from feature/tcp-class
@@ -33,40 +34,49 @@ Functions parseFunction(const std::string& function){
         return Functions::addRobot;
     } else if (function == "getRobot"){
         return Functions::getRobot;
-    } else if (function == "deleteRobot"){
+    } else if (function == "removeRobot"){
         return Functions::removeRobot;
     } else{
         throw UnreadableFunctionException(function);
     }
 }
 
-void addRobot(int id, int port, std::map<int,int> &robotMap) {
+void addRobot(int id, int port, std::map<const int,int> &robotMap) {
+    std::mutex mutex;
     auto search = robotMap.find(id);
     if (search == robotMap.end()) {
+        mutex.lock();
+        std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
         robotMap.insert(std::make_pair(id, port));
+        mutex.unlock();
     } else {
         throw IdAlreadyDefinedException(std::to_string(id));
     }
 }
 
-int getRobot(int id, std::map<int,int> &robotMap){
+void getRobot(int id, std::map<const int,int> &robotMap, int fd){
     try {
-        return robotMap.at(id);
+        const std::string message = std::to_string(robotMap.at(id));
+        tcp::send(fd, message);
     } catch (std::out_of_range& e){
-        std::cerr << "No robot with id: " << e.what() << std::endl;
+        tcp::send(fd, "No robot with Id " + std::to_string(id));
     }
 }
 
-void removeRobot(int id, std::map<int,int> &robotMap){
+void removeRobot(int id, std::map<const int,int> &robotMap){
+    std::mutex mutex;
+
+    mutex.lock();
     robotMap.erase(id);
+    mutex.unlock();
 }
 
-void callFunction(Functions function, const std::vector<std::string>& parameters, std::map<int,int> &robotMap){
+void callFunction(Functions function, const std::vector<std::string>& parameters, std::map<const int,int> &robotMap, int fd){
     try {
         switch (function) {
             case Functions::getRobot:
                 assert(parameters.size()== 2);
-                getRobot(stoi(parameters[1]), robotMap);
+                getRobot(stoi(parameters[1]), robotMap, fd);
                 break;
             case Functions::addRobot:
                 assert(parameters.size()== 3);
@@ -84,45 +94,46 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
     }
 }
 
-void parseMessage(int fd, std::map<int, int> &robotMap){
-    auto message = tcp::receive(fd);
-    auto result = split(message, ',');
-
+void parseMessage(int fd, std::map<const int, int> &robotMap){
+    std::vector<std::string> result;
     try {
-        Functions function = parseFunction(result[0]);
-        callFunction(function, result, robotMap);
+        auto messages = tcp::receive(fd, MSG_DONTWAIT);
+        for (std::string message : messages){
+            std::cout << message << "\n" << std::endl;
+            result = split(message, ',');
+            Functions function = parseFunction(result[0]);
+            callFunction(function, result, robotMap, fd);
+        }
+    } catch (tcp::MalformedMessageException& e) {
+        std::cerr << e.what();
     } catch (UnreadableFunctionException& e) {
-        std::cout << "Unable to parse function" << std::endl;
-        std::cout << e.what() << std::endl;
+        std::cerr << "Unable to parse function" << e.what() << std::endl;
     } catch (UnreadableParametersException& e) {
-        std::cout << "Unable to parse function" << std::endl;
+        std::cout << "Unable to parse parameters" << std::endl;
     }
-
+    close(fd);
 }
 
-PortService::PortService(int port) : server(tcp::Server(port)) {}
+portService::portService(int port) : server(tcp::Server(port)) {}
 
-PortService::~PortService() {
+portService::~portService() {
     server.close();
 }
 
-void PortService::start_server(){
-    std::vector<std::thread> threads;
-    std::cout << "Waiting for connections ..." << std::endl;
-
+void portService::start_server(){
+    std::cout << "Waiting for connections on port: " << server.get_port() << std::endl;
     while(true){
         try {
             int client_fd = server.accept();
-            std::thread t1(parseMessage, client_fd, std::ref(robotMap)); //TODO: Remember mutex around robotMap
+            std::thread t1(parseMessage, client_fd, std::ref(robotMap));
             t1.detach();
-        } catch (tcp::AccpetException& e) {
+        } catch (tcp::AcceptException& e) {
             std::cerr << e.what() << "\n";
         }
     }
 }
 
-
 int main(int argc, char** argv){
-    PortService portService(4444);
+    portService portService(0);
     portService.start_server();
 }

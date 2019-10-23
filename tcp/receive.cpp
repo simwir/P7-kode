@@ -10,16 +10,20 @@
 /**
  * Reads the message in a socket buffer until empty.
  */
-std::string tcp::receive(int socket_fd, int flags) {
+std::vector<std::string> tcp::receive(int socket_fd, int flags) {
   std::string output;
   char buffer[256];
 
   while (true) {
-    memset(buffer, 0, sizeof buffer);
+    std::memset(buffer, 0, sizeof buffer);
     ssize_t bytes = ::recv(socket_fd, buffer, sizeof buffer, flags);
 
     if (bytes == -1) {
-      throw tcp::ReceiveException();
+        if (errno == EAGAIN || errno == EWOULDBLOCK){
+            break;
+        } else {
+            throw tcp::ReceiveException();
+        }
     } else if (bytes == 0) {
       break;
     } else {
@@ -27,13 +31,19 @@ std::string tcp::receive(int socket_fd, int flags) {
     }
   }
 
+  size_t start_pos, end_pos;
+  std::vector<std::string> messages;
+  start_pos = output.find("#|");
+  end_pos = output.find("|#");
 
-  int start_pos = output.find('#');
-  int end_pos = output.find('#', start_pos + 1);
+    do {
+      if (start_pos != std::string::npos && end_pos == std::string::npos)
+          throw tcp::MalformedMessageException(output);
+      messages.push_back(output.substr(start_pos + 2, end_pos - 2));
+      output.erase(start_pos, end_pos + 1);
+      start_pos = output.find("#|");
+      end_pos = output.find("|#");
+  } while (start_pos != std::string::npos);
 
-  if (start_pos == std::string::npos || end_pos == std::string::npos) {
-    throw tcp::MalformedMessageException(output);
-  }
-
-  return output.substr(start_pos + 1, end_pos - start_pos - 1);
+  return messages;
 }

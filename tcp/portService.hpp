@@ -34,14 +34,14 @@ public:
     const char* what() const noexcept override { return message.c_str(); }
 };
 
-class PortService {
+class portService {
 public:
-    PortService(int port);
+    portService(int port);
     void start_server();
-    ~PortService();
+    ~portService();
 private:
     tcp::Server server;
-    std::map<int, int> robotMap; // {Robot_id , Port_number}
+    std::map<const int, int> robotMap; // {Robot_id , Port_number}
 };
 
 Functions parseFunction(const std::string& function);
