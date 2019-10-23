@@ -34,7 +34,7 @@ class robot_controller {
 
     void run_simulation();
 
-    void set_destination(const geo::Point &point)
+    void set_destination(const geo::GlobalPoint &point)
     {
         destination = point;
         has_destination = true;
@@ -46,15 +46,15 @@ class robot_controller {
 
     geo::Angle get_facing_angle() const;
 
-    geo::Point get_position() const;
+    geo::GlobalPoint get_position() const;
 
     geo::Angle get_angle_to_dest() const;
     geo::Angle get_angle_to_goal() const;
 
-    static geo::Point gps_reading_to_point(const webots::GPS *gps)
+    static geo::GlobalPoint gps_reading_to_point(const webots::GPS *gps)
     {
         const double *reading = gps->getValues();
-        return geo::Point{reading[0], reading[2]};
+        return geo::GlobalPoint{reading[0], reading[2]};
     }
 
     void update_sensor_values();
@@ -70,19 +70,20 @@ class robot_controller {
     std::array<webots::DistanceSensor *, NUM_SENSORS> distance_sensors;
 
     int lidar_resolution;
-    int lidar_max_range;
+    double lidar_max_range;
     int lidar_num_layers = 1;
     double lidar_fov;
     double range_threshold;
     inline size_t lidar_num_points() { return lidar_resolution * lidar_num_layers; }
-    std::vector<std::optional<float>> lidar_range_values;
-    std::vector<webots::LidarPoint> lidar_point_cloud;
+    std::vector<std::optional<double>> lidar_range_values;
+    std::vector<geo::RelPoint> point_cloud;
+    //    std::vector<webots::LidarPoint> lidar_point_cloud;
 
     bool has_destination = false;
-    geo::Point destination;
-    std::optional<geo::Point> bug_destination = std::nullopt;
+    geo::GlobalPoint destination;
+    std::optional<geo::GlobalPoint> bug_destination = std::nullopt;
 
-    inline geo::Point get_destination() const
+    inline geo::GlobalPoint get_destination() const
     {
         if (bug_destination.has_value()) {
             return bug_destination.value();
@@ -103,18 +104,18 @@ class robot_controller {
         return std::round((angle.theta + lidar_fov / 2) * lidar_resolution / lidar_fov);
     }
 
-    geo::Point lidar_value_to_point(int idx) const
-    {
-        /*double dist =
-            lidar_range_values[idx].has_value() ? lidar_range_values[idx].value() : lidar_max_range;
-        double angle = get_lidar_point_angle(idx);
+    // geo::Point lidar_value_to_point(int idx) const
+    // {
+    //     /*double dist =
+    //         lidar_range_values[idx].has_value() ? lidar_range_values[idx].value() : lidar_max_range;
+    //     double angle = get_lidar_point_angle(idx);
 
-        return {dist * std::cos(angle), 0, dist * std::sin(angle)};*/
-        const auto pt = lidar_point_cloud[idx];
-        return geo::Point{pt.x, pt.z};
-    }
+    //     return {dist * std::cos(angle), 0, dist * std::sin(angle)};*/
+    //     const auto pt = lidar_point_cloud[idx];
+    //     return geo::Point{pt.x, pt.z};
+    // }
 
-    std::vector<geo::Point> get_discontinuity_points() const;
+    std::vector<geo::GlobalPoint> get_discontinuity_points() const;
 
     double prev_heuristic_dist = std::numeric_limits<double>::max();
 
@@ -142,9 +143,12 @@ class robot_controller {
 
     //geo::Angle dest_angle;
     //geo::Angle angle_to_dest;
-    geo::Point position;
+    geo::GlobalPoint position;
 
     size_t num_steps = 0;
+
+    void dump_readings_to_csv(const std::string& pcfilename = "point_cloud.csv",
+                              const std::string& rangefilename = "range_values.csv");
 };
 
 #endif
