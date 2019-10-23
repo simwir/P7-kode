@@ -1,31 +1,39 @@
 #include "geo.hpp"
 
 namespace geo {
-Point operator+(const Point &p1, const Point &p2)
+GlobalPoint operator+(const GlobalPoint &p1, const GlobalPoint &p2)
 {
     return {p1.x + p2.x, p1.y + p2.y};
 }
-Point operator-(const Point &p1, const Point &p2)
+GlobalPoint operator-(const GlobalPoint &p1, const GlobalPoint &p2)
 {
     return {p1.x - p2.x, p1.y - p2.y};
 }
 
-std::ostream &operator<<(std::ostream &os, const Point &p)
+std::ostream &operator<<(std::ostream &os, const GlobalPoint &p)
 {
-    return os << "{" << p.x << ',' << p.y << '}';
+    return os << p.x << ',' << p.y;
 }
-
-Point get_average(const Point &p1, const Point &p2)
+std::ostream &operator<<(std::ostream &os, const RelPoint &p)
+{
+    return os << p.x << ',' << p.y;
+}
+GlobalPoint get_average(const GlobalPoint &p1, const GlobalPoint &p2)
 {
     return {(p1.x + p2.x) / 2, (p1.y + p2.y) / 2};
 }
 
-Angle angle_of_line(const Point2D &p1, const Point2D &p2)
+Angle angle_of_line(const GlobalPoint &p1, const GlobalPoint &p2)
 {
     return {std::atan2(p2.y - p1.y, p2.x - p1.x) + PI};
 }
 
-double euclidean_dist(const Point2D &p1, const Point2D &p2)
+double euclidean_dist(const GlobalPoint &p1, const GlobalPoint &p2)
+{
+    return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+}
+
+double euclidean_dist(const RelPoint &p1, const RelPoint &p2)
 {
     return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
 }
@@ -59,15 +67,15 @@ std::ostream &operator<<(std::ostream &os, const Angle &a)
     return os << a.theta;
 }
 
-Point rotate_point(const Point &p, const Angle a)
+RelPoint rotate_point(const RelPoint &p, const Angle a)
 {
     return {p.x * std::cos(a.theta) - p.y * std::sin(a.theta),
             p.x * std::sin(a.theta) + p.y * std::cos(a.theta)};
 }
 
-Point to_global_coordinates(Point rel_orig, Angle rel_angle, Point rel_point)
+GlobalPoint to_global_coordinates(GlobalPoint rel_orig, Angle rel_angle, RelPoint rel_point)
 {
     const auto rotated = rotate_point(rel_point, rel_angle);
-    return rotated + rel_orig;
+    return GlobalPoint{rotated.x, rotated.y} + rel_orig;
 }
 } // namespace geo

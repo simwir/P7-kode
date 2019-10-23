@@ -19,6 +19,9 @@ struct Angle {
     Angle() : theta(0) {}
 };
 
+enum class PointType { Global, Relative };
+
+template <PointType type>
 struct Point2D {
     double x, y;
     Point2D() : x(0), y(0) {}
@@ -31,14 +34,17 @@ struct Point2D {
     }
 };
 
-using Point = Point2D;
+using RelPoint = Point2D<PointType::Relative>;
+using GlobalPoint = Point2D<PointType::Global>;
 
-Point operator+(const Point &p1, const Point &p2);
-Point operator-(const Point &p1, const Point &p2);
-std::ostream &operator<<(std::ostream &os, const Point &p);
-Point get_average(const Point &p1, const Point &p2);
-Angle angle_of_line(const Point2D &p1, const Point2D &p2);
-double euclidean_dist(const Point2D &p1, const Point2D &p2);
+GlobalPoint operator+(const GlobalPoint &p1, const GlobalPoint &p2);
+GlobalPoint operator-(const GlobalPoint &p1, const GlobalPoint &p2);
+std::ostream &operator<<(std::ostream &os, const GlobalPoint &p);
+std::ostream &operator<<(std::ostream &os, const RelPoint &p);
+GlobalPoint get_average(const GlobalPoint &p1, const GlobalPoint &p2);
+Angle angle_of_line(const GlobalPoint &p1, const GlobalPoint &p2);
+double euclidean_dist(const GlobalPoint &p1, const GlobalPoint &p2);
+double euclidean_dist(const RelPoint &p1, const RelPoint &p2);
 
 Angle operator+(const Angle a1, const Angle a2);
 Angle operator-(const Angle a1, const Angle a2);
@@ -46,8 +52,9 @@ Angle operator-(const Angle);
 std::ostream &operator<<(std::ostream &os, const Angle &a);
 Angle abs_angle(const Angle);
 
-Point rotate_point(const Point &p, const Angle a);
-Point to_global_coordinates(Point rel_orig, Angle rel_angle, Point rel_point);
+RelPoint rotate_point(const RelPoint &p, const Angle a);
+
+GlobalPoint to_global_coordinates(GlobalPoint rel_orig, Angle rel_angle, RelPoint rel_point);
 
 } // namespace geo
 
