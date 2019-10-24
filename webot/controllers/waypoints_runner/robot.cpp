@@ -269,7 +269,7 @@ std::vector<geo::GlobalPoint> robot_controller::get_discontinuity_points() const
                 geo::abs_angle(absolute_goal_angle - geo::angle_of_line(position, global_point))
                     .theta;
             // std::cerr << "angle_diff " << angle_diff << '\n';
-            if (angle_diff <= PI / (lidar.get_number_of_points())) {
+            if (angle_diff <= 2*PI / (lidar.get_number_of_points())) {
                 if (dist_to_dest < geo::euclidean_dist(position, global_point)) {
                     discontinuities.push_back(destination);
                 }
