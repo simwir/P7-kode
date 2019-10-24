@@ -38,7 +38,7 @@ ssize_t tcp::Client::send(const std::string& message) {
   return tcp::send(socket_fd, message);
 }
 
-std::string tcp::Client::receive(int flags) {
+std::vector<std::string> tcp::Client::receive(int flags) {
   return tcp::receive(socket_fd, flags);
 }
 
