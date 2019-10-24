@@ -7,6 +7,7 @@
 #include <webots/Motor.hpp>
 #include <webots/Robot.hpp>
 #include <webots/Supervisor.hpp>
+#include <webots/LED.hpp>
 
 #include <array>
 #include <optional>
@@ -18,8 +19,12 @@
 #include "geo/geo.hpp"
 
 constexpr auto NUM_SENSORS = 8;
+constexpr auto NUM_LEDS = 8;
 constexpr auto ANGLE_SENSITIVITY = 0.8;
 constexpr auto DESTINATION_BUFFER_DISTANCE = 0.05;
+
+
+enum class Direction {Left, Right, Straight};
 
 struct DestinationNotDefinedException {
 };
@@ -68,6 +73,7 @@ class robot_controller {
     webots::Lidar *_lidar;
     lidar_wrapper lidar;
     std::array<webots::DistanceSensor *, NUM_SENSORS> distance_sensors;
+    std::array<webots::LED *, NUM_LEDS> leds;
 
     int lidar_resolution;
     double lidar_max_range;
@@ -144,11 +150,13 @@ class robot_controller {
     //geo::Angle dest_angle;
     //geo::Angle angle_to_dest;
     geo::GlobalPoint position;
+    Direction dir;
 
     size_t num_steps = 0;
 
     void dump_readings_to_csv(const std::string& pcfilename = "point_cloud.csv",
                               const std::string& rangefilename = "range_values.csv");
+
 };
 
 #endif

@@ -66,6 +66,9 @@ robot_controller::robot_controller(webots::Supervisor *robot)
         distance_sensors[i] = robot->getDistanceSensor("ps" + std::to_string(i));
         distance_sensors[i]->enable(time_step);
     }
+    for (int i = 0; i < NUM_LEDS; ++i) {
+        leds[i] = robot->getLED("led" + std::to_string(i));
+    }
 }
 
 void robot_controller::update_sensor_values()
@@ -143,18 +146,45 @@ void robot_controller::go_straight_ahead()
     // adjust by angle-delta so we approach a direct line.
     left_motor->setVelocity(6 - 0.1 * relative_dest_angle.theta);
     right_motor->setVelocity(6 + 0.1 * relative_dest_angle.theta);
+    dir = Direction::Straight;
+    leds[0]->set(0);
+    leds[1]->set(0);
+    leds[2]->set(0);
+    leds[3]->set(0);
+    leds[4]->set(0);
+    leds[5]->set(0);
+    leds[6]->set(0);
+    leds[7]->set(0);
 }
 
 void robot_controller::do_left_turn()
 {
     left_motor->setVelocity(-4);
     right_motor->setVelocity(4);
+    dir = Direction::Left;
+    leds[0]->set(0);
+    leds[1]->set(1);
+    leds[2]->set(1);
+    leds[3]->set(1);
+    leds[4]->set(0);
+    leds[5]->set(0);
+    leds[6]->set(0);
+    leds[7]->set(0);
 }
 
 void robot_controller::do_right_turn()
 {
     left_motor->setVelocity(4);
     right_motor->setVelocity(-4);
+    dir = Direction::Right;
+    leds[0]->set(0);
+    leds[1]->set(0);
+    leds[2]->set(0);
+    leds[3]->set(0);
+    leds[4]->set(1);
+    leds[5]->set(1);
+    leds[6]->set(1);
+    leds[7]->set(0);
 }
 
 void robot_controller::stop()
@@ -231,21 +261,21 @@ std::vector<geo::GlobalPoint> robot_controller::get_discontinuity_points() const
             discontinuities.push_back(
                 geo::to_global_coordinates(position, facing_angle, point_cloud[i - 1]));
         }
-        // TODO not working!
         // add point in direct path to destination if possible
         else if ((!lidar_range_values[i].has_value() ||
-                  lidar_range_values[i].value() < dist_to_dest)) {
+                  lidar_range_values[i].value() > dist_to_dest)) {
             auto global_point = geo::to_global_coordinates(position, facing_angle, point_cloud[i]);
             auto angle_diff =
                 geo::abs_angle(absolute_goal_angle - geo::angle_of_line(position, global_point))
                     .theta;
             // std::cerr << "angle_diff " << angle_diff << '\n';
-            //TODO logic if goal is closer than lidar point
             if (angle_diff <= PI / (lidar.get_number_of_points())) {
-                auto tangent_point =
-                    geo::to_global_coordinates(position, facing_angle, point_cloud[i]);
-                std::cerr << "tangent point inserted " << tangent_point << std::endl;
-                discontinuities.push_back(tangent_point);
+                if (dist_to_dest < geo::euclidean_dist(position, global_point)) {
+                    discontinuities.push_back(destination);
+                }
+                else {
+                    discontinuities.push_back(global_point);
+                }
             }
         }
         if (is_in_range) {
@@ -265,7 +295,7 @@ void robot_controller::tangent_bug_get_destination()
 
     double min_heuristic = std::numeric_limits<double>::max();
     geo::GlobalPoint best_point;
-    //TODO abort if no discontinuities
+    // TODO abort if no discontinuities
     for (const geo::GlobalPoint &point : discontinuities) {
         double h = geo::euclidean_dist(position, point) + geo::euclidean_dist(point, destination);
         if (h < min_heuristic) {
@@ -282,5 +312,6 @@ void robot_controller::tangent_bug_get_destination()
     }
     bug_destination = best_point;
     prev_heuristic_dist = min_heuristic;
-    dump_readings_to_csv();
+    // uncomment to enable debug logging to csv file.
+    //dump_readings_to_csv();
 }
