@@ -6,17 +6,17 @@
 
 #include <waypoint_scheduler.hpp>
 
-class LogWaypointScheduleSubscriber : public waypoint_scheduling::WaypointScheduleSubscriber  {
-    void newSchedule(const std::vector<waypoint_scheduling::Action>& schedule) {
+class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber  {
+    void newSchedule(const std::vector<scheduling::Action>& schedule) {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new waypoint schedule at " << std::asctime(std::localtime(&result));
         
         for (auto action : schedule) {
             std::cout << "Action: ";
-            if (action.type == waypoint_scheduling::ActionType::Hold) {
+            if (action.type == scheduling::ActionType::Hold) {
                 std::cout << "Hold";
             }
-            else if (action.type == waypoint_scheduling::ActionType::Waypoint) {
+            else if (action.type == scheduling::ActionType::Waypoint) {
                 std::cout << "Waypoint";
             }
             else {
@@ -29,7 +29,7 @@ class LogWaypointScheduleSubscriber : public waypoint_scheduling::WaypointSchedu
 
 int main() {
     std::cout << "Starting...\n";
-    waypoint_scheduling::WaypointScheduler scheduler;
+    scheduling::WaypointScheduler scheduler;
     LogWaypointScheduleSubscriber logSubscriber;
     
     

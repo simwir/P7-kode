@@ -3,8 +3,17 @@
 
 #include <thread>
 #include <vector>
+#include <queue>
+#include <uppaal_executor.hpp>
+#include <uppaal_simulation_parser.hpp>
 
-namespace waypoint_scheduling {
+namespace scheduling {
+
+struct NameNotFoundException : public std::exception {
+    const char* what() const noexcept override{
+        return "Cannot find name";
+    }
+};
 
 enum class ActionType {
     Hold,
@@ -18,22 +27,6 @@ struct Action {
     int value;
 };
 
-struct WaypointSchedulingException : public std::exception {
-     const char* what() const noexcept { return "Could not run scheduling"; }
-};
-
-class StrategyParseException : public std::exception{
-    std::string message;
-public:
-    StrategyParseException(const std::string& inmessage){
-        message = inmessage;
-    }
-
-    const char* what() const noexcept override{
-        return message.c_str();
-    }
-};
-
 class WaypointScheduleSubscriber {
 public:
     virtual void newSchedule(const std::vector<Action>& schedule) = 0;
@@ -42,18 +35,23 @@ public:
 
 class WaypointScheduler {
 public:
+    WaypointScheduler() : executor("waypoint_scheduling.xml", "waypoint_scheduling.q") { }
     void start();
     void stop();
     void addSubscriber(WaypointScheduleSubscriber& subscriber);
 
 private:
     void run();
-    std::vector<Action> parseResult(int fd);
+    std::vector<scheduling::Action> convertResult(const std::vector<scheduling::SimulationValue>& values);
+    std::queue<std::pair<double, int>> findFirstRunAsQueue(const std::vector<scheduling::SimulationValue>& values, const std::string& name);
     void emitSchedule(const std::vector<Action>& schedule);
 
     std::thread worker;
     std::vector<WaypointScheduleSubscriber*> subscribers;
     bool shouldStop;
+
+    UppaalExecutor executor;
+    UppaalSimulationParser parser;
 };
 
 }

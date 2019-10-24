@@ -18,10 +18,10 @@ include_directories(
 	${CMAKE_SOURCE_DIR}
 
 	# Libraries
-	waypoint_scheduling/include
+	scheduling/include
 )
 
-add_subdirectory(waypoint_scheduling)
+add_subdirectory(scheduling)
 
 # set {SOURCES,PROJECT_LINK_LIBS} to expanded wildcards
 file(GLOB SOURCES "src/*.cpp")
@@ -30,5 +30,5 @@ file(GLOB SOURCES "src/*.cpp")
 #file(GLOB PROJECT_STATIC_LINK_LIBS "lib/*.a")
 
 add_executable(master ${SOURCES})
-target_link_libraries(master waypoint_scheduling)
+target_link_libraries(master scheduling)
 install(TARGETS master DESTINATION bin)
