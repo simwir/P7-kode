@@ -8,8 +8,9 @@
 // <webots/DistanceSensor.hpp>, <webots/Motor.hpp>, etc.
 // and/or to add some other includes
 #include <webots/Robot.hpp>
+#include <webots/Supervisor.hpp>
 
-#include "points.hpp"
+#include "geo/geo.hpp"
 #include "robot.hpp"
 
 // This is the main program of your controller.
@@ -22,7 +23,7 @@
 int main(int argc, char **argv)
 {
     // create the Robot instance.
-    robot_controller controller{new webots::Robot()};
+    robot_controller controller{new webots::Supervisor()};
     controller.run_simulation();
 
     // Main loop:

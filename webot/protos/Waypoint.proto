@@ -1,0 +1,39 @@
+#VRML_SIM R2019b utf8
+# tags: static
+
+PROTO Waypoint [
+  field SFInt32    id                  0
+  field SFString   adjList             ""
+  field SFVec3f    translation         0 0.1 0
+  field SFColor    boxColor            0 0 0
+  field SFRotation rotation            0 1 0 0
+  field SFString   name                "waypoint"
+  field SFVec3f    size                0.01 0.01 0.01  # Defines the size of the wooden box.
+  field SFFloat    mass                0            # Defines the mass of the wooden box in kg. A value smaller or equal to 0 remove the physics of the wooden box.
+  field SFBool     locked              FALSE        # Is `Solid.locked`.
+
+]
+{
+Solid {
+    %{
+    local size = fields.size.value
+    local volume = size.x * size.y * size.z
+    local mass = fields.mass.value
+  }%
+  translation IS translation
+  rotation IS rotation
+  children [
+    Shape {
+      appearance Appearance {
+      material Material { diffuseColor IS boxColor }
+      }
+      geometry Box {
+        size %{= size.x }% %{= size.y }% %{= size.z }%
+      }
+    }
+  ]
+  name IS name
+  model "waypoint"
+  locked IS locked
+}
+}

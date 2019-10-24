@@ -8,6 +8,17 @@ constexpr double PI = 3.141926535;
 
 struct Point {
     double x, y, z;
+    Point()
+        :x(0), y(0), z(0){}
+};
+
+struct CoordinateSystem {
+    Point origin;
+    double rotation;
+
+    Point to_global_coordinates(const Point& point) const;
+
+    //Point from_global_coordinates(const Point& point);
 };
 
 double euclidean_distance(const Point &p1, const Point &p2);
@@ -24,5 +35,7 @@ std::ostream &operator<<(std::ostream &os, const Point &p);
 Point get_average(const Point &p1, const Point &p2);
 
 double get_relative_angle(const Point &origin, const Point &p1, const Point &p2);
+
+double angle_delta(const double angle1, const double angle2);
 
 #endif
