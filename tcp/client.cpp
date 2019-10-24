@@ -10,9 +10,9 @@
 
 #include <string>
 
-#include "close_exception.hpp"
 #include "receive.hpp"
 #include "send.hpp"
+#include "exceptions/exceptions.hpp"
 
 /**
  * Creates a TCP connection to a host on a given port and connects.

@@ -2,6 +2,7 @@
 #include "server.hpp"
 #include "send.hpp"
 #include "receive.hpp"
+#include "exceptions/exceptions.hpp"
 
 #include <iostream>
 #include <map>
@@ -39,7 +40,7 @@ Functions parse_function(const std::string& function){
     } else if (function == "remove_robot"){
         return Functions::remove_robot;
     } else{
-        throw UnreadableFunctionException(function);
+        throw tcp::UnreadableFunctionException(function);
     }
 }
 
@@ -47,8 +48,8 @@ void addRobot(int id, int port, std::map<const int,int> &robot_map) {
     auto search = robot_map.find(id);
     if (search == robot_map.end()) {
         mutex.lock();
-        std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
         robot_map.insert(std::make_pair(id, port));
+        std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
         mutex.unlock();
     } else {
         throw IdAlreadyDefinedException(std::to_string(id));
@@ -77,20 +78,20 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
                 if (parameters.size() == 2){
                     get_robot(stoi(parameters[1]), robotMap, fd);
                 } else {
-                    throw InvalidParametersException(std::to_string(parameters.size()));
+                    throw tcp::InvalidParametersException(std::to_string(parameters.size()));
                 }
                 break;
             case Functions::add_robot:
                 if (parameters.size() == 2){
                     addRobot(stoi(parameters[1]),stoi(parameters[2]), robotMap);
                 } else {
-                    throw InvalidParametersException(std::to_string(parameters.size()));
+                    throw tcp::InvalidParametersException(std::to_string(parameters.size()));
                 }
             case Functions::remove_robot:
                 if (parameters.size() == 2){
                     remove_robot(stoi(parameters[1]), robotMap);
                 } else {
-                    throw InvalidParametersException(std::to_string(parameters.size()));
+                    throw tcp::InvalidParametersException(std::to_string(parameters.size()));
                 }
                 break;
         }
@@ -115,9 +116,9 @@ void parseMessage(int fd, std::map<const int, int> &robot_map){
         }
     } catch (tcp::MalformedMessageException& e) {
         tcp::send(fd, e.what());
-    } catch (UnreadableFunctionException& e) {
+    } catch (tcp::UnreadableFunctionException& e) {
         tcp::send(fd, e.what());
-    } catch (InvalidParametersException& e) {
+    } catch (tcp::InvalidParametersException& e) {
         tcp::send(fd, e.what());
     }
     close(fd);
