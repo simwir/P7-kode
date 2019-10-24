@@ -52,7 +52,7 @@ int tcp::Server::accept() {
   int fd = ::accept(socket_fd, (sockaddr *)&client_address, &client_length);
 
   if (fd == -1) {
-    throw tcp::AccpetException();
+    throw tcp::AcceptException();
   }
 
   clients.push_back(fd);
@@ -60,7 +60,7 @@ int tcp::Server::accept() {
   return fd;
 }
 
-std::string tcp::Server::receive(int client_fd, int flags) {
+std::vector<std::string> tcp::Server::receive(int client_fd, int flags) {
   return tcp::receive(client_fd, flags);
 }
 

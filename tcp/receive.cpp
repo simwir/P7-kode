@@ -20,7 +20,7 @@ std::vector<std::string> tcp::receive(int socket_fd, int flags) {
 
     if (bytes == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK){
-            return std::vector<std::string>{};
+            break;
         } else {
             throw tcp::ReceiveException();
         }
@@ -33,15 +33,16 @@ std::vector<std::string> tcp::receive(int socket_fd, int flags) {
 
   size_t start_pos, end_pos;
   std::vector<std::string> messages;
+  start_pos = output.find("#|");
+  end_pos = output.find("|#");
 
-  do {
-      start_pos = output.find("#|");
-      end_pos = output.find("|#");
-
+    do {
       if (start_pos != std::string::npos && end_pos == std::string::npos)
           throw tcp::MalformedMessageException(output);
-      messages.push_back(output.substr(start_pos + 2, end_pos - 1));
+      messages.push_back(output.substr(start_pos + 2, end_pos - 2));
       output.erase(start_pos, end_pos + 1);
+      start_pos = output.find("#|");
+      end_pos = output.find("|#");
   } while (start_pos != std::string::npos);
 
   return messages;
