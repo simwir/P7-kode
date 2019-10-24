@@ -13,6 +13,8 @@
 #include <sys/socket.h>
 
 
+std::mutex mutex;
+
 //This function is duplicated from feature/tcp-class
 std::vector<std::string> split(const std::string &input, char delimiter) {
     std::vector<std::string> result;
@@ -42,7 +44,6 @@ Functions parse_function(const std::string& function){
 }
 
 void addRobot(int id, int port, std::map<const int,int> &robot_map) {
-    std::mutex mutex;
     auto search = robot_map.find(id);
     if (search == robot_map.end()) {
         mutex.lock();
@@ -64,8 +65,6 @@ void get_robot(int id, std::map<const int,int> &robot_map, int fd){
 }
 
 void remove_robot(int id, std::map<const int,int> &robot_map){
-    std::mutex mutex;
-
     mutex.lock();
     robot_map.erase(id);
     mutex.unlock();
@@ -75,22 +74,32 @@ void callFunction(Functions function, const std::vector<std::string>& parameters
     try {
         switch (function) {
             case Functions::get_robot:
-                assert(parameters.size()== 2);
-                get_robot(stoi(parameters[1]), robotMap, fd);
+                if (parameters.size() == 2){
+                    get_robot(stoi(parameters[1]), robotMap, fd);
+                } else {
+                    throw InvalidParametersException(std::to_string(parameters.size()));
+                }
                 break;
             case Functions::add_robot:
-                assert(parameters.size()== 3);
-                addRobot(stoi(parameters[1]),stoi(parameters[2]), robotMap);
-                break;
+                if (parameters.size() == 2){
+                    addRobot(stoi(parameters[1]),stoi(parameters[2]), robotMap);
+                } else {
+                    throw InvalidParametersException(std::to_string(parameters.size()));
+                }
             case Functions::remove_robot:
-                assert(parameters.size()== 2);
-                remove_robot(stoi(parameters[1]), robotMap);
+                if (parameters.size() == 2){
+                    remove_robot(stoi(parameters[1]), robotMap);
+                } else {
+                    throw InvalidParametersException(std::to_string(parameters.size()));
+                }
                 break;
         }
     } catch (const std::invalid_argument& e) {
-        std::cerr << "Invalid argument: " << e.what() << '\n';
+        std::string message = "Invalid argument";
+        tcp::send(fd, message + e.what());
     } catch (const IdAlreadyDefinedException& e) {
-        std::cerr << "Tried to add robot, but the id was already in the map. Id: : " << e.what() << '\n';
+        std::string message = "Tried to add robot, but the id was already in the map. Id: : ";
+        tcp::send(fd, message + e.what());
     }
 }
 
@@ -105,11 +114,11 @@ void parseMessage(int fd, std::map<const int, int> &robot_map){
             callFunction(function, result, robot_map, fd);
         }
     } catch (tcp::MalformedMessageException& e) {
-        std::cerr << e.what();
+        tcp::send(fd, e.what());
     } catch (UnreadableFunctionException& e) {
-        std::cerr << "Unable to parse function" << e.what() << std::endl;
-    } catch (UnreadableParametersException& e) {
-        std::cout << "Unable to parse parameters" << std::endl;
+        tcp::send(fd, e.what());
+    } catch (InvalidParametersException& e) {
+        tcp::send(fd, e.what());
     }
     close(fd);
 }

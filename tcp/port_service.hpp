@@ -26,11 +26,11 @@ public:
     const char* what() const noexcept override { return message.c_str(); }
 };
 
-class UnreadableParametersException : public std::exception {
+class InvalidParametersException : public std::exception {
     std::string message;
 
 public:
-    UnreadableParametersException(const std::string& in_message) { message = in_message; }
+    InvalidParametersException(const std::string& in_message) { message = in_message; }
     const char* what() const noexcept override { return message.c_str(); }
 };
 
