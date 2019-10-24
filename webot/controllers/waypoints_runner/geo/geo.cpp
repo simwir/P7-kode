@@ -25,7 +25,12 @@ GlobalPoint get_average(const GlobalPoint &p1, const GlobalPoint &p2)
 
 Angle angle_of_line(const GlobalPoint &p1, const GlobalPoint &p2)
 {
-    return {std::atan2(p2.y - p1.y, p2.x - p1.x) + PI};
+    const auto res = std::atan2(p2.y - p1.y, p2.x - p1.x);
+    if (res < 0) {
+        return Angle{2 * PI + res};
+    }
+    else
+        return Angle{res};
 }
 
 double euclidean_dist(const GlobalPoint &p1, const GlobalPoint &p2)
@@ -69,8 +74,8 @@ std::ostream &operator<<(std::ostream &os, const Angle &a)
 
 RelPoint rotate_point(const RelPoint &p, const Angle a)
 {
-    return {p.x * std::cos(a.theta) - p.y * std::sin(a.theta),
-            p.x * std::sin(a.theta) + p.y * std::cos(a.theta)};
+    return RelPoint{p.x * std::cos(a.theta) - p.y * std::sin(a.theta),
+                    p.x * std::sin(a.theta) + p.y * std::cos(a.theta)};
 }
 
 GlobalPoint to_global_coordinates(GlobalPoint rel_orig, Angle rel_angle, RelPoint rel_point)

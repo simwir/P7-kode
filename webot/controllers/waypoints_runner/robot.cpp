@@ -1,4 +1,5 @@
 #include "robot.hpp"
+#include "geo/geo.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -35,6 +36,7 @@ void robot_controller::dump_readings_to_csv(const std::string &pcfilename,
         rangefile << '\n';
     }
 }
+
 robot_controller::robot_controller(webots::Supervisor *robot)
     : time_step((int)robot->getBasicTimeStep()), robot(robot)
 {
@@ -71,9 +73,9 @@ void robot_controller::update_sensor_values()
     std::transform(distance_sensors.begin(), distance_sensors.end(), sensor_readings.begin(),
                    [](auto *ds) { return ds->getValue(); });
     facing_angle = get_facing_angle();
-    absolute_dest_angle = geo::angle_of_line(get_destination(), gps_reading_to_point(frontGPS));
+    absolute_dest_angle = geo::angle_of_line(gps_reading_to_point(backGPS), get_destination());
     relative_dest_angle = facing_angle - absolute_dest_angle;
-    absolute_goal_angle = geo::angle_of_line(destination, gps_reading_to_point(frontGPS));
+    absolute_goal_angle = geo::angle_of_line(gps_reading_to_point(backGPS), destination);
     relative_goal_angle = facing_angle - absolute_goal_angle;
 
     // angle_to_dest = facing_angle - dest_angle;
@@ -114,14 +116,17 @@ void robot_controller::run_simulation()
             tangent_bug_get_destination();
         //}
 
-        if (num_steps % 5 == 0) {
+        /*if (num_steps % 5 != 0) {
             continue;
-        }
+            }*/
 
         // std::printf("\tgoal: {x:%lf, y:%lf}", destination.x, destination.y);
         // std::printf("\tdest: {x:%lf, y:%lf}\n", get_destination().x, get_destination().y);
 
-        if (geo::abs_angle(relative_dest_angle).theta < ANGLE_SENSITIVITY) {
+        if (dist_to_dest < DESTINATION_BUFFER_DISTANCE) {
+            stop();
+        }
+        else if (geo::abs_angle(relative_dest_angle).theta < ANGLE_SENSITIVITY) {
             go_straight_ahead();
         }
         else if (relative_dest_angle.theta > PI) {
@@ -129,9 +134,6 @@ void robot_controller::run_simulation()
         }
         else if (relative_dest_angle.theta < PI) {
             do_left_turn();
-        }
-        else {
-            stop();
         }
     }
 }
@@ -162,7 +164,7 @@ void robot_controller::stop()
 }
 geo::Angle robot_controller::get_facing_angle() const
 {
-    return geo::angle_of_line(gps_reading_to_point(frontGPS), gps_reading_to_point(backGPS));
+    return geo::angle_of_line(gps_reading_to_point(backGPS), gps_reading_to_point(frontGPS));
 }
 
 geo::Angle robot_controller::get_angle_to_dest() const
@@ -235,9 +237,10 @@ std::vector<geo::GlobalPoint> robot_controller::get_discontinuity_points() const
                   lidar_range_values[i].value() < dist_to_dest)) {
             auto global_point = geo::to_global_coordinates(position, facing_angle, point_cloud[i]);
             auto angle_diff =
-                geo::abs_angle(relative_goal_angle - geo::angle_of_line(position, global_point))
+                geo::abs_angle(absolute_goal_angle - geo::angle_of_line(position, global_point))
                     .theta;
-            //std::cerr << "angle_diff " << angle_diff << '\n';
+            // std::cerr << "angle_diff " << angle_diff << '\n';
+            //TODO logic if goal is closer than lidar point
             if (angle_diff <= PI / (lidar.get_number_of_points())) {
                 auto tangent_point =
                     geo::to_global_coordinates(position, facing_angle, point_cloud[i]);
@@ -262,7 +265,8 @@ void robot_controller::tangent_bug_get_destination()
 
     double min_heuristic = std::numeric_limits<double>::max();
     geo::GlobalPoint best_point;
-    for (const auto &point : discontinuities) {
+    //TODO abort if no discontinuities
+    for (const geo::GlobalPoint &point : discontinuities) {
         double h = geo::euclidean_dist(position, point) + geo::euclidean_dist(point, destination);
         if (h < min_heuristic) {
             min_heuristic = h;
