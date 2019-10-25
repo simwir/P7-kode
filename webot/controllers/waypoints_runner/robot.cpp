@@ -120,7 +120,6 @@ void robot_controller::communicate(){
                     server.send_message({message.payload, webots_server::MessageType::not_understood});
                     continue;
                 }
-                std::cerr << "set destination split." << std::endl;
                 destination = {
                                 std::stod(message.payload.substr(0,split_pos)),
                                 std::stod(message.payload.substr(split_pos + 1))

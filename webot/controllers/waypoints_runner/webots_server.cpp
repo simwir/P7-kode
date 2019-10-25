@@ -27,12 +27,12 @@ webots_server::Server::~Server(){
 std::vector<Message> webots_server::Server::get_messages(){
     std::vector<std::string> raw_messages = client->receive(MSG_DONTWAIT); 
     std::vector<Message> messages;
-    for (std::string raw_message : raw_messages){
-        MessageType messageType;
+    for (const auto &raw_message : raw_messages){
+        MessageType message_type;
         size_t split_pos = raw_message.find(",");
         if (split_pos == std::string::npos){
             if (raw_message == "get_position") {
-                messageType = MessageType::get_position;
+                message_type = MessageType::get_position;
             } else {
                 send_message(Message{raw_message, MessageType::not_understood});
                 continue;
@@ -40,7 +40,7 @@ std::vector<Message> webots_server::Server::get_messages(){
         } else {
             std::string type = raw_message.substr(0, split_pos);
             if (type == "set_destination") {
-                messageType = MessageType::set_destination;
+                message_type = MessageType::set_destination;
             } else {
                 send_message(Message{raw_message, MessageType::not_understood});
                 continue;
