@@ -25,5 +25,5 @@ tcp::Client::Client(const std::string& host, const std::string& port)
   connect(socket_fd, res->ai_addr, res->ai_addrlen);
   freeaddrinfo(res);
   
-  setFD(socket_fd);
+  set_fd(socket_fd);
 }

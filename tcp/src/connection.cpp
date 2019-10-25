@@ -32,6 +32,48 @@ ssize_t tcp::Connection::send(const std::string& message) {
   return bytes;
 }
 
+void tcp::Connection::read_buffer() {
+  char buffer[BUFFER_SIZE];
+
+  while (true) {
+    std::memset(buffer, 0, BUFFER_SIZE);
+    ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, flags);
+
+    if (bytes == -1) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK){
+        break;
+      } else {
+        throw tcp::ReceiveException(errno);
+      }
+    } else if (bytes == 0) {
+      break;
+    } else {
+      obuffer.append(buffer, bytes);
+    }
+  }
+}
+
+std::vector<std::string> tcp::Connection::parse_messages() {    
+    size_t start_pos, end_pos;
+    std::vector<std::string> messages;
+    start_pos = obuffer.find("#|");
+    end_pos = obuffer.find("|#");
+
+    while (end_pos != std::string::npos) {
+      if (start_pos != 0) {
+        throw tcp::MalformedMessageException(obuffer);
+      }
+    
+      messages.push_back(obuffer.substr(start_pos + 2, end_pos - 2));
+      obuffer.erase(start_pos, end_pos + 2);
+      
+      start_pos = obuffer.find("#|");
+      end_pos = obuffer.find("|#");
+    }
+
+    return messages;
+}
+
 std::vector<std::string> tcp::Connection::receive(int flags) {
   if (!ready) {
       throw ConnectionException("Connection not ready");
@@ -41,46 +83,11 @@ std::vector<std::string> tcp::Connection::receive(int flags) {
       throw ConnectionException("Connection not open");
   }
   
-  char buffer[BUFFER_SIZE];
-
-  while (true) {
-    std::memset(buffer, 0, BUFFER_SIZE);
-    ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, flags);
-
-    if (bytes == -1) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK){
-            break;
-        } else {
-            throw tcp::ReceiveException(errno);
-        }
-    } else if (bytes == 0) {
-      break;
-    } else {
-      obuffer.append(buffer, bytes);
-    }
-  }
-
-  size_t start_pos, end_pos;
-  std::vector<std::string> messages;
-  start_pos = obuffer.find("#|");
-  end_pos = obuffer.find("|#");
-
-  while (end_pos != std::string::npos) {
-    if (start_pos != 0) {
-      throw tcp::MalformedMessageException(obuffer);
-    }
-  
-    messages.push_back(obuffer.substr(start_pos + 2, end_pos - 2));
-    obuffer.erase(start_pos, end_pos + 2);
-    
-    start_pos = obuffer.find("#|");
-    end_pos = obuffer.find("|#");
-  }
-
-  return messages;
+  read_buffer();
+  return parse_messages();
 }
 
-void tcp::Connection::setFD(int fd) {
+void tcp::Connection::set_fd(int fd) {
   this->fd = fd;
   ready = true;
 }
@@ -90,7 +97,11 @@ bool tcp::Connection::closed() {
 }
 
 void tcp::Connection::close() {
-  if (!open || ::close(fd) == -1) {
+  if (!open) {
+    return;  
+  }
+      
+  if (::close(fd) == -1) {
     throw tcp::CloseException();
   };
   
