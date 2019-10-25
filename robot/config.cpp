@@ -36,6 +36,7 @@ std::string robot::Config::get<std::string>(const std::string &key)
     if (!json.isMember(key)) {
         throw robot::InvalidKeyException(key);
     };
+
     return json[key].asString();
 }
 
@@ -45,5 +46,6 @@ double robot::Config::get<double>(const std::string &key)
     if (!json.isMember(key)) {
         throw robot::InvalidKeyException(key);
     };
+
     return json[key].asDouble();
 }

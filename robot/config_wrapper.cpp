@@ -16,4 +16,5 @@ CONFIG_GETTER(int, number_of_waypoints);
 CONFIG_GETTER(int, waypoint_passing_time);
 CONFIG_GETTER(int, station_passing_time);
 CONFIG_GETTER(int, current_station);
+CONFIG_GETTER(int, destination);
 CONFIG_GETTER(double, uncertainty);
