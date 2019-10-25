@@ -31,7 +31,7 @@ tcp::Server::Server(int in_port, int backlog) {
 
   if (bind(socket_fd, (sockaddr *)&server_address, sizeof server_address) ==
       -1) {
-    throw tcp::BindException();
+      throw tcp::BindException(std::to_string(errno));
   }
 
   socklen_t length = sizeof server_address;

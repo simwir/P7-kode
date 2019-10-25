@@ -13,7 +13,10 @@ struct AcceptException : std::exception {
 };
 
 struct BindException : std::exception {
-  const char* what() const noexcept { return "Could not bind"; }
+    std::string message;
+    std::string const_message= "Cound not bind. Errno: ";
+    BindException(const std::string& err) {message = const_message + err;};
+    const char* what() const noexcept override { return (message).c_str(); }
 };
 
 struct ListenException : std::exception {
