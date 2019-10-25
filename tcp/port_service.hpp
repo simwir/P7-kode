@@ -8,7 +8,7 @@
 #include <vector>
 #include "server.hpp"
 
-enum class Functions{ add_robot, get_robot, remove_robot};
+enum class Function { add_robot, get_robot, remove_robot };
 
 class IdAlreadyDefinedException : public std::exception {
     std::string message;
