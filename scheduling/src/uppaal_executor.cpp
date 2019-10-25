@@ -1,8 +1,8 @@
 // POSIX includes
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <errno.h>
 
 // Other includes
 #include <iostream>
@@ -13,9 +13,11 @@ constexpr int PARENT_READ = 0;
 constexpr int CHILD_WRITE = 1;
 constexpr int CHILD_READ = 2;
 constexpr int PARENT_WRITE = 3;
+
 constexpr int NO_FLAGS = 0;
 
-std::string scheduling::UppaalExecutor::execute() {
+std::string scheduling::UppaalExecutor::execute()
+{
     pid_t pid;
     int fd[4];
 
@@ -31,15 +33,15 @@ std::string scheduling::UppaalExecutor::execute() {
         close(fd[PARENT_WRITE]);
         close(fd[PARENT_READ]);
 
-        const char* command = "verifyta";
+        const char *command = "verifyta";
 
-        int ret = execlp(command, command, model, queries, nullptr);
+        int ret = execlp(command, command, modelPath, queriesPath, nullptr);
 
         if (ret == -1) {
-            std::cerr << "Could not start verifyta. errno: " << errno << ".\n";
-            throw SchedulingException();
+            throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) +
+                                      ".");
         }
-        
+
         return "";
     }
     else {
@@ -58,29 +60,23 @@ std::string scheduling::UppaalExecutor::execute() {
             // Cleanup after use
             close(fd[PARENT_WRITE]);
             close(fd[PARENT_READ]);
-            
-            std::cerr << "Could not start verifyta.\n";
-            throw SchedulingException();
+
+            throw SchedulingException{"Could not start verifyta."};
         }
-        
+
         // Read all from pipe
         std::stringstream ss;
-        char buffer[257];
+        char buffer[2048];
         ssize_t bytes = 0;
 
-        while ((bytes = read(fd[PARENT_READ], buffer, 256)) > 0) {
-            if (0 < bytes && bytes <= 256) {
-                buffer[bytes] = '\0';
-            }
-            buffer[256] = '\0';
-
-            ss << buffer;
+        while ((bytes = read(fd[PARENT_READ], buffer, 2048)) > 0) {
+            ss.write(buffer, bytes);
         }
 
         // Cleanup after use
         close(fd[PARENT_WRITE]);
         close(fd[PARENT_READ]);
-        
+
         return ss.str();
     }
 }
