@@ -27,17 +27,27 @@ void robot::Config::write_to_file(const std::string &file_path)
 template <>
 int robot::Config::get<int>(const std::string &key)
 {
+    if (!json.isMember(key)) {
+        throw robot::InvalidKeyException(key);
+    };
+
     return json[key].asInt();
 }
 
 template <>
 std::string robot::Config::get<std::string>(const std::string &key)
 {
+    if (!json.isMember(key)) {
+        throw robot::InvalidKeyException(key);
+    };
     return json[key].asString();
 }
 
 template <>
 double robot::Config::get<double>(const std::string &key)
 {
+    if (!json.isMember(key)) {
+        throw robot::InvalidKeyException(key);
+    };
     return json[key].asDouble();
 }

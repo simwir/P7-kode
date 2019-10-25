@@ -6,6 +6,14 @@
 #include <string>
 
 namespace robot {
+class InvalidKeyException : public std::exception {
+    std::string key;
+
+  public:
+    InvalidKeyException(const std::string &key) : key(key){};
+    const char *what() const noexcept { return ("Key not found: " + key).c_str(); };
+};
+
 class Config {
     Json::Value json;
 

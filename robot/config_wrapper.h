@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void set_config_path(char* file_path);
+void set_config_path(char *file_path);
 int number_of_stations();
 int number_of_end_stations();
 int number_of_robots();
