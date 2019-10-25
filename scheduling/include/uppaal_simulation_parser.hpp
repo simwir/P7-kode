@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <iostream>
 
 namespace scheduling {
 
@@ -28,22 +29,18 @@ public:
 struct Run {
     int number;
     std::vector<std::pair<double, int>> values;
-    
-    Run(int number, std::vector<std::pair<double, int>> values) : number(number), values(values) { }
 };
 
 struct SimulationValue {
     std::string name;
     std::vector<Run> runs;
-    
-    SimulationValue(std::string name, std::vector<Run> runs) : name(name), runs(runs) { }
 };
 
 class UppaalSimulationParser {
 public:
     std::vector<SimulationValue> parse(std::string result, int formula);
 private:
-    SimulationValue parseValue(std::stringstream& ss, std::string& line);
+    SimulationValue parseValue(std::istream& ss, std::string& line);
 };
     
 }

@@ -3,13 +3,8 @@
 #include <uppaal_simulation_parser.hpp>
 
 std::vector<scheduling::SimulationValue> scheduling::UppaalSimulationParser::parse(std::string result, int formula) {
-    std::stringstream verifyStart;
-    verifyStart << "Verifying formula " << formula;
-    std::stringstream verifyStop;
-    verifyStop << "Verifying formula " << (formula + 1);
-    
-    int startIndex = result.find(verifyStart.str());
-    int stopIndex = result.find(verifyStop.str()); // Equal to std::string::npos if not found.
+    int startIndex = result.find("Verifying formula " + std::to_string(formula).str());
+    int stopIndex = result.find("Verifying formula " + std::to_string(formula + 1).str()); // Equal to std::string::npos if not found.
     
     if (stopIndex == std::string::npos) {
         result = result.substr(startIndex);
@@ -18,7 +13,7 @@ std::vector<scheduling::SimulationValue> scheduling::UppaalSimulationParser::par
         result = result.substr(startIndex, stopIndex - startIndex);
     }
     
-    std::stringstream ss(result);
+    std::stringstream ss{result};
     std::vector<scheduling::SimulationValue> values;
     
     std::string line;
@@ -30,7 +25,7 @@ std::vector<scheduling::SimulationValue> scheduling::UppaalSimulationParser::par
     }
     
     std::getline(ss, line);
-    while (line.compare("") != 0) {
+    while (line.size() > 0) {
         values.push_back(parseValue(ss, line));
         
         if (ss.eof()) {
@@ -41,13 +36,14 @@ std::vector<scheduling::SimulationValue> scheduling::UppaalSimulationParser::par
     return values;
 }
 
-scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::stringstream& ss, std::string& line) {
+scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::istream& ss, std::string& line) {
     std::string name = line.substr(0, line.length() - 1);
     std::vector<scheduling::Run> runs;
     
+    // Read run
     std::getline(ss, line);
     
-    while (line.compare("") != 0 && line.at(0) == '[') {
+    while (line.size() > 0 && line.at(0) == '[') {
         // Find all (t, n) pairs
         int state = 0;
         std::stringstream time;
@@ -167,14 +163,15 @@ scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::
             }
         }
         
-        runs.push_back(scheduling::Run(std::stoi(run_number.str()), values));
+        runs.push_back(scheduling::Run{std::stoi(run_number.str()), values});
         
         if (ss.eof()) {
             break;
         }
         
+        // Read next run
         std::getline(ss, line);
     }
     
-    return scheduling::SimulationValue(name, runs);
+    return scheduling::SimulationValue{name, runs};
 }

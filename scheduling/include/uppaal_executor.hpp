@@ -6,17 +6,25 @@
 
 namespace scheduling {
 
-struct SchedulingException : public std::exception {
-     const char* what() const noexcept { return "Could not run scheduling"; }
+class SchedulingException : public std::exception {
+    std::string message;
+public:
+    SchedulingException(const std::string& inmessage){
+        message = inmessage;
+    }
+
+    const char* what() const noexcept override{
+        return message.c_str();
+    }
 };
 
 class UppaalExecutor {
 public:
-    UppaalExecutor(const char* model, const char* queries) : model(model), queries(queries) { }
+    UppaalExecutor(const char* modelPath, const char* queriesPath) : modelPath(modelPath), queriesPath(queriesPath) { }
     std::string execute();
 private:
-    const char* model;
-    const char* queries;
+    const char* modelPath;
+    const char* queriesPath;
 };
     
 }

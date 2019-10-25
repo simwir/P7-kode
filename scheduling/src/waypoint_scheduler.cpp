@@ -25,11 +25,7 @@ void scheduling::WaypointScheduler::addSubscriber(scheduling::WaypointScheduleSu
 }
 
 void scheduling::WaypointScheduler::run() {
-    while(true) {
-        if (shouldStop) {
-            break;
-        }
-
+    while(!shouldStop) {
         std::cout << "Starting a new waypoint scheduling.\n";
 
         std::cout << "Executing..." << std::endl;
