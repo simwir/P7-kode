@@ -9,12 +9,6 @@
 
 namespace scheduling {
 
-struct NameNotFoundException : public std::exception {
-    const char* what() const noexcept override{
-        return "Cannot find name";
-    }
-};
-
 enum class ActionType {
     Hold,
     Waypoint

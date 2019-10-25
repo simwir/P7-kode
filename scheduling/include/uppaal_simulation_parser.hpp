@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include <utility>
 
 namespace scheduling {
@@ -25,6 +26,12 @@ public:
     }
 };
 
+struct NameNotFoundException : public std::exception {
+    const char* what() const noexcept override{
+        return "Cannot find name";
+    }
+};
+
 struct Run {
     int number;
     std::vector<std::pair<double, int>> values;
@@ -42,6 +49,7 @@ struct SimulationValue {
 class UppaalSimulationParser {
 public:
     std::vector<SimulationValue> parse(std::string result, int formula);
+    std::queue<std::pair<double, int>> findFirstRunAsQueue(const std::vector<scheduling::SimulationValue>& values, const std::string& name);
 private:
     SimulationValue parseValue(std::stringstream& ss, std::string& line);
 };

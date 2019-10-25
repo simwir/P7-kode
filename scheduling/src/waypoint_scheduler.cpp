@@ -4,7 +4,6 @@
 #include <queue>
 #include <deque>
 #include <utility>
-#include <algorithm>
 
 #include <waypoint_scheduler.hpp>
 
@@ -46,25 +45,11 @@ void scheduling::WaypointScheduler::run() {
     }
 }
 
-std::queue<std::pair<double, int>> scheduling::WaypointScheduler::findFirstRunAsQueue(const std::vector<scheduling::SimulationValue>& values, const std::string& name) {
-    auto value = std::find_if(values.begin(), values.end(),
-        [&name](const scheduling::SimulationValue& val) {
-            return val.name.compare(name) == 0;
-        });
-        
-    if (value == values.end()) {
-        throw NameNotFoundException();
-    }
-        
-    scheduling::Run first_run = value->runs.at(0);
-    return std::queue<std::pair<double, int>>(std::deque<std::pair<double, int>>(first_run.values.begin(), first_run.values.end()));
-}
-
 std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(const std::vector<scheduling::SimulationValue>& values) {
     // Convert into queues
-    std::queue<std::pair<double, int>> cur_waypoint = findFirstRunAsQueue(values, "Robot.cur_waypoint");
-    std::queue<std::pair<double, int>> dest_waypoint = findFirstRunAsQueue(values, "Robot.dest_waypoint");
-    std::queue<std::pair<double, int>> hold = findFirstRunAsQueue(values, "Robot.Holding");
+    std::queue<std::pair<double, int>> cur_waypoint = parser.findFirstRunAsQueue(values, "Robot.cur_waypoint");
+    std::queue<std::pair<double, int>> dest_waypoint = parser.findFirstRunAsQueue(values, "Robot.dest_waypoint");
+    std::queue<std::pair<double, int>> hold = parser.findFirstRunAsQueue(values, "Robot.Holding");
 
     // Convert queues to schedules
     std::vector<scheduling::Action> schedule;

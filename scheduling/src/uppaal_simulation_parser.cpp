@@ -1,6 +1,22 @@
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include <uppaal_simulation_parser.hpp>
+
+
+std::queue<std::pair<double, int>> scheduling::UppaalSimulationParser::findFirstRunAsQueue(const std::vector<scheduling::SimulationValue>& values, const std::string& name) {
+    auto value = std::find_if(values.begin(), values.end(),
+        [&name](const scheduling::SimulationValue& val) {
+            return val.name.compare(name) == 0;
+        });
+        
+    if (value == values.end()) {
+        throw NameNotFoundException();
+    }
+        
+    scheduling::Run first_run = value->runs.at(0);
+    return std::queue<std::pair<double, int>>(std::deque<std::pair<double, int>>(first_run.values.begin(), first_run.values.end()));
+}
 
 std::vector<scheduling::SimulationValue> scheduling::UppaalSimulationParser::parse(std::string result, int formula) {
     std::stringstream verifyStart;
