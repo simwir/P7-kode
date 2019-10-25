@@ -21,14 +21,13 @@ public:
 
 class ReceiveException : public std::exception {
   int err;
+  std::string msg;
 
 public:
-  ReceiveException(int err) : err(err) { }
+    ReceiveException(int err) : err(err), msg("Could not read receive buffer: " + std::to_string(err)) { }
 
   const char* what() const noexcept {
-    std::stringstream ss;
-    ss << "Could not read receive buffer: " << err;
-    return ss.str().c_str();
+    return msg.c_str();
   }
 };
 
