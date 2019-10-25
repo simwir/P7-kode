@@ -50,7 +50,7 @@ std::shared_ptr<tcp::Connection> tcp::Server::accept() {
     throw tcp::AcceptException();
   }
   
-  auto con = std::make_shared(tcp::Connection{fd});
+  auto con = std::make_shared<tcp::Connection>(tcp::Connection{fd});
 
   clients.push_back(con->weak_from_this());
 
