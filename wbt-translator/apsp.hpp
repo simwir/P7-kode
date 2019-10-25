@@ -1,7 +1,7 @@
 #ifndef APSP_HPP
 #define APSP_HPP
-#include <map>
 #include "webots_parser.hpp"
+#include <map>
 
 struct apsp_result {
     std::map<int, std::map<int, double>> dist;

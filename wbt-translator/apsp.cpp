@@ -1,11 +1,10 @@
 #include "apsp.hpp"
 
+#include "distance_matrix.hpp"
 #include <cfloat>
 #include <sstream>
-#include "distance_matrix.hpp"
 
 // Algorithm from: https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
-
 apsp_result all_pairs_shortest_path(const AST& ast){
     apsp_result result;
 
@@ -68,13 +67,13 @@ std::string print_all_pairs_shortest_path_dist(const std::map<int, std::map<int,
     ss << "const int shortest_path_length[NUM_WAYPOINTS][NUM_WAYPOINTS] = {\n";
     for(size_t i = 0; i < num_waypoints; i++){
         ss << "  {";
-        for (size_t j = 0; j < num_waypoints; j++){
+        for (size_t j = 0; j < num_waypoints; j++) {
             ss << dist.at(i).at(j);
-            if (j < num_waypoints-1)
+            if (j < num_waypoints - 1)
                 ss << ",";
         }
         ss << "}";
-        if (i < num_waypoints-1)
+        if (i < num_waypoints - 1)
             ss << ",\n";
     }
     ss << "\n};\n";
