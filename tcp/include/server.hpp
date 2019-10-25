@@ -24,7 +24,7 @@ class Server {
  public:
   Server(int port, int backlog = DEFAULT_BACKLOG);
   ~Server();
-  Connection* accept();
+  Connection& accept();
   void close();
   int get_port();
 
@@ -32,7 +32,7 @@ class Server {
   int socket_fd;
   int port;
   bool open = true;
-  std::vector<Connection*> clients;
+  std::vector<std::weak_ptr<Connection>> clients;
 };
 }  // namespace tcp
 

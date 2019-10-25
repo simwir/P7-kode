@@ -35,7 +35,7 @@ tcp::Server::Server(int in_port, int backlog) {
   }
 }
 
-tcp::Connection* tcp::Server::accept() {
+std::shared_ptr<tcp::Connection> tcp::Server::accept() {
 
   if (!open) {
     throw ConnectionException("Connection not open");
@@ -50,11 +50,11 @@ tcp::Connection* tcp::Server::accept() {
     throw tcp::AcceptException();
   }
   
-  tcp::Connection* connection = new tcp::Connection(fd);
+  auto con = std::make_shared(tcp::Connection{fd});
 
-  clients.push_back(connection);
+  clients.push_back(con->weak_from_this());
 
-  return connection;
+  return con;
 }
 
 void tcp::Server::close() {
@@ -63,7 +63,9 @@ void tcp::Server::close() {
   }
   
   for (auto connection : clients) {
-    connection->open = false;
+    if (auto spt = connection.lock()) {
+      spt->open = false;
+    }
   }
 }
 
