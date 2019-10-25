@@ -9,8 +9,6 @@ namespace tcp {
 class Client : public Connection {
  public:
   Client(const std::string& host, const std::string& port);
-  ssize_t send(const std::string& message);
-  void close();
 
  private:
   std::string host;
