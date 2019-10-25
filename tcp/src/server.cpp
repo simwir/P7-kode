@@ -49,8 +49,7 @@ std::shared_ptr<tcp::Connection> tcp::Server::accept() {
   if (fd == -1) {
     throw tcp::AcceptException();
   }
-  
-  auto con = std::make_shared<tcp::Connection>(tcp::Connection{fd});
+  auto con = std::make_shared<tcp::Connection>(fd);
 
   clients.push_back(con->weak_from_this());
 
