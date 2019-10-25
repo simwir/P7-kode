@@ -7,16 +7,23 @@
 
 namespace robot {
 class Config {
-  Json::Value json;
+    Json::Value json;
 
- public:
-  Config();
-  Config(const std::string& file_path);
-  void load_config_file(const std::string& file_path);
+  public:
+    Config();
+    Config(const std::string &file_path);
+    void load_from_file(const std::string &file_path);
+    void write_to_file(const std::string &file_path);
 
-  template <typename T>
-  T get(const std::string& key);
+    template <typename T>
+    T get(const std::string &key);
+
+    template <typename T>
+    void set(const std::string &key, T value)
+    {
+        json[key] = value;
+    };
 };
-}  // namespace robot
+} // namespace robot
 
 #endif
