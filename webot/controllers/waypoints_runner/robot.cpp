@@ -105,19 +105,20 @@ void robot_controller::update_sensor_values()
 }
 
 void robot_controller::communicate(){
-    for (webots_server::Message message : server.get_messages()){
+    using namespace webots_server;
+    for (Message message : server.get_messages()){
         switch (message.type){
-        case webots_server::MessageType::get_position:
+        case MessageType::get_position:
             {
                 auto response = std::to_string(position.x) + "," + std::to_string(position.y);
-                server.send_message({response, webots_server::MessageType::get_position});
+                server.send_message({response, MessageType::get_position});
                 break;
             }
-        case webots_server::MessageType::set_destination:
+        case MessageType::set_destination:
             {
                 size_t split_pos = message.payload.find(",");
                 if (split_pos == std::string::npos){
-                    server.send_message({message.payload, webots_server::MessageType::not_understood});
+                    server.send_message({message.payload, MessageType::not_understood});
                     continue;
                 }
                 destination = {
