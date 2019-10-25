@@ -3,8 +3,10 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "server.hpp"
+
 
 namespace webots_server {
 
@@ -24,7 +26,7 @@ public:
 private:
     tcp::Server server;
     std::string robot_id;
-    int client_fd;
+    std::shared_ptr<tcp::Connection> client;
 };
 }
 #endif

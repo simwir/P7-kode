@@ -39,7 +39,7 @@
 ###
 ### ---- C++ Sources ----
 ### if your program uses several C++ source files:
-CXX_SOURCES = webots_server.cpp waypoints_runner.cpp robot.cpp lidar_wrapper.cpp geo/geo.cpp ../../../tcp/client.cpp ../../../tcp/receive.cpp ../../../tcp/send.cpp ../../../tcp/server.cpp
+CXX_SOURCES = webots_server.cpp waypoints_runner.cpp robot.cpp lidar_wrapper.cpp geo/geo.cpp ../../../tcp/src/client.cpp ../../../tcp/src/connection.cpp ../../../tcp/src/server.cpp
 ###
 ### ---- Compilation options ----
 ### if special compilation flags are necessary:
@@ -47,7 +47,7 @@ CFLAGS = -Wno-unused-result -std=c++17 -O0 -g -n -Wall -pedantic
 ###
 ### ---- Linked libraries ----
 ### if your program needs additional libraries:
-INCLUDE = -I"../../../tcp"
+INCLUDE = -I"../../../tcp/include"
 ### LIBRARIES = -L"/path/to/my/library" -lmy_library -lmy_other_library
 ###
 ### ---- Linking options ----

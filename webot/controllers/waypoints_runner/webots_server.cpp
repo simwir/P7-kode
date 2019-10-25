@@ -11,10 +11,9 @@ const std::string PDS_ADDR = "127.0.0.1";
 using namespace webots_server;
 
 webots_server::Server::Server(std::string id) : server(tcp::Server{0}), robot_id(id){
-    tcp::Client client{PDS_ADDR, PDS_PORT};
-    client.send("addRobot," + id + "," + std::to_string(server.get_port()));
-    client.close();
-    client_fd = server.accept();
+    tcp::Client port_discovery{PDS_ADDR, PDS_PORT};
+    port_discovery.send("addRobot," + id + "," + std::to_string(server.get_port()));
+    client = server.accept();
 }
 
 webots_server::Server::~Server(){
@@ -26,27 +25,27 @@ webots_server::Server::~Server(){
 }
 
 std::vector<Message> webots_server::Server::get_messages(){
-    std::vector<std::string> raw_messages = server.receive(client_fd, MSG_DONTWAIT); 
+    std::vector<std::string> raw_messages = client->receive(MSG_DONTWAIT); 
     std::vector<Message> messages;
-    std::cerr << "Getting messages" << std::endl;
     for (std::string raw_message : raw_messages){
         MessageType messageType;
         size_t split_pos = raw_message.find(",");
         if (split_pos == std::string::npos){
-            send_message(Message{raw_message, MessageType::not_understood});
-            continue;
-        }
-        std::cerr << "get_message substr 1. pos: " << split_pos << " len: " << raw_message.length();
-        std::string type = raw_message.substr(0, split_pos);
-        if (type == "get_position") {
-            messageType = MessageType::get_position;
-        } else if (type == "set_destination") {
-            messageType = MessageType::set_destination;
+            if (raw_message == "get_position") {
+                messageType = MessageType::get_position;
+            } else {
+                send_message(Message{raw_message, MessageType::not_understood});
+                continue;
+            }
         } else {
-            send_message(Message{raw_message, MessageType::not_understood});
-            continue;
+            std::string type = raw_message.substr(0, split_pos);
+            if (type == "set_destination") {
+                messageType = MessageType::set_destination;
+            } else {
+                send_message(Message{raw_message, MessageType::not_understood});
+                continue;
+            }
         }
-        std::cerr << "get_message substr 2.";
         messages.push_back(Message{raw_message.substr(split_pos + 1),
                                    messageType});
     }
@@ -65,6 +64,6 @@ void webots_server::Server::send_message(Message message){
     case MessageType::not_understood:
         payload = "not_understood," + message.payload;
     }
-    server.send(client_fd, payload);
+    client->send(payload);
 }
 
