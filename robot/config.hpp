@@ -18,7 +18,7 @@ class Config {
     Json::Value json;
 
   public:
-    Config();
+    Config(){};
     Config(const std::string &file_path);
     void load_from_file(const std::string &file_path);
     void write_to_file(const std::string &file_path);

@@ -3,10 +3,6 @@
 #include <fstream>
 #include <string>
 
-robot::Config::Config()
-{
-}
-
 robot::Config::Config(const std::string &file_path)
 {
     load_from_file(file_path);
