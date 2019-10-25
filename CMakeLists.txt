@@ -16,4 +16,4 @@ include_directories(
 )
 
 #add_subdirectory(validator)
-add_subdirectory(unit_test)
+add_subdirectory(tests)
