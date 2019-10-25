@@ -1,9 +1,9 @@
 #ifndef TCP_SERVER_HPP
 #define TCP_SERVER_HPP
 
-#include <list>
-#include <string>
 #include <vector>
+
+#include "connection.hpp"
 
 constexpr size_t DEFAULT_BACKLOG = 16;
 
@@ -23,17 +23,16 @@ struct ListenException : std::exception {
 class Server {
  public:
   Server(int port, int backlog = DEFAULT_BACKLOG);
-  int accept();
-  std::vector<std::string> receive(int client_fd, int flags = 0);
-  ssize_t send(int client_fd, std::string mesage);
+  ~Server();
+  Connection* accept();
   void close();
-  void close_client(int client_fd);
   int get_port();
 
  private:
   int socket_fd;
   int port;
-  std::list<int> clients;
+  bool open = true;
+  std::vector<Connection*> clients;
 };
 }  // namespace tcp
 

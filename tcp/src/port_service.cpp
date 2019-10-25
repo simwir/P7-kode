@@ -1,8 +1,5 @@
-#include "port_service.hpp"
-#include "exceptions/exceptions.hpp"
-#include "receive.hpp"
-#include "send.hpp"
-#include "server.hpp"
+#include <port_service.hpp>
+#include <connection.hpp>
 
 #include <assert.h>
 #include <iostream>
@@ -79,7 +76,7 @@ void remove_robot(int id, std::map<const int, int> &robot_map)
 }
 
 void callFunction(Function function, const std::vector<std::string> &parameters,
-                  std::map<const int, int> &robotMap, int client_fd)
+                  std::map<const int, int> &robotMap, tcp::Connection* connection)
 {
     try {
         switch (function) {
@@ -115,19 +112,19 @@ void callFunction(Function function, const std::vector<std::string> &parameters,
     }
     catch (const std::invalid_argument &e) {
         std::string message = "Invalid argument";
-        tcp::send(client_fd, message + e.what());
+        connection->send(message + e.what());
     }
     catch (const IdAlreadyDefinedException &e) {
         std::string message = "Tried to add robot, but the id was already in the map. Id: : ";
-        tcp::send(client_fd, message + e.what());
+        connection->send(message + e.what());
     }
 }
 
-void parseMessage(int client_fd, std::map<const int, int> &robot_map)
+void parseMessage(tcp::Connection* connection, std::map<const int, int> &robot_map)
 {
     std::vector<std::string> result;
     try {
-        auto messages = tcp::receive(client_fd, MSG_DONTWAIT);
+        auto messages = connection->receive(MSG_DONTWAIT);
         for (const std::string &message : messages) {
             std::cout << message << "\n" << std::endl;
             result = split(message, ',');
@@ -136,35 +133,27 @@ void parseMessage(int client_fd, std::map<const int, int> &robot_map)
         }
     }
     catch (tcp::MalformedMessageException &e) {
-        tcp::send(client_fd, e.what());
+        connection->send(e.what());
     }
     catch (tcp::UnreadableFunctionException &e) {
-        tcp::send(client_fd, e.what());
+        connection->send(e.what());
     }
     catch (tcp::InvalidParametersException &e) {
-        tcp::send(client_fd, e.what());
+        connection->send(e.what());
     }
-    close(client_fd);
+    
+    // TODO: Fix delete problem
+    delete connection;
 }
 
-port_service::port_service(int port)
-    : server(tcp::Server(port))
-{
-}
-
-port_service::~port_service()
-{
-    server.close();
-}
-
-void port_service::start_server()
+void tcp::PortService::start()
 {
     std::cout << "Waiting for connections on port: " << server.get_port() << std::endl;
     while (true) {
         try {
-            int client_fd = server.accept();
-            std::thread t1{parseMessage, client_fd, std::ref(robotMap)};
-            t1.detach();
+            tcp::Connection* connection = server.accept();
+            std::thread thread{parseMessage, connection, std::ref(robotMap)};
+            thread.detach();
         }
         catch (tcp::AcceptException &e) {
             std::cerr << e.what() << "\n";
@@ -174,6 +163,6 @@ void port_service::start_server()
 
 int main(int argc, char **argv)
 {
-    port_service portService(4444);
-    portService.start_server();
+    PortService portService(4444);
+    portService.start();
 }
