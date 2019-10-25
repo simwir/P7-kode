@@ -119,5 +119,6 @@ void tcp::Connection::close()
 
 tcp::Connection::~Connection()
 {
-    close();
+    if (open)
+        close();
 }

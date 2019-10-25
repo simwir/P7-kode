@@ -21,17 +21,16 @@ class SendException : public std::exception {
 };
 
 class ReceiveException : public std::exception {
-    std::string message;
+    int err;
+    std::string msg;
 
   public:
     ReceiveException(int err)
+        : err(err), msg("Could not read receive buffer: " + std::to_string(err))
     {
-        std::stringstream ss;
-        ss << "Could not read receive buffer: " << err;
-        message = ss.str();
     }
 
-    const char *what() const noexcept { return message.c_str(); }
+    const char *what() const noexcept { return msg.c_str(); }
 };
 
 struct MalformedMessageException : public std::exception {
