@@ -4,12 +4,13 @@
 #include <thread>
 #include <vector>
 #include <queue>
-#include <uppaal_executor.hpp>
-#include <uppaal_simulation_parser.hpp>
+#include <memory>
+#include "uppaal_executor.hpp"
+#include "uppaal_simulation_parser.hpp"
 
 namespace scheduling {
 
-class StationScheduleSubscriber {
+    class StationScheduleSubscriber : public std::enable_shared_from_this<StationScheduleSubscriber> {
 public:
     virtual void newSchedule(const std::vector<int>& schedule) = 0;
     virtual ~StationScheduleSubscriber() { }
@@ -20,7 +21,7 @@ public:
     StationScheduler() : executor("station_scheduling.xml", "station_scheduling.q") { }
     void start();
     void stop();
-    void addSubscriber(StationScheduleSubscriber& subscriber);
+    void addSubscriber(std::shared_ptr<StationScheduleSubscriber> subscriber);
 
 private:
     void run();
@@ -28,7 +29,7 @@ private:
     void emitSchedule(const std::vector<int>& schedule);
 
     std::thread worker;
-    std::vector<StationScheduleSubscriber*> subscribers;
+    std::vector<std::weak_ptr<StationScheduleSubscriber>> subscribers;
     bool shouldStop;
 
     UppaalExecutor executor;

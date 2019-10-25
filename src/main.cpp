@@ -3,15 +3,17 @@
 
 // Other includes
 #include <iostream>
+#include <memory>
 
-#include <waypoint_scheduler.hpp>
-#include <station_scheduler.hpp>
+#include "station_scheduler.hpp"
+#include "waypoint_scheduler.hpp"
 
-class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber  {
-    void newSchedule(const std::vector<scheduling::Action>& schedule) {
+class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber {
+    void newSchedule(const std::vector<scheduling::Action> &schedule)
+    {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new waypoint schedule at " << std::asctime(std::localtime(&result));
-        
+
         for (auto action : schedule) {
             std::cout << "Action: ";
             if (action.type == scheduling::ActionType::Hold) {
@@ -28,45 +30,47 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
     }
 };
 
-class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber  {
-    void newSchedule(const std::vector<int>& schedule) {
+class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber {
+    void newSchedule(const std::vector<int> &schedule)
+    {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new station schedule at " << std::asctime(std::localtime(&result));
-        
+
         std::cout << "Stations: ";
         for (auto station : schedule) {
             std::cout << station << " ";
         }
-        
+
         std::cout << std::endl;
     }
 };
 
-int main() {
+int main()
+{
     std::cout << "Starting...\n";
-    
+
     // Waypoints
     scheduling::WaypointScheduler waypointScheduler;
     LogWaypointScheduleSubscriber logWaypointSubscriber;
-    
+
     std::cout << "Adding waypoint subscriber\n";
     waypointScheduler.addSubscriber(logWaypointSubscriber);
-    
+
     std::cout << "Starting waypoint scheduler\n";
     waypointScheduler.start();
-    
+
     // Stations
     scheduling::StationScheduler stationScheduler;
-    LogStationScheduleSubscriber logStationSubscriber;
-    
+    auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
+
     std::cout << "Adding station subscriber\n";
-    stationScheduler.addSubscriber(logStationSubscriber);
-    
+    stationScheduler.addSubscriber(logStationSubscriber->shared_from_this());
+
     std::cout << "Starting station scheduler\n";
     stationScheduler.start();
-    
+
     sleep(120);
-    
+
     std::cout << "Stopping schedulers\n";
     waypointScheduler.stop();
     stationScheduler.stop();

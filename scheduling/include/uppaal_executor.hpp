@@ -18,7 +18,6 @@ private:
     const char* model;
     const char* queries;
 };
-    
 }
 
 #endif // UPPAAL_EXECUTOR_HPP
