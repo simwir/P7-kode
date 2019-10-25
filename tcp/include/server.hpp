@@ -2,6 +2,7 @@
 #define TCP_SERVER_HPP
 
 #include <vector>
+#include <memory>
 
 #include "connection.hpp"
 
@@ -27,7 +28,7 @@ class Server {
  public:
   Server(int port, int backlog = DEFAULT_BACKLOG);
   ~Server();
-  Connection& accept();
+  std::shared_ptr<tcp::Connection> accept();
   void close();
   int get_port();
 
