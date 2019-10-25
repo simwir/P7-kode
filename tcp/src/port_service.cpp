@@ -12,7 +12,6 @@
 
 std::mutex robot_map_lock;
 
-// This function is duplicated from feature/tcp-class
 std::vector<std::string> split(const std::string &input, char delimiter)
 {
     std::vector<std::string> result;
@@ -58,14 +57,14 @@ void add_robot(int id, int port, std::map<const int, int> &robot_map)
     }
 }
 
-void get_robot(int id, std::map<const int, int> &robot_map, int fd)
+void get_robot(int id, std::map<const int, int> &robot_map, std::shared_ptr<tcp::Connection> connection)
 {
     try {
         const std::string message = std::to_string(robot_map.at(id));
-        tcp::send(fd, message);
+        connection->send(message);
     }
     catch (std::out_of_range &e) {
-        tcp::send(fd, "No robot with Id " + std::to_string(id));
+        connection->send("No robot with Id " + std::to_string(id));
     }
 }
 
@@ -76,7 +75,7 @@ void remove_robot(int id, std::map<const int, int> &robot_map)
 }
 
 void callFunction(Function function, const std::vector<std::string> &parameters,
-                  std::map<const int, int> &robotMap, tcp::Connection* connection)
+                  std::map<const int, int> &robotMap, std::shared_ptr<tcp::Connection> connection)
 {
     try {
         switch (function) {
@@ -115,12 +114,12 @@ void callFunction(Function function, const std::vector<std::string> &parameters,
         connection->send(message + e.what());
     }
     catch (const IdAlreadyDefinedException &e) {
-        std::string message = "Tried to add robot, but the id was already in the map. Id: : ";
+        std::string message = "Tried to add robot, but the id was already in the map. Id: ";
         connection->send(message + e.what());
     }
 }
 
-void parseMessage(tcp::Connection* connection, std::map<const int, int> &robot_map)
+void parseMessage(std::shared_ptr<tcp::Connection> connection, std::map<const int, int> &robot_map)
 {
     std::vector<std::string> result;
     try {
@@ -141,9 +140,6 @@ void parseMessage(tcp::Connection* connection, std::map<const int, int> &robot_m
     catch (tcp::InvalidParametersException &e) {
         connection->send(e.what());
     }
-    
-    // TODO: Fix delete problem
-    delete connection;
 }
 
 void tcp::PortService::start()
