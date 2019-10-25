@@ -20,8 +20,8 @@ void scheduling::WaypointScheduler::stop() {
     worker.join();
 }
 
-void scheduling::WaypointScheduler::addSubscriber(scheduling::WaypointScheduleSubscriber& subscriber) {
-    subscribers.push_back(&subscriber);
+void scheduling::WaypointScheduler::addSubscriber(std::shared_ptr<scheduling::WaypointScheduleSubscriber> subscriber) {
+    subscribers.push_back(subscriber->weak_from_this());
 }
 
 void scheduling::WaypointScheduler::run() {
@@ -121,6 +121,8 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(con
 
 void scheduling::WaypointScheduler::emitSchedule(const std::vector<scheduling::Action>& schedule) {
     for (auto subscriber : subscribers) {
-        subscriber->newSchedule(schedule);
+        if (auto sub = subscriber.lock()) {
+            sub->newSchedule(schedule);
+        }
     }
 }

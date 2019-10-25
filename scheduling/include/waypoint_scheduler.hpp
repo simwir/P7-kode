@@ -4,8 +4,9 @@
 #include <thread>
 #include <vector>
 #include <queue>
-#include <uppaal_executor.hpp>
-#include <uppaal_simulation_parser.hpp>
+#include <memory>
+#include "uppaal_executor.hpp"
+#include "uppaal_simulation_parser.hpp"
 
 namespace scheduling {
 
@@ -27,7 +28,7 @@ struct Action {
     int value;
 };
 
-class WaypointScheduleSubscriber {
+class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {
 public:
     virtual void newSchedule(const std::vector<Action>& schedule) = 0;
     virtual ~WaypointScheduleSubscriber() { }
@@ -38,7 +39,7 @@ public:
     WaypointScheduler() : executor("waypoint_scheduling.xml", "waypoint_scheduling.q") { }
     void start();
     void stop();
-    void addSubscriber(WaypointScheduleSubscriber& subscriber);
+    void addSubscriber(std::shared_ptr<WaypointScheduleSubscriber> subscriber);
 
 private:
     void run();
@@ -47,7 +48,7 @@ private:
     void emitSchedule(const std::vector<Action>& schedule);
 
     std::thread worker;
-    std::vector<WaypointScheduleSubscriber*> subscribers;
+    std::vector<std::weak_ptr<WaypointScheduleSubscriber>> subscribers;
     bool shouldStop;
 
     UppaalExecutor executor;

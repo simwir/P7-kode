@@ -30,11 +30,11 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
 int main() {
     std::cout << "Starting...\n";
     scheduling::WaypointScheduler scheduler;
-    LogWaypointScheduleSubscriber logSubscriber;
+    auto logSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
     
     
     std::cout << "Adding subscriber\n";
-    scheduler.addSubscriber(logSubscriber);
+    scheduler.addSubscriber(logSubscriber->shared_from_this());
     
     std::cout << "Starting waypoint scheduler\n";
     scheduler.start();
