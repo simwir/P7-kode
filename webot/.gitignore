@@ -1,3 +1,8 @@
 # Webot
 *.cache
 *.wbproj
+
+# c++
+*.o
+*.out
+*.d

@@ -16,6 +16,7 @@
 //#include "points.hpp"
 #include "lidar_wrapper.hpp"
 #include "geo/geo.hpp"
+#include "tcp.hpp"
 
 constexpr auto NUM_SENSORS = 8;
 constexpr auto ANGLE_SENSITIVITY = 0.8;
@@ -78,6 +79,8 @@ class robot_controller {
     std::vector<std::optional<double>> lidar_range_values;
     std::vector<geo::RelPoint> point_cloud;
     //    std::vector<webots::LidarPoint> lidar_point_cloud;
+
+    tcp::Server server;
 
     bool has_destination = false;
     geo::GlobalPoint destination;

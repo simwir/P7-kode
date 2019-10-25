@@ -176,6 +176,7 @@ Elisa3 {
   translation -0.27832799999999996 -0.024383 0.010863999999999999
   rotation 0.018348277990769116 0.996114800629578 -0.0861315543890231 -0.4290131621667231
   controller "waypoints_runner"
+  supervisor TRUE
   extensionSlot [
     Group {
       children [
@@ -198,4 +199,5 @@ Elisa3 {
       ]
     }
   ]
+  id 1
 }

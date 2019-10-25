@@ -37,8 +37,19 @@ void robot_controller::dump_readings_to_csv(const std::string &pcfilename,
     }
 }
 
+int getRobotId(webots::Supervisor *robot){
+    auto self = robot->getSelf();
+    if (self == nullptr){
+        std::cerr << "robot->getSelf() returned 0. Please restart webots";
+        exit(1);
+    }
+    return self->getField("id")->getSFInt32();
+}
+
 robot_controller::robot_controller(webots::Supervisor *robot)
-    : time_step((int)robot->getBasicTimeStep()), robot(robot)
+    : time_step((int)robot->getBasicTimeStep()),
+      robot(robot),
+      server(tcp::Server{getRobotId(robot)})
 {
     left_motor = robot->getMotor("left wheel motor");
     right_motor = robot->getMotor("right wheel motor");
