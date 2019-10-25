@@ -42,7 +42,7 @@ public:
   }
 };
 
-class Connection {
+class Connection : public std::enable_shared_from_this<Connection> {
 public:
     Connection(int fd) : fd(fd) { ready = true; }
     Connection() { }
