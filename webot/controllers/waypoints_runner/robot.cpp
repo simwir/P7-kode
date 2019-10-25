@@ -1,5 +1,6 @@
 #include "robot.hpp"
 #include "geo/geo.hpp"
+#include "server.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -49,7 +50,7 @@ int getRobotId(webots::Supervisor *robot){
 robot_controller::robot_controller(webots::Supervisor *robot)
     : time_step((int)robot->getBasicTimeStep()),
       robot(robot),
-      server(tcp::Server{getRobotId(robot)})
+      server(std::to_string(getRobotId(robot)))
 {
     left_motor = robot->getMotor("left wheel motor");
     right_motor = robot->getMotor("right wheel motor");
@@ -103,12 +104,42 @@ void robot_controller::update_sensor_values()
     }
 }
 
+void robot_controller::communicate(){
+    for (webots_server::Message message : server.get_messages()){
+        switch (message.type){
+        case webots_server::MessageType::get_position:
+            {
+                auto response = std::to_string(position.x) + "," + std::to_string(position.y);
+                server.send_message({response, webots_server::MessageType::get_position});
+                break;
+            }
+        case webots_server::MessageType::set_destination:
+            {
+                size_t split_pos = message.payload.find(",");
+                if (split_pos == std::string::npos){
+                    server.send_message({message.payload, webots_server::MessageType::not_understood});
+                    continue;
+                }
+                std::cerr << "set destination split." << std::endl;
+                destination = {
+                                std::stod(message.payload.substr(0,split_pos)),
+                                std::stod(message.payload.substr(split_pos + 1))
+                };
+                break;
+            }
+        default:
+            break;
+        }
+    }
+}
+
 void robot_controller::run_simulation()
 {
     set_destination(geo::GlobalPoint{-0.68, 0.79});
     while (robot->step(time_step) != -1) {
         // std::cout << lidar.get_number_of_points() << std::endl;
         num_steps++;
+        communicate();
         update_sensor_values();
         /*if (!has_destination)
           break;*/

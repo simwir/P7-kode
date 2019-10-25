@@ -39,7 +39,7 @@
 ###
 ### ---- C++ Sources ----
 ### if your program uses several C++ source files:
-CXX_SOURCES = waypoints_runner.cpp robot.cpp lidar_wrapper.cpp geo/geo.cpp ../../../tcp/client.cpp ../../../tcp/receive.cpp ../../../tcp/send.cpp ../../../tcp/server.cpp
+CXX_SOURCES = webots_server.cpp waypoints_runner.cpp robot.cpp lidar_wrapper.cpp geo/geo.cpp ../../../tcp/client.cpp ../../../tcp/receive.cpp ../../../tcp/send.cpp ../../../tcp/server.cpp
 ###
 ### ---- Compilation options ----
 ### if special compilation flags are necessary:
