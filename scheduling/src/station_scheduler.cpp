@@ -24,7 +24,7 @@ void StationScheduler::stop()
 
 void StationScheduler::addSubscriber(std::shared_ptr<StationScheduleSubscriber> subscriber)
 {
-    subscribers.push_back(subscriber);
+    subscribers.push_back(subscriber->weak_from_this());
 }
 
 void StationScheduler::run()
