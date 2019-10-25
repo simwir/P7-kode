@@ -1,8 +1,8 @@
 // POSIX includes
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <errno.h>
 
 // Other includes
 #include <iostream>
@@ -16,7 +16,8 @@ constexpr int PARENT_WRITE = 3;
 
 constexpr int NO_FLAGS = 0;
 
-std::string scheduling::UppaalExecutor::execute() {
+std::string scheduling::UppaalExecutor::execute()
+{
     pid_t pid;
     int fd[4];
 
@@ -32,14 +33,15 @@ std::string scheduling::UppaalExecutor::execute() {
         close(fd[PARENT_WRITE]);
         close(fd[PARENT_READ]);
 
-        const char* command = "verifyta";
+        const char *command = "verifyta";
 
         int ret = execlp(command, command, modelPath, queriesPath, nullptr);
 
         if (ret == -1) {
-            throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) + ".");
+            throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) +
+                                      ".");
         }
-        
+
         return "";
     }
     else {
@@ -58,10 +60,10 @@ std::string scheduling::UppaalExecutor::execute() {
             // Cleanup after use
             close(fd[PARENT_WRITE]);
             close(fd[PARENT_READ]);
-            
+
             throw SchedulingException{"Could not start verifyta."};
         }
-        
+
         // Read all from pipe
         std::stringstream ss;
         char buffer[2048];
@@ -74,7 +76,7 @@ std::string scheduling::UppaalExecutor::execute() {
         // Cleanup after use
         close(fd[PARENT_WRITE]);
         close(fd[PARENT_READ]);
-        
+
         return ss.str();
     }
 }

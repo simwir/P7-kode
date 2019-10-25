@@ -1,29 +1,24 @@
 #ifndef UPPAAL_SIMULATION_PARSER_H
 #define UPPAAL_SIMULATION_PARSER_H
 
-#include <string>
-#include <vector>
-#include <utility>
 #include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace scheduling {
 
 struct FormulaNotSatisfiedException : public std::exception {
-    const char* what() const noexcept override{
-        return "Formula not satisfied";
-    }
+    const char *what() const noexcept override { return "Formula not satisfied"; }
 };
 
 class SimulationParseException : public std::exception {
     std::string message;
-public:
-    SimulationParseException(const std::string& inmessage){
-        message = inmessage;
-    }
 
-    const char* what() const noexcept override{
-        return message.c_str();
-    }
+  public:
+    SimulationParseException(const std::string &inmessage) { message = inmessage; }
+
+    const char *what() const noexcept override { return message.c_str(); }
 };
 
 struct Run {
@@ -37,12 +32,13 @@ struct SimulationValue {
 };
 
 class UppaalSimulationParser {
-public:
+  public:
     std::vector<SimulationValue> parse(std::string result, int formula);
-private:
-    SimulationValue parseValue(std::istream& ss, std::string& line);
+
+  private:
+    SimulationValue parseValue(std::istream &ss, std::string &line);
 };
-    
-}
+
+} // namespace scheduling
 
 #endif // UPPAAL_SIMULATION_PARSER_H
