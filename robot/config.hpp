@@ -7,11 +7,11 @@
 
 namespace robot {
 class InvalidKeyException : public std::exception {
-    std::string key;
+    std::string message;
 
   public:
-    InvalidKeyException(const std::string &key) : key(key){};
-    const char *what() const noexcept { return ("Key not found: " + key).c_str(); };
+    InvalidKeyException(const std::string &key) { message = "Key not found: " + key; };
+    const char *what() const noexcept { return message.c_str(); };
 };
 
 class Config {
