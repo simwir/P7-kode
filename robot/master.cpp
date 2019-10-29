@@ -6,13 +6,27 @@
 #include "../wbt-translator/apsp.hpp"
 #include "../wbt-translator/distance_matrix.hpp"
 
-robot::Master::Master(){
+robot::Master::Master(int robot_id){
+    std::string port_to_controller;
+
+    tcp::Client PDSClient = tcp::Client("localhost", "4444"); 
+    PDSClient.send("get_robot," + robot_id);
+    std::vector<std::string> recieved_strings = PDSClient.receive(0);
+    if (recieved_strings.size == 1)
+    {
+        port_to_controller = recieved_strings[0];
+    }
+    else{
+        // TODO: throw appropiate exception 
+    }
+    
+    
     //TODO: Port discovery service port: 4444. Connect to this to get port for controller
     //TODO: Create clients to controller and broadcaster
     //tcp::Client client_webots = tcp::Client(host, port);
 }
 
-void robot::Master::load_webots_to_config(std::string input_file){
+void robot::Master::load_webots_to_config(std::string input_file, std::string output_file){
     std::ifstream infile(input_file);
     if (!infile.is_open()) {
         std::cerr << "The file " << input_file << " could not be opened.\n";

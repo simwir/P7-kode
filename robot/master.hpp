@@ -7,8 +7,8 @@
 namespace robot {
 class Master{
     public:
-        Master();
-        void load_webots_to_config(std::string input_file);
+        Master(int robot_id);
+        void load_webots_to_config(std::string input_file, std::string output_file);
         
 
     private:
