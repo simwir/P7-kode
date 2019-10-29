@@ -57,7 +57,7 @@ void add_robot(int id, int port, std::map<const int, int> &robot_map)
     }
 }
 
-void get_robot(int id, std::map<const int, int> &robot_map, std::shared_ptr<tcp::Connection> connection)
+void get_robot(int id, const std::map<const int, int> &robot_map, std::shared_ptr<tcp::Connection> connection)
 {
     try {
         const std::string message = std::to_string(robot_map.at(id));
