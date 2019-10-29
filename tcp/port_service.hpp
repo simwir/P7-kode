@@ -20,7 +20,7 @@ public:
 
 class port_service {
 public:
-    port_service(int port);
+    explicit port_service(int port);
     void start_server();
     ~port_service();
 private:
