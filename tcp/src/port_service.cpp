@@ -121,14 +121,14 @@ void call_function(Function function, const std::vector<std::string> &parameters
 
 void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<const int, int> &robot_map)
 {
-    std::vector<std::string> result;
+    std::vector<std::string> args;
     try {
         auto messages = connection->receive(MSG_DONTWAIT);
         for (const std::string &message : messages) {
             std::cout << message << "\n" << std::endl;
-            result = split(message, ',');
-            Function function = parse_function(result[0]);
-            call_function(function, result, robot_map, client_fd);
+            args = split(message, ',');
+            Function function = parse_function(args[0]);
+            call_function(function, args, robot_map, client_fd);
         }
     }
     catch (tcp::MalformedMessageException &e) {
