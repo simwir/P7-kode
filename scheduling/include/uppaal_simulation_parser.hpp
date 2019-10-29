@@ -21,22 +21,27 @@ class SimulationParseException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-struct Run {
-    int number;
-    std::vector<std::pair<double, int>> values;
+struct TimeValuePair {
+    double time;
+    int value;
 };
 
-struct SimulationValue {
+struct SimulationTrace {
+    int number;
+    std::vector<TimeValuePair> values;
+};
+
+struct SimulationExpression {
     std::string name;
-    std::vector<Run> runs;
+    std::vector<SimulationTrace> runs;
 };
 
 class UppaalSimulationParser {
   public:
-    std::vector<SimulationValue> parse(std::string result, int formula);
+    std::vector<SimulationExpression> parse(std::string result, int formula);
 
   private:
-    SimulationValue parseValue(std::istream &ss, std::string &line);
+    SimulationExpression parseValue(std::istream &ss, std::string &line);
 };
 
 } // namespace scheduling

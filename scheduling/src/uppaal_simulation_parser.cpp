@@ -2,7 +2,7 @@
 #include <sstream>
 #include <uppaal_simulation_parser.hpp>
 
-std::vector<scheduling::SimulationValue>
+std::vector<scheduling::SimulationExpression>
 scheduling::UppaalSimulationParser::parse(std::string result, int formula)
 {
     int startIndex = result.find("Verifying formula " + std::to_string(formula));
@@ -18,7 +18,7 @@ scheduling::UppaalSimulationParser::parse(std::string result, int formula)
     }
 
     std::stringstream ss{result};
-    std::vector<scheduling::SimulationValue> values;
+    std::vector<scheduling::SimulationExpression> values;
 
     std::string line;
     std::getline(ss, line); // Verifying formula \d+ at <file:line>
@@ -40,11 +40,11 @@ scheduling::UppaalSimulationParser::parse(std::string result, int formula)
     return values;
 }
 
-scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::istream &ss,
-                                                                           std::string &line)
+scheduling::SimulationExpression scheduling::UppaalSimulationParser::parseValue(std::istream &ss,
+                                                                                std::string &line)
 {
     std::string name = line.substr(0, line.length() - 1);
-    std::vector<scheduling::Run> runs;
+    std::vector<scheduling::SimulationTrace> runs;
 
     // Read run
     std::getline(ss, line);
@@ -55,7 +55,7 @@ scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::
         std::stringstream time;
         std::stringstream value;
         std::stringstream run_number;
-        std::vector<std::pair<double, int>> values;
+        std::vector<scheduling::TimeValuePair> values;
 
         // Regex for this (ignore whitespace) \[\d+\]: ( \( \d+(\.\d+)? , \d+ \) )*
         for (char &c : line) {
@@ -158,7 +158,7 @@ scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::
                     time.str(std::string());
                     value.str(std::string());
 
-                    values.push_back(std::make_pair(time_double, value_int));
+                    values.push_back(scheduling::TimeValuePair{time_double, value_int});
 
                     state = 4;
                 }
@@ -169,7 +169,7 @@ scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::
             }
         }
 
-        runs.push_back(scheduling::Run{std::stoi(run_number.str()), values});
+        runs.push_back(scheduling::SimulationTrace{std::stoi(run_number.str()), values});
 
         if (ss.eof()) {
             break;
@@ -179,5 +179,5 @@ scheduling::SimulationValue scheduling::UppaalSimulationParser::parseValue(std::
         std::getline(ss, line);
     }
 
-    return scheduling::SimulationValue{name, runs};
+    return scheduling::SimulationExpression{name, runs};
 }

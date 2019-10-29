@@ -1,10 +1,10 @@
 #ifndef WAYPOINT_SCHEDULER_HPP
 #define WAYPOINT_SCHEDULER_HPP
 
-#include <queue>
-#include <memory>
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
+#include <memory>
+#include <queue>
 #include <thread>
 #include <vector>
 
@@ -24,9 +24,9 @@ struct Action {
 };
 
 class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {
-public:
-    virtual void newSchedule(const std::vector<Action>& schedule) = 0;
-    virtual ~WaypointScheduleSubscriber() { }
+  public:
+    virtual void newSchedule(const std::vector<Action> &schedule) = 0;
+    virtual ~WaypointScheduleSubscriber() {}
 };
 
 class WaypointScheduler {
@@ -35,12 +35,13 @@ class WaypointScheduler {
     void start();
     void stop();
     void addSubscriber(std::shared_ptr<WaypointScheduleSubscriber> subscriber);
+
   private:
     void run();
     std::vector<scheduling::Action>
-    convertResult(const std::vector<scheduling::SimulationValue> &values);
-    std::queue<std::pair<double, int>>
-    findFirstRunAsQueue(const std::vector<scheduling::SimulationValue> &values,
+    convertResult(const std::vector<scheduling::SimulationExpression> &values);
+    std::queue<scheduling::TimeValuePair>
+    findFirstRunAsQueue(const std::vector<scheduling::SimulationExpression> &values,
                         const std::string &name);
     void emitSchedule(const std::vector<Action> &schedule);
 
