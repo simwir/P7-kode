@@ -7,7 +7,7 @@
 #include <waypoint_scheduler.hpp>
 
 class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber  {
-    void newSchedule(const std::vector<scheduling::Action>& schedule) {
+    void newSchedule(const std::vector<scheduling::Action>& schedule) override {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new waypoint schedule at " << std::asctime(std::localtime(&result));
         
