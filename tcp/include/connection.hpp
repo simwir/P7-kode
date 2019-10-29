@@ -51,14 +51,14 @@ class Connection : public std::enable_shared_from_this<Connection> {
     Connection() {}
     virtual ~Connection();
     std::vector<std::string> receive(int flags = 0);
-    ssize_t send(const std::string &message);
+    ssize_t send(const std::string &message, int flags = 0);
     void close();
 
     bool closed();
 
   protected:
     void set_fd(int fd);
-    void read_buffer();
+    void read_buffer(int flags);
     std::vector<std::string> parse_messages();
 
   private:

@@ -11,7 +11,7 @@
 
 constexpr int BUFFER_SIZE = 256;
 
-ssize_t tcp::Connection::send(const std::string &message)
+ssize_t tcp::Connection::send(const std::string &message, int flags)
 {
     if (!ready) {
         throw ConnectionException("Connection not ready");
@@ -23,7 +23,7 @@ ssize_t tcp::Connection::send(const std::string &message)
 
     std::string prepped_message = "#|" + message + "|#";
 
-    ssize_t bytes = ::send(fd, prepped_message.c_str(), prepped_message.length(), 0);
+    ssize_t bytes = ::send(fd, prepped_message.c_str(), prepped_message.length(), flags);
 
     if (bytes == -1) {
         throw tcp::SendException(message);
@@ -32,13 +32,13 @@ ssize_t tcp::Connection::send(const std::string &message)
     return bytes;
 }
 
-void tcp::Connection::read_buffer()
+void tcp::Connection::read_buffer(int flags)
 {
     char buffer[BUFFER_SIZE];
 
     while (true) {
         std::memset(buffer, 0, BUFFER_SIZE);
-        ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, flags);
+        ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, flags | MSG_DONTWAIT);
 
         if (bytes == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -89,7 +89,7 @@ std::vector<std::string> tcp::Connection::receive(int flags)
         throw ConnectionException("Connection not open");
     }
 
-    read_buffer();
+    read_buffer(flags);
     return parse_messages();
 }
 
