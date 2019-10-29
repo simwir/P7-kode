@@ -9,16 +9,43 @@
 constexpr size_t DEFAULT_BACKLOG = 16;
 
 namespace tcp {
-struct AcceptException : std::exception {
-    const char *what() const noexcept { return "Could not accept"; }
+class AcceptException : public std::exception {
+    int err;
+    std::string msg;
+
+  public:
+    AcceptException(int err)
+        : err(err), msg("Could not accept: " + std::to_string(err))
+    {
+    }
+
+    const char *what() const noexcept { return msg.c_str(); }
 };
 
-struct BindException : std::exception {
-    const char *what() const noexcept { return "Could not bind"; }
+class BindException : public std::exception {
+    int err;
+    std::string msg;
+
+  public:
+    BindException(int err)
+        : err(err), msg("Could not bind: " + std::to_string(err))
+    {
+    }
+
+    const char *what() const noexcept { return msg.c_str(); }
 };
 
-struct ListenException : std::exception {
-    const char *what() const noexcept { return "Could not listen"; }
+class ListenException : public std::exception {
+    int err;
+    std::string msg;
+
+  public:
+    ListenException(int err)
+        : err(err), msg("Could not listen: " + std::to_string(err))
+    {
+    }
+
+    const char *what() const noexcept { return msg.c_str(); }
 };
 
 class Server {

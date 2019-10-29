@@ -12,21 +12,26 @@ class SendException : public std::exception {
     std::string message;
 
   public:
-    SendException(const std::string &in_message) : message(in_message) {}
+    SendException(const std::string &in_message) : message("Could not send message: " + in_message) {}
 
     const char *what() const noexcept
     {
-        return std::string("Could not send message: " + message).c_str();
+        return message.c_str();
     }
 };
 
 class ReceiveException : public std::exception {
-    int err;
+    int err = 0;
     std::string msg;
 
   public:
     ReceiveException(int err)
         : err(err), msg("Could not read receive buffer: " + std::to_string(err))
+    {
+    }
+    
+    ReceiveException()
+      : msg("Got 0 bytes")
     {
     }
 

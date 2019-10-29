@@ -49,7 +49,7 @@ void tcp::Connection::read_buffer(int flags)
             }
         }
         else if (bytes == 0) {
-            break;
+            throw tcp::ReceiveException(); // If this happens, wud
         }
         else {
             obuffer.append(buffer, bytes);

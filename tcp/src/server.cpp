@@ -14,7 +14,6 @@ tcp::Server::Server(int in_port, int backlog)
     sockaddr_in server_address;
     socklen_t length = sizeof(sockaddr);
 
-    // Should getaddrinfo() be called here?
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
     std::memset(&server_address, 0, sizeof server_address);
@@ -23,7 +22,7 @@ tcp::Server::Server(int in_port, int backlog)
     server_address.sin_port = htons(in_port);
 
     if (bind(socket_fd, (sockaddr *)&server_address, length) == -1) {
-        throw tcp::BindException();
+        throw tcp::BindException(errno);
     }
 
     getsockname(socket_fd, (sockaddr *)&server_address, &length);
@@ -31,7 +30,7 @@ tcp::Server::Server(int in_port, int backlog)
     port = ntohs(server_address.sin_port);
 
     if (listen(socket_fd, backlog) == -1) {
-        throw tcp::ListenException();
+        throw tcp::ListenException(errno);
     }
 }
 
@@ -48,7 +47,7 @@ std::shared_ptr<tcp::Connection> tcp::Server::accept()
     int fd = ::accept(socket_fd, (sockaddr *)&client_address, &length);
 
     if (fd == -1) {
-        throw tcp::AcceptException();
+        throw tcp::AcceptException(errno);
     }
 
     auto con = std::make_shared<tcp::Connection>(fd);
