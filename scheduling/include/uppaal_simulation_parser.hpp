@@ -33,7 +33,7 @@ struct SimulationValue {
 
 class UppaalSimulationParser {
   public:
-    std::vector<SimulationValue> parse(std::string result, int formula);
+    std::vector<SimulationValue> parse(std::string result, int formula_number);
 
   private:
     SimulationValue parseValue(std::istream &ss, std::string &line);
