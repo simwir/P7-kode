@@ -2,7 +2,7 @@
 #define MASTER_HPP
 
 #include "config.hpp"
-#include "../tcp/client.hpp"
+#include "../tcp/include/client.hpp"
 
 namespace robot {
 class Master{
