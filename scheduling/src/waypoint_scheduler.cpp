@@ -30,7 +30,7 @@ void scheduling::WaypointScheduler::addSubscriber(
 void scheduling::WaypointScheduler::run()
 {
     while (!shouldStop) {
-        std::cout << "Starting a new waypoint scheduling.\n";
+        std::cout << "Starting a new waypoint scheduling." << std::endl;
 
         std::cout << "Executing..." << std::endl;
         std::string result = executor.execute();
