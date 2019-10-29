@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
 
 robot::Config::Config(const std::string &file_path)
 {
@@ -48,4 +49,24 @@ double robot::Config::get<double>(const std::string &key)
     };
 
     return json[key].asDouble();
+}
+
+template <>
+std::vector<int> robot::Config::get<std::vector<int>>(const std::string &key)
+{
+    if (!json.isMember(key)) {
+        throw robot::InvalidKeyException(key);
+    }
+
+    if (json[key].type() != Json::ValueType::arrayValue) {
+        throw robot::InvalidValueException();
+    }
+
+    std::vector<int> result;
+
+    for (Json::Value::const_iterator itr = json[key].begin(); itr != json[key].end(); itr++) {
+        result.push_back(json[key][itr.index()].asInt());
+    }
+
+    return result;
 }

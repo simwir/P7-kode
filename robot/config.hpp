@@ -4,8 +4,13 @@
 #include <json/json.h>
 
 #include <string>
+#include <vector>
 
 namespace robot {
+struct InvalidValueException : std::exception {
+    const char *what() const noexcept { return "Invalid value"; }
+};
+
 class InvalidKeyException : public std::exception {
     std::string message;
 
