@@ -57,7 +57,7 @@ std::vector<Message> webots_server::Server::get_messages() {
   return messages;
 }
 
-void webots_server::Server::send_message(Message message) {
+void webots_server::Server::send_message(const Message& message) {
   std::string payload;
   switch (message.type) {
   case MessageType::get_position:
