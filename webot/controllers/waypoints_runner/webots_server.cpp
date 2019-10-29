@@ -32,11 +32,13 @@ std::vector<Message> webots_server::Server::get_messages() {
   for (const auto &raw_message : raw_messages) {
     MessageType message_type;
     size_t split_pos = raw_message.find(",");
+    // If no ',' found we assume this to be a command without an argument.
     if (split_pos == std::string::npos) {
       if (raw_message == "get_position") {
         message_type = MessageType::get_position;
       } else {
         send_message(Message{raw_message, MessageType::not_understood});
+        std::cerr << "Recieved message not understood: " << raw_message << std::endl;
         continue;
       }
     } else {
@@ -45,6 +47,7 @@ std::vector<Message> webots_server::Server::get_messages() {
         message_type = MessageType::set_destination;
       } else {
         send_message(Message{raw_message, MessageType::not_understood});
+        std::cerr << "Recieved message not understood: " << raw_message << std::endl;
         continue;
       }
     }
