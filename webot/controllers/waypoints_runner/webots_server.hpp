@@ -21,7 +21,7 @@ public:
   Server(std::string id);
   ~Server();
   std::vector<Message> get_messages();
-  void send_message(Message);
+  void send_message(const Message&);
 
 private:
   tcp::Server server;
