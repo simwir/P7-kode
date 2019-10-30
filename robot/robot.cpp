@@ -30,37 +30,24 @@ Json::Value parse_eta_map(const std::map<int, std::vector<robot::plan>>& eta_map
 
 std::map<int, robot::location> parse_json_location_map(Json::Value json){
     std::map<int, robot::location> map;
+
     for (Json::ValueConstIterator itr = json.begin(); itr != json.end(); itr++){
-        itr.key();
-        std::cout << json.get(itr.index(), json);
+        robot::location location = {json[itr.name()]["x"].asDouble(), json[itr.name()]["y"].asDouble()};
+        map.insert({itr.key().asInt(), location});
     }
     return map;
 }
 
-int main(int argc, char**){
-    //Locations
-    struct robot::location loc1{1, 1.1};
-    struct robot::location loc2{2, 2.2};
+std::map<int, std::vector<robot::plan>> parse_json_eta_map(Json::Value json){
+    std::map<int, std::vector<robot::plan>> map;
 
-    //Plan
-    struct robot::plan plan1{1, 1.1};
-    struct robot::plan plan2{2, 2.01};
-
-    //Plans
-    std::vector<robot::plan> plans2;
-    plans2.push_back(plan1);
-    plans2.push_back(plan2);
-
-    //location_map
-    std::map<int, robot::location> location_map = {{1337, loc1}};
-    location_map.insert({ 2, loc2});
-
-    //eta_map
-    std::map<int, std::vector<robot::plan>> eta_map = {{1, plans2}};
-
-    //location_map_json
-    Json::Value location_map_json;
-    location_map_json = parse_location_map(location_map);
-    std::cout << location_map_json;
-    parse_json_location_map(location_map_json);
+    for (Json::ValueConstIterator itr = json.begin(); itr != json.end(); itr++){
+        std::vector<robot::plan> plans;
+        Json::Value entry = json[itr.name()];
+        for (auto itr2 = entry.begin(); itr2 != entry.end(); itr2++){
+            plans.push_back(robot::plan::from_json(entry[itr2.index()]));
+        }
+        map.insert({atoi(itr.key().asCString()), plans});
+    }
+    return map;
 }

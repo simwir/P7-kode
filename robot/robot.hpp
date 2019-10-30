@@ -46,7 +46,6 @@ namespace robot {
         std::string toString() {
             return std::to_string(station_id) + " " + std::to_string(time);
         }
-
     };
 
     std::map<int, location> location_map;
