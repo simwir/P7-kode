@@ -7,13 +7,13 @@
 
 namespace tcp {
 class Client : public Connection {
- public:
-  Client(const std::string& host, const std::string& port);
+  public:
+    Client(const std::string &host, const std::string &port);
 
- private:
-  std::string host;
-  std::string port;
+  private:
+    std::string host;
+    std::string port;
 };
-}  // namespace tcp
+} // namespace tcp
 
 #endif
