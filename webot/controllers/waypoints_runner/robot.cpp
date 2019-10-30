@@ -58,7 +58,6 @@ robot_controller::robot_controller(webots::Supervisor *robot)
     lidar_resolution = lidar.get_resolution();
     lidar_max_range = lidar.get_max_range();
     lidar_range_values.resize(lidar.get_number_of_points());
-    // point_cloud.resize(lidar.get_number_of_points());
     point_cloud.resize(lidar.get_number_of_points());
     lidar_fov = lidar.get_fov();
 
