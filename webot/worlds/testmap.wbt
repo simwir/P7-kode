@@ -180,10 +180,13 @@ Elisa3 {
     Group {
       children [
         Lidar {
-          translation 0 0.03 0
+          translation 0 0.04 0
           rotationStep 0.261799
-          fieldOfView 3.14159
+          horizontalResolution 2048
+          fieldOfView 6.28328
           numberOfLayers 1
+          maxRange 0.5
+          type "fixed"
         }
         GPS {
           translation 0.02 0.03 0

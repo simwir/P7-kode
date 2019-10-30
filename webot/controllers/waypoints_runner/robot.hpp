@@ -25,6 +25,7 @@ constexpr auto DESTINATION_BUFFER_DISTANCE = 0.05;
 
 
 enum class Direction {Left, Right, Straight};
+enum class Phase {Motion2Goal, BoundaryFollowing};
 
 struct DestinationNotDefinedException {
 };
@@ -36,25 +37,25 @@ struct bad_bug_routing : std::exception {
 class robot_controller {
   public:
     robot_controller(webots::Supervisor *robot);
-
-    void run_simulation();
-
-    void set_destination(const geo::GlobalPoint &point)
-    {
-        destination = point;
-        has_destination = true;
-    }
-
-    void abort_destination() { has_destination = false; }
-
     ~robot_controller() { delete robot; }
 
-    geo::Angle get_facing_angle() const;
+    void run_simulation();
+    Phase motion2goal();
+    Phase boundary_following();
+
+    void set_goal(const geo::GlobalPoint &point)
+    {
+        goal = point;
+        has_goal = true;
+    }
+
+    void abort_goal() { has_goal = false; }
 
     geo::GlobalPoint get_position() const;
 
-    geo::Angle get_angle_to_dest() const;
+    geo::Angle get_facing_angle() const;
     geo::Angle get_angle_to_goal() const;
+    geo::Angle get_relative_angle_to_goal() const;
 
     static geo::GlobalPoint gps_reading_to_point(const webots::GPS *gps)
     {
@@ -70,7 +71,6 @@ class robot_controller {
     webots::Supervisor *robot;
     webots::GPS *frontGPS, *backGPS;
     webots::Motor *left_motor, *right_motor;
-    webots::Lidar *_lidar;
     lidar_wrapper lidar;
     std::array<webots::DistanceSensor *, NUM_SENSORS> distance_sensors;
     std::array<webots::LED *, NUM_LEDS> leds;
@@ -83,10 +83,9 @@ class robot_controller {
     inline size_t lidar_num_points() { return lidar_resolution * lidar_num_layers; }
     std::vector<std::optional<double>> lidar_range_values;
     std::vector<geo::RelPoint> point_cloud;
-    //    std::vector<webots::LidarPoint> lidar_point_cloud;
 
-    bool has_destination = false;
-    geo::GlobalPoint destination;
+    bool has_goal = false;
+    geo::GlobalPoint goal;
     std::optional<geo::GlobalPoint> bug_destination = std::nullopt;
 
     inline geo::GlobalPoint get_destination() const
@@ -95,7 +94,7 @@ class robot_controller {
             return bug_destination.value();
         }
         else
-            return destination;
+            return goal;
     }
 
     // float get_lidar_point_angle(size_t idx) const
@@ -110,22 +109,9 @@ class robot_controller {
         return std::round((angle.theta + lidar_fov / 2) * lidar_resolution / lidar_fov);
     }
 
-    // geo::Point lidar_value_to_point(int idx) const
-    // {
-    //     /*double dist =
-    //         lidar_range_values[idx].has_value() ? lidar_range_values[idx].value() : lidar_max_range;
-    //     double angle = get_lidar_point_angle(idx);
-
-    //     return {dist * std::cos(angle), 0, dist * std::sin(angle)};*/
-    //     const auto pt = lidar_point_cloud[idx];
-    //     return geo::Point{pt.x, pt.z};
-    // }
-
     std::vector<geo::GlobalPoint> get_discontinuity_points() const;
 
     double prev_heuristic_dist = std::numeric_limits<double>::max();
-
-    //CoordinateSystem get_coordinate_system() const { return {position, facing_angle}; }
 
     // actions
     void do_left_turn();
@@ -139,16 +125,10 @@ class robot_controller {
     // current state information
     std::array<double, NUM_SENSORS> sensor_readings;
     double dist_to_dest;
-    geo::Angle facing_angle;
 
-    geo::Angle absolute_goal_angle;
-    geo::Angle absolute_dest_angle;
+    double cur_dist2goal;
+    double prev_dist2goal;
 
-    geo::Angle relative_goal_angle;
-    geo::Angle relative_dest_angle;
-
-    //geo::Angle dest_angle;
-    //geo::Angle angle_to_dest;
     geo::GlobalPoint position;
     Direction dir;
 

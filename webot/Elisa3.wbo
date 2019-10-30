@@ -12,11 +12,11 @@ Elisa3 {
         Lidar {
           translation 0 0.04 0
           rotationStep 0.261799
-          horizontalResolution 1024
-          fieldOfView 3.14
+          horizontalResolution 2048
+          fieldOfView 6.28328
           numberOfLayers 1
           maxRange 0.5
-          type "rotating"
+          type "fixed"
         }
         GPS {
           translation 0.02 0.03 0
