@@ -19,6 +19,9 @@ class InvalidKeyException : public std::exception {
     const char *what() const noexcept { return message.c_str(); };
 };
 
+template <typename T>
+T convert_from_json(const Json::Value &value);
+
 class Config {
     Json::Value json;
 
@@ -32,10 +35,7 @@ class Config {
     T get(const std::string &key);
 
     template <typename T>
-    void set(const std::string &key, T value)
-    {
-        json[key] = value;
-    };
+    void set(const std::string &key, T value);
 };
 } // namespace robot
 
