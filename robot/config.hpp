@@ -4,19 +4,39 @@
 #include <json/json.h>
 
 #include <string>
+#include <vector>
 
 namespace robot {
-class Config {
-  Json::Value json;
-
- public:
-  Config();
-  Config(const std::string& file_path);
-  void load_config_file(const std::string& file_path);
-
-  template <typename T>
-  T get(const std::string& key);
+struct InvalidValueException : std::exception {
+    const char *what() const noexcept { return "Invalid value"; }
 };
-}  // namespace robot
+
+class InvalidKeyException : public std::exception {
+    std::string message;
+
+  public:
+    InvalidKeyException(const std::string &key) { message = "Key not found: " + key; };
+    const char *what() const noexcept { return message.c_str(); };
+};
+
+template <typename T>
+T convert_from_json(const Json::Value &value);
+
+class Config {
+    Json::Value json;
+
+  public:
+    Config(){};
+    Config(const std::string &file_path);
+    void load_from_file(const std::string &file_path);
+    void write_to_file(const std::string &file_path);
+
+    template <typename T>
+    T get(const std::string &key);
+
+    template <typename T>
+    void set(const std::string &key, T value);
+};
+} // namespace robot
 
 #endif
