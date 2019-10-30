@@ -35,7 +35,7 @@ std::string scheduling::UppaalExecutor::execute()
 
         const char *command = "verifyta";
 
-        int ret = execlp(command, command, modelPath, queriesPath, nullptr);
+        int ret = execlp(command, command, model_path.c_str(), query_path.c_str(), nullptr);
 
         if (ret == -1) {
             throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) +
