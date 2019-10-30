@@ -27,7 +27,7 @@ webots_server::Server::~Server() {
 }
 
 std::vector<Message> webots_server::Server::get_messages() {
-  std::vector<std::string> raw_messages = client->receive(MSG_DONTWAIT);
+  std::vector<std::string> raw_messages = client->receive();
   std::vector<Message> messages;
   for (const auto &raw_message : raw_messages) {
     MessageType message_type;
