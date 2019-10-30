@@ -1,29 +1,36 @@
 #include<fstream>
 
 #include "master.hpp"
+#include "config.hpp"
 #include "../tcp/include/client.hpp"
 #include "../wbt-translator/webots_parser.hpp"
 #include "../wbt-translator/apsp.hpp"
 #include "../wbt-translator/distance_matrix.hpp"
 
-robot::Master::Master(int robot_id){
-    std::string port_to_controller;
+#define PORT_TO_BROADCASTER "5435"
+#define PORT_TO_PDS "4444"
 
-    tcp::Client PDSClient = tcp::Client("localhost", "4444"); 
+robot::Master::Master(std::string robot_host, std::string broadcast_host ,int robot_id)
+        : broadcast_client(broadcast_host, PORT_TO_BROADCASTER){
+    std::string port_to_controller;
+    std::vector<std::string> recieved_strings;
+
+    //Connecting to the Port Discovery Service
+    tcp::Client PDSClient = tcp::Client(robot_host, PORT_TO_PDS); 
     PDSClient.send("get_robot," + robot_id);
-    std::vector<std::string> recieved_strings = PDSClient.receive(0);
+    do{
+        recieved_strings = PDSClient.receive();
+    }while(recieved_strings.size == 0);
     if (recieved_strings.size == 1)
     {
         port_to_controller = recieved_strings[0];
     }
     else{
-        // TODO: throw appropiate exception 
+        throw robot::RecievedMessageException("Recieved" + recieved_strings.size + "messages while only one was expected.");
     }
     
-    
-    //TODO: Port discovery service port: 4444. Connect to this to get port for controller
-    //TODO: Create clients to controller and broadcaster
-    //tcp::Client client_webots = tcp::Client(host, port);
+    //Connecting to the WeBots Controller
+    webot_client = tcp::Client(robot_host, port_to_controller);
 }
 
 void robot::Master::load_webots_to_config(std::string input_file, std::string output_file){
@@ -66,9 +73,8 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
     }
 
     //TODO: Get number of robots
+}
 
-
-    
-
-
+void robot::Master::request_broadcast_info(){
+    broadcast_client.send(""); //TODO What message to send to the broadcaster
 }
