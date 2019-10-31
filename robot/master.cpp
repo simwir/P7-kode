@@ -11,7 +11,7 @@
 #define PORT_TO_PDS "4444"
 
 robot::Master::Master(std::string robot_host, std::string broadcast_host ,int robot_id)
-        : broadcast_client(broadcast_host, PORT_TO_BROADCASTER){
+        : broadcast_client(broadcast_host, PORT_TO_BROADCASTER) {
     std::string port_to_controller;
     std::vector<std::string> recieved_strings;
 
@@ -30,7 +30,7 @@ robot::Master::Master(std::string robot_host, std::string broadcast_host ,int ro
     }
     
     //Connecting to the WeBots Controller
-    webot_client = tcp::Client(robot_host, port_to_controller);
+    webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
 void robot::Master::load_webots_to_config(std::string input_file, std::string output_file){
@@ -71,6 +71,10 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
             break;
         }
     }
+
+    config.set<int>("number_of_stations", station_count);
+    config.set<int>("number_of_end_stations", endpoint_count);
+    config.set<int>("number_of_waypoints", waypoint_count);
 
     //TODO: Get number of robots
 }

@@ -26,7 +26,7 @@ class Master{
 
     private:
         robot::Config config;
-        tcp::Client webot_client;
+        std::unique_ptr<tcp::Client> webot_client;
         tcp::Client broadcast_client;
         
 };
