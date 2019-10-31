@@ -30,8 +30,7 @@ Functions parse_function(const std::string &function) {
 }
 void broadcaster::Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
     mutex.lock();
-    location_map;
-    conn.send("sdjaofja");
+    conn.send(location_map.parse_location_map());
     mutex.unlock();
 }
 
