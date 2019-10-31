@@ -1,9 +1,9 @@
-include_directories(${PROJECT_SOURCE_DIR}/tests/include)
+include_directories(${PROJECT_SOURCE_DIR}/tcp/include)
 
 file(GLOB SOURCES "src/*.cpp")
 
-add_library(board_driver ${SOURCES})
+add_library(tcp ${SOURCES})
 
-target_link_libraries(board_driver
+target_link_libraries(tcp
     m # Math library for example
 )
