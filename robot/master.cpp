@@ -80,5 +80,13 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
 }
 
 void robot::Master::request_broadcast_info(){
-    broadcast_client.send(""); //TODO What message to send to the broadcaster
+    broadcast_client.send("get_robot_locations"); 
+}
+
+void robot::Master::send_robot_location(Json::Value value){
+    broadcast_client.send("post_robot_location, " + value);
+}
+
+std::string robot::Master::recv_broadcast_info(){
+
 }
