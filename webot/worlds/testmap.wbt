@@ -34,7 +34,7 @@ DEF Station_1 Station {
 DEF Station_2 Station {
   translation -0.83 0.05 -1.17
   name "wooden box(1)"
-  adjList "2"
+  adjList "22"
   id 2
 }
 DEF Station_3 Station {
@@ -52,7 +52,7 @@ DEF Station_4 Station {
 DEF Station_5 Station {
   translation 0.47 0.05 -1.18
   name "wooden box(4)"
-  adjList "24"
+  adjList "0"
   id 5
 }
 DEF Station_6 Station {
@@ -99,72 +99,72 @@ Endpoint {
 }
 Waypoint {
   id 13
-  adjList "22,14,17,16,23"
+  adjList "22,14,17,16,23,6"
   translation -0.89 0.1 -0.49
 }
 Waypoint {
   id 14
-  adjList "13,23,22,16,24"
+  adjList "13,23,22,16,0,8"
   translation 0 0.09999999999999999 -0.49
   name "waypoint(1)"
 }
 Waypoint {
   id 15
-  adjList "16,19,20"
-  translation 0.48 0.09999999999999999 0.09999999999999999
+  adjList "16,19,20,7"
+  translation 0.48 0.1 0.1
   name "waypoint(2)"
 }
 Waypoint {
   id 16
-  adjList "13,14,15,20,19"
+  adjList "13,14,15,20,19,3"
   translation 0 0.09999999999999999 0.49
   name "waypoint(3)"
 }
 Waypoint {
   id 17
-  adjList "13,23,21"
+  adjList "13,23,21,1"
   translation -0.89 0.09999999999999999 0.5
   name "waypoint(4)"
 }
 Waypoint {
   id 19
-  adjList "18,15,16,20"
+  adjList "18,15,16,20,12"
   translation 1.05 0.09999999999999999 0.7999999999999999
   name "waypoint(5)"
 }
 Waypoint {
   id 20
-  adjList "21,16,15,19"
+  adjList "21,16,15,19,9"
   translation 0 0.09999999999999999 0.7999999999999999
   name "waypoint(6)"
 }
 Waypoint {
   id 21
-  adjList "17,20"
+  adjList "17,20,10"
   translation -0.89 0.09999999999999999 0.7899999999999999
   name "waypoint(7)"
 }
 Waypoint {
   id 22
-  adjList "13,14,23"
+  adjList "13,14,23,2"
   translation -0.82 0.09999999999999999 -0.97
   name "waypoint(8)"
 }
 Waypoint {
   id 23
-  adjList "22,13,14,24,17"
+  adjList "22,13,14,0,17,4"
   translation -0.3 0.09999999999999999 -0.95
   name "waypoint(9)"
 }
 Waypoint {
-  id 24
-  adjList "23,14,18"
-  translation 0.47 0.09999999999999999 -0.96
+  id 0
+  adjList "23,14,18,5"
+  translation 0.47 0.1 -0.96
   name "waypoint(10)"
 }
 Waypoint {
-  id 11
-  adjList "24,19"
+  id 18
+  adjList "0,19,11"
   translation 0.98 0.09999999999999999 -0.99
   name "waypoint(11)"
 }
