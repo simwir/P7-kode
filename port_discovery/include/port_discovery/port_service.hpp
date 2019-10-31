@@ -3,9 +3,9 @@
 
 #include <string>
 #include <map>
-#include "server.hpp"
+#include <tcp/server.hpp>
 
-namespace tcp {
+namespace port_discovery {
 
 class UnreadableFunctionException : public std::exception {
     std::string message;
@@ -40,7 +40,6 @@ class PortService {
 public:
     PortService(int port) : server(port) { }
     void start();
-    ~PortService();
 private:
     tcp::Server server;
     std::map<const int, int> robot_map;// {Robot_id , Port_number}

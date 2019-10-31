@@ -1,5 +1,5 @@
-#include <port_service.hpp>
-#include <connection.hpp>
+#include <port_discovery/port_service.hpp>
+#include <tcp/connection.hpp>
 
 #include <assert.h>
 #include <iostream>
@@ -28,19 +28,19 @@ std::vector<std::string> split(const std::string &input, char delimiter)
     return result;
 }
 
-Function parse_function(const std::string &function)
+port_discovery::Function parse_function(const std::string &function)
 {
     if (function == "add_robot") {
-        return Function::add_robot;
+        return port_discovery::Function::add_robot;
     }
     else if (function == "get_robot") {
-        return Function::get_robot;
+        return port_discovery::Function::get_robot;
     }
     else if (function == "remove_robot") {
-        return Function::remove_robot;
+        return port_discovery::Function::remove_robot;
     }
     else {
-        throw tcp::UnreadableFunctionException(function);
+        throw port_discovery::UnreadableFunctionException(function);
     }
 }
 
@@ -53,7 +53,7 @@ void add_robot(int id, int port, std::map<const int, int> &robot_map)
         std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
     }
     else {
-        throw IdAlreadyDefinedException(std::to_string(id));
+        throw port_discovery::IdAlreadyDefinedException(std::to_string(id));
     }
 }
 
@@ -74,37 +74,37 @@ void remove_robot(int id, std::map<const int, int> &robot_map)
     robot_map.erase(id);
 }
 
-void call_function(Function function, const std::vector<std::string> &parameters,
+void call_function(port_discovery::Function function, const std::vector<std::string> &parameters,
                    std::map<const int, int> &robot_map, std::shared_ptr<tcp::Connection> connection)
 {
     try {
         switch (function) {
-        case Function::get_robot:
+        case port_discovery::Function::get_robot:
             if (parameters.size() == 2) {
                 const auto id = stoi(parameters[1]);
-                get_robot(id, robot_map, client_fd);
+                get_robot(id, robot_map, connection);
             }
             else {
-                throw tcp::InvalidParametersException(std::to_string(parameters.size()));
+                throw port_discovery::InvalidParametersException(std::to_string(parameters.size()));
             }
             break;
-        case Function::add_robot:
+        case port_discovery::Function::add_robot:
             if (parameters.size() == 3) {
                 const auto id = stoi(parameters[1]);
                 const auto port = stoi(parameters[2]);
                 add_robot(id, port, robot_map);
             }
             else {
-                throw tcp::InvalidParametersException(std::to_string(parameters.size()));
+                throw port_discovery::InvalidParametersException(std::to_string(parameters.size()));
             }
             break;
-        case Function::remove_robot:
+        case port_discovery::Function::remove_robot:
             if (parameters.size() == 2) {
                 const auto id = stoi(parameters[1]);
                 remove_robot(id, robot_map);
             }
             else {
-                throw tcp::InvalidParametersException(std::to_string(parameters.size()));
+                throw port_discovery::InvalidParametersException(std::to_string(parameters.size()));
             }
             break;
         }
@@ -113,7 +113,7 @@ void call_function(Function function, const std::vector<std::string> &parameters
         std::string message = "Invalid argument";
         connection->send(message + e.what());
     }
-    catch (const IdAlreadyDefinedException &e) {
+    catch (const port_discovery::IdAlreadyDefinedException &e) {
         std::string message = "Tried to add robot, but the id was already in the map. Id: ";
         connection->send(message + e.what());
     }
@@ -127,27 +127,27 @@ void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<const i
         for (const std::string &message : messages) {
             std::cout << message << "\n" << std::endl;
             args = split(message, ',');
-            Function function = parse_function(args[0]);
-            call_function(function, args, robot_map, client_fd);
+            port_discovery::Function function = parse_function(args[0]);
+            call_function(function, args, robot_map, connection);
         }
     }
     catch (tcp::MalformedMessageException &e) {
         connection->send(e.what());
     }
-    catch (tcp::UnreadableFunctionException &e) {
+    catch (port_discovery::UnreadableFunctionException &e) {
         connection->send(e.what());
     }
-    catch (tcp::InvalidParametersException &e) {
+    catch (port_discovery::InvalidParametersException &e) {
         connection->send(e.what());
     }
 }
 
-void tcp::PortService::start()
+void port_discovery::PortService::start()
 {
     std::cout << "Waiting for connections on port: " << server.get_port() << std::endl;
     while (true) {
         try {
-            tcp::Connection* connection = server.accept();
+            std::shared_ptr<tcp::Connection> connection = server.accept();
             std::thread thread{parse_message, connection, std::ref(robot_map)};
             thread.detach();
         }
