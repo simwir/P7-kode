@@ -77,8 +77,6 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
     config.set<int>("number_of_end_stations", endpoint_count);
     config.set<int>("number_of_waypoints", waypoint_count);
     config.set<int>("number_of_robots", parser.number_of_robots);
-
-    //TODO: Get number of robots
 }
 
 void robot::Master::request_broadcast_info(){
