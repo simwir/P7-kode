@@ -6,6 +6,18 @@
 #include <jsoncpp/json/json.h>
 #include <fstream>
 
+template <>
+std::vector<int> robot::convert_from_json<std::vector<int>>(const Json::Value &value)
+{
+    std::vector<int> result;
+
+    for (auto itr = value.begin(); itr != value.end(); itr++) {
+        result.push_back(value[itr.index()].asInt());
+    }
+
+    return result;
+}
+
 Json::Value parse_location_map(const std::map<int, robot::location>& location_map){
     Json::Value location_map_json;
 
@@ -28,26 +40,23 @@ Json::Value parse_eta_map(const std::map<int, std::vector<robot::plan>>& eta_map
     return eta_map_json;
 }
 
-std::map<int, robot::location> parse_json_location_map(Json::Value json){
+template <>
+std::map<int, robot::location> robot::convert_from_json<std::map<int, robot::location>>(const Json::Value &value) {
     std::map<int, robot::location> map;
 
-    for (Json::ValueConstIterator itr = json.begin(); itr != json.end(); itr++){
-        robot::location location = {json[itr.name()]["x"].asDouble(), json[itr.name()]["y"].asDouble()};
-        map.insert({itr.key().asInt(), location});
+    for (auto itr = value.begin(); itr != value.end(); itr++){
+        map.insert({itr.key().asInt(), robot::location::from_json(value[itr.name()])});
     }
     return map;
 }
 
-std::map<int, std::vector<robot::plan>> parse_json_eta_map(Json::Value json){
-    std::map<int, std::vector<robot::plan>> map;
+template <>
+std::map<int, robot::plan> robot::convert_from_json<std::map<int, robot::plan>>(const Json::Value &value){
+    std::map<int, robot::plan> map;
 
-    for (Json::ValueConstIterator itr = json.begin(); itr != json.end(); itr++){
-        std::vector<robot::plan> plans;
-        Json::Value entry = json[itr.name()];
-        for (auto itr2 = entry.begin(); itr2 != entry.end(); itr2++){
-            plans.push_back(robot::plan::from_json(entry[itr2.index()]));
-        }
-        map.insert({atoi(itr.key().asCString()), plans});
+    for (auto itr = value.begin(); itr != value.end(); itr++){
+        map.insert({itr.key().asInt(), robot::plan::from_json(value[itr.name()])});
     }
+
     return map;
 }

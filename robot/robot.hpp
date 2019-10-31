@@ -28,6 +28,12 @@ namespace robot {
         }
     };
 
+    template <typename T>
+    T convert_from_json(const Json::Value &value);
+
+    template <typename T>
+    T convert_to_json();
+
     struct plan {
         int station_id;
         double time;
@@ -49,7 +55,11 @@ namespace robot {
     };
 
     std::map<int, location> location_map;
-    std::map<int, std::vector<plan>> eta_map;
+    std::map<int, plan> eta_map;
+    std::vector<int> station_plan;
+    std::vector<int> waypoint_plan;
 }
+
+
 
 #endif //BROADCASTER_ROBOT_HPP
