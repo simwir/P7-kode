@@ -16,6 +16,6 @@ file(GLOB SOURCES "*.cpp")
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_CXX_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 
-add_executable(broadcaster ${SOURCES} broadcaster.cpp)
+add_executable(broadcaster ${SOURCES} src/broadcaster.cpp)
 
 install(TARGETS broadcaster DESTINATION bin)

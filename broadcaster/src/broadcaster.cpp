@@ -1,15 +1,15 @@
 #include <bits/socket.h>
 #include <functional>
-#include "include/broadcaster.hpp"
+#include "../include/broadcaster.hpp"
 #include "include/server.hpp"
 #include <tcp/exceptions/exceptions.hpp>
 #include <tcp/receive.hpp>
 #include <tcp/utility/split.hpp>
-#include <tcp/send.hpp>
-
+#include <tcp/include/connection.hpp>
 
 #include <thread>
 #include <mutex>
+#include <map>
 
 std::mutex mutex;
 
@@ -28,20 +28,16 @@ Functions parse_function(const std::string &function) {
         throw tcp::UnreadableFunctionException(function);
     }
 }
-void get_robot_locations(std::vector<int> fd) {
-}
-
-void post_robot_location(Json::Val) {
+void broadcaster::Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
     mutex.lock();
-    data.location_map[robot_id] = new_loc;
+    location_map;
+    conn.send("sdjaofja");
     mutex.unlock();
 }
-void get_robot_locations(std::vector<int> fds) {
-}
 
-void post_robot_location(robot_data &data, location &new_loc, int robot_id) {
+void broadcaster::Broadcaster::post_robot_location(Json::Value value) {
     mutex.lock();
-    data.location_map[robot_id] = new_loc;
+    location_map[robot_id] = new_loc;
     mutex.unlock();
 }
 
@@ -54,19 +50,20 @@ void callFunction(Functions functions, Json::Value, robot_data data) {
     }
 }
 
-void parseMessage(int fd, robot_data data) {
+void broadcaster::Broadcaster::parseMessage(std::shared_ptr<tcp::Connection> conn) {
     std::vector<std::string> result;
     try {
-        auto messages = tcp::receive(fd, MSG_DONTWAIT);
+        auto messages = conn->receive();
         if (!messages.empty()){
             for (const std::string &message : messages) {
                 result = split_message(message);
+                get_robot_locations(conn)
                 Functions function = parse_function(result[0]);
-                callFunction(function, Json::Value(result[1]), data); //Update callFunc
+                callFunction(function, Json::Value(result[1]), robot_info); //Update callFunc
             }
         }
     } catch (tcp::MalformedMessageException &e) {
-        tcp::send(fd, e.what());
+        conn->send(e.what());
     } catch (tcp::UnreadableFunctionException &e) {
         tcp::send(fd, e.what());
     } catch (tcp::InvalidParametersException &e) {
@@ -74,13 +71,13 @@ void parseMessage(int fd, robot_data data) {
     }
 }
 
-broadcaster::broadcaster(int port) : server(tcp::Server(port)) {}
+broadcaster::Broadcaster(int port) : server(port) {}
 
-void broadcaster::start_broadcasting() {
-    struct robot_data data;
+void broadcaster::Broadcaster::start_broadcasting() {
+    std::vector()
     while (true) {
-        int client_fd = server.accept();
-        std::thread t1(parseMessage, client_fd, std::ref(data));
+        std::shared_ptr<tcp::Connection> conn = server.accept();
+        std::thread t1(&Broadcaster::parseMessage, this, conn);
     }
 }
 
