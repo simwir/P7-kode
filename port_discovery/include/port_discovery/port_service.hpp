@@ -43,7 +43,7 @@ class PortService {
 
   private:
     tcp::Server server;
-    std::map<const int, int> robot_map; // {Robot_id , Port_number}
+    std::map<int, int> robot_map; // {Robot_id , Port_number}
 };
 
 } // namespace port_discovery

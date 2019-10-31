@@ -44,7 +44,7 @@ port_discovery::Function parse_function(const std::string &function)
     }
 }
 
-void add_robot(int id, int port, std::map<const int, int> &robot_map)
+void add_robot(int id, int port, std::map<int, int> &robot_map)
 {
     auto search = robot_map.find(id);
     if (search == robot_map.end()) {
@@ -57,7 +57,7 @@ void add_robot(int id, int port, std::map<const int, int> &robot_map)
     }
 }
 
-void get_robot(int id, const std::map<const int, int> &robot_map,
+void get_robot(int id, const std::map<int, int> &robot_map,
                std::shared_ptr<tcp::Connection> connection)
 {
     try {
@@ -69,14 +69,14 @@ void get_robot(int id, const std::map<const int, int> &robot_map,
     }
 }
 
-void remove_robot(int id, std::map<const int, int> &robot_map)
+void remove_robot(int id, std::map<int, int> &robot_map)
 {
     std::scoped_lock l{robot_map_lock};
     robot_map.erase(id);
 }
 
 void call_function(port_discovery::Function function, const std::vector<std::string> &parameters,
-                   std::map<const int, int> &robot_map, std::shared_ptr<tcp::Connection> connection)
+                   std::map<int, int> &robot_map, std::shared_ptr<tcp::Connection> connection)
 {
     try {
         switch (function) {
@@ -120,7 +120,7 @@ void call_function(port_discovery::Function function, const std::vector<std::str
     }
 }
 
-void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<const int, int> &robot_map)
+void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<int, int> &robot_map)
 {
     try {
         auto messages = connection->receive();
@@ -132,12 +132,15 @@ void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<const i
         }
     }
     catch (tcp::MalformedMessageException &e) {
+        std::cerr << "Malformed message: " << e.what() << std::endl;
         connection->send(e.what());
     }
     catch (port_discovery::UnreadableFunctionException &e) {
+        std::cerr << "Unreadable function: " << e.what() << std::endl;
         connection->send(e.what());
     }
     catch (port_discovery::InvalidParametersException &e) {
+        std::cerr << "Invalid parameters: " << e.what() << std::endl;
         connection->send(e.what());
     }
 }
