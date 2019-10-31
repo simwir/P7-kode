@@ -20,7 +20,7 @@ void print_help(const char *const execute_location)
               << std::endl
               << "-s --stations       Emit stations ids" << std::endl
               << "-e --endpoints      Emit endpoint ids" << std::endl
-              << "-w --waypoints      Emit waypoint ids" << std::endl
+              << "-v --vias           Emit vias ids" << std::endl
               << "-n --all-nodes      Same as -sev" << std::endl
               << "-a --all            Same as -dprsewn";
 }
@@ -45,6 +45,8 @@ int main(int argc, char **argv)
         case 'p':
             p = true;
             break;
+        case 'r':
+            r = true;
         case 's':
             optstations = true;
             break;
@@ -83,13 +85,18 @@ int main(int argc, char **argv)
         std::cout << distance_matrix{ast}.to_uppaal_declaration();
     }
 
-    std::map<int, std::map<int, double>> shortest_path;
+    apsp_result shortest_path;
     if (p || r) {
         shortest_path = all_pairs_shortest_path(ast);
+        std::cout << print_num_waypoints(shortest_path.dist);
     }
 
     if (p) {
-        std::cout << print_all_pairs_shortest_pairs(shortest_path);
+        std::cout << print_all_pairs_shortest_path_dist(shortest_path.dist);
+    }
+
+    if (r) {
+        std::cout << print_all_pairs_shortest_path_next(shortest_path.next);
     }
 
     if (optstations) {
