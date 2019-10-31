@@ -4,7 +4,7 @@
 
 #include <map>
 #include <tcp/server.hpp>
-#include "../../robot.hpp"
+#include "../../../robot/robot.hpp"
 
 namespace broadcaster {
 enum class Functions {
@@ -21,10 +21,13 @@ public:
 private:
     tcp::Server server;
 
-    std::map<int, location> location_map;
-    std::map<int, plan> eta_map;
+    std::map<int, robot::location> location_map;
+    std::map<int, robot::plan> eta_map;
     std::vector<int> station_plan;
     std::vector<int> waypoint_plan;
+
+    void get_robot_locations(std::shared_ptr<tcp::Connection> conn);
+    void post_robot_location(Json::Value value);
 };
 
 }

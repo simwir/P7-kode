@@ -1,11 +1,7 @@
-#include <bits/socket.h>
-#include <functional>
-#include "../include/broadcaster.hpp"
-#include "include/server.hpp"
-#include <tcp/exceptions/exceptions.hpp>
-#include <tcp/receive.hpp>
-#include <tcp/utility/split.hpp>
-#include <tcp/include/connection.hpp>
+#include <broadcaster/broadcaster.hpp>
+#include <tcp/server.hpp>
+#include <tcp/exception.hpp>
+#include <tcp/connection.hpp>
 
 #include <thread>
 #include <mutex>
@@ -19,32 +15,35 @@ std::vector<std::string> split_message(const std::string message){
     return std::vector<std::string> {start, end};
 }
 
-Functions parse_function(const std::string &function) {
+broadcaster::Functions parse_function(const std::string &function) {
     if (function == "get_robot_locations") {
-        return Functions::get_robot_locations;
+        return broadcaster::Functions::get_robot_locations;
     } else if (function == "post_robot_location") {
-        return Functions::post_robot_location;
+        return broadcaster::Functions::post_robot_location;
     } else {
-        throw tcp::UnreadableFunctionException(function);
+        throw tcp::MessageException(function);
     }
 }
 void broadcaster::Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
     mutex.lock();
-    conn.send(location_map.parse_location_map());
+    conn->send(location_map.parse_location_map());
     mutex.unlock();
 }
 
 void broadcaster::Broadcaster::post_robot_location(Json::Value value) {
     mutex.lock();
-    location_map[robot_id] = new_loc;
     mutex.unlock();
 }
 
-void callFunction(Functions functions, Json::Value, robot_data data) {
+void callFunction(broadcaster::Functions functions, Json::Value value) {
     try {
         switch (functions) {
-            case Functions::post_robot_location:
-                post_robot_location()
+            case broadcaster::Functions::post_robot_location:
+                broadcaster::post_robot_location(value)
+                break;
+            case broadcaster::Functions::get_robot_location:
+                broadcaster::get_robot_location();
+                break;
         }
     }
 }
@@ -55,18 +54,17 @@ void broadcaster::Broadcaster::parseMessage(std::shared_ptr<tcp::Connection> con
         auto messages = conn->receive();
         if (!messages.empty()){
             for (const std::string &message : messages) {
-                result = split_message(message);
-                get_robot_locations(conn)
-                Functions function = parse_function(result[0]);
-                callFunction(function, Json::Value(result[1]), robot_info); //Update callFunc
+                std::vector<std::string> result = split_message(message);
+                broadcaster::Functions function = parse_function(result[0]);
+                callFunction(function, result[1], robot_info);
             }
         }
     } catch (tcp::MalformedMessageException &e) {
         conn->send(e.what());
-    } catch (tcp::UnreadableFunctionException &e) {
-        tcp::send(fd, e.what());
-    } catch (tcp::InvalidParametersException &e) {
-        tcp::send(fd, e.what());
+    } catch (port_discovery::UnreadableFunctionException &e) {
+        conn->send(e.what());
+    } catch (port_discovery::InvalidParametersException &e) {
+        conn->send(e.what());
     }
 }
 

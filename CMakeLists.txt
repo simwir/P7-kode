@@ -21,3 +21,4 @@ add_subdirectory(tcp)
 # Executables
 add_subdirectory(tests)
 add_subdirectory(port_discovery)
+add_subdirectory(broadcaster)
