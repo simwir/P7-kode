@@ -2,7 +2,8 @@
 
 #include "master.hpp"
 #include "config.hpp"
-#include "../tcp/include/client.hpp"
+#include "location.hpp"
+#include "../tcp/include/tcp/client.hpp"
 #include "../wbt-translator/webots_parser.hpp"
 #include "../wbt-translator/apsp.hpp"
 #include "../wbt-translator/distance_matrix.hpp"
@@ -83,8 +84,9 @@ void robot::Master::request_broadcast_info(){
     broadcast_client.send("get_robot_locations"); 
 }
 
-void robot::Master::send_robot_location(Json::Value value){
-    broadcast_client.send("post_robot_location, " + value);
+void robot::Master::send_robot_location(int robot_id, robot::Location location){
+    
+    broadcast_client.send("post_robot_location, ");
 }
 
 std::string robot::Master::recv_broadcast_info(){
