@@ -25,7 +25,7 @@ public:
 
 private:
     void run();
-    std::vector<int> convertResult(const std::vector<scheduling::SimulationValue>& values);
+    std::vector<int> convertResult(const std::vector<scheduling::SimulationExpression>& values);
     void emitSchedule(const std::vector<int>& schedule);
 
     std::thread worker;

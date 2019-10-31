@@ -1,23 +1,33 @@
 #ifndef UPPAAL_EXECUTOR_HPP
 #define UPPAAL_EXECUTOR_HPP
 
-#include <string>
 #include <iostream>
+#include <string>
 
 namespace scheduling {
 
-struct SchedulingException : public std::exception {
-     const char* what() const noexcept { return "Could not run scheduling"; }
+class SchedulingException : public std::exception {
+    std::string message;
+
+  public:
+    SchedulingException(const std::string &inmessage) { message = inmessage; }
+
+    const char *what() const noexcept override { return message.c_str(); }
 };
 
 class UppaalExecutor {
-public:
-    UppaalExecutor(const char* model, const char* queries) : model(model), queries(queries) { }
+  public:
+    UppaalExecutor(const char *modelPath, const char *queriesPath)
+        : modelPath(modelPath), queriesPath(queriesPath)
+    {
+    }
     std::string execute();
-private:
-    const char* model;
-    const char* queries;
+
+  private:
+    const char *modelPath;
+    const char *queriesPath;
 };
-}
+
+} // namespace scheduling
 
 #endif // UPPAAL_EXECUTOR_HPP
