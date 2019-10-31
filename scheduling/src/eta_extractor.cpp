@@ -37,7 +37,7 @@ void EtaExtractor::run()
     }
 }
 
-void EtaExtractor::notify_eta(const double eta)
+void EtaExtractor::notify_eta(double eta)
 {
     std::for_each(std::begin(subscribers), std::end(subscribers), [eta](auto &&subscriber) {
         if (auto sub = subscriber.lock())

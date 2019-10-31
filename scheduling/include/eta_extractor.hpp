@@ -21,7 +21,7 @@ struct StrategyNotDefinedException : std::exception {
 
 class EtaSubscriber : public std::enable_shared_from_this<EtaSubscriber> {
   public:
-    virtual void new_eta(const double eta) = 0;
+    virtual void new_eta(double eta) = 0;
     virtual ~EtaSubscriber() = default;
 };
 
@@ -39,7 +39,7 @@ class EtaExtractor {
   private:
     UppaalExecutor executor;
     std::vector<std::weak_ptr<EtaSubscriber>> subscribers;
-    void notify_eta(const double eta);
+    void notify_eta(double eta);
 
     std::thread runner;
     void run();
