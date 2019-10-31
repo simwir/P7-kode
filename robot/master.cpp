@@ -39,7 +39,8 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
         std::cerr << "The file " << input_file << " could not be opened.\n";
         exit(1);
     }
-    AST ast = Parser(infile).parse_stream();
+    Parser parser = Parser(infile);
+    AST ast = parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
         std::cerr << "Malformed world file. No waypoints found.";
@@ -75,6 +76,7 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
     config.set<int>("number_of_stations", station_count);
     config.set<int>("number_of_end_stations", endpoint_count);
     config.set<int>("number_of_waypoints", waypoint_count);
+    config.set<int>("number_of_robots", parser.number_of_robots);
 
     //TODO: Get number of robots
 }
