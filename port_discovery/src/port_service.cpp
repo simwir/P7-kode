@@ -57,7 +57,8 @@ void add_robot(int id, int port, std::map<const int, int> &robot_map)
     }
 }
 
-void get_robot(int id, const std::map<const int, int> &robot_map, std::shared_ptr<tcp::Connection> connection)
+void get_robot(int id, const std::map<const int, int> &robot_map,
+               std::shared_ptr<tcp::Connection> connection)
 {
     try {
         const std::string message = std::to_string(robot_map.at(id));
@@ -121,12 +122,11 @@ void call_function(port_discovery::Function function, const std::vector<std::str
 
 void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<const int, int> &robot_map)
 {
-    std::vector<std::string> args;
     try {
-        auto messages = connection->receive(MSG_DONTWAIT);
+        auto messages = connection->receive();
         for (const std::string &message : messages) {
             std::cout << message << "\n" << std::endl;
-            args = split(message, ',');
+            std::vector<std::string> args = split(message, ',');
             port_discovery::Function function = parse_function(args[0]);
             call_function(function, args, robot_map, connection);
         }
