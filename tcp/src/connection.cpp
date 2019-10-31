@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string>
 
-#include <connection.hpp>
-#include <tcp_exception.hpp>
+#include <tcp/connection.hpp>
+#include <tcp/exception.hpp>
 
 constexpr int BUFFER_SIZE = 256;
 
