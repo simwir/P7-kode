@@ -12,8 +12,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
 
 include_directories(
-    #${PROJECT_SOURCE_DIR}/validator/include"
+    #${PROJECT_SOURCE_DIR}/validator/include
+    ${PROJECT_SOURCE_DIR}/tcp/include
 )
 
 #add_subdirectory(validator)
 add_subdirectory(tests)
+add_subdirectory(tcp)
