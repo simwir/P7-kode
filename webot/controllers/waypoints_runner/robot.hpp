@@ -80,7 +80,7 @@ class robot_controller {
     int lidar_num_layers = 1;
     double lidar_fov;
     double range_threshold;
-    inline size_t lidar_num_points() { return lidar_resolution * lidar_num_layers; }
+   size_t lidar_num_points() { return lidar_resolution * lidar_num_layers; }
     std::vector<std::optional<double>> lidar_range_values;
     std::vector<geo::RelPoint> point_cloud;
     //    std::vector<webots::LidarPoint> lidar_point_cloud;
