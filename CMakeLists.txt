@@ -15,6 +15,9 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/tcp/include
 )
 
-#add_subdirectory(validator)
-add_subdirectory(tests)
+# Libraries
 add_subdirectory(tcp)
+
+# Executables
+add_subdirectory(tests)
+add_subdirectory(port_discovery)
