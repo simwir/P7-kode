@@ -63,6 +63,7 @@ class Parser {
   private:
     std::istream &is;
     AST ast;
+    int number_of_robots;
 
     std::string read_token();
     std::string read_string();
