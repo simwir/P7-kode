@@ -20,7 +20,7 @@ class RecievedMessageException : public std::exception {
 
 class Master{
     public:
-        Master(std::string robot_host, std::string broadcast_host, int robot_id);
+        Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id);
         void load_webots_to_config(std::string input_file, std::string output_file);
         void request_broadcast_info();
         void send_robot_location(int robot_id, Location location);
