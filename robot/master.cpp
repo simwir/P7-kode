@@ -97,4 +97,9 @@ void robot::Master::send_robot_info(int robot_id, Location location)
 
 std::string robot::Master::recv_broadcast_info()
 {
+    std::vector<std::string> strings_from_broadcaster;
+    strings_from_broadcaster = broadcast_client.receive();
+    
+    //Gets the latest info from the broadcaster
+    return strings_from_broadcaster.back();
 }
