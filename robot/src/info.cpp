@@ -13,12 +13,14 @@ Json::Value Info::to_json() const
     json["eta"] = eta;
     json["station_plan"] = Json::Value{Json::arrayValue};
 
-    for (std::size_t i = 0; i != station_plan.size(); ++i) {
-        json["station_plan"][Json::ArrayIndex(i)] = station_plan[i];
+    for (const int &station : station_plan) {
+        json["station_plan"].append(Json::Value{station});
     }
 
-    for (std::size_t i = 0; i != waypoint_plan.size(); ++i) {
-        json["waypoint_plan"][Json::ArrayIndex(i)] = waypoint_plan[i];
+    json["waypoint_plan"] = Json::Value{Json::arrayValue};
+
+    for (const int &waypoint : waypoint_plan) {
+        json["waypoint_plan"].append(Json::Value{waypoint});
     }
 
     return json;
