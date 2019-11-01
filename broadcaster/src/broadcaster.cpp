@@ -21,20 +21,17 @@ std::vector<std::string> split_message(const std::string message){
 }
 
 Functions Broadcaster::parse_function(const std::string &function) {
-    if (function == "get_robot_locations") {
-        return Functions::get_robot_locations;
+    if (function == "get_robot_info") {
+        return Functions::get_robot_info;
     } else if (function == "post_robot_location") {
         return Functions::post_robot_location;
     } else {
         throw tcp::MessageException(function);
     }
 }
-void Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
+void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
+    Json::Value result = robotsMap.to_json;
     mutex.lock();
-    Json::Value result;
-    for (robot::Info data : robots){
-        result.append(data.to_json);
-    }
     conn->send(result.toStyledString());
     mutex.unlock();
 }
@@ -42,7 +39,7 @@ void Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
 void Broadcaster::post_robot_location(std::string value) {
     robot::Info info = robot::Info::from_json(value);
     mutex.lock();
-    robotsMap.insert(info);
+    robotsMap[info.id] = info;
     mutex.unlock();
 }
 
@@ -51,8 +48,8 @@ void Broadcaster::call_function(Functions functions, std::string& value, std::sh
         case Functions::post_robot_location:
             post_robot_location(value);
             break;
-        case Functions::get_robot_locations:
-            get_robot_locations(conn);
+        case Functions::get_robot_info:
+            get_robot_info(conn);
             break;
         default: 
             throw UnknownFunctionException("Function not implementet");
