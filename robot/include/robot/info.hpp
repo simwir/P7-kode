@@ -26,7 +26,7 @@ struct Info {
 };
 
 struct InfoMap {
-    std::map<int, Info> info_map;
+    std::map<int, Info> robot_info;
 
     InfoMap(){};
     InfoMap(const std::vector<Info> &infos);

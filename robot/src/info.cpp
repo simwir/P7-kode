@@ -69,19 +69,19 @@ InfoMap::InfoMap(const std::vector<Info> &infos)
 
 Info &InfoMap::operator[](int index)
 {
-    return info_map[index];
+    return robot_info[index];
 }
 
 const Info &InfoMap::operator[](int index) const
 {
-    return info_map.at(index);
+    return robot_info.at(index);
 }
 
 Json::Value InfoMap::to_json() const
 {
     Json::Value json{Json::objectValue};
 
-    for (auto &[robot_id, info] : info_map) {
+    for (auto &[robot_id, info] : robot_info) {
         json[std::to_string(robot_id)] = info.to_json();
     }
 
