@@ -4,7 +4,11 @@
 #include <utility>
 #include <vector>
 
+#if __APPLE__
 #include <json/json.h>
+#elif
+#include <jsoncpp/json/json.h>
+#endif
 
 namespace robot {
 Json::Value Info::to_json() const
@@ -59,7 +63,7 @@ Info Info::from_json(const Json::Value &json)
 InfoMap::InfoMap(std::vector<Info> infos)
 {
     for (Info info : infos) {
-        insert(info.id, info);
+        (*this)[info.id] = info;
     }
 }
 
@@ -79,16 +83,6 @@ Json::Value InfoMap::to_json() const
     return json;
 }
 
-void InfoMap::insert(Info info)
-{
-    insert(info.id, info);
-}
-
-void InfoMap::insert(int index, Info info)
-{
-    info_map.insert({index, info});
-}
-
 InfoMap InfoMap::from_json(const std::string &json)
 {
     return InfoMap::from_json(Json::Value{json});
@@ -104,5 +98,4 @@ InfoMap InfoMap::from_json(const Json::Value &json)
 
     return InfoMap{infos};
 }
-
 } // namespace robot

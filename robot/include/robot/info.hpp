@@ -1,7 +1,12 @@
 #ifndef ROBOT_INFO_HPP
 #define ROBOT_INFO_HPP
 
+#if __APPLE__
 #include <json/json.h>
+#elif
+#include <jsoncpp/json/json.h>
+#endif
+
 #include <map>
 #include <string>
 #include <utility>
@@ -25,8 +30,6 @@ struct InfoMap {
 
     InfoMap(std::vector<Info> infos);
     Json::Value to_json() const;
-    void insert(Info info);
-    void insert(int, Info);
     Info &operator[](int index);
     static InfoMap from_json(const std::string &json);
     static InfoMap from_json(const Json::Value &json);
