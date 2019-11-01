@@ -38,11 +38,11 @@ std::string get_var_list(Parser &parser)
     const size_t num_waypoints = ast.nodes.size();
     const size_t num_robots = parser.number_of_robots;
     std::stringstream ss;
-    ss << "{\\\n";
+    ss << "{" << newline;
     other_robot_vars(ss, num_robots);
     robot_vars(ss);
     visited_vars(ss, num_waypoints);
-    ss << "} -> {\\\n";
+    ss << "} -> {" << newline;
     point_variables(ss, num_waypoints);
     ss << "} ";
 
