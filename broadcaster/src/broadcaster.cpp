@@ -40,12 +40,9 @@ void Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
 }
 
 void Broadcaster::post_robot_location(std::string value) {
-    Json::Value result{value};
-    robot::Info info = robot::Info::from_json(result);
-
-    
-
+    robot::Info info = robot::Info::from_json(value);
     mutex.lock();
+    robotsMap.insert(info);
     mutex.unlock();
 }
 

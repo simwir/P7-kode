@@ -43,7 +43,7 @@ public:
 private:
     tcp::Server server;
 
-    std::vector<robot::Info> robots;    
+    robot::InfoMap robotsMap;    
 };
 
 }
