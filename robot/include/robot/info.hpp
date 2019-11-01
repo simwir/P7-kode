@@ -2,6 +2,7 @@
 #define ROBOT_INFO_HPP
 
 #include <json/json.h>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,6 +18,15 @@ struct Info {
     Json::Value to_json() const;
     static Info from_json(std::string &json);
     static Info from_json(const Json::Value &json);
+};
+
+class InfoMap {
+    std::map<int, Info> info_map;
+
+  public:
+    InfoMap(std::vector<Info> infos);
+    void insert(int, Info);
+    Info &operator[](int index);
 };
 } // namespace robot
 

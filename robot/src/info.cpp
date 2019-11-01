@@ -1,3 +1,4 @@
+#include <map>
 #include <robot/info.hpp>
 #include <string>
 #include <utility>
@@ -49,8 +50,26 @@ Info Info::from_json(const Json::Value &json)
         waypoint_plan.push_back(itr.key().asInt());
     }
 
-    Info info{json["id"].asInt(), location, station_plan, waypoint_plan, json["eta"].asDouble()};
+    robot::Info info{json["id"].asInt(), location, station_plan, waypoint_plan,
+                     json["eta"].asDouble()};
 
     return info;
+}
+
+InfoMap::InfoMap(std::vector<Info> infos)
+{
+    for (Info info : infos) {
+        insert(info.id, info);
+    }
+}
+
+Info &InfoMap::operator[](int index)
+{
+    return info_map[index];
+}
+
+void InfoMap::insert(int index, Info info)
+{
+    info_map.insert({index, info});
 }
 } // namespace robot
