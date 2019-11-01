@@ -32,7 +32,7 @@ Json::Value Info::to_json() const
     return json;
 }
 
-Info Info::from_json(std::string &json)
+Info Info::from_json(const std::string &json)
 {
     return Info::from_json(Json::Value{json});
 }
@@ -60,7 +60,7 @@ Info Info::from_json(const Json::Value &json)
     return info;
 }
 
-InfoMap::InfoMap(std::vector<Info> infos)
+InfoMap::InfoMap(const std::vector<Info> &infos)
 {
     for (Info info : infos) {
         (*this)[info.id] = info;
@@ -69,14 +69,19 @@ InfoMap::InfoMap(std::vector<Info> infos)
 
 Info &InfoMap::operator[](int index)
 {
-    return info_map[index];
+    return robot_info[index];
+}
+
+const Info &InfoMap::operator[](int index) const
+{
+    return robot_info.at(index);
 }
 
 Json::Value InfoMap::to_json() const
 {
     Json::Value json{Json::objectValue};
 
-    for (auto &[robot_id, info] : info_map) {
+    for (auto &[robot_id, info] : robot_info) {
         json[std::to_string(robot_id)] = info.to_json();
     }
 
@@ -92,7 +97,7 @@ InfoMap InfoMap::from_json(const Json::Value &json)
 {
     std::vector<Info> infos;
 
-    for (auto info : json) {
+    for (auto &info : json) {
         infos.push_back(Info::from_json(info));
     }
 
