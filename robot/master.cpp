@@ -17,7 +17,7 @@ robot::Master::Master(std::string robot_host, std::string broadcast_host ,int ro
     std::vector<std::string> recieved_strings;
 
     //Connecting to the Port Discovery Service
-    tcp::Client PDSClient = tcp::Client(robot_host, PORT_TO_PDS); 
+    tcp::Client PDSClient{robot_host, PORT_TO_PDS}; 
     PDSClient.send("get_robot," + robot_id);
     do{
         recieved_strings = PDSClient.receive();
