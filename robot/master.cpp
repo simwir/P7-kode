@@ -17,7 +17,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     std::vector<std::string> recieved_strings;
 
     //Connecting to the Port Discovery Service
-    tcp::Client PDSClient = tcp::Client(robot_host, PORT_TO_PDS); 
+    tcp::Client PDSClient{robot_host, PORT_TO_PDS}; 
     PDSClient.send("get_robot," + robot_id);
     do{
         recieved_strings = PDSClient.receive();
@@ -44,7 +44,7 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file){
     AST ast = parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
-        std::cerr << "Malformed world file. No waypoints found.";
+        std::cerr << "Malformed world file. No waypoints found." << std::endl;
         exit(1);
     }
 
