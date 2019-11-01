@@ -4,7 +4,8 @@
 
 #include <json/json.h>
 
-Json::Value robot::Info::to_json() const
+namespace robot {
+Json::Value Info::to_json() const
 {
     Json::Value json;
 
@@ -23,7 +24,7 @@ Json::Value robot::Info::to_json() const
     return json;
 }
 
-robot::Info robot::Info::from_json(const Json::Value &json)
+Info Info::from_json(const Json::Value &json)
 {
     std::pair<double, double> location{json["location"]["x"].asDouble(),
                                        json["location"]["y"].asDouble()};
@@ -40,8 +41,8 @@ robot::Info robot::Info::from_json(const Json::Value &json)
         waypoint_plan.push_back(itr.key().asInt());
     }
 
-    robot::Info info{json["id"].asInt(), location, station_plan, waypoint_plan,
-                     json["eta"].asDouble()};
+    Info info{json["id"].asInt(), location, station_plan, waypoint_plan, json["eta"].asDouble()};
 
     return info;
 }
+} // namespace robot
