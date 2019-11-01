@@ -11,7 +11,7 @@
 #define PORT_TO_BROADCASTER "5435"
 #define PORT_TO_PDS "4444"
 
-robot::Master::Master(std::string robot_host, std::string broadcast_host ,int robot_id)
+robot::Master::Master(const std::string &robot_host, const std::string &broadcast_host ,int robot_id)
         : broadcast_client(broadcast_host, PORT_TO_BROADCASTER) {
     std::string port_to_controller;
     std::vector<std::string> recieved_strings;
@@ -21,8 +21,8 @@ robot::Master::Master(std::string robot_host, std::string broadcast_host ,int ro
     PDSClient.send("get_robot," + robot_id);
     do{
         recieved_strings = PDSClient.receive();
-    }while(recieved_strings.size == 0);
-    if (recieved_strings.size == 1)
+    }while(recieved_strings.size() == 0);
+    if (recieved_strings.size() == 1)
     {
         port_to_controller = recieved_strings[0];
     }
@@ -34,7 +34,7 @@ robot::Master::Master(std::string robot_host, std::string broadcast_host ,int ro
     webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
-void robot::Master::load_webots_to_config(std::string input_file, std::string output_file){
+void robot::Master::load_webots_to_config(std::filesystem::path input_file){
     std::ifstream infile(input_file);
     if (!infile.is_open()) {
         std::cerr << "The file " << input_file << " could not be opened.\n";
@@ -74,10 +74,10 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
         }
     }
 
-    config.set<int>("number_of_stations", station_count);
-    config.set<int>("number_of_end_stations", endpoint_count);
-    config.set<int>("number_of_waypoints", waypoint_count);
-    config.set<int>("number_of_robots", parser.number_of_robots);
+    config.set("number_of_stations", station_count);
+    config.set("number_of_end_stations", endpoint_count);
+    config.set("number_of_waypoints", waypoint_count);
+    config.set("number_of_robots", parser.number_of_robots);
 }
 
 void robot::Master::request_broadcast_info(){
@@ -87,7 +87,7 @@ void robot::Master::request_broadcast_info(){
 void robot::Master::send_robot_info(int robot_id, Location location){
     robot::LocationMap map = robot::LocationMap();
     map.locations.insert({robot_id, location});
-    broadcast_client.send("post_robot_location, " + location.);
+    broadcast_client.send("post_robot_location, " + location.to_json);
 }
 
 std::string robot::Master::recv_broadcast_info(){
