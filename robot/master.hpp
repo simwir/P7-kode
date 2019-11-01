@@ -23,7 +23,7 @@ class Master{
         Master(std::string robot_host, std::string broadcast_host, int robot_id);
         void load_webots_to_config(std::string input_file, std::string output_file);
         void request_broadcast_info();
-        void send_robot_location(int robot_id, robot::Location location);
+        void send_robot_location(int robot_id, Location location);
         std::string recv_broadcast_info();
 
     private:
