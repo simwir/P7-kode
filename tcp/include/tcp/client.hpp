@@ -2,6 +2,7 @@
 #define TCP_CLIENT_HPP
 
 #include <string>
+#include <vector>
 
 #include "connection.hpp"
 

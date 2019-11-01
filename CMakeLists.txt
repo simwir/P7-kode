@@ -13,8 +13,13 @@ set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/tcp/include
+    ${PROJECT_SOURCE_DIR}/robot/include
 )
 
-#add_subdirectory(validator)
-add_subdirectory(tests)
+# Libraries
 add_subdirectory(tcp)
+add_subdirectory(robot)
+
+# Executables
+add_subdirectory(tests)
+add_subdirectory(port_discovery)
