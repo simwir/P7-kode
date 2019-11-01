@@ -28,6 +28,8 @@ struct InfoMap {
     void insert(Info info);
     void insert(int, Info);
     Info &operator[](int index);
+    static InfoMap from_json(const std::string &json);
+    static InfoMap from_json(const Json::Value &json);
 };
 } // namespace robot
 

@@ -88,4 +88,21 @@ void InfoMap::insert(int index, Info info)
 {
     info_map.insert({index, info});
 }
+
+InfoMap InfoMap::from_json(const std::string &json)
+{
+    return InfoMap::from_json(Json::Value{json});
+}
+
+InfoMap InfoMap::from_json(const Json::Value &json)
+{
+    std::vector<Info> infos;
+
+    for (auto info : json) {
+        infos.push_back(Info::from_json(info));
+    }
+
+    return InfoMap{infos};
+}
+
 } // namespace robot
