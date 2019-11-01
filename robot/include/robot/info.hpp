@@ -21,7 +21,7 @@ struct Info {
     double eta;
 
     Json::Value to_json() const;
-    static Info from_json(std::string &json);
+    static Info from_json(const std::string &json);
     static Info from_json(const Json::Value &json);
 };
 
