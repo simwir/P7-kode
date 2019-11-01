@@ -34,8 +34,8 @@ struct Point2D {
     {
         const auto angle = a.theta;
         const auto x = r * std::cos(angle);
-        const auto negative_y = r * std::sin(angle);
-        return Point2D{x, -negative_y};
+        const auto y = -r * std::sin(angle);
+        return Point2D{x, y};
     }
 };
 

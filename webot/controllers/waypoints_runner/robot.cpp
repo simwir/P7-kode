@@ -295,7 +295,7 @@ std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> RobotController
 
     for (int i = 0; i < lidar_resolution; ++i) {
         int next = (i + 1) % lidar_resolution;
-        // Switch from object in range to not in range
+        // Switch from object in range to not in range or vice versa
         if (lidar_range_values[i].has_value() != lidar_range_values[next].has_value()) {
             const auto dist = lidar_range_values[i].has_value() ? lidar_range_values[i].value() : lidar_max_range;
             const auto angle = index2angle(i);
