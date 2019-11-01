@@ -8,6 +8,9 @@
 
 const std::regex template_par{TEMPL_START + R"_(.*)_" + TEMPL_END};
 const std::regex strat_var_placeholder(TEMPL_START + R"(STRATEGY_VAR_LIST)" + TEMPL_END);
+// Extra backslash so verifyta doesn't get confused by newline.
+constexpr auto varsep = ",";
+constexpr auto newline = "\\\n";
 
 std::string get_var_list(Parser &parser);
 std::ostream &other_robot_vars(std::ostream &os, size_t num_robots);
@@ -33,7 +36,7 @@ std::string get_var_list(Parser &parser)
 {
     AST ast = parser.parse_stream();
     const size_t num_waypoints = ast.nodes.size();
-    const size_t num_robots = ;//parser.number_of_robots;
+    const size_t num_robots = 8; // parser.number_of_robots;
     std::stringstream ss;
     ss << "{\\\n";
     other_robot_vars(ss, num_robots);
@@ -49,23 +52,28 @@ std::string get_var_list(Parser &parser)
 std::ostream &other_robot_vars(std::ostream &os, size_t num_robots)
 {
     for (size_t i = 2; i <= num_robots; ++i) {
-        os << "OtherRobot(" << i << ").location,\\\n"
-           << "OtherRobot(" << i << ").cur,\\\n"
-           << "OtherRobot(" << i << ").next.type,\\\n"
-           << "OtherRobot(" << i << ").next.value,\\\n";
+        os << "OtherRobot(" << i << ").location" << varsep << newline
+           << "OtherRobot(" << i << ").cur" << varsep << newline
+           << "OtherRobot(" << i << ").next.type" << varsep << newline
+           << "OtherRobot(" << i << ").next.value" << varsep << newline;
     }
     return os;
 }
 
 std::ostream &robot_vars(std::ostream &os)
 {
-    return os << "Robot.location,\\\nRobot.dest,\\\nRobot.cur_waypoint,\\\nRobot.dest_waypoint";
+    return os << "Robot.location" << varsep << newline
+              << "Robot.dest" << varsep << newline
+              << "Robot.cur_waypoint" << varsep << newline
+              << "Robot.dest_waypoint" << varsep << newline;
 }
 
 std::ostream &visited_vars(std::ostream &os, size_t num_waypoints)
 {
     for (size_t i = 1; i <= num_waypoints; ++i) {
-        os << "Robot.visited[" << i << "]\\\n";
+        os << "Robot.visited[" << i << "]";
+        if (i != num_waypoints) os << varsep;
+        os << newline;
     }
     return os;
 }
@@ -73,7 +81,7 @@ std::ostream &visited_vars(std::ostream &os, size_t num_waypoints)
 std::ostream &point_variables(std::ostream &os, size_t num_waypoints)
 {
     for (size_t i = 1; i <= num_waypoints; ++i) {
-        os << "Waypoint(" << i << ").num_in_queue\\\n";
+        os << "Waypoint(" << i << ").num_in_queue" << varsep << newline;
     }
-    return os << "Robot.x\\\n";
+    return os << "Robot.x" << newline;
 }
