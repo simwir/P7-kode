@@ -1,10 +1,13 @@
+#include <map>
 #include <robot/info.hpp>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include <json/json.h>
 
-Json::Value robot::Info::to_json() const
+namespace robot {
+Json::Value Info::to_json() const
 {
     Json::Value json;
 
@@ -12,18 +15,25 @@ Json::Value robot::Info::to_json() const
     json["eta"] = eta;
     json["station_plan"] = Json::Value{Json::arrayValue};
 
-    for (std::size_t i = 0; i != station_plan.size(); ++i) {
-        json["station_plan"][Json::ArrayIndex(i)] = station_plan[i];
+    for (const int &station : station_plan) {
+        json["station_plan"].append(Json::Value{station});
     }
 
-    for (std::size_t i = 0; i != waypoint_plan.size(); ++i) {
-        json["waypoint_plan"][Json::ArrayIndex(i)] = waypoint_plan[i];
+    json["waypoint_plan"] = Json::Value{Json::arrayValue};
+
+    for (const int &waypoint : waypoint_plan) {
+        json["waypoint_plan"].append(Json::Value{waypoint});
     }
 
     return json;
 }
 
-robot::Info robot::Info::from_json(const Json::Value &json)
+Info Info::from_json(std::string &json)
+{
+    return Info::from_json(Json::Value{json});
+}
+
+Info Info::from_json(const Json::Value &json)
 {
     std::pair<double, double> location{json["location"]["x"].asDouble(),
                                        json["location"]["y"].asDouble()};
@@ -45,3 +55,21 @@ robot::Info robot::Info::from_json(const Json::Value &json)
 
     return info;
 }
+
+InfoMap::InfoMap(std::vector<Info> infos)
+{
+    for (Info info : infos) {
+        insert(info.id, info);
+    }
+}
+
+Info &InfoMap::operator[](int index)
+{
+    return info_map[index];
+}
+
+void InfoMap::insert(int index, Info info)
+{
+    info_map.insert({index, info});
+}
+} // namespace robot
