@@ -3,38 +3,43 @@
 #include <iostream>
 #include <string.h>
 #include <vector>
+#include <filesystem>
 
 #include "apsp.hpp"
 #include "distance_matrix.hpp"
 #include "uppaal-printer.hpp"
+#include "xml-generator.hpp"
 
 #include "webots_parser.hpp"
 void print_help(const char *const execute_location)
 {
     std::cerr << "Usage: " << execute_location << " [options] INPUT_FILE [options]" << std::endl
-              << "-d --dist-matrix    Emit uppaal waypoint distance matrix" << std::endl
-              << "-p --shortest-path  Emit the length of the shortest path between all stations "
+              << "-d --dist-matrix         Emit uppaal waypoint distance matrix" << std::endl
+              << "-p --shortest-path       Emit the length of the shortest path between all stations "
                  "and endpoints"
               << std::endl
-              << "-r --shortest-route Emit the shortest route between all stations and endpoints"
+              << "-r --shortest-route      Emit the shortest route between all stations and endpoints"
               << std::endl
-              << "-s --stations       Emit stations ids" << std::endl
-              << "-e --endpoints      Emit endpoint ids" << std::endl
-              << "-v --vias           Emit vias ids" << std::endl
-              << "-n --all-nodes      Same as -sev" << std::endl
-              << "-a --all            Same as -dprsewn";
+              << "-s --stations            Emit stations ids" << std::endl
+              << "-e --endpoints           Emit endpoint ids" << std::endl
+              << "-v --vias                Emit vias ids" << std::endl
+              << "-n --all-nodes           Same as -sev" << std::endl
+              << "-x --xml <template file> Generate UPPAAL XML file\n"
+              << "-a --all                 Same as -dprsewn";
 }
 
 int main(int argc, char **argv)
 {
-    const char *const shortOpts = "dprsevna";
+    const char *const shortOpts = "dprsevnax:";
     const option longOpts[] = {
         {"dist-matrix", no_argument, nullptr, 'd'},    {"shortest-path", no_argument, nullptr, 'p'},
         {"shortest-route", no_argument, nullptr, 'r'}, {"stations", no_argument, nullptr, 's'},
         {"endpoints", no_argument, nullptr, 'e'},      {"vias", no_argument, nullptr, 'v'},
-        {"all-nodes", no_argument, nullptr, 'n'},      {"all", no_argument, nullptr, 'a'}};
+        {"all-nodes", no_argument, nullptr, 'n'},      {"all", no_argument, nullptr, 'a'},
+        {"xml", required_argument, nullptr, 'x'}};
 
-    bool d, p, r, optstations, optendpoints, optvias;
+    bool d, p, r, optstations, optendpoints, optvias, optxml;
+    std::string template_path;
 
     int opt;
     while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1) {
@@ -59,6 +64,13 @@ int main(int argc, char **argv)
         case 'n':
             optstations = optendpoints = optvias = true;
             break;
+        case 'x':
+            optxml = true;
+            template_path = std::string{optarg};
+            break;
+        case 'a':
+            d = p = r = optstations = optendpoints = optvias = optxml = true;
+            break;
         }
     }
 
@@ -74,7 +86,8 @@ int main(int argc, char **argv)
         std::cerr << "The file " << inputFile << " could not be opened.\n";
         exit(1);
     }
-    AST ast = Parser{infile}.parse_stream();
+    Parser parser{infile};
+    AST ast = parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
         std::cerr << "Malformed world file. No waypoints found.";
@@ -109,5 +122,15 @@ int main(int argc, char **argv)
 
     if (optvias) {
         std::cout << print_waypoints_of_type(ast, WaypointType::eVia);
+    }
+
+    if (optxml) {
+        std::ifstream template_file{template_path};
+        if(!template_file.is_open()){
+            std::cerr << "The file " << template_path << " could not be opened" << std::endl;
+            exit(1);
+        }
+        generate_xml(ast, parser.number_of_robots, std::cout, template_file);
+        template_file.close();
     }
 }

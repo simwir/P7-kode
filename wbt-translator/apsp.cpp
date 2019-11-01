@@ -54,6 +54,10 @@ apsp_result all_pairs_shortest_path(const AST& ast){
     return result;
 }
 
+apsp_result filter_apsp(apsp_result original, std::vector<int> filter){
+    
+}
+
 std::string print_num_waypoints(const std::map<int, std::map<int, double>>& dist) {
     size_t num_waypoints = dist.size();
     std::stringstream ss;

@@ -17,16 +17,15 @@ std::string print_waypoints_of_type(const AST &ast, const WaypointType type)
     std::string type_name;
     switch (type) {
     case WaypointType::eVia:
-        type_name = "VIAS";
+        type_name = "via";
         break;
     case WaypointType::eStation:
-        type_name = "STATIONS";
+        type_name = "station";
         break;
     case WaypointType::eEndPoint:
-        type_name = "ENDPOINTS";
+        type_name = "endpoint";
         break;
     }
-    ss1 << "const int NUM_" << type_name << " = " << count << ";\n"
-        << "const int " << type_name << "[NUM_" << type_name << "] = {" << ss2.str() << "};\n";
+    ss1 << "const waypoint_t " << type_name << "_waypoint[" << type_name << "_t] = {" << ss2.str() << "};";
     return ss1.str();
 }
