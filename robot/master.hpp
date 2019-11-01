@@ -3,37 +3,33 @@
 
 #include <filesystem>
 
-#include "config.hpp"
 #include "../tcp/include/tcp/client.hpp"
+#include "config.hpp"
 #include "location.hpp"
 
 namespace robot {
 class RecievedMessageException : public std::exception {
     std::string message;
-    
-    public:
-        RecievedMessageException(const std::string &in_message) : message(in_message) {}
 
-        const char *what() const noexcept override
-        {
-            return message.c_str();
-        }
+  public:
+    RecievedMessageException(const std::string &in_message) : message(in_message) {}
+
+    const char *what() const noexcept override { return message.c_str(); }
 };
 
-class Master{
-    public:
-        Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id);
-        void load_webots_to_config(std::filesystem::path input_file);
-        void request_broadcast_info();
-        void send_robot_location(int robot_id, Location location);
-        void send_robot_info(int robot_id, Location location);
-        std::string recv_broadcast_info();
+class Master {
+  public:
+    Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id);
+    void load_webots_to_config(std::filesystem::path input_file);
+    void request_broadcast_info();
+    void send_robot_location(int robot_id, Location location);
+    void send_robot_info(int robot_id, Location location);
+    std::string recv_broadcast_info();
 
-    private:
-        robot::Config config;
-        std::unique_ptr<tcp::Client> webot_client;
-        tcp::Client broadcast_client;
-        
+  private:
+    robot::Config config;
+    std::unique_ptr<tcp::Client> webot_client;
+    tcp::Client broadcast_client;
 };
-}// namespace robot
+} // namespace robot
 #endif
