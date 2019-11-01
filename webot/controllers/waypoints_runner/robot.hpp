@@ -51,6 +51,10 @@ class RobotController {
     geo::Angle get_angle_to_goal() const;
     geo::Angle get_relative_angle_to_goal() const;
     geo::Angle get_angle_to_point(const geo::GlobalPoint& point) const;
+    void update_dfollowed();
+    bool clear();
+    double dreach();
+    geo::Angle normal_angle();
 
     static geo::GlobalPoint gps_reading_to_point(const webots::GPS *gps)
     {
@@ -95,8 +99,8 @@ class RobotController {
     }
 
     std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> get_discontinuity_points() const;
-    bool clear();
     void go_towards_angle(const geo::Angle& angle);
+    void go_to_discontinuity(geo::GlobalPoint point, DiscontinuityDirection dir);
 
     // actions
     void do_left_turn();
@@ -113,7 +117,8 @@ class RobotController {
     double prev_dist2goal;
     bool first_iteration = true;
     Phase phase = Phase::Motion2Goal;
-
+    double dfollowed;
+    
     geo::GlobalPoint position;
 
     void dump_readings_to_csv(const std::string& pcfilename = "point_cloud.csv",
