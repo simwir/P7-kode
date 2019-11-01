@@ -26,7 +26,7 @@ broadcaster::Functions parse_function(const std::string &function) {
 }
 void broadcaster::Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
     mutex.lock();
-    conn->send(location_map.parse_location_map());
+    //conn->send(Broadcaster::location_map());
     mutex.unlock();
 }
 
@@ -39,7 +39,7 @@ void callFunction(broadcaster::Functions functions, Json::Value value) {
     try {
         switch (functions) {
             case broadcaster::Functions::post_robot_location:
-                broadcaster::post_robot_location(value)
+                post_robot_location(value)
                 break;
             case broadcaster::Functions::get_robot_location:
                 broadcaster::get_robot_location();
