@@ -72,6 +72,11 @@ Info &InfoMap::operator[](int index)
     return info_map[index];
 }
 
+const Info &InfoMap::operator[](int index) const
+{
+    return info_map.at(index);
+}
+
 Json::Value InfoMap::to_json() const
 {
     Json::Value json{Json::objectValue};
