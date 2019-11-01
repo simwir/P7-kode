@@ -36,7 +36,7 @@ std::string get_var_list(Parser &parser)
 {
     AST ast = parser.parse_stream();
     const size_t num_waypoints = ast.nodes.size();
-    const size_t num_robots = 8; // parser.number_of_robots;
+    const size_t num_robots = parser.number_of_robots;
     std::stringstream ss;
     ss << "{\\\n";
     other_robot_vars(ss, num_robots);
