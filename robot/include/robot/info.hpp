@@ -20,11 +20,11 @@ struct Info {
     static Info from_json(const Json::Value &json);
 };
 
-class InfoMap {
+struct InfoMap {
     std::map<int, Info> info_map;
 
-  public:
     InfoMap(std::vector<Info> infos);
+    Json::Value to_json() const;
     void insert(Info info);
     void insert(int, Info);
     Info &operator[](int index);

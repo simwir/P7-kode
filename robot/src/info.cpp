@@ -68,6 +68,17 @@ Info &InfoMap::operator[](int index)
     return info_map[index];
 }
 
+Json::Value InfoMap::to_json() const
+{
+    Json::Value json{Json::objectValue};
+
+    for (auto &[robot_id, info] : info_map) {
+        json[std::to_string(robot_id)] = info.to_json();
+    }
+
+    return json;
+}
+
 void InfoMap::insert(Info info)
 {
     insert(info.id, info);
