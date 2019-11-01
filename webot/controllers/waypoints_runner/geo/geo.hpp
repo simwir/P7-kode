@@ -32,7 +32,10 @@ struct Point2D {
 
     static Point2D from_polar(const double r, Angle a)
     {
-        return Point2D{r * std::cos(a.theta), r * std::sin(a.theta)};
+        const auto angle = a.theta;
+        const auto x = r * std::cos(angle);
+        const auto negative_y = r * std::sin(angle);
+        return Point2D{x, -negative_y};
     }
 };
 

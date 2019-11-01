@@ -52,7 +52,7 @@ CFLAGS = -Wno-unused-result -std=c++17 -O0 -g -n -Wall -pedantic
 ###
 ### ---- Linking options ----
 ### if special linking flags are needed:
-### LFLAGS = -s
+LFLAGS = -static-libasan
 ###
 ### ---- Webots included libraries ----
 ### if you want to use the Webots C API in your C++ controller program:

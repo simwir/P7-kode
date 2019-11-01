@@ -23,7 +23,7 @@
 int main(int argc, char **argv)
 {
     // create the Robot instance.
-    robot_controller controller{new webots::Supervisor()};
+    RobotController controller{new webots::Supervisor()};
     controller.run_simulation();
 
     // Main loop:

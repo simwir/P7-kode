@@ -16,6 +16,9 @@ double lidar_wrapper::get_fov() const {
 double lidar_wrapper::get_max_range() const {
     return lidar->getMaxRange();
 }
+double lidar_wrapper::get_min_range() const {
+    return lidar->getMinRange();
+}
 double lidar_wrapper::get_resolution() const {
     return lidar->getHorizontalResolution();
 }

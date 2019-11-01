@@ -6,8 +6,9 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.915545311745861 0.25386013666958696 0.3119804691808011 4.8683159696564315
-  position -0.3638218379055663 1.4481739067632187 0.38777109634734735
+  orientation 0.1151019771789315 0.8698243975520322 0.4797468627023475 3.794654624283696
+  position -1.1416518317275077 1.2807436327659467 -0.5921245625252853
+  follow "Elisa-3"
 }
 TexturedBackground {
 }
@@ -169,12 +170,8 @@ Waypoint {
   name "waypoint(11)"
 }
 Elisa3 {
-  hidden position_0_0 100.94044645349216
-  hidden position_0_1 97.12014253684322
-  hidden rotation_4 0 0 -1 0.4094815386187735
-  hidden rotation_5 0 0 1 3.4108223780301654
-  translation -0.27832799999999996 -0.024383 0.010863999999999999
-  rotation 0.018348277990769116 0.996114800629578 -0.0861315543890231 -0.4290131621667231
+  translation -0.27901213672797526 -9.611637893725336e-06 0.010555737502188687
+  rotation -1.150878178195831e-05 0.9999999999085518 -7.10241993612351e-06 -0.4009166797489478
   controller "waypoints_runner"
   extensionSlot [
     Group {
@@ -182,11 +179,9 @@ Elisa3 {
         Lidar {
           translation 0 0.04 0
           rotationStep 0.261799
-          horizontalResolution 2048
           fieldOfView 6.28328
           numberOfLayers 1
           maxRange 0.5
-          type "fixed"
         }
         GPS {
           translation 0.02 0.03 0

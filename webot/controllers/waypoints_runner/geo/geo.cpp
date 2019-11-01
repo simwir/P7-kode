@@ -25,7 +25,7 @@ GlobalPoint get_midpoint(const GlobalPoint &p1, const GlobalPoint &p2)
 
 Angle angle_of_line(const GlobalPoint &p1, const GlobalPoint &p2)
 {
-    const auto res = std::atan2(p2.y - p1.y, p2.x - p1.x);
+    const auto res = std::atan2((-p2.y) - (-p1.y), p2.x - p1.x);
     return Angle{res};
 }
 
@@ -77,8 +77,8 @@ std::ostream &operator<<(std::ostream &os, const Angle &a)
 
 RelPoint rotate_point(const RelPoint &p, const Angle a)
 {
-    return RelPoint{p.x * std::cos(a.theta) - p.y * std::sin(a.theta),
-                    p.x * std::sin(a.theta) + p.y * std::cos(a.theta)};
+    return RelPoint{p.y * std::sin(a.theta) + p.x * std::cos(a.theta),
+                    p.y * std::cos(a.theta) - p.x * std::sin(a.theta)};
 }
 
 GlobalPoint to_global_coordinates(GlobalPoint rel_orig, Angle rel_angle, RelPoint rel_point)
