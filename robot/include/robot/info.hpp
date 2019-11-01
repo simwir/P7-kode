@@ -28,6 +28,7 @@ struct Info {
 struct InfoMap {
     std::map<int, Info> info_map;
 
+    InfoMap(){};
     InfoMap(const std::vector<Info> &infos);
     Json::Value to_json() const;
     Info &operator[](int index);
