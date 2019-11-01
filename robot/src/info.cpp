@@ -1,4 +1,5 @@
 #include <robot/info.hpp>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -24,6 +25,11 @@ Json::Value Info::to_json() const
     }
 
     return json;
+}
+
+Info Info::from_json(std::string &json)
+{
+    return Info::from_json(Json::Value{json});
 }
 
 Info Info::from_json(const Json::Value &json)

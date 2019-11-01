@@ -2,6 +2,7 @@
 #define ROBOT_INFO_HPP
 
 #include <json/json.h>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -14,6 +15,7 @@ struct Info {
     double eta;
 
     Json::Value to_json() const;
+    static Info from_json(std::string &json);
     static Info from_json(const Json::Value &json);
 };
 } // namespace robot
