@@ -68,6 +68,11 @@ Info &InfoMap::operator[](int index)
     return info_map[index];
 }
 
+void InfoMap::insert(Info info)
+{
+    insert(info.id, info);
+}
+
 void InfoMap::insert(int index, Info info)
 {
     info_map.insert({index, info});

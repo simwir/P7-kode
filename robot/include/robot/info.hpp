@@ -25,6 +25,7 @@ class InfoMap {
 
   public:
     InfoMap(std::vector<Info> infos);
+    void insert(Info info);
     void insert(int, Info);
     Info &operator[](int index);
 };
