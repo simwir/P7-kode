@@ -5,9 +5,12 @@
 
 #include <jsoncpp/json/json.h>
 
+#include <iostream>
 #include <thread>
 #include <mutex>
 #include <map>
+
+namespace broadcaster {
 
 std::mutex mutex;
 
@@ -17,67 +20,72 @@ std::vector<std::string> split_message(const std::string message){
     return std::vector<std::string> {start, end};
 }
 
-broadcaster::Functions parse_function(const std::string &function) {
+Functions Broadcaster::parse_function(const std::string &function) {
     if (function == "get_robot_locations") {
-        return broadcaster::Functions::get_robot_locations;
+        return Functions::get_robot_locations;
     } else if (function == "post_robot_location") {
-        return broadcaster::Functions::post_robot_location;
+        return Functions::post_robot_location;
     } else {
         throw tcp::MessageException(function);
     }
 }
-void get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
+void Broadcaster::get_robot_locations(std::shared_ptr<tcp::Connection> conn) {
     mutex.lock();
-    //conn->send(Broadcaster::location_map());
+    Json::Value result;
+    for (robot::Info data : robots){
+        result.append(data.to_json);
+    }
+    conn->send(result.toStyledString());
     mutex.unlock();
 }
 
-void post_robot_location(Json::Value value) {
+void Broadcaster::post_robot_location(std::string value) {
+    Json::Value result{value};
+    robot::Info info = robot::Info::from_json(result);
+
+    
+
     mutex.lock();
     mutex.unlock();
 }
 
-void callFunction(broadcaster::Functions functions, Json::Value value, std::shared_ptr<tcp::Connection> conn) {
+void Broadcaster::call_function(Functions functions, std::string& value, std::shared_ptr<tcp::Connection> conn) {
     switch (functions) {
-        case broadcaster::Functions::post_robot_location:
+        case Functions::post_robot_location:
             post_robot_location(value);
             break;
-        case broadcaster::Functions::get_robot_locations:
+        case Functions::get_robot_locations:
             get_robot_locations(conn);
             break;
         default: 
-            throw broadcaster::UnknownFunctionException("Function not implementet");
+            throw UnknownFunctionException("Function not implementet");
     } 
 }
 
-void parseMessage(std::shared_ptr<tcp::Connection> conn) {
-    std::vector<std::string> result;
+void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn) {
     try {
         auto messages = conn->receive();
         if (!messages.empty()){
             for (const std::string &message : messages) {
                 std::vector<std::string> result = split_message(message);
-                broadcaster::Functions function = parse_function(result[0]);
-                callFunction(function, result[1], conn);
+                Functions function = parse_function(result[0]);
+                call_function(function, result[1], conn);
             }
         }
     } catch (tcp::MalformedMessageException &e) {
         conn->send(e.what());
-    } catch (broadcaster::UnknownFunctionException &e) {
+    } catch (UnknownFunctionException &e) {
         conn->send(e.what());
-    } catch (port_discovery::InvalidParametersException &e) {
+    } catch (UnknownParameterException &e) {
         conn->send(e.what());
     }
 }
 
-broadcaster::Broadcaster(int port) : server(port) {}
-
-void broadcaster::Broadcaster::start_broadcasting() {
-    std::vector()
+void Broadcaster::start_broadcasting() {
+    std::cout << "Waiting for connections on port: " << server.get_port() << std::endl;
     while (true) {
         std::shared_ptr<tcp::Connection> conn = server.accept();
-        std::thread t1(&Broadcaster::parseMessage, this, conn);
+        std::thread t1(&Broadcaster::parse_message, this, conn);
     }
 }
-
-
+}

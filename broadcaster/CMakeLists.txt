@@ -7,5 +7,6 @@ target_link_libraries(broadcaster
     pthread
     tcp
     jsoncpp
+    robot
 )
 install(TARGETS broadcaster DESTINATION bin)
