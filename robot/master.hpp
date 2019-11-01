@@ -5,7 +5,7 @@
 
 #include "../tcp/include/tcp/client.hpp"
 #include "config.hpp"
-#include "location.hpp"
+#include "include/robot/info.hpp"
 
 namespace robot {
 class RecievedMessageException : public std::exception {
@@ -22,8 +22,7 @@ class Master {
     Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id);
     void load_webots_to_config(std::filesystem::path input_file);
     void request_broadcast_info();
-    void send_robot_location(int robot_id, Location location);
-    void send_robot_info(int robot_id, Location location);
+    void send_robot_info(int robot_id, Info robot_info);
     std::string recv_broadcast_info();
 
   private:

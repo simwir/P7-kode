@@ -5,7 +5,7 @@
 #include "../wbt-translator/distance_matrix.hpp"
 #include "../wbt-translator/webots_parser.hpp"
 #include "config.hpp"
-#include "location.hpp"
+#include "include/robot/info.hpp"
 #include "master.hpp"
 
 #define PORT_TO_BROADCASTER "5435"
@@ -88,11 +88,9 @@ void robot::Master::request_broadcast_info()
     broadcast_client.send("get_robot_locations");
 }
 
-void robot::Master::send_robot_info(int robot_id, Location location)
+void robot::Master::send_robot_info(int robot_id, Info robot_info)
 {
-    robot::LocationMap map = robot::LocationMap();
-    map.locations.insert({robot_id, location});
-    broadcast_client.send("post_robot_location, " + location.to_json);
+    broadcast_client.send("post_robot_location, " + robot_info.to_json);
 }
 
 std::string robot::Master::recv_broadcast_info()
