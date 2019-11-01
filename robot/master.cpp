@@ -51,12 +51,6 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file)
         exit(1);
     }
 
-    // Get distance matrix for waypoints
-    distance_matrix waypoint_matrix = distance_matrix(ast);
-
-    // Get distance matrix for stations
-    apsp_result station_matrix = all_pairs_shortest_path(ast);
-
     // Get number of stations, endpoints and waypoint
     int station_count = 0, endpoint_count = 0, waypoint_count = 0;
 
@@ -81,6 +75,39 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file)
     config.set("number_of_end_stations", endpoint_count);
     config.set("number_of_waypoints", waypoint_count);
     config.set("number_of_robots", parser.number_of_robots);
+
+    // Get distance matrix for waypoints
+    std::vector<std::vector<double>> waypoint_matrix = distance_matrix(ast).get_data;
+
+    // Get distance matrix for stations
+    std::map<int, std::map<int, double>> station_matrix = all_pairs_shortest_path(ast).dist;
+
+    Json::Value jsonarray_waypoint_matrix{Json::arrayValue};
+    size_t columns = waypoint_matrix.front().size();
+    size_t rows = waypoint_matrix.size();
+    size_t count = 0;
+    for (std::size_t i = 0; i < rows; i++) {
+        for (size_t h = 0; h < columns; h++) {
+            jsonarray_waypoint_matrix[Json::ArrayIndex(count)] = waypoint_matrix[i][h];
+            count++;
+        }
+    }
+
+    config.set("waypoint_distance_matrix", jsonarray_waypoint_matrix);
+
+    // TODO set station matrix
+    Json::Value jsonarray_station_matrix{Json::arrayValue};
+    count = 0;
+    columns = station_matrix.at(1).size();
+    rows = station_matrix.size();
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t h = 0; h < columns; h++) {
+            jsonarray_station_matrix[Json::ArrayIndex(count)] = station_matrix.at(i).at(h);
+            count++;
+        }
+    }
+
+    config.set("station_distance_matrix", jsonarray_station_matrix);
 }
 
 void robot::Master::request_broadcast_info()
@@ -97,7 +124,7 @@ std::string robot::Master::recv_broadcast_info()
 {
     std::vector<std::string> strings_from_broadcaster;
     strings_from_broadcaster = broadcast_client.receive();
-    
-    //Gets the latest info from the broadcaster
+
+    // Gets the latest info from the broadcaster
     return strings_from_broadcaster.back();
 }
