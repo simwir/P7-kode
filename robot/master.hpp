@@ -12,7 +12,7 @@ class RecievedMessageException : public std::exception {
     public:
         RecievedMessageException(const std::string &in_message) : message(in_message) {}
 
-        const char *what() const noexcept
+        const char *what() const noexcept override
         {
             return message.c_str();
         }
