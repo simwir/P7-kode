@@ -25,7 +25,7 @@ constexpr auto DESTINATION_BUFFER_DISTANCE = 0.05;
 
 
 enum class Direction {Left, Right, Straight};
-enum class Phase {Motion2Goal, BoundaryFollowing};
+enum class Phase {Motion2Goal, Motion2Discontinuity, BoundaryFollowing};
 enum class DiscontinuityDirection {Left, Right};
 
 class RobotController {
@@ -95,6 +95,8 @@ class RobotController {
     }
 
     std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> get_discontinuity_points() const;
+    bool clear();
+    void go_towards_angle(const geo::Angle& angle);
 
     // actions
     void do_left_turn();
@@ -102,7 +104,6 @@ class RobotController {
     void go_straight_ahead();
     void go_adjusted_straight(const geo::Angle& angle);
     void stop();
-    void go_towards_angle(const geo::Angle& angle);
     void set_leds(Direction dir);
 
     // current state information
@@ -111,6 +112,7 @@ class RobotController {
     double cur_dist2goal;
     double prev_dist2goal;
     bool first_iteration = true;
+    Phase phase = Phase::Motion2Goal;
 
     geo::GlobalPoint position;
 

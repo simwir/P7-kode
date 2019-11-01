@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 constexpr double DIST_TO_GOAL_THRESHOLD = 0.1;
+constexpr double ROBOT_RADIUS = 0.021;
 
 geo::RelPoint from_lidar_point(const webots::LidarPoint &point)
 {
@@ -96,7 +97,6 @@ void RobotController::update_sensor_values()
 
 void RobotController::run_simulation()
 {
-    Phase phase = Phase::Motion2Goal;
     set_goal(geo::GlobalPoint{-0.68, 0.79});
     while (robot->step(time_step) != -1) {
         if (first_iteration) {
@@ -116,11 +116,11 @@ void RobotController::run_simulation()
             continue;
         }
 
-        if (phase == Phase::Motion2Goal) {
-            phase = motion2goal();
+        if (phase == Phase::BoundaryFollowing) {
+            phase = boundary_following();
         }
         else {
-            phase = boundary_following();
+            phase = motion2goal();
         }
     }
 }
@@ -132,7 +132,7 @@ Phase RobotController::motion2goal() {
     geo::Angle angle2goal = get_relative_angle_to_goal();
     int lidar_value_index = angle2index(angle2goal);
     std::optional<double> range2goal = lidar_range_values[lidar_value_index];
-    if (!range2goal.has_value() || cur_dist2goal < range2goal.value()) {
+    if ((!range2goal.has_value() || cur_dist2goal < range2goal.value()) && clear()) {
         std::cerr << "Towards goal: " << angle2goal << ", " << !range2goal.has_value() << std::endl;
         go_towards_angle(angle2goal);
 
@@ -161,19 +161,39 @@ Phase RobotController::motion2goal() {
     else {
         geo::Angle angle = get_angle_to_point(best_point);
         std::cerr << "Towards discontinuity: " << angle << ", " << (dir == DiscontinuityDirection::Left) << std::endl;
-        const auto dist = geo::euclidean_dist(best_point, goal);
+        const auto dist = geo::euclidean_dist(position, best_point);
         const auto rectified_remaining_dist = (1 - std::min(1.0, dist));
-        const auto angle_correction = rectified_remaining_dist * rectified_remaining_dist * PI / 5 *
+        const auto angle_correction = rectified_remaining_dist * PI / 4 *
             (dir == DiscontinuityDirection::Left ? 1 : -1);
         
         go_towards_angle(angle + angle_correction);
         
-        return Phase::Motion2Goal;
+        return Phase::Motion2Discontinuity;
     }
 }
 
 Phase RobotController::boundary_following() {
     return Phase::Motion2Goal;
+}
+
+bool RobotController::clear() {
+    if (phase == Phase::Motion2Goal) {
+        return true;
+    }
+  
+    const auto num_points = lidar.get_number_of_points();
+    for (int i = 0; i < num_points; ++i) {
+        const auto angle = index2angle(i);
+        const auto diff = abs_angle(angle - get_relative_angle_to_goal());
+        
+        if (diff.theta <= PI / 2 && 
+            lidar_range_values[i].has_value() && 
+            geo::RelPoint::from_polar(lidar_range_values[i].value(), diff).x <= ROBOT_RADIUS) {
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 void RobotController::go_towards_angle(const geo::Angle& angle) {
@@ -199,8 +219,8 @@ void RobotController::go_towards_angle(const geo::Angle& angle) {
 
 void RobotController::go_adjusted_straight(const geo::Angle& angle)
 {
-    left_motor->setVelocity(6 - 3.5 * angle.theta);
-    right_motor->setVelocity(6 + 3.5 * angle.theta);
+    left_motor->setVelocity(8 - 3.5 * angle.theta);
+    right_motor->setVelocity(8 + 3.5 * angle.theta);
     set_leds(Direction::Straight);
 }
 
