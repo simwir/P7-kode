@@ -44,7 +44,7 @@ void robot::Master::load_webots_to_config(std::string input_file, std::string ou
     AST ast = parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
-        std::cerr << "Malformed world file. No waypoints found.";
+        std::cerr << "Malformed world file. No waypoints found." << std::endl;
         exit(1);
     }
 
