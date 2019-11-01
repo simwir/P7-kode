@@ -12,7 +12,7 @@ struct lidar_wrapper {
     double get_fov() const;
     double get_max_range() const;
     double get_min_range() const;
-    double get_resolution() const;
+    int get_resolution() const;
     void enable(const int time_step);
     bool is_enabled() const;
 };

@@ -85,12 +85,12 @@ class RobotController {
 
     int angle2index(const geo::Angle& angle) const
     {
-        return std::round(((angle.theta + PI) / (2 * PI)) * lidar.get_number_of_points());
+        return std::round(((angle.theta + PI) / (2 * PI)) * lidar_resolution);
     }
     
     geo::Angle index2angle(int index) const
     {
-        const auto angle = (static_cast<double>(index) / lidar.get_number_of_points()) * 2 * PI - PI;
+        const auto angle = (static_cast<double>(index) / lidar_resolution) * 2 * PI - PI;
         return geo::Angle{angle};
     }
 

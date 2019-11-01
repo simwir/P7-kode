@@ -61,8 +61,8 @@ RobotController::RobotController(webots::Supervisor *robot)
     lidar_resolution = lidar.get_resolution();
     lidar_max_range = lidar.get_max_range();
     lidar_min_range = lidar.get_min_range();
-    lidar_range_values.resize(lidar.get_number_of_points());
-    point_cloud.resize(lidar.get_number_of_points());
+    lidar_range_values.resize(lidar_resolution);
+    //point_cloud.resize(lidar_resolution);
     lidar_fov = lidar.get_fov();
 
     for (int i = 0; i < NUM_SENSORS; ++i) {
@@ -83,11 +83,10 @@ void RobotController::update_sensor_values()
     cur_dist2goal = geo::euclidean_dist(position, goal);
 
     const float *range_image = lidar.get_range_image();
-    const auto num_points = lidar.get_number_of_points();
-    const auto quarter = num_points / 4;
-    for (int i = 0; i < num_points; ++i) {
-        const auto index = num_points - 1 - (i - quarter + num_points) % num_points;
-
+    const auto quarter = lidar_resolution / 4;
+    for (int i = 0; i < lidar_resolution; ++i) {
+        const auto index = lidar_resolution - 1 - (i - quarter + lidar_resolution) % lidar_resolution;
+        
         auto dist = range_image[i];
         auto nextval = 1.01 * lidar_min_range <= dist && dist <= 0.99 * lidar_max_range ? std::make_optional(dist) : std::nullopt;
         
@@ -181,8 +180,8 @@ bool RobotController::clear() {
         return true;
     }
   
-    const auto num_points = lidar.get_number_of_points();
-    for (int i = 0; i < num_points; ++i) {
+    // const auto num_points = lidar.get_number_of_points();
+    for (int i = 0; i < lidar_resolution; ++i) {
         const auto angle = index2angle(i);
         const auto diff = abs_angle(angle - get_relative_angle_to_goal());
         
@@ -292,11 +291,10 @@ std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> RobotController
 {
     std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> discontinuities;
     constexpr float THRESHOLD = 0.05f;
-    const auto num_points = lidar.get_number_of_points();
     const geo::Angle facing_angle = get_facing_angle();
 
-    for (int i = 0; i < num_points; ++i) {
-        int next = (i + 1) % num_points;
+    for (int i = 0; i < lidar_resolution; ++i) {
+        int next = (i + 1) % lidar_resolution;
         // Switch from object in range to not in range
         if (lidar_range_values[i].has_value() != lidar_range_values[next].has_value()) {
             const auto dist = lidar_range_values[i].has_value() ? lidar_range_values[i].value() : lidar_max_range;

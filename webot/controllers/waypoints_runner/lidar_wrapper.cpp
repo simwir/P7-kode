@@ -19,12 +19,12 @@ double lidar_wrapper::get_max_range() const {
 double lidar_wrapper::get_min_range() const {
     return lidar->getMinRange();
 }
-double lidar_wrapper::get_resolution() const {
+int lidar_wrapper::get_resolution() const {
     return lidar->getHorizontalResolution();
 }
 void lidar_wrapper::enable(const int time_step) {
     lidar->enable(time_step);
-    lidar->enablePointCloud();
+    //lidar->enablePointCloud();
 }
 bool lidar_wrapper::is_enabled() const {
     return lidar->getSamplingPeriod() != 0;
