@@ -36,12 +36,9 @@ Json::Value Info::to_json() const
 
 Info Info::from_json(const std::string &json)
 {
-    Json::CharReaderBuilder builder;
-    Json::CharReader *reader = builder.newCharReader();
+    std::stringstream ss(json);
     Json::Value root;
-    std::string errors;
-
-    reader->parse(json.c_str(), json.c_str() + json.size(), &root, &errors);
+    ss >> root;
 
     return Info::from_json(root);
 }
@@ -99,7 +96,10 @@ Json::Value InfoMap::to_json() const
 
 InfoMap InfoMap::from_json(const std::string &json)
 {
-    return InfoMap::from_json(Json::Value{json});
+    Json::Value root;
+    std::stringstream str(json);
+    str >> root;
+    return InfoMap::from_json(root);
 }
 
 InfoMap InfoMap::from_json(const Json::Value &json)
