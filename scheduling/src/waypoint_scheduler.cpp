@@ -50,9 +50,9 @@ std::queue<scheduling::TimeValuePair> scheduling::WaypointScheduler::findFirstRu
     const std::vector<scheduling::SimulationExpression> &values, const std::string &name)
 {
     auto iter = std::find_if(values.begin(), values.end(),
-                              [&name](const scheduling::SimulationExpression &val) {
-                                  return val.name.compare(name) == 0;
-                              });
+                             [&name](const scheduling::SimulationExpression &val) {
+                                 return val.name.compare(name) == 0;
+                             });
 
     if (iter == values.end()) {
         throw NameNotFoundException();
