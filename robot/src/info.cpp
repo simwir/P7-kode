@@ -17,6 +17,8 @@ Json::Value Info::to_json() const
 
     json["id"] = id;
     json["eta"] = eta;
+    json["location"]["x"] = location.first;
+    json["location"]["y"] = location.second;
     json["station_plan"] = Json::Value{Json::arrayValue};
 
     for (const int &station : station_plan) {
