@@ -10,7 +10,7 @@
 
 namespace broadcaster {
 enum class Functions {
-    get_robot_locations, post_robot_location
+    get_robot_info, post_robot_location
 };
 
 class UnknownFunctionException : public std::exception {
@@ -37,13 +37,13 @@ public:
     void call_function(Functions functions, std::string& value, std::shared_ptr<tcp::Connection> conn);
     Functions parse_function(const std::string &function);
     void parse_message(std::shared_ptr<tcp::Connection> conn);
-    void get_robot_locations(std::shared_ptr<tcp::Connection> conn);
+    void get_robot_info(std::shared_ptr<tcp::Connection> conn);
     void post_robot_location(std::string value);
 
 private:
     tcp::Server server;
 
-    robot::InfoMap robotsMap;    
+    robot::InfoMap robotsMap;
 };
 
 }

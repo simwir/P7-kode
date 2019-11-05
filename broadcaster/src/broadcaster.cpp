@@ -30,7 +30,7 @@ Functions Broadcaster::parse_function(const std::string &function) {
     }
 }
 void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
-    Json::Value result = robotsMap.to_json;
+    Json::Value result = robotsMap.to_json();
     mutex.lock();
     conn->send(result.toStyledString());
     mutex.unlock();
@@ -80,6 +80,7 @@ void Broadcaster::start_broadcasting() {
     while (true) {
         std::shared_ptr<tcp::Connection> conn = server.accept();
         std::thread t1(&Broadcaster::parse_message, this, conn);
+        t1.detach();
     }
 }
 }
