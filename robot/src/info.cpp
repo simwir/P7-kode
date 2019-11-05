@@ -34,7 +34,14 @@ Json::Value Info::to_json() const
 
 Info Info::from_json(const std::string &json)
 {
-    return Info::from_json(Json::Value{json});
+    Json::CharReaderBuilder builder;
+    Json::CharReader *reader = builder.newCharReader();
+    Json::Value root;
+    std::string errors;
+
+    reader->parse(json.c_str(), json.c_str() + json.size(), &root, &errors);
+
+    return Info::from_json(root);
 }
 
 Info Info::from_json(const Json::Value &json)
