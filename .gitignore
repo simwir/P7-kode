@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Prerequisites
 *.d
 
@@ -48,3 +49,8 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+=======
+.ccls
+.idea
+build
+>>>>>>> master
