@@ -3,12 +3,12 @@
 #include <uppaal_simulation_parser.hpp>
 
 std::vector<scheduling::SimulationExpression>
-scheduling::UppaalSimulationParser::parse(const std::string& result, int formula)
+scheduling::UppaalSimulationParser::parse(const std::string& result, int formula_number)
 {
-    int startIndex = result.find("Verifying formula " + std::to_string(formula));
+    int startIndex = result.find("Verifying formula " + std::to_string(formula_number));
     int stopIndex =
         result.find("Verifying formula " +
-                    std::to_string(formula + 1)); // Equal to std::string::npos if not found.
+                    std::to_string(formula_number + 1)); // Equal to std::string::npos if not found.
 
     std::string formula;
 
