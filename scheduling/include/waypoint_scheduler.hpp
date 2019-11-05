@@ -10,7 +10,7 @@
 
 namespace scheduling {
 
-struct NameNotFoundException : public std::exception {
+struct NameNotFoundException : std::exception {
     const char *what() const noexcept override { return "Cannot find name"; }
 };
 

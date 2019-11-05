@@ -8,7 +8,7 @@
 
 namespace scheduling {
 
-struct FormulaNotSatisfiedException : public std::exception {
+struct FormulaNotSatisfiedException : std::exception {
     const char *what() const noexcept override { return "Formula not satisfied"; }
 };
 
@@ -16,7 +16,7 @@ class SimulationParseException : public std::exception {
     std::string message;
 
   public:
-    SimulationParseException(const std::string &inmessage) { message = inmessage; }
+    SimulationParseException(const std::string &inmessage) : message(inmessage) {}
 
     const char *what() const noexcept override { return message.c_str(); }
 };
