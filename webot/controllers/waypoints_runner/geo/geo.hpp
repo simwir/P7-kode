@@ -44,6 +44,8 @@ using GlobalPoint = Point2D<PointType::Global>;
 
 GlobalPoint operator+(const GlobalPoint &p1, const GlobalPoint &p2);
 GlobalPoint operator-(const GlobalPoint &p1, const GlobalPoint &p2);
+RelPoint operator+(const RelPoint &p1, const RelPoint &p2);
+RelPoint operator-(const RelPoint &p1, const RelPoint &p2);
 std::ostream &operator<<(std::ostream &os, const GlobalPoint &p);
 std::ostream &operator<<(std::ostream &os, const RelPoint &p);
 GlobalPoint get_midpoint(const GlobalPoint &p1, const GlobalPoint &p2);

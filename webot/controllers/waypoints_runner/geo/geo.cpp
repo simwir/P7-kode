@@ -10,6 +10,15 @@ GlobalPoint operator-(const GlobalPoint &p1, const GlobalPoint &p2)
     return {p1.x - p2.x, p1.y - p2.y};
 }
 
+RelPoint operator+(const RelPoint &p1, const RelPoint &p2)
+{
+    return {p1.x + p2.x, p1.y + p2.y};
+}
+RelPoint operator-(const RelPoint &p1, const RelPoint &p2)
+{
+    return {p1.x - p2.x, p1.y - p2.y};
+}
+
 std::ostream &operator<<(std::ostream &os, const GlobalPoint &p)
 {
     return os << p.x << ',' << p.y;

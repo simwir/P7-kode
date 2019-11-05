@@ -98,9 +98,10 @@ class RobotController {
         return geo::Angle{angle};
     }
 
-    std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> get_discontinuity_points() const;
+    std::vector<geo::GlobalPoint> get_discontinuity_points() const;
     void go_towards_angle(const geo::Angle& angle);
-    void go_to_discontinuity(geo::GlobalPoint point, DiscontinuityDirection dir);
+    void go_to_discontinuity(geo::GlobalPoint point);
+    geo::Angle get_angle_correction(double radius, bool left) const;
 
     // actions
     void do_left_turn();
