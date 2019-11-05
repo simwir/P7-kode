@@ -9,7 +9,7 @@ PROTO Endpoint [
   field SFRotation rotation            0 1 0 0
   field SFString   name                "Endpoint"
   field SFString   adjList	           ""
-  field SFInt32    id                  0
+  field SFInt32    id                  -1
   field SFColor    boxColor            0 0 1
   field SFVec3f    size                0.15 0.15 0.15  # Defines the size of the wooden box.
   field SFFloat    mass                0            # Defines the mass of the wooden box in kg. A value smaller or equal to 0 remove the physics of the wooden box.
