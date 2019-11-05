@@ -9,7 +9,7 @@
 #include "waypoint_scheduler.hpp"
 
 class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber {
-    void newSchedule(const std::vector<scheduling::Action> &schedule)
+    void newSchedule(const std::vector<scheduling::Action> &schedule) override
     {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new waypoint schedule at " << std::asctime(std::localtime(&result));
@@ -31,7 +31,7 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
 };
 
 class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber {
-    void newSchedule(const std::vector<int> &schedule)
+    void newSchedule(const std::vector<int> &schedule) override
     {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new station schedule at " << std::asctime(std::localtime(&result));
@@ -49,12 +49,11 @@ int main()
 {
     std::cout << "Starting...\n";
 
-    // Waypoints
     scheduling::WaypointScheduler waypointScheduler;
-    LogWaypointScheduleSubscriber logWaypointSubscriber;
+    auto logSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
     std::cout << "Adding waypoint subscriber\n";
-    waypointScheduler.addSubscriber(logWaypointSubscriber);
+    waypointScheduler.addSubscriber(logSubscriber->shared_from_this());
 
     std::cout << "Starting waypoint scheduler\n";
     waypointScheduler.start();
