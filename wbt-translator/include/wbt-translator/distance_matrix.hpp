@@ -1,7 +1,7 @@
 #ifndef DISTANCE_MATRIX_HPP
 #define DISTANCE_MATRIX_HPP
 
-#include "webots_parser.hpp"
+#include "wbt-translator/webots_parser.hpp"
 #include <cmath>
 #include <string>
 #include <vector>

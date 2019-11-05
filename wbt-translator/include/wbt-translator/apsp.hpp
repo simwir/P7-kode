@@ -1,6 +1,6 @@
 #ifndef APSP_HPP
 #define APSP_HPP
-#include "webots_parser.hpp"
+#include "wbt-translator/webots_parser.hpp"
 #include <map>
 
 struct apsp_result {
