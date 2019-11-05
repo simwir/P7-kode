@@ -49,16 +49,16 @@ void scheduling::WaypointScheduler::run()
 std::queue<scheduling::TimeValuePair> scheduling::WaypointScheduler::findFirstRunAsQueue(
     const std::vector<scheduling::SimulationExpression> &values, const std::string &name)
 {
-    auto value = std::find_if(values.begin(), values.end(),
+    auto iter = std::find_if(values.begin(), values.end(),
                               [&name](const scheduling::SimulationExpression &val) {
                                   return val.name.compare(name) == 0;
                               });
 
-    if (value == values.end()) {
+    if (iter == values.end()) {
         throw NameNotFoundException();
     }
 
-    scheduling::SimulationTrace first_run = value->runs.at(0);
+    scheduling::SimulationTrace first_run = iter->runs.at(0);
     return std::queue<scheduling::TimeValuePair>(
         std::deque<scheduling::TimeValuePair>(first_run.values.begin(), first_run.values.end()));
 }
