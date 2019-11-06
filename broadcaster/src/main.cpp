@@ -1,8 +1,13 @@
 #include <broadcaster/broadcaster.hpp>
+#include <iostream>
 
 int main(int argc, char **argv)
 {
-    broadcaster::Broadcaster broadcaster(0);
+    if (argc !=2){
+        std::cout << "Please specify what port the broadcaster is run on. (Use 0 for OS to assign an available port";
+        exit(0);
+    }
+    broadcaster::Broadcaster broadcaster(std::stoi(argv[1]));
     broadcaster.start_broadcasting();
     return 0;
 }

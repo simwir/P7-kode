@@ -30,15 +30,15 @@ Function Broadcaster::parse_function(const std::string &function) {
     }
 }
 void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
-    Json::Value result = robot_info.to_json();
     mutex.lock();
-    conn->send(result.toStyledString());
+    Json::Value result = robot_info.to_json();
     mutex.unlock();
+    conn->send(result.toStyledString());
 }
 
 void Broadcaster::post_robot_location(const std::string& value) {
-    robot::Info info = robot::Info::from_json(value);
     mutex.lock();
+    robot::Info info = robot::Info::from_json(value);
     robot_info[info.id] = info;
     mutex.unlock();
 }
@@ -57,21 +57,25 @@ void Broadcaster::call_function(Function function, std::string& value, std::shar
 }
 
 void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn) {
-    try {
-        auto messages = conn->receive();
-        if (!messages.empty()){
-            for (const std::string &message : messages) {
-                std::vector<std::string> result = split_message(message);
-                Function function = parse_function(result[0]);
-                call_function(function, result[1], conn);
+    while (true){
+        try {
+            auto messages = conn->receive();
+            if (!messages.empty()){
+                for (const std::string &message : messages) {
+                    std::vector<std::string> result = split_message(message);
+                    Function function = parse_function(result[0]);
+                    call_function(function, result[1], conn);
+                }
             }
+        } catch (tcp::MalformedMessageException &e) {
+            conn->send(e.what());
+        } catch (UnknownFunctionException &e) {
+            conn->send(e.what());
+        } catch (UnknownParameterException &e) {
+            conn->send(e.what());
+        } catch (tcp::ReceiveException &e) {
+            conn->send(e.what());
         }
-    } catch (tcp::MalformedMessageException &e) {
-        conn->send(e.what());
-    } catch (UnknownFunctionException &e) {
-        conn->send(e.what());
-    } catch (UnknownParameterException &e) {
-        conn->send(e.what());
     }
 }
 
