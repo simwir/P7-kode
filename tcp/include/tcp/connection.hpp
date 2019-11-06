@@ -60,7 +60,6 @@ class Connection : public std::enable_shared_from_this<Connection> {
 
   protected:
     void set_fd(int fd);
-    void read_buffer(int flags);
     std::optional<std::string> parse_message();
 
   private:

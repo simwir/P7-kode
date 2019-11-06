@@ -32,31 +32,6 @@ ssize_t tcp::Connection::send(const std::string &message, int flags)
     return bytes;
 }
 
-void tcp::Connection::read_buffer(int flags)
-{
-    char buffer[BUFFER_SIZE];
-
-    while (true) {
-        std::memset(buffer, 0, BUFFER_SIZE);
-        ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, flags | MSG_DONTWAIT);
-
-        if (bytes == -1) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                break;
-            }
-            else {
-                throw tcp::ReceiveException(errno);
-            }
-        }
-        else if (bytes == 0) {
-            throw tcp::ReceiveException(); // If this happens, wud
-        }
-        else {
-            obuffer.append(buffer, bytes);
-        }
-    }
-}
-
 std::optional<std::string> tcp::Connection::parse_message()
 {
     size_t start_pos, end_pos;
