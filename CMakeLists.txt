@@ -15,6 +15,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/tcp/include
     ${PROJECT_SOURCE_DIR}/robot/include
     ${PROJECT_SOURCE_DIR}/wbt-translator/include
+    ${PROJECT_SOURCE_DIR}/include
 )
 
 # Libraries

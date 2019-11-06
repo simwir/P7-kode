@@ -3,35 +3,10 @@
 
 #include <json/json.h>
 
+#include "util/meta.hpp"
 #include <string>
 #include <type_traits>
 #include <vector>
-
-namespace meta {
-
-template <typename T, typename = void>
-struct is_container : std::false_type {
-};
-
-template <typename T>
-using element_type = decltype(std::begin(std::declval<T &>()));
-
-template <typename T>
-struct is_container<T, std::void_t<element_type<T>>> : std::true_type {
-};
-template <typename T>
-constexpr auto is_container_v = is_container<T>::value;
-
-template <typename T, typename = void>
-struct is_string : std::false_type {
-};
-
-template <typename T>
-struct is_string<T, std::enable_if_t<is_container<T>::value>>
-    : std::is_same<element_type<T>, char> {
-};
-
-} // namespace meta
 
 namespace robot {
 struct InvalidValueException : std::exception {
@@ -64,16 +39,22 @@ class Config {
     template <typename T>
     void set(const std::string &key, T value)
     {
-        if constexpr (std::is_assignable<Json::Value&, T>::value) {
+        // if we can just assign the value to json[key] (of type Json::Value &),
+        // simply assign.
+        if constexpr (std::is_assignable<Json::Value &, T>::value) {
             json[key] = value;
         }
-        else {
-            static_assert(meta::is_container<T>::value, "expected container");
+        // if it is a container, dump container to a Json::array.
+        else if constexpr (meta::is_container<T>::value) {
             Json::Value arr{Json::arrayValue};
             for (auto &it : value) {
                 arr.append(it);
             }
             json[key] = arr;
+        }
+        // otherwise abort; we don't know what to do;
+        else {
+            meta::unsupported<T> _;
         }
     }
 };
