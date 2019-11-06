@@ -18,15 +18,24 @@ class RecievedMessageException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
+class CannotOpenFileException : public std::exception {
+    std::string message;
+
+  public:
+    CannotOpenFileException() : message("Cannot open file") {}
+    CannotOpenFileException(const std::string &msg) : message(msg) {}
+
+    const char *what() const noexcept override { return message.c_str(); }
+};
+
 class Master {
   public:
     Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
            std::istream &world_file);
-    void load_webots_to_config(std::filesystem::path input_file);
+    void load_webots_to_config(const std::filesystem::path &input_file);
     void request_broadcast_info();
     void send_robot_info(int robot_id, Info robot_info);
     std::string recv_broadcast_info();
-    void run();
 
     void write_static_config(const std::filesystem::path &path);
     void write_dynamic_config(const std::filesystem::path &path);
@@ -37,7 +46,6 @@ class Master {
     std::unique_ptr<tcp::Client> webot_client;
     tcp::Client broadcast_client;
     Parser webots_parser;
-
 };
 } // namespace robot
 #endif

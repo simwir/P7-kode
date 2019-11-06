@@ -36,22 +36,18 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
-void robot::Master::load_webots_to_config(std::filesystem::path input_file)
+void robot::Master::load_webots_to_config(const std::filesystem::path &input_file)
 {
     std::ifstream infile(input_file);
     if (!infile.is_open()) {
-        std::cerr << "The file " << input_file << " could not be opened.\n";
-        exit(1);
+        throw CannotOpenFileException{input_file.c_str()};
     }
     Parser parser = Parser(infile);
     AST ast = parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
-        std::cerr << "Malformed world file. No waypoints found." << std::endl;
-        exit(1);
+        throw MalformedWorldFileError{"No waypoints found"};
     }
-
-    std::cerr << "number of nodes" << ast.nodes.size() << std::endl;
 
     std::vector<int> stations;
     std::vector<int> end_stations;
@@ -76,8 +72,6 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file)
     int station_count = stations.size(), endpoint_count = end_stations.size(),
         via_count = vias.size();
 
-    std::for_each(std::begin(stations), std::end(stations),
-                  [](auto station) { std::cerr << station << '\n'; });
     static_config.set("stations", stations);
     static_config.set("end_stations", end_stations);
     static_config.set("vias", vias);
@@ -93,22 +87,19 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file)
     // Get distance matrix for stations
     std::map<int, std::map<int, double>> apsp_distances = all_pairs_shortest_path(ast).dist;
 
+    // Flatten waypoint distance matrix.
     Json::Value jsonarray_waypoint_matrix{Json::arrayValue};
     size_t columns = waypoint_matrix.front().size();
     size_t rows = waypoint_matrix.size();
-    size_t count = 0;
-    for (std::size_t i = 0; i < rows; i++) {
+    for (size_t i = 0; i < rows; i++) {
         for (size_t h = 0; h < columns; h++) {
             jsonarray_waypoint_matrix.append(waypoint_matrix[i][h]);
-            count++;
         }
     }
-
     static_config.set("waypoint_distance_matrix", jsonarray_waypoint_matrix);
 
-    // TODO set station matrix
+    // Flatten shortest paths between stations
     Json::Value jsonarray_apsp_distances{Json::arrayValue};
-    count = 0;
     columns = apsp_distances.at(1).size();
     rows = apsp_distances.size();
     for (size_t i = 0; i < rows; i++) {
@@ -120,15 +111,16 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file)
         }
     }
 
+    // Dump all waypoint information.
     Json::Value waypoint_list{Json::arrayValue};
     for (auto &[id, waypoint] : ast.nodes) {
         waypoint_list.append(Json::objectValue);
         auto &last = waypoint_list[waypoint_list.size() - 1];
         last["id"] = id;
         last["x"] = waypoint.translation.x;
-        last["z"] = waypoint.translation.z;
+        last["y"] = waypoint.translation.z;
         last["type"] = to_string(waypoint.waypointType);
-        last["adjList"] = Json::arrayValue;
+        last["adjList"] = Json::Value{Json::arrayValue};
         std::for_each(std::begin(waypoint.adjlist), std::end(waypoint.adjlist),
                       [&last](int adj) { last["adjList"].append(adj); });
     }

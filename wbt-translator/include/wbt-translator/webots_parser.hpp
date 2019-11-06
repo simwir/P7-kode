@@ -19,7 +19,7 @@ class MalformedWorldFileError : public std::exception {
     std::string message;
 
   public:
-    MalformedWorldFileError(const std::string &inmessage) { message = inmessage; }
+    MalformedWorldFileError(const std::string &inmessage) { message = "Malformed world file:" + inmessage; }
 
     const char *what() const noexcept override { return message.c_str(); }
 };
