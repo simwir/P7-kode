@@ -91,6 +91,7 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
 
         obuffer.append(buffer, bytes);
         message = parse_message();
+        // repeat if received message was incomplete.
     } while (!message);
 
     return message;
