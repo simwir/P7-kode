@@ -30,7 +30,6 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
     }
 };
 
-
 class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber {
     void newSchedule(const std::vector<int> &schedule) override
     {
