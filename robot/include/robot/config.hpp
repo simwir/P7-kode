@@ -37,7 +37,7 @@ class Config {
     T get(const std::string &key);
 
     template <typename T>
-    void set(const std::string &key, T value)
+    void set(const std::string &key, T &&value)
     {
         // if we can just assign the value to json[key] (of type Json::Value &),
         // simply assign.
