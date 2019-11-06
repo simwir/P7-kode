@@ -32,7 +32,6 @@ AST Parser::parse_stream()
             else if (token == "Elisa3") {
                 number_of_robots++;
             }
-            
         };
     }
     catch (EndOfStreamException &e) {
