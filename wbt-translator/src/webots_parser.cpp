@@ -21,12 +21,16 @@ std::string Parser::read_string()
 
 AST Parser::parse_stream()
 {
+    number_of_robots = 0;
     try {
         while (!is.eof()) {
             std::string token = read_token();
             if (token == "Waypoint" || token == "Station" || token == "Endpoint") {
                 Waypoint waypoint = parse_waypoint(token);
                 ast.nodes.insert(std::make_pair(waypoint.id, waypoint));
+            }
+            else if (token == "Elisa3") {
+                number_of_robots++;
             }
         };
     }
