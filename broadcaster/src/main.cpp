@@ -4,7 +4,7 @@
 int main(int argc, char **argv)
 {
     if (argc !=2){
-        std::cout << "Please specify what port the broadcaster is run on. (Use 0 for OS to assign an available port";
+        std::cout << "Please specify what port the broadcaster is run on. (Use 0 for OS to assign an available port" << std::endl;
         exit(0);
     }
     broadcaster::Broadcaster broadcaster(std::stoi(argv[1]));
