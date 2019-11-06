@@ -1,1 +1,4 @@
+/.vscode
 .ccls
+.idea
+build
