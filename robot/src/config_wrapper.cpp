@@ -1,6 +1,6 @@
-#include "config_wrapper.h"
+#include "robot/config_wrapper.h"
 
-#include "config.hpp"
+#include "robot/config.hpp"
 
 robot::Config config;
 

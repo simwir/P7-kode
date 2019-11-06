@@ -30,6 +30,8 @@ struct Translation {
 
 enum class WaypointType { eVia, eStation, eEndPoint };
 
+std::string to_string(WaypointType wptype);
+
 struct Waypoint {
     int id;
     std::vector<int> adjlist;
