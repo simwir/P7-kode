@@ -14,7 +14,7 @@ namespace broadcaster {
 
 std::mutex mutex;
 
-std::vector<std::string> split_message(const std::string message){
+std::vector<std::string> split_message(const std::string& message) {
     std::string start = message.substr(0, message.find(','));
     std::string end = message.substr(message.find(',') + 1);
     return std::vector<std::string> {start, end};
@@ -36,7 +36,7 @@ void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
     mutex.unlock();
 }
 
-void Broadcaster::post_robot_location(std::string value) {
+void Broadcaster::post_robot_location(const std::string& value) {
     robot::Info info = robot::Info::from_json(value);
     mutex.lock();
     robotsMap[info.id] = info;
