@@ -6,8 +6,8 @@
 #include <cstring>
 #include <string>
 
-#include <server.hpp>
-#include <tcp_exception.hpp>
+#include <tcp/exception.hpp>
+#include <tcp/server.hpp>
 
 tcp::Server::Server(int in_port, int backlog)
 {
