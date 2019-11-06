@@ -90,7 +90,7 @@ void robot::Master::request_broadcast_info()
     broadcast_client.send("get_robot_locations");
 }
 
-void robot::Master::send_robot_info(int robot_id, Info robot_info)
+void robot::Master::send_robot_info(int robot_id, const robot::Info& robot_info)
 {
     broadcast_client.send("post_robot_location, " + robot_info.to_json());
 }
