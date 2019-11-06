@@ -50,5 +50,6 @@ CTestTestfile.cmake
 _deps
 
 # Editors
+/.vscode
 .ccls
 .idea
