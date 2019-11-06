@@ -52,6 +52,7 @@ std::optional<std::string> tcp::Connection::parse_message()
 
 std::string tcp::Connection::receive_blocking()
 {
+    assert(receive.has_value());
     return receive(true).value(); // When called blocking we know a value is present.
 }
 
