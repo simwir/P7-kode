@@ -1,4 +1,4 @@
-#include "uppaal-printer.hpp"
+#include "wbt-translator/uppaal-printer.hpp"
 
 #include <sstream>
 

@@ -1,6 +1,4 @@
-
-
-#include "webots_parser.hpp"
+#include "wbt-translator/webots_parser.hpp"
 #include <iomanip>
 
 std::string Parser::read_token()

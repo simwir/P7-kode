@@ -1,4 +1,4 @@
-#include "distance_matrix.hpp"
+#include "wbt-translator/distance_matrix.hpp"
 
 #include <iostream>
 #include <iterator>
