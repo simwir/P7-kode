@@ -5,5 +5,5 @@ file(GLOB SOURCES "src/*.cpp")
 add_library(wbt-translator ${SOURCES})
 
 target_link_libraries(
-  wbt-translator
+    wbt-translator
 )

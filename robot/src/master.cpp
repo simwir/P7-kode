@@ -1,3 +1,4 @@
+
 #include <fstream>
 
 #include "robot/config.hpp"
@@ -28,19 +29,20 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
         port_to_controller = recieved_strings[0];
     }
     else {
-        throw robot::RecievedMessageException{"Recieved" + std::to_string(recieved_strings.size()) +
-                                              "messages while only one was expected."};
+        throw robot::RecievedMessageException("Recieved" + std::to_string(recieved_strings.size()) +
+                                              "messages while only one was expected.");
     }
-
+    
     // Connecting to the WeBots Controller
     // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
-void robot::Master::load_webots_to_config(const std::filesystem::path &input_file)
+void robot::Master::load_webots_to_config(std::filesystem::path input_file)
 {
     std::ifstream infile(input_file);
     if (!infile.is_open()) {
-        throw CannotOpenFileException{input_file.c_str()};
+        std::cerr << "The file " << input_file << " could not be opened.\n";
+        exit(1);
     }
     Parser parser = Parser(infile);
     AST ast = parser.parse_stream();
@@ -105,11 +107,11 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
     for (size_t i = 0; i < rows; i++) {
         for (size_t h = 0; h < columns; h++) {
             if (ast.nodes.at(i).waypointType == WaypointType::eStation &&
-                ast.nodes.at(h).waypointType == WaypointType::eStation) {
-                jsonarray_apsp_distances.append(apsp_distances.at(i).at(h));
-            }
-        }
-    }
+               ast.nodes.at(h).waypointType == WaypointType::eStation) {
+               jsonarray_apsp_distances.append(apsp_distances.at(i).at(h));
+           }
+       }
+   }
 
     // Dump all waypoint information.
     Json::Value waypoint_list{Json::arrayValue};
@@ -133,17 +135,17 @@ void robot::Master::request_broadcast_info()
     broadcast_client.send("get_robot_locations");
 }
 
-void robot::Master::send_robot_info(int robot_id, Info robot_info)
+void robot::Master::send_robot_info(int robot_id, const robot::Info& robot_info)
 {
-    broadcast_client.send("post_robot_location, " + robot_info.to_json().toStyledString());
+    broadcast_client.send("post_robot_location, " + robot_info.to_json());
 }
 
 std::string robot::Master::recv_broadcast_info()
 {
     std::vector<std::string> strings_from_broadcaster;
     strings_from_broadcaster = broadcast_client.receive();
-
-    // Gets the latest info from the broadcaster
+    
+    //Gets the latest info from the broadcaster
     return strings_from_broadcaster.back();
 }
 

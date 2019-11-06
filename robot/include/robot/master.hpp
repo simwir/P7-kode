@@ -3,9 +3,9 @@
 
 #include <filesystem>
 
+#include <tcp/client.hpp>
 #include "config.hpp"
-#include "robot/info.hpp"
-#include "tcp/client.hpp"
+#include "info.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
 namespace robot {
@@ -34,7 +34,7 @@ class Master {
            std::istream &world_file);
     void load_webots_to_config(const std::filesystem::path &input_file);
     void request_broadcast_info();
-    void send_robot_info(int robot_id, Info robot_info);
+    void send_robot_info(int robot_id, const Info& robot_info);
     std::string recv_broadcast_info();
 
     void write_static_config(const std::filesystem::path &path);

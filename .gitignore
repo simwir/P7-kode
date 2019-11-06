@@ -52,7 +52,6 @@ _deps
 # Editors
 /.vscode
 .ccls
-build
 .idea
 TAGS
 .dir-locals.el
