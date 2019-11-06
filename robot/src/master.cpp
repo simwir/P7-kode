@@ -92,7 +92,7 @@ void robot::Master::request_broadcast_info()
 
 void robot::Master::send_robot_info(int robot_id, Info robot_info)
 {
-    broadcast_client.send("post_robot_location, " + robot_info.to_json);
+    broadcast_client.send("post_robot_location, " + robot_info.to_json());
 }
 
 std::string robot::Master::recv_broadcast_info()
