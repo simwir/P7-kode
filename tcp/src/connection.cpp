@@ -57,29 +57,24 @@ void tcp::Connection::read_buffer(int flags)
     }
 }
 
-std::vector<std::string> tcp::Connection::parse_messages()
+std::optional<std::string> tcp::Connection::parse_message()
 {
     size_t start_pos, end_pos;
-    std::vector<std::string> messages;
+    std::string message;
     start_pos = obuffer.find("#|");
     end_pos = obuffer.find("|#");
 
-    while (end_pos != std::string::npos) {
-        if (start_pos != 0) {
-            throw tcp::MalformedMessageException(obuffer);
-        }
-
-        messages.push_back(obuffer.substr(start_pos + 2, end_pos - 2));
-        obuffer.erase(start_pos, end_pos + 2);
-
-        start_pos = obuffer.find("#|");
-        end_pos = obuffer.find("|#");
+    if (end_pos != std::string::npos) {
+        message = obuffer.substr(start_pos + 2, end_pos - 2);
+        obuffer.erase(start_pos, end_pos + 2); // TODO Is there a off by 2 in one of the end_pos?
+        return std::optional{message};
     }
-
-    return messages;
+    else {
+        return std::nullopt;
+    }
 }
 
-std::vector<std::string> tcp::Connection::receive(int flags)
+std::optional<std::string> tcp::Connection::receive(bool blocking)
 {
     if (!ready) {
         throw ConnectionException("Connection not ready");
@@ -89,8 +84,31 @@ std::vector<std::string> tcp::Connection::receive(int flags)
         throw ConnectionException("Connection not open");
     }
 
-    read_buffer(flags);
-    return parse_messages();
+    auto message = parse_message();
+    if (message) {
+        return message;
+    }
+
+    char buffer[BUFFER_SIZE];
+
+    do {
+        std::memset(buffer, 0, BUFFER_SIZE);
+        ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, blocking ? 0 : MSG_DONTWAIT);
+
+        if (bytes == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                return std::nullopt;
+            }
+            else {
+                throw tcp::ReceiveException(errno);
+            }
+        }
+
+        obuffer.append(buffer, bytes);
+        message = parse_message();
+    } while (!message);
+
+    return message;
 }
 
 void tcp::Connection::set_fd(int fd)
