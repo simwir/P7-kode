@@ -5,7 +5,7 @@
 #include <cstring>
 #include <string>
 
-#include <client.hpp>
+#include <tcp/client.hpp>
 
 /**
  * Creates a TCP connection to a host on a given port and connects.

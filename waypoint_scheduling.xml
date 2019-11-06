@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+hybrid clock total;
+
+const int NUM_STATIONS = 10;
+const int NUM_WAYPOINTS = 28;
+const int MAX_ROBOTS = 5;
+const double UNCERTAINTY = 1.1;
+
+typedef int[1, NUM_STATIONS] station_t;
+typedef int[1, NUM_WAYPOINTS] waypoint_t;
+typedef int[1, MAX_ROBOTS] robot_t;
+
+const robot_t CUR_ROBOT = 1;
+
+typedef int[CUR_ROBOT + 1, MAX_ROBOTS] other_robot_t;
+
+const int waypoint_dist[waypoint_t][waypoint_t] = {
+    {-1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, 1, -1, 4, -1, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {1, -1, 4, -1, 3, -1, -1, -1, -1, -1, -1, -1, 8, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, 3, -1, 3, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, 3, -1, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1},
+    {-1, -1, -1, -1, -1, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, 3, -1, -1, -1, -1, 1, -1, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, 3, -1, -1, -1, -1, -1, 1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, 8, -1, -1, -1, -1, 3, -1, -1, 1, -1, 7, -1, 4, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, 8, -1, -1, -1, -1, -1, 3, -1, -1, 7, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1, -1, -1, -1, -1, -1, 1, 3, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 3, -1, -1, -1, 7, -1, -1, -1, -1, 3, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 7, -1, 2, -1, -1, -1, -1, -1, 7, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, 2, 7, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 3, -1, -1, -1, 2, -1, -1, -1, 8, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 7, 5, -1, -1, 12, 1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, 8, 12, -1, -1, 1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
+const waypoint_t station_waypoint[station_t] = { 1, 2, 8, 12, 28, 11, 15, 20, 26, 27 };
+
+broadcast chan arr[station_t][robot_t], 
+               done[robot_t],
+               go[robot_t],
+               queue[waypoint_t][robot_t];</declaration>
+	<template>
+		<name>Waypoint</name>
+		<parameter>waypoint_t id</parameter>
+		<declaration>const int MAX_QUEUE = MAX_ROBOTS;
+const int NON_STATION_PASSING = 3;
+const int STATION_PASSING = 6;
+
+clock x;
+
+int[0, MAX_ROBOTS] list[MAX_QUEUE];
+int[0, MAX_QUEUE] num_in_queue = 0;
+
+// Put an element at the end of the queue
+void enqueue(robot_t element)
+{
+    list[num_in_queue++] = element;
+}
+
+// Remove the front element of the queue
+void dequeue()
+{
+    int i = 0;
+    num_in_queue -= 1;
+    while (i &lt; num_in_queue)
+    {
+        list[i] = list[i + 1];
+        i++;
+    }
+    list[i] = 0;
+    x = 0;
+}
+
+// Returns the front element of the queue
+robot_t front()
+{
+   return list[0];
+}
+
+// Returns the last element of the queue
+robot_t tail()
+{
+   return list[num_in_queue - 1];
+}
+
+int passing_time() {
+    for (station_id : station_t) {
+        if (station_waypoint[station_id] == id) {
+            return STATION_PASSING;
+        }
+    }
+
+    return NON_STATION_PASSING;
+}</declaration>
+		<location id="id0" x="-263" y="-34">
+			<name x="-306" y="-25">Idle</name>
+		</location>
+		<location id="id1" x="-93" y="42">
+			<name x="-161" y="17">Queued</name>
+			<label kind="invariant" x="-68" y="51">x &lt;= passing_time() * UNCERTAINTY</label>
+		</location>
+		<init ref="id0"/>
+		<transition controllable="false">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-161" y="144">num_in_queue &gt; 1 &amp;&amp;
+x &gt;= passing_time()</label>
+			<label kind="synchronisation" x="-161" y="178">go[front()]!</label>
+			<label kind="assignment" x="-161" y="195">dequeue()</label>
+			<nail x="-161" y="144"/>
+			<nail x="-25" y="144"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="select" x="119" y="-25">robot_id : robot_t</label>
+			<label kind="synchronisation" x="119" y="-8">queue[id][robot_id]?</label>
+			<label kind="assignment" x="119" y="8">enqueue(robot_id)</label>
+			<nail x="110" y="42"/>
+			<nail x="110" y="-34"/>
+			<nail x="-59" y="-34"/>
+			<nail x="-59" y="17"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="select" x="-289" y="51">robot_id : robot_t</label>
+			<label kind="synchronisation" x="-289" y="68">queue[id][robot_id]?</label>
+			<label kind="assignment" x="-289" y="85">enqueue(robot_id),
+x = 0</label>
+			<nail x="-263" y="42"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-204" y="-110">num_in_queue == 1 &amp;&amp;
+x &gt;= passing_time()</label>
+			<label kind="synchronisation" x="-203" y="-76">go[front()]!</label>
+			<label kind="assignment" x="-203" y="-59">dequeue()</label>
+			<nail x="-93" y="-34"/>
+			<nail x="-110" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>OtherRobot</name>
+		<parameter>other_robot_t id</parameter>
+		<declaration>typedef int[0,2] next_type_t ;
+
+typedef struct {
+    next_type_t type;
+    int value;
+} next_t;
+
+const next_type_t WAYPOINT = 0;
+const next_type_t HOLDING = 1;
+const next_type_t DONE = 2;
+
+const next_t order[other_robot_t][NUM_WAYPOINTS * 2] = {
+    {{WAYPOINT,13},{WAYPOINT,16},{WAYPOINT,20},{WAYPOINT,16},{WAYPOINT,21},{WAYPOINT,23},{WAYPOINT,17},{WAYPOINT,18},{WAYPOINT,15},{WAYPOINT,18},{HOLDING,3},{WAYPOINT,17},{WAYPOINT,14},{WAYPOINT,10},{WAYPOINT,5},{WAYPOINT,4},{WAYPOINT,1},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0}},
+    {{WAYPOINT,26},{WAYPOINT,24},{WAYPOINT,25},{WAYPOINT,27},{WAYPOINT,25},{WAYPOINT,23},{WAYPOINT,21},{WAYPOINT,16},{WAYPOINT,13},{WAYPOINT,12},{WAYPOINT,13},{WAYPOINT,9},{WAYPOINT,8},{WAYPOINT,9},{WAYPOINT,3},{WAYPOINT,2},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0}},
+    {{WAYPOINT,17},{WAYPOINT,18},{HOLDING,2},{WAYPOINT,15},{WAYPOINT,18},{WAYPOINT,19},{WAYPOINT,7},{WAYPOINT,6},{HOLDING,2},{WAYPOINT,28},{WAYPOINT,6},{WAYPOINT,5},{WAYPOINT,10},{HOLDING,2},{WAYPOINT,11},{WAYPOINT,10},{WAYPOINT,14},{WAYPOINT,17},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0}},
+    {{WAYPOINT,13},{WAYPOINT,14},{WAYPOINT,4},{HOLDING,5},{WAYPOINT,13},{WAYPOINT,14},{WAYPOINT,4},{HOLDING,5},{WAYPOINT,13},{WAYPOINT,14},{WAYPOINT,4},{HOLDING,5},{WAYPOINT,13},{WAYPOINT,14},{WAYPOINT,4},{HOLDING,5},{WAYPOINT,13},{WAYPOINT,14},{WAYPOINT,4},{HOLDING,5},{WAYPOINT,13},{WAYPOINT,14},{WAYPOINT,4},{HOLDING,5},{WAYPOINT,13},{WAYPOINT,14},{WAYPOINT,4},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0}}
+};
+
+clock x;
+
+int[0, NUM_WAYPOINTS * NUM_STATIONS - 1] step_index = 0;
+waypoint_t cur;
+next_t next;
+
+next_t next_step() {
+    return order[id][step_index++];
+}</declaration>
+		<location id="id2" x="-323" y="-246">
+			<name x="-332" y="-297">BetweenWaypoints</name>
+			<label kind="invariant" x="-332" y="-280">x &lt;= waypoint_dist[cur][next.value] * UNCERTAINTY</label>
+		</location>
+		<location id="id3" x="-637" y="-246">
+			<name x="-714" y="-246">Choose</name>
+			<committed/>
+		</location>
+		<location id="id4" x="-782" y="-399">
+			<name x="-799" y="-433">Done</name>
+		</location>
+		<location id="id5" x="-323" y="-8">
+			<name x="-306" y="-17">AtWaypoint</name>
+		</location>
+		<location id="id6" x="-1028" y="-246">
+			<name x="-1038" y="-280">Start</name>
+			<committed/>
+		</location>
+		<location id="id7" x="-790" y="-8">
+			<name x="-850" y="-42">InvalidPath</name>
+		</location>
+		<location id="id8" x="-476" y="-408">
+			<name x="-450" y="-433">Holding</name>
+			<label kind="invariant" x="-450" y="-416">x &lt;= next.value</label>
+		</location>
+		<init ref="id6"/>
+		<transition controllable="false">
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-1045" y="0">order[id][0].type != WAYPOINT</label>
+			<nail x="-1028" y="-8"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id8"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-637" y="-433">x == next.value</label>
+			<label kind="assignment" x="-637" y="-450">next = next_step()</label>
+			<nail x="-637" y="-408"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-527" y="-348">next.type == HOLDING</label>
+			<label kind="assignment" x="-527" y="-331">x = 0</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-952" y="-119">next.type == WAYPOINT &amp;&amp;
+waypoint_dist[cur][next.value] == -1</label>
+			<nail x="-688" y="-195"/>
+			<nail x="-688" y="-8"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id6"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-969" y="-238">order[id][0].type == WAYPOINT</label>
+			<label kind="assignment" x="-969" y="-221">cur = next_step().value,
+next = next_step()</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id5"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-595" y="-51">go[id]?</label>
+			<label kind="assignment" x="-595" y="-34">next = next_step()</label>
+			<nail x="-637" y="-8"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id2"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-314" y="-212">x &gt;= waypoint_dist[cur][next.value]</label>
+			<label kind="synchronisation" x="-314" y="-195">queue[next.value][id]!</label>
+			<label kind="assignment" x="-314" y="-178">cur = next.value</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-875" y="-348">next.type == DONE</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-586" y="-238">next.type == WAYPOINT &amp;&amp;
+waypoint_dist[cur][next.value] != -1</label>
+			<label kind="assignment" x="-578" y="-204">x = 0</label>
+		</transition>
+	</template>
+	<template>
+		<name>Robot</name>
+		<declaration>clock x;
+
+bool visited[waypoint_t];
+
+station_t dest;
+
+const waypoint_t start_waypoint = 21;
+waypoint_t cur_waypoint;
+waypoint_t dest_waypoint;</declaration>
+		<location id="id9" x="-25" y="-246">
+			<name x="-51" y="-221">Waiting</name>
+		</location>
+		<location id="id10" x="-399" y="-399">
+			<name x="-501" y="-442">BetweenWaypoints</name>
+			<label kind="invariant" x="-901" y="-408">x &lt;= waypoint_dist[cur_waypoint][dest_waypoint] * UNCERTAINTY</label>
+		</location>
+		<location id="id11" x="-398" y="-246">
+			<name x="-467" y="-272">Choose</name>
+			<committed/>
+		</location>
+		<location id="id12" x="-399" y="-102">
+			<name x="-374" y="-110">Done</name>
+			<label kind="invariant" x="-374" y="-93">total' == 0</label>
+		</location>
+		<location id="id13" x="-680" y="-246">
+			<name x="-714" y="-280">Start</name>
+			<committed/>
+		</location>
+		<location id="id14" x="-25" y="-399">
+			<name x="-59" y="-433">QueueUp</name>
+			<committed/>
+		</location>
+		<location id="id15" x="161" y="-399">
+			<name x="178" y="-416">Holding</name>
+			<label kind="invariant" x="178" y="-399">x &lt;= 1</label>
+		</location>
+		<init ref="id13"/>
+		<transition controllable="false">
+			<source ref="id15"/>
+			<target ref="id14"/>
+			<label kind="guard" x="51" y="-374">x == 1</label>
+			<nail x="161" y="-357"/>
+			<nail x="17" y="-357"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id15"/>
+			<label kind="assignment" x="51" y="-416">x = 0</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id14"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-17" y="-306">queue[dest_waypoint][CUR_ROBOT]!</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id13"/>
+			<target ref="id11"/>
+			<label kind="assignment" x="-654" y="-238">cur_waypoint = start_waypoint,
+visited[cur_waypoint] = true</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id11"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-391" y="-204">station_waypoint[dest] == cur_waypoint</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id9"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-221" y="-272">go[CUR_ROBOT]?</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id10"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-331" y="-459">x &gt;= waypoint_dist[cur_waypoint][dest_waypoint]</label>
+			<label kind="assignment" x="-331" y="-442">cur_waypoint = dest_waypoint,
+visited[cur_waypoint] = true, x = 0</label>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="select" x="-391" y="-365">id : waypoint_t</label>
+			<label kind="guard" x="-391" y="-348">waypoint_dist[cur_waypoint][id] != -1 &amp;&amp;
+station_waypoint[dest] != cur_waypoint</label>
+			<label kind="assignment" x="-391" y="-314">dest_waypoint = id,
+x = 0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+const int C_RED    = 0;
+const int C_GREEN  = 1;
+const int C_BLUE   = 2;
+const int C_PURPLE = 3;
+const int C_ORANGE = 5;
+const int C_YELLOW = 6;
+const int C_CYAN   = 9;
+
+// List one or more processes to be composed into a system.
+system Waypoint, OtherRobot, Robot;
+
+gantt {
+    Waypoint: for (j : waypoint_t) Robot.dest_waypoint == j -&gt; 1;
+}</system>
+	<queries>
+		<query>
+			<formula>strategy omnipotent = minE (total) [&lt;=500] {
+	OtherRobot(2).location,
+	OtherRobot(3).location,
+	OtherRobot(4).location,
+	OtherRobot(5).location,
+	Robot.location,
+	OtherRobot(2).cur,
+	OtherRobot(2).next.type,
+	OtherRobot(2).next.value,
+	OtherRobot(3).cur,
+	OtherRobot(3).next.type,
+	OtherRobot(3).next.value,
+	OtherRobot(4).cur,
+	OtherRobot(4).next.type,
+	OtherRobot(4).next.value,
+	OtherRobot(5).cur,
+	OtherRobot(5).next.type,
+	OtherRobot(5).next.value,
+	Robot.visited[1],
+	Robot.visited[2],
+	Robot.visited[3],
+	Robot.visited[4],
+	Robot.visited[5],
+	Robot.visited[6],
+	Robot.visited[7],
+	Robot.visited[8],
+	Robot.visited[9],
+	Robot.visited[10],
+	Robot.visited[11],
+	Robot.visited[12],
+	Robot.visited[13],
+	Robot.visited[14],
+	Robot.visited[15],
+	Robot.visited[16],
+	Robot.visited[17],
+	Robot.visited[18],
+	Robot.visited[19],
+	Robot.visited[20],
+	Robot.visited[21],
+	Robot.visited[22],
+	Robot.visited[23],
+	Robot.visited[24],
+	Robot.visited[25],
+	Robot.visited[26],
+	Robot.visited[27],
+	Robot.visited[28],
+	Robot.dest,
+	Robot.cur_waypoint,
+	Robot.dest_waypoint
+} -&gt; {
+	Waypoint(1).num_in_queue,
+	Waypoint(2).num_in_queue,
+	Waypoint(3).num_in_queue,
+	Waypoint(4).num_in_queue,
+	Waypoint(5).num_in_queue,
+	Waypoint(6).num_in_queue,
+	Waypoint(7).num_in_queue,
+	Waypoint(8).num_in_queue,
+	Waypoint(9).num_in_queue,
+	Waypoint(10).num_in_queue,
+	Waypoint(11).num_in_queue,
+	Waypoint(12).num_in_queue,
+	Waypoint(13).num_in_queue,
+	Waypoint(14).num_in_queue,
+	Waypoint(15).num_in_queue,
+	Waypoint(16).num_in_queue,
+	Waypoint(17).num_in_queue,
+	Waypoint(18).num_in_queue,
+	Waypoint(19).num_in_queue,
+	Waypoint(20).num_in_queue,
+	Waypoint(21).num_in_queue,
+	Waypoint(22).num_in_queue,
+	Waypoint(23).num_in_queue,
+	Waypoint(24).num_in_queue,
+	Waypoint(25).num_in_queue,
+	Waypoint(26).num_in_queue,
+	Waypoint(27).num_in_queue,
+	Waypoint(28).num_in_queue,
+	Robot.x
+} : &lt;&gt; Robot.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy realistic = minE (total) [&lt;=500] {
+	OtherRobot(2).location,
+	OtherRobot(3).location,
+	OtherRobot(4).location,
+	OtherRobot(5).location,
+	Robot.location,
+	OtherRobot(2).cur,
+	OtherRobot(2).next.type,
+	OtherRobot(2).next.value,
+	OtherRobot(3).cur,
+	OtherRobot(3).next.type,
+	OtherRobot(3).next.value,
+	OtherRobot(4).cur,
+	OtherRobot(4).next.type,
+	OtherRobot(4).next.value,
+	OtherRobot(5).cur,
+	OtherRobot(5).next.type,
+	OtherRobot(5).next.value,
+	Robot.visited[1],
+	Robot.visited[2],
+	Robot.visited[3],
+	Robot.visited[4],
+	Robot.visited[5],
+	Robot.visited[6],
+	Robot.visited[7],
+	Robot.visited[8],
+	Robot.visited[9],
+	Robot.visited[10],
+	Robot.visited[11],
+	Robot.visited[12],
+	Robot.visited[13],
+	Robot.visited[14],
+	Robot.visited[15],
+	Robot.visited[16],
+	Robot.visited[17],
+	Robot.visited[18],
+	Robot.visited[19],
+	Robot.visited[20],
+	Robot.visited[21],
+	Robot.visited[22],
+	Robot.visited[23],
+	Robot.visited[24],
+	Robot.visited[25],
+	Robot.visited[26],
+	Robot.visited[27],
+	Robot.visited[28],
+	Robot.dest,
+	Robot.cur_waypoint,
+	Robot.dest_waypoint
+} -&gt; {
+	Waypoint(1).num_in_queue,
+	Waypoint(2).num_in_queue,
+	Waypoint(3).num_in_queue,
+	Waypoint(4).num_in_queue,
+	Waypoint(5).num_in_queue,
+	Waypoint(6).num_in_queue,
+	Waypoint(7).num_in_queue,
+	Waypoint(8).num_in_queue,
+	Waypoint(9).num_in_queue,
+	Waypoint(10).num_in_queue,
+	Waypoint(11).num_in_queue,
+	Waypoint(12).num_in_queue,
+	Waypoint(13).num_in_queue,
+	Waypoint(14).num_in_queue,
+	Waypoint(15).num_in_queue,
+	Waypoint(16).num_in_queue,
+	Waypoint(17).num_in_queue,
+	Waypoint(18).num_in_queue,
+	Waypoint(19).num_in_queue,
+	Waypoint(20).num_in_queue,
+	Waypoint(21).num_in_queue,
+	Waypoint(22).num_in_queue,
+	Waypoint(23).num_in_queue,
+	Waypoint(24).num_in_queue,
+	Waypoint(25).num_in_queue,
+	Waypoint(26).num_in_queue,
+	Waypoint(27).num_in_queue,
+	Waypoint(28).num_in_queue,
+	Robot.x
+} : &lt;&gt; Robot.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under omnipotent</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under realistic</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 100] {
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding * 2 + NUM_WAYPOINTS + 2
+}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 100] {
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding * 2 + NUM_WAYPOINTS + 2
+} under omnipotent</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 100] {
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding * 2 + NUM_WAYPOINTS + 2
+} under realistic</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total) under omnipotent</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total) under realistic</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>saveStrategy("test3.json", realistic)</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
