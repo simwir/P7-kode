@@ -15,6 +15,7 @@ addons:
       - libc++-8-dev
       - libc++abi-8-dev
       - libjsoncpp-dev
+      - g++-8
 
 before_install:
     - export CC=clang-8
