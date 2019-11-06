@@ -2,7 +2,6 @@
 #define _CONTROLLER_LIDAR_HPP
 
 struct LidarReading {
-    
 };
 
 #endif

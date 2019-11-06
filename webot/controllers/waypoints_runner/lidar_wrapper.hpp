@@ -4,10 +4,10 @@
 #include <webots/Lidar.hpp>
 
 struct lidar_wrapper {
-    webots::Lidar* lidar;
+    webots::Lidar *lidar;
 
     int get_number_of_points() const;
-    const float* get_range_image() const;
+    const float *get_range_image() const;
     const webots::LidarPoint *get_point_cloud() const;
     double get_fov() const;
     double get_max_range() const;

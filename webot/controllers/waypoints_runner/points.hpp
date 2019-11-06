@@ -8,17 +8,16 @@ constexpr double PI = 3.141926535;
 
 struct Point {
     double x, y, z;
-    Point()
-        :x(0), y(0), z(0){}
+    Point() : x(0), y(0), z(0) {}
 };
 
 struct CoordinateSystem {
     Point origin;
     double rotation;
 
-    Point to_global_coordinates(const Point& point) const;
+    Point to_global_coordinates(const Point &point) const;
 
-    //Point from_global_coordinates(const Point& point);
+    // Point from_global_coordinates(const Point& point);
 };
 
 double euclidean_distance(const Point &p1, const Point &p2);

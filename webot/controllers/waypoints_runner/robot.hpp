@@ -14,8 +14,8 @@
 #include <vector>
 
 //#include "points.hpp"
-#include "lidar_wrapper.hpp"
 #include "geo/geo.hpp"
+#include "lidar_wrapper.hpp"
 #include "webots_server.hpp"
 
 constexpr auto NUM_SENSORS = 8;
@@ -112,7 +112,8 @@ class robot_controller {
     // geo::Point lidar_value_to_point(int idx) const
     // {
     //     /*double dist =
-    //         lidar_range_values[idx].has_value() ? lidar_range_values[idx].value() : lidar_max_range;
+    //         lidar_range_values[idx].has_value() ? lidar_range_values[idx].value() :
+    //         lidar_max_range;
     //     double angle = get_lidar_point_angle(idx);
 
     //     return {dist * std::cos(angle), 0, dist * std::sin(angle)};*/
@@ -124,7 +125,7 @@ class robot_controller {
 
     double prev_heuristic_dist = std::numeric_limits<double>::max();
 
-    //CoordinateSystem get_coordinate_system() const { return {position, facing_angle}; }
+    // CoordinateSystem get_coordinate_system() const { return {position, facing_angle}; }
 
     // actions
     void do_left_turn();
@@ -146,14 +147,14 @@ class robot_controller {
     geo::Angle relative_goal_angle;
     geo::Angle relative_dest_angle;
 
-    //geo::Angle dest_angle;
-    //geo::Angle angle_to_dest;
+    // geo::Angle dest_angle;
+    // geo::Angle angle_to_dest;
     geo::GlobalPoint position;
 
     size_t num_steps = 0;
 
-    void dump_readings_to_csv(const std::string& pcfilename = "point_cloud.csv",
-                              const std::string& rangefilename = "range_values.csv");
+    void dump_readings_to_csv(const std::string &pcfilename = "point_cloud.csv",
+                              const std::string &rangefilename = "range_values.csv");
 };
 
 #endif

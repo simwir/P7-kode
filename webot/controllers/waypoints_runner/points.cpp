@@ -52,9 +52,7 @@ double angle_delta(const double angle1, const double angle2)
 
 Point CoordinateSystem::to_global_coordinates(const Point &point) const
 {
-    return Point{
-        point.x * std::cos(-rotation) - point.y * std::sin(-rotation),
-        0,
-        point.z * std::sin(-rotation) + point.x * std::cos(-rotation)
-    } + origin;
+    return Point{point.x * std::cos(-rotation) - point.y * std::sin(-rotation), 0,
+                 point.z * std::sin(-rotation) + point.x * std::cos(-rotation)} +
+           origin;
 }
