@@ -35,7 +35,7 @@ class Config {
     T get(const std::string &key);
 
     template <typename T>
-    void set(const std::string &key, T&& value);
+    void set(const std::string &key, T &&value);
 };
 } // namespace robot
 
