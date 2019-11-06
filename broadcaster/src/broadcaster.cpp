@@ -8,7 +8,6 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
-#include <map>
 
 namespace broadcaster {
 
