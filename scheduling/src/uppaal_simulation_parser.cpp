@@ -3,21 +3,23 @@
 #include <uppaal_simulation_parser.hpp>
 
 std::vector<scheduling::SimulationExpression>
-scheduling::UppaalSimulationParser::parse(std::string result, int formula)
+scheduling::UppaalSimulationParser::parse(const std::string &result, int formula_number)
 {
-    int startIndex = result.find("Verifying formula " + std::to_string(formula));
+    int startIndex = result.find("Verifying formula " + std::to_string(formula_number));
     int stopIndex =
         result.find("Verifying formula " +
-                    std::to_string(formula + 1)); // Equal to std::string::npos if not found.
+                    std::to_string(formula_number + 1)); // Equal to std::string::npos if not found.
+
+    std::string formula;
 
     if (stopIndex == std::string::npos) {
-        result = result.substr(startIndex);
+        formula = result.substr(startIndex);
     }
     else {
-        result = result.substr(startIndex, stopIndex - startIndex);
+        formula = result.substr(startIndex, stopIndex - startIndex);
     }
 
-    std::stringstream ss{result};
+    std::stringstream ss{formula};
     std::vector<scheduling::SimulationExpression> values;
 
     std::string line;

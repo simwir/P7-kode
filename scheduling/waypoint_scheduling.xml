@@ -64,7 +64,7 @@ const int STATION_PASSING = 6;
 
 clock x;
 
-int[0, MAX_ROBOTS + 1] list[MAX_QUEUE + 1];
+int[0, MAX_ROBOTS] list[MAX_QUEUE];
 int[0, MAX_QUEUE] num_in_queue = 0;
 
 // Put an element at the end of the queue
