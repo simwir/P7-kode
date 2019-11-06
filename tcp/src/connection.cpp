@@ -49,6 +49,16 @@ std::optional<std::string> tcp::Connection::parse_message()
     }
 }
 
+std::string tcp::Connection::receive_blocking()
+{
+    return receive(true).value(); // When called blocking we know a value is present.
+}
+
+std::optional<std::string> tcp::Connection::receive_nonblocking()
+{
+    return receive(false);
+}
+
 std::optional<std::string> tcp::Connection::receive(bool blocking)
 {
     if (!ready) {

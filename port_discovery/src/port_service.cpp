@@ -123,7 +123,7 @@ void call_function(port_discovery::Function function, const std::vector<std::str
 void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<int, int> &robot_map)
 {
     try {
-        auto message = connection->receive().value();
+        auto message = connection->receive_blocking();
         std::cout << message << "\n" << std::endl;
         std::vector<std::string> args = split(message, ',');
         port_discovery::Function function = parse_function(args[0]);

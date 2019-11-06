@@ -52,7 +52,8 @@ class Connection : public std::enable_shared_from_this<Connection> {
     Connection(int fd) : fd(fd) { ready = true; }
     Connection() {}
     virtual ~Connection();
-    std::optional<std::string> receive(bool blocking = true);
+    std::optional<std::string> receive_nonblocking();
+    std::string receive_blocking();
     ssize_t send(const std::string &message, int flags = 0);
     void close();
 
@@ -63,6 +64,7 @@ class Connection : public std::enable_shared_from_this<Connection> {
     std::optional<std::string> parse_message();
 
   private:
+    std::optional<std::string> receive(bool blocking);
     int fd;
     std::string obuffer;
     bool open = true;
