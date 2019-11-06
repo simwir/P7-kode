@@ -9,7 +9,7 @@
 
 namespace scheduling {
 
-struct FormulaNotSatisfiedException : public std::exception {
+struct FormulaNotSatisfiedException : std::exception {
     const char *what() const noexcept override { return "Formula not satisfied"; }
 };
 
@@ -22,7 +22,7 @@ class SimulationParseException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-struct NameNotFoundException : public std::exception {
+struct NameNotFoundException : std::exception {
     const char *what() const noexcept override { return "Cannot find name"; }
 };
 
