@@ -20,17 +20,17 @@ std::vector<std::string> split_message(const std::string message){
     return std::vector<std::string> {start, end};
 }
 
-Functions Broadcaster::parse_function(const std::string &function) {
+Function Broadcaster::parse_function(const std::string &function) {
     if (function == "get_robot_info") {
-        return Functions::get_robot_info;
+        return Function::get_robot_info;
     } else if (function == "post_robot_location") {
-        return Functions::post_robot_location;
+        return Function::post_robot_location;
     } else {
         throw tcp::MessageException(function);
     }
 }
 void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
-    Json::Value result = robotsMap.to_json();
+    Json::Value result = robot_info.to_json();
     mutex.lock();
     conn->send(result.toStyledString());
     mutex.unlock();
@@ -39,16 +39,16 @@ void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
 void Broadcaster::post_robot_location(std::string value) {
     robot::Info info = robot::Info::from_json(value);
     mutex.lock();
-    robotsMap[info.id] = info;
+    robot_info[info.id] = info;
     mutex.unlock();
 }
 
-void Broadcaster::call_function(Functions functions, std::string& value, std::shared_ptr<tcp::Connection> conn) {
-    switch (functions) {
-        case Functions::post_robot_location:
+void Broadcaster::call_function(Function function, std::string& value, std::shared_ptr<tcp::Connection> conn) {
+    switch (function) {
+        case Function::post_robot_location:
             post_robot_location(value);
             break;
-        case Functions::get_robot_info:
+        case Function::get_robot_info:
             get_robot_info(conn);
             break;
         default: 
@@ -62,7 +62,7 @@ void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn) {
         if (!messages.empty()){
             for (const std::string &message : messages) {
                 std::vector<std::string> result = split_message(message);
-                Functions function = parse_function(result[0]);
+                Function function = parse_function(result[0]);
                 call_function(function, result[1], conn);
             }
         }
