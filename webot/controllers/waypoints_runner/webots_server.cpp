@@ -13,7 +13,7 @@ using namespace webots_server;
 webots_server::Server::Server(std::string id)
     : server(tcp::Server{0}), robot_id(id) {
   tcp::Client port_discovery{PDS_ADDR, PDS_PORT};
-  port_discovery.send("addRobot," + id + "," +
+  port_discovery.send("add_robot," + id + "," +
                       std::to_string(server.get_port()));
   client = server.accept();
 }
@@ -22,7 +22,7 @@ webots_server::Server::~Server() {
   server.close();
   // Deregister robot with the port discovery service.
   tcp::Client client{PDS_ADDR, PDS_PORT};
-  client.send("removeRobot," + robot_id);
+  client.send("remove_robot," + robot_id);
   client.close();
 }
 

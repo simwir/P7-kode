@@ -38,9 +38,10 @@ void robot_controller::dump_readings_to_csv(const std::string &pcfilename,
     }
 }
 
-int getRobotId(webots::Supervisor *robot){
+int getRobotId(webots::Supervisor *robot)
+{
     auto self = robot->getSelf();
-    if (self == nullptr){
+    if (self == nullptr) {
         std::cerr << "robot->getSelf() returned 0. Please restart webots";
         exit(1);
     }
@@ -48,8 +49,7 @@ int getRobotId(webots::Supervisor *robot){
 }
 
 robot_controller::robot_controller(webots::Supervisor *robot)
-    : time_step((int)robot->getBasicTimeStep()),
-      robot(robot),
+    : time_step((int)robot->getBasicTimeStep()), robot(robot),
       server(std::to_string(getRobotId(robot)))
 {
     left_motor = robot->getMotor("left wheel motor");
@@ -104,29 +104,26 @@ void robot_controller::update_sensor_values()
     }
 }
 
-void robot_controller::communicate(){
+void robot_controller::communicate()
+{
     using namespace webots_server;
-    for (Message message : server.get_messages()){
-        switch (message.type){
-        case MessageType::get_position:
-            {
-                auto response = std::to_string(position.x) + "," + std::to_string(position.y);
-                server.send_message({response, MessageType::get_position});
-                break;
+    for (Message message : server.get_messages()) {
+        switch (message.type) {
+        case MessageType::get_position: {
+            auto response = std::to_string(position.x) + "," + std::to_string(position.y);
+            server.send_message({response, MessageType::get_position});
+            break;
+        }
+        case MessageType::set_destination: {
+            size_t split_pos = message.payload.find(",");
+            if (split_pos == std::string::npos) {
+                server.send_message({message.payload, MessageType::not_understood});
+                continue;
             }
-        case MessageType::set_destination:
-            {
-                size_t split_pos = message.payload.find(",");
-                if (split_pos == std::string::npos){
-                    server.send_message({message.payload, MessageType::not_understood});
-                    continue;
-                }
-                destination = {
-                                std::stod(message.payload.substr(0,split_pos)),
-                                std::stod(message.payload.substr(split_pos + 1))
-                };
-                break;
-            }
+            destination = {std::stod(message.payload.substr(0, split_pos)),
+                           std::stod(message.payload.substr(split_pos + 1))};
+            break;
+        }
         default:
             break;
         }
@@ -282,7 +279,7 @@ std::vector<geo::GlobalPoint> robot_controller::get_discontinuity_points() const
                 geo::abs_angle(absolute_goal_angle - geo::angle_of_line(position, global_point))
                     .theta;
             // std::cerr << "angle_diff " << angle_diff << '\n';
-            //TODO logic if goal is closer than lidar point
+            // TODO logic if goal is closer than lidar point
             if (angle_diff <= PI / (lidar.get_number_of_points())) {
                 auto tangent_point =
                     geo::to_global_coordinates(position, facing_angle, point_cloud[i]);
@@ -307,7 +304,7 @@ void robot_controller::tangent_bug_get_destination()
 
     double min_heuristic = std::numeric_limits<double>::max();
     geo::GlobalPoint best_point;
-    //TODO abort if no discontinuities
+    // TODO abort if no discontinuities
     for (const geo::GlobalPoint &point : discontinuities) {
         double h = geo::euclidean_dist(position, point) + geo::euclidean_dist(point, destination);
         if (h < min_heuristic) {
