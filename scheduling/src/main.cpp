@@ -30,6 +30,7 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
     }
 };
 
+
 class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber {
     void newSchedule(const std::vector<int> &schedule) override
     {
@@ -50,10 +51,10 @@ int main()
     std::cout << "Starting...\n";
 
     scheduling::WaypointScheduler waypointScheduler;
-    auto logSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
+    auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
     std::cout << "Adding waypoint subscriber\n";
-    waypointScheduler.addSubscriber(logSubscriber->shared_from_this());
+    waypointScheduler.addSubscriber(logWaypointSubscriber->shared_from_this());
 
     std::cout << "Starting waypoint scheduler\n";
     waypointScheduler.start();
