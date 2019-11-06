@@ -171,7 +171,7 @@ const next_type_t WAYPOINT = 0;
 const next_type_t HOLDING = 1;
 const next_type_t DONE = 2;
 
-const next_t order[other_robot_t][NUM_WAYPOINTS * 2] = {
+const next_t schedule[other_robot_t][NUM_WAYPOINTS * 2] = {
     {{WAYPOINT,13},{WAYPOINT,16},{WAYPOINT,20},{WAYPOINT,16},{WAYPOINT,21},{WAYPOINT,23},{WAYPOINT,17},{WAYPOINT,18},{WAYPOINT,15},{WAYPOINT,18},{HOLDING,3},{WAYPOINT,17},{WAYPOINT,14},{WAYPOINT,10},{WAYPOINT,5},{WAYPOINT,4},{WAYPOINT,1},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0}},
     {{WAYPOINT,26},{WAYPOINT,24},{WAYPOINT,25},{WAYPOINT,27},{WAYPOINT,25},{WAYPOINT,23},{WAYPOINT,21},{WAYPOINT,16},{WAYPOINT,13},{WAYPOINT,12},{WAYPOINT,13},{WAYPOINT,9},{WAYPOINT,8},{WAYPOINT,9},{WAYPOINT,3},{WAYPOINT,2},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0}},
     {{WAYPOINT,17},{WAYPOINT,18},{HOLDING,2},{WAYPOINT,15},{WAYPOINT,18},{WAYPOINT,19},{WAYPOINT,7},{WAYPOINT,6},{HOLDING,2},{WAYPOINT,28},{WAYPOINT,6},{WAYPOINT,5},{WAYPOINT,10},{HOLDING,2},{WAYPOINT,11},{WAYPOINT,10},{WAYPOINT,14},{WAYPOINT,17},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0},{DONE,0}},
@@ -180,12 +180,12 @@ const next_t order[other_robot_t][NUM_WAYPOINTS * 2] = {
 
 clock x;
 
-int[0, NUM_WAYPOINTS * NUM_STATIONS - 1] step_index = 0;
+int[0, NUM_WAYPOINTS * 2 - 1] step_index = 0;
 waypoint_t cur;
 next_t next;
 
 next_t next_step() {
-    return order[id][step_index++];
+    return schedule[id][step_index++];
 }</declaration>
 		<location id="id2" x="-323" y="-246">
 			<name x="-332" y="-297">BetweenWaypoints</name>
@@ -216,7 +216,7 @@ next_t next_step() {
 		<transition controllable="false">
 			<source ref="id6"/>
 			<target ref="id7"/>
-			<label kind="guard" x="-1045" y="0">order[id][0].type != WAYPOINT</label>
+			<label kind="guard" x="-1045" y="0">schedule[id][0].type != WAYPOINT</label>
 			<nail x="-1028" y="-8"/>
 		</transition>
 		<transition controllable="false">
@@ -243,7 +243,7 @@ waypoint_dist[cur][next.value] == -1</label>
 		<transition controllable="false">
 			<source ref="id6"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-969" y="-238">order[id][0].type == WAYPOINT</label>
+			<label kind="guard" x="-969" y="-238">schedule[id][0].type == WAYPOINT</label>
 			<label kind="assignment" x="-969" y="-221">cur = next_step().value,
 next = next_step()</label>
 		</transition>

@@ -12,6 +12,7 @@ addons:
     packages:
       - clang-8
       - clang-format-8
+      - libjsoncpp-dev
 
 before_install:
     - export CC=clang-8
