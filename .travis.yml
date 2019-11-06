@@ -12,6 +12,8 @@ addons:
     packages:
       - clang-8
       - clang-format-8
+      - libc++-8-dev
+      - libc++abi-8-dev
       - libjsoncpp-dev
 
 before_install:
