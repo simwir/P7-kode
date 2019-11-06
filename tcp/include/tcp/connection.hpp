@@ -12,12 +12,11 @@ class SendException : public std::exception {
     std::string message;
 
   public:
-    SendException(const std::string &in_message) : message("Could not send message: " + in_message) {}
-
-    const char *what() const noexcept
+    SendException(const std::string &in_message) : message("Could not send message: " + in_message)
     {
-        return message.c_str();
     }
+
+    const char *what() const noexcept { return message.c_str(); }
 };
 
 class ReceiveException : public std::exception {
@@ -29,11 +28,8 @@ class ReceiveException : public std::exception {
         : err(err), msg("Could not read receive buffer: " + std::to_string(err))
     {
     }
-    
-    ReceiveException()
-      : msg("Got 0 bytes")
-    {
-    }
+
+    ReceiveException() : msg("Got 0 bytes") {}
 
     const char *what() const noexcept { return msg.c_str(); }
 };
