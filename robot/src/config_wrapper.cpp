@@ -1,5 +1,5 @@
-#include "config_wrapper.hpp"
-#include "config.hpp"
+#include <robot/config_wrapper.hpp>
+#include <robot/config.hpp>
 
 robot::Config config;
 

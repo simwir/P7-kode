@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include <robot/config.hpp>
 
 #include <fstream>
 #include <map>

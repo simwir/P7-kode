@@ -1,12 +1,12 @@
 #include <fstream>
 
-#include "../tcp/include/tcp/client.hpp"
-#include "../wbt-translator/apsp.hpp"
-#include "../wbt-translator/distance_matrix.hpp"
-#include "../wbt-translator/webots_parser.hpp"
-#include "config.hpp"
-#include "include/robot/info.hpp"
-#include "master.hpp"
+#include <tcp/client.hpp>
+#include <wbt-translator/apsp.hpp>
+#include <wbt-translator/distance_matrix.hpp>
+#include <wbt-translator/webots_parser.hpp>
+#include <robot/config.hpp>
+#include <robot/info.hpp>
+#include <robot/master.hpp>
 
 #define PORT_TO_BROADCASTER "5435"
 #define PORT_TO_PDS "4444"

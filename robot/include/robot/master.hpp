@@ -3,9 +3,9 @@
 
 #include <filesystem>
 
-#include "../tcp/include/tcp/client.hpp"
+#include <tcp/client.hpp>
 #include "config.hpp"
-#include "include/robot/info.hpp"
+#include "info.hpp"
 
 namespace robot {
 class RecievedMessageException : public std::exception {
