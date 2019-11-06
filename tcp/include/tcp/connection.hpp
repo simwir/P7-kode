@@ -2,10 +2,10 @@
 #define TCP_CONNECTION_HPP
 
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <optional>
 
 namespace tcp {
 
