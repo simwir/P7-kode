@@ -4,11 +4,11 @@
 #include <string.h>
 #include <vector>
 
-#include "apsp.hpp"
-#include "distance_matrix.hpp"
-#include "uppaal-printer.hpp"
+#include "wbt-translator/apsp.hpp"
+#include "wbt-translator/distance_matrix.hpp"
+#include "wbt-translator/uppaal-printer.hpp"
+#include "wbt-translator/webots_parser.hpp"
 
-#include "webots_parser.hpp"
 void print_help(const char *const execute_location)
 {
     std::cerr << "Usage: " << execute_location << " [options] INPUT_FILE [options]" << std::endl
