@@ -7,6 +7,8 @@
 #include <robot/config.hpp>
 #include <robot/info.hpp>
 #include <robot/master.hpp>
+#include <vector>
+#include <string>
 
 #define PORT_TO_BROADCASTER "5435"
 #define PORT_TO_PDS "4444"
