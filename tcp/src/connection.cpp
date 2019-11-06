@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -81,6 +82,8 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
         ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, blocking ? 0 : MSG_DONTWAIT);
 
         if (bytes == -1) {
+            // If the MSG_DONTWAIT flag is set recv might return with -1 and errno to one of
+            // the following values indicating that no error occurred, but the recv buffer was empty
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 return std::nullopt;
             }
