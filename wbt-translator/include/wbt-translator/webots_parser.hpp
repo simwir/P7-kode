@@ -59,6 +59,7 @@ class Parser {
   public:
     AST parse_stream();
     Parser(std::istream &inputStream) : is(inputStream) {}
+    int number_of_robots;
 
   private:
     std::istream &is;
