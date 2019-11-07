@@ -1,9 +1,6 @@
 #include <broadcaster/broadcaster.hpp>
-#include <tcp/server.hpp>
 #include <tcp/exception.hpp>
 #include <tcp/connection.hpp>
-
-#include <jsoncpp/json/json.h>
 
 #include <iostream>
 #include <thread>
@@ -13,10 +10,10 @@ namespace broadcaster {
 
 std::mutex mutex;
 
-std::vector<std::string> split_message(const std::string& message) {
+std::pair<std::string, std::string> split_message(const std::string& message) {
     std::string start = message.substr(0, message.find(','));
     std::string end = message.substr(message.find(',') + 1);
-    return std::vector<std::string> {start, end};
+    return std::pair {start, end};
 }
 
 Function Broadcaster::parse_function(const std::string &function) {
@@ -29,23 +26,22 @@ Function Broadcaster::parse_function(const std::string &function) {
     }
 }
 void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
     Json::Value result = robot_info.to_json();
-    mutex.unlock();
+    lock.unlock;
     conn->send(result.toStyledString());
 }
 
 void Broadcaster::post_robot_location(const std::string& value) {
-    mutex.lock();
+    std::scoped_lock<std::mutex> lock(mutex);
     robot::Info info = robot::Info::from_json(value);
     robot_info[info.id] = info;
-    mutex.unlock();
 }
 
-void Broadcaster::call_function(Function function, std::string& value, std::shared_ptr<tcp::Connection> conn) {
+void Broadcaster::call_function(Function function, const std::string& parameters, std::shared_ptr<tcp::Connection> conn) {
     switch (function) {
         case Function::post_robot_location:
-            post_robot_location(value);
+            post_robot_location(parameters);
             break;
         case Function::get_robot_info:
             get_robot_info(conn);
@@ -61,19 +57,23 @@ void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn) {
             auto messages = conn->receive();
             if (!messages.empty()){
                 for (const std::string &message : messages) {
-                    std::vector<std::string> result = split_message(message);
-                    Function function = parse_function(result[0]);
-                    call_function(function, result[1], conn);
+                    std::pair<std::string, std::string> result = split_message(message);
+                    Function function = parse_function(result.first);
+                    call_function(function, result.second, conn);
                 }
             }
         } catch (tcp::MalformedMessageException &e) {
             conn->send(e.what());
+            std::cerr << "MalformedMessageException" << e.what() << std::endl;
         } catch (UnknownFunctionException &e) {
             conn->send(e.what());
+            std::cerr << "UnknownFunctionException" << e.what() << std::endl; 
         } catch (UnknownParameterException &e) {
             conn->send(e.what());
+            std::cerr << "UnknownParameterException" << e.what() << std::endl; 
         } catch (tcp::ReceiveException &e) {
             conn->send(e.what());
+            std::cerr << "ReceiveException" << e.what() << std::endl; 
         }
     }
 }

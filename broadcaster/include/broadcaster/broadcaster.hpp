@@ -4,6 +4,7 @@
 #include <map>
 #include <tcp/server.hpp>
 #include <robot/info.hpp>
+#include <util/json.hpp> 
 #include <vector>
 #include <memory>
 
@@ -33,7 +34,7 @@ public:
     Broadcaster(int port) : server(port) {}
 
     void start_broadcasting();
-    void call_function(Function function, std::string& value, std::shared_ptr<tcp::Connection> conn);
+    void call_function(Function function, const std::string& parameters, std::shared_ptr<tcp::Connection> conn);
     Function parse_function(const std::string &function);
     void parse_message(std::shared_ptr<tcp::Connection> conn);
     void get_robot_info(std::shared_ptr<tcp::Connection> conn);
