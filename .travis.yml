@@ -13,10 +13,13 @@ addons:
       - clang-8
       - clang-format-8
       - libjsoncpp-dev
+      - libc++-8-dev
+      - libc++abi-8-dev
 
 before_install:
     - export CC=clang-8
     - export CXX=clang++-8    
+    - export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib/llvm-8/include/c++/v1
 
 jobs:
   include:
