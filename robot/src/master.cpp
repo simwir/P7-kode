@@ -37,7 +37,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
-void robot::Master::load_webots_to_config(std::filesystem::path input_file)
+void robot::Master::load_webots_to_config(const std::filesystem::path &input_file)
 {
     std::ifstream infile(input_file);
     if (!infile.is_open()) {
@@ -118,7 +118,7 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file)
     for (auto &[id, waypoint] : ast.nodes) {
         waypoint_list.append(Json::objectValue);
         auto &last = waypoint_list[waypoint_list.size() - 1];
-        last["id"] = id;
+        last["id"] = Json::Value{static_cast<int>(id)};
         last["x"] = waypoint.translation.x;
         last["y"] = waypoint.translation.z;
         last["type"] = to_string(waypoint.waypointType);
@@ -137,7 +137,7 @@ void robot::Master::request_broadcast_info()
 
 void robot::Master::send_robot_info(int robot_id, const robot::Info &robot_info)
 {
-    broadcast_client.send("post_robot_location, " + robot_info.to_json());
+    broadcast_client.send("post_robot_location, " + robot_info.to_json().toStyledString());
 }
 
 std::string robot::Master::recv_broadcast_info()

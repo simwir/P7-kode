@@ -4,6 +4,8 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_library(config SHARED ${SOURCES})
 
-# target_link_libraries(config
-#     m # Math library for example
-# )
+target_link_libraries(config
+  ${JSONCPP_LIBRARIES}
+)
+
+install(TARGETS config DESTINATION bin)

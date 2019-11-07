@@ -1,4 +1,4 @@
-#include "config/config_wrapper.h"
+#include "config/config_wrapper.hpp"
 #include "config/config.hpp"
 
 robot::Config config;
