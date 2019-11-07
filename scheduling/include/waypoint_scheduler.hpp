@@ -10,10 +10,6 @@
 
 namespace scheduling {
 
-struct NameNotFoundException : std::exception {
-    const char *what() const noexcept override { return "Cannot find name"; }
-};
-
 enum class ActionType { Hold, Waypoint };
 
 struct Action {
@@ -40,14 +36,11 @@ class WaypointScheduler {
     void run();
     std::vector<scheduling::Action>
     convertResult(const std::vector<scheduling::SimulationExpression> &values);
-    std::queue<scheduling::TimeValuePair>
-    findFirstRunAsQueue(const std::vector<scheduling::SimulationExpression> &values,
-                        const std::string &name);
     void emitSchedule(const std::vector<Action> &schedule);
 
     std::thread worker;
     std::vector<std::weak_ptr<WaypointScheduleSubscriber>> subscribers;
-    bool shouldStop;
+    bool should_stop;
 
     UppaalExecutor executor;
     UppaalSimulationParser parser;

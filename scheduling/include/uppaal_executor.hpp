@@ -29,5 +29,4 @@ class UppaalExecutor {
 };
 
 } // namespace scheduling
-
 #endif // UPPAAL_EXECUTOR_HPP
