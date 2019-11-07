@@ -46,7 +46,7 @@ std::optional<std::string> tcp::Connection::parse_message()
 
     if (end_pos != std::string::npos) {
         message = obuffer.substr(start_pos + 2, end_pos - 2);
-        obuffer.erase(start_pos, end_pos + 2); // TODO Is there a off by 2 in one of the end_pos?
+        obuffer.erase(start_pos, end_pos + 2);
         return std::optional{message};
     }
     else {
