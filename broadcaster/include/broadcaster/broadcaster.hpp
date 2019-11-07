@@ -38,7 +38,7 @@ public:
     Function parse_function(const std::string &function);
     void parse_message(std::shared_ptr<tcp::Connection> conn);
     void get_robot_info(std::shared_ptr<tcp::Connection> conn);
-    void post_robot_location(const std::string& value);
+    void post_robot_location(const std::string& robot_payload);
 
 private:
     tcp::Server server;

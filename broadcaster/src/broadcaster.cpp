@@ -32,9 +32,9 @@ void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
     conn->send(result.toStyledString());
 }
 
-void Broadcaster::post_robot_location(const std::string& value) {
+void Broadcaster::post_robot_location(const std::string& robot_payload) {
     std::scoped_lock<std::mutex> lock(mutex);
-    robot::Info info = robot::Info::from_json(value);
+    robot::Info info = robot::Info::from_json(robot_payload);
     robot_info[info.id] = info;
 }
 
