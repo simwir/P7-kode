@@ -25,11 +25,8 @@ void waypoint_distance_matrix(int number_of_waypoints,
                               int matrix[number_of_waypoints][number_of_waypoints]);
 void other_robot_station_schedules(int number_of_robots, int number_of_stations,
                                    int matrix[number_of_robots][number_of_stations]);
-void other_robot_waypoint_schedules(
-    int number_of_robots, int number_of_waypoints,
-    int matrix[number_of_robots]
-              [number_of_waypoints * 2]); // * 2 because we expect to visit each waypoint at most
-                                          // once and hold at most once at each waypoint.
+void other_robot_waypoint_schedules(int number_of_robots, int number_of_waypoints,
+                                    int matrix[number_of_robots][number_of_waypoints * 2]); // * 2 because we expect to visit each waypoint at most once and hold at most once at each waypoint.
 
 #ifdef __cplusplus
 }

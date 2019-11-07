@@ -10,7 +10,7 @@ class SchedulingException : public std::exception {
     std::string message;
 
   public:
-    SchedulingException(const std::string &inmessage) : message(inmessage) {}
+    SchedulingException(const std::string &inmessage) { message = inmessage; }
 
     const char *what() const noexcept override { return message.c_str(); }
 };
@@ -29,5 +29,4 @@ class UppaalExecutor {
 };
 
 } // namespace scheduling
-
 #endif // UPPAAL_EXECUTOR_HPP
