@@ -13,13 +13,11 @@ extern int errno;
 namespace scheduling {
 void StationScheduler::start()
 {
-    should_stop = false;
     worker = std::thread(&StationScheduler::run, this);
 }
 
-void StationScheduler::stop()
+void StationScheduler::wait_for_schedule()
 {
-    should_stop = true;
     worker.join();
 }
 
@@ -30,21 +28,19 @@ void StationScheduler::addSubscriber(std::shared_ptr<StationScheduleSubscriber> 
 
 void StationScheduler::run()
 {
-    while (!should_stop) {
-        std::cout << "Starting a new waypoint scheduling.\n";
+    std::cout << "Starting a new waypoint scheduling.\n";
 
-        std::cout << "Executing..." << std::endl;
-        std::string result = executor.execute();
+    std::cout << "Executing..." << std::endl;
+    std::string result = executor.execute();
 
-        std::cout << "Parsing..." << std::endl;
-        std::vector<SimulationExpression> values = parser.parse(result, 2);
+    std::cout << "Parsing..." << std::endl;
+    std::vector<SimulationExpression> values = parser.parse(result, 2);
 
-        std::cout << "Composing..." << std::endl;
-        std::vector<int> schedule = convertResult(values);
+    std::cout << "Composing..." << std::endl;
+    std::vector<int> schedule = convertResult(values);
 
-        std::cout << "Emitting..." << std::endl;
-        emitSchedule(schedule);
-    }
+    std::cout << "Emitting..." << std::endl;
+    emitSchedule(schedule);
 }
 
 std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
