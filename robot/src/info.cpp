@@ -1,9 +1,9 @@
+#include "robot/info.hpp"
 #include <map>
-#include <robot/info.hpp>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <sstream>
 
 namespace robot {
 Json::Value Info::to_json() const
@@ -22,8 +22,8 @@ Json::Value Info::to_json() const
 
     json["waypoint_plan"] = Json::Value{Json::arrayValue};
 
-    for (const int &waypoint : waypoint_plan) {
-        json["waypoint_plan"].append(Json::Value{waypoint});
+    for (const scheduling::Action &waypoint : waypoint_plan) {
+        json["waypoint_plan"].append(waypoint.to_json());
     }
 
     return json;
@@ -53,6 +53,20 @@ std::vector<int> get_field_as<std::vector<int>>(const Json::Value& json, const s
         vector.push_back(itr.key().asInt());
     }
     return vector;
+}
+
+template <>
+std::vector<scheduling::Action> get_field_as<std::vector<scheduling::Action>>(const Json::Value& json, const std::string &field) {
+    std::vector<scheduling::Action> waypoint_plan;
+
+    if (!json.isMember(field)) {
+        return waypoint_plan;
+    }
+
+    for (auto itr = json[field].begin(); itr != json[field].end(); itr++) {
+            waypoint_plan.push_back(scheduling::Action::from_json(itr.key().asInt()));
+    }
+    return waypoint_plan;
 }
 
 template <>

@@ -2,6 +2,7 @@
 #define UPPAAL_SIMULATION_PARSER_H
 
 #include <iostream>
+#include <queue>
 #include <string>
 #include <utility>
 #include <vector>
@@ -19,6 +20,10 @@ class SimulationParseException : public std::exception {
     SimulationParseException(const std::string &inmessage) : message(inmessage) {}
 
     const char *what() const noexcept override { return message.c_str(); }
+};
+
+struct NameNotFoundException : std::exception {
+    const char *what() const noexcept override { return "Cannot find name"; }
 };
 
 struct TimeValuePair {
@@ -39,6 +44,8 @@ struct SimulationExpression {
 class UppaalSimulationParser {
   public:
     std::vector<SimulationExpression> parse(const std::string &result, int formula_number);
+    std::queue<TimeValuePair> findFirstRunAsQueue(const std::vector<SimulationExpression> &values,
+                                                  const std::string &name);
 
   private:
     SimulationExpression parseValue(std::istream &ss, std::string &line);
