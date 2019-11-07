@@ -4,8 +4,6 @@ project(p7)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
-target_link_libraries(stdc++fs)
-
 include(ExternalProject)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -27,3 +25,5 @@ add_subdirectory(scheduling)
 add_subdirectory(tests)
 add_subdirectory(port_discovery)
 add_subdirectory(wbt-translator)
+
+target_link_libraries(stdc++fs)
