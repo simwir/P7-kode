@@ -29,11 +29,9 @@ AST Parser::parse_stream()
                 Waypoint waypoint = parse_waypoint(token);
                 ast.nodes.insert(std::make_pair(waypoint.id, waypoint));
             }
-            else if (token == "Elisa3")
-            {
+            else if (token == "Elisa3") {
                 number_of_robots++;
             }
-            
         };
     }
     catch (EndOfStreamException &e) {
