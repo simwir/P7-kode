@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 
+#include "eta_extractor.hpp"
 #include "station_scheduler.hpp"
 #include "waypoint_scheduler.hpp"
 
@@ -45,10 +46,15 @@ class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscribe
     }
 };
 
+class LogEtaSubscriber : public scheduling::EtaSubscriber {
+    void new_eta(const double eta) override { std::cout << "Eta found: " << eta << std::endl; }
+};
+
 int main()
 {
     std::cout << "Starting...\n";
 
+    // Waypoints
     scheduling::WaypointScheduler waypointScheduler;
     auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
@@ -68,11 +74,19 @@ int main()
     std::cout << "Starting station scheduler\n";
     stationScheduler.start();
 
+    scheduling::EtaExtractor eta_extractor;
+    auto eta_logger = std::make_shared<LogEtaSubscriber>();
+    eta_extractor.addSubscriber(eta_logger->shared_from_this());
+
+    std::cout << "Starting ETA extractor";
+    eta_extractor.start();
+
     sleep(120);
 
     std::cout << "Stopping schedulers\n";
     waypointScheduler.stop();
     stationScheduler.stop();
+    eta_extractor.stop();
 
     return 0;
 }

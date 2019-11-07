@@ -37,7 +37,7 @@ void StationScheduler::run()
         std::string result = executor.execute();
 
         std::cout << "Parsing..." << std::endl;
-        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
+        std::vector<SimulationExpression> values = parser.parse(result, 2);
 
         std::cout << "Composing..." << std::endl;
         std::vector<int> schedule = convertResult(values);
@@ -47,12 +47,11 @@ void StationScheduler::run()
     }
 }
 
-std::vector<int>
-StationScheduler::convertResult(const std::vector<scheduling::SimulationExpression> &values)
+std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
 {
     // Convert into queues
-    std::queue<scheduling::TimeValuePair> cur = parser.findFirstRunAsQueue(values, "Robot.cur_loc");
-    std::queue<scheduling::TimeValuePair> dest = parser.findFirstRunAsQueue(values, "Robot.dest");
+    std::queue<TimeValuePair> cur = parser.findFirstRunAsQueue(values, "Robot.cur_loc");
+    std::queue<TimeValuePair> dest = parser.findFirstRunAsQueue(values, "Robot.dest");
 
     // Convert queues to schedules
     std::vector<int> schedule;
@@ -60,7 +59,7 @@ StationScheduler::convertResult(const std::vector<scheduling::SimulationExpressi
     cur.pop();
     schedule.push_back(cur.front().value);
 
-    scheduling::TimeValuePair last_dest = dest.front();
+    TimeValuePair last_dest = dest.front();
     dest.pop();
 
     while (!dest.empty()) {
