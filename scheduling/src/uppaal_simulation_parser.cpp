@@ -1,6 +1,24 @@
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <uppaal_simulation_parser.hpp>
+
+std::queue<scheduling::TimeValuePair> scheduling::UppaalSimulationParser::findFirstRunAsQueue(
+    const std::vector<scheduling::SimulationExpression> &values, const std::string &name)
+{
+    auto iter = std::find_if(values.begin(), values.end(),
+                             [&name](const scheduling::SimulationExpression &val) {
+                                 return val.name.compare(name) == 0;
+                             });
+
+    if (iter == values.end()) {
+        throw NameNotFoundException();
+    }
+
+    scheduling::SimulationTrace first_run = iter->runs.at(0);
+    return std::queue<scheduling::TimeValuePair>(
+        std::deque<scheduling::TimeValuePair>(first_run.values.begin(), first_run.values.end()));
+}
 
 std::vector<scheduling::SimulationExpression>
 scheduling::UppaalSimulationParser::parse(const std::string &result, int formula_number)
@@ -11,7 +29,6 @@ scheduling::UppaalSimulationParser::parse(const std::string &result, int formula
                     std::to_string(formula_number + 1)); // Equal to std::string::npos if not found.
 
     std::string formula;
-
     if (stopIndex == std::string::npos) {
         formula = result.substr(startIndex);
     }

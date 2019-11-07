@@ -11,13 +11,13 @@ extern int errno;
 
 void scheduling::WaypointScheduler::start()
 {
-    shouldStop = false;
+    should_stop = false;
     worker = std::thread(&WaypointScheduler::run, this);
 }
 
 void scheduling::WaypointScheduler::stop()
 {
-    shouldStop = true;
+    should_stop = true;
     worker.join();
 }
 
@@ -29,7 +29,7 @@ void scheduling::WaypointScheduler::addSubscriber(
 
 void scheduling::WaypointScheduler::run()
 {
-    while (!shouldStop) {
+    while (!should_stop) {
         std::cout << "Starting a new waypoint scheduling." << std::endl;
 
         std::cout << "Executing..." << std::endl;
@@ -46,32 +46,16 @@ void scheduling::WaypointScheduler::run()
     }
 }
 
-std::queue<scheduling::TimeValuePair> scheduling::WaypointScheduler::findFirstRunAsQueue(
-    const std::vector<scheduling::SimulationExpression> &values, const std::string &name)
-{
-    auto iter = std::find_if(values.begin(), values.end(),
-                             [&name](const scheduling::SimulationExpression &val) {
-                                 return val.name.compare(name) == 0;
-                             });
-
-    if (iter == values.end()) {
-        throw NameNotFoundException();
-    }
-
-    scheduling::SimulationTrace first_run = iter->runs.at(0);
-    return std::queue<scheduling::TimeValuePair>(
-        std::deque<scheduling::TimeValuePair>(first_run.values.begin(), first_run.values.end()));
-}
-
 std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
     const std::vector<scheduling::SimulationExpression> &values)
 {
     // Convert into queues
     std::queue<scheduling::TimeValuePair> cur_waypoint =
-        findFirstRunAsQueue(values, "Robot.cur_waypoint");
+        parser.findFirstRunAsQueue(values, "Robot.cur_waypoint");
     std::queue<scheduling::TimeValuePair> dest_waypoint =
-        findFirstRunAsQueue(values, "Robot.dest_waypoint");
-    std::queue<scheduling::TimeValuePair> hold = findFirstRunAsQueue(values, "Robot.Holding");
+        parser.findFirstRunAsQueue(values, "Robot.dest_waypoint");
+    std::queue<scheduling::TimeValuePair> hold =
+        parser.findFirstRunAsQueue(values, "Robot.Holding");
 
     // Convert queues to schedules
     std::vector<scheduling::Action> schedule;
