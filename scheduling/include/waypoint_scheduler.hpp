@@ -1,6 +1,7 @@
 #ifndef WAYPOINT_SCHEDULER_HPP
 #define WAYPOINT_SCHEDULER_HPP
 
+#include "scheduler.hpp"
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
 #include <memory>
@@ -25,23 +26,18 @@ class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointS
     virtual ~WaypointScheduleSubscriber() {}
 };
 
-class WaypointScheduler {
+class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vector<Action>> {
   public:
-    WaypointScheduler() : executor("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
-    void start();
-    void wait_for_schedule();
-    void addSubscriber(std::shared_ptr<WaypointScheduleSubscriber> subscriber);
+    WaypointScheduler() : Scheduler("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
+    void start() override;
 
   private:
     void run();
     std::vector<scheduling::Action>
     convertResult(const std::vector<scheduling::SimulationExpression> &values);
-    void emitSchedule(const std::vector<Action> &schedule);
+    void notify_subscribers(const std::vector<Action> &) override;
 
     std::thread worker;
-    std::vector<std::weak_ptr<WaypointScheduleSubscriber>> subscribers;
-
-    UppaalExecutor executor;
     UppaalSimulationParser parser;
 };
 

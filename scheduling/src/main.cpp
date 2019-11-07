@@ -59,7 +59,7 @@ int main()
     auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
     std::cout << "Adding waypoint subscriber\n";
-    waypointScheduler.addSubscriber(logWaypointSubscriber->shared_from_this());
+    waypointScheduler.add_subscriber(logWaypointSubscriber->shared_from_this());
 
     std::cout << "Starting waypoint scheduler\n";
     waypointScheduler.start();
@@ -69,14 +69,14 @@ int main()
     auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
 
     std::cout << "Adding station subscriber\n";
-    stationScheduler.addSubscriber(logStationSubscriber->shared_from_this());
+    stationScheduler.add_subscriber(logStationSubscriber->shared_from_this());
 
     std::cout << "Starting station scheduler\n";
     stationScheduler.start();
 
     scheduling::EtaExtractor eta_extractor;
     auto eta_logger = std::make_shared<LogEtaSubscriber>();
-    eta_extractor.addSubscriber(eta_logger->shared_from_this());
+    eta_extractor.add_subscriber(eta_logger->shared_from_this());
 
     std::cout << "Starting ETA extractor";
     eta_extractor.start();
@@ -84,9 +84,9 @@ int main()
     sleep(120);
 
     std::cout << "Stopping schedulers\n";
-    waypointScheduler.wait_for_schedule();
-    stationScheduler.wait_for_schedule();
-    eta_extractor.wait_for_eta();
+    waypointScheduler.wait_for_result();
+    stationScheduler.wait_for_result();
+    eta_extractor.wait_for_result();
 
     return 0;
 }

@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <signal.h>
 
 // Other includes
 #include <iostream>
@@ -16,7 +17,7 @@ constexpr int PARENT_WRITE = 3;
 
 constexpr int NO_FLAGS = 0;
 
-std::string scheduling::UppaalExecutor::execute()
+std::optional<std::string> scheduling::UppaalExecutor::execute()
 {
     pid_t pid;
     int fd[4];
@@ -42,9 +43,11 @@ std::string scheduling::UppaalExecutor::execute()
                                       ".");
         }
 
+        child_pid = std::nullopt;
         return "";
     }
     else {
+        child_pid = pid;
         // Parent
         close(fd[CHILD_WRITE]);
         close(fd[CHILD_READ]);
@@ -54,6 +57,10 @@ std::string scheduling::UppaalExecutor::execute()
         int status;
         waitpid(pid, &status, NO_FLAGS);
         std::cout << "Scheduling complete with status " << status << ".\n";
+
+        if (WIFSIGNALED(status)) { //Is true if the pid was terminated by a signal
+            return std::nullopt;
+        }
 
         // Only do something if we actually did get a result
         if (status != 0) {
@@ -79,4 +86,16 @@ std::string scheduling::UppaalExecutor::execute()
 
         return ss.str();
     }
+}
+
+bool scheduling::UppaalExecutor::abort() {
+    if (child_pid) {
+        if (kill(*child_pid, SIGKILL) == 0) {
+            child_pid = std::nullopt;
+            return true;
+        }
+        // TODO report error?
+        return false;
+    }
+    return false;
 }

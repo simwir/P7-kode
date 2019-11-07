@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <optional>
 
 namespace scheduling {
 
@@ -21,11 +22,15 @@ class UppaalExecutor {
         : modelPath(modelPath), queriesPath(queriesPath)
     {
     }
-    std::string execute();
+    std::optional<std::string> execute();
+
+    bool abort();
 
   private:
     const char *modelPath;
     const char *queriesPath;
+
+    std::optional<int> child_pid;
 };
 
 } // namespace scheduling

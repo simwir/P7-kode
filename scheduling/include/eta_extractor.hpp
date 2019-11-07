@@ -1,12 +1,13 @@
 #ifndef SCHEDULING_ETA_EXTRACTOR
 #define SCHEDULING_ETA_EXTRACTOR
 
+#include "scheduler.hpp"
 #include "uppaal_executor.hpp"
 
+#include <filesystem>
 #include <memory>
 #include <thread>
 #include <vector>
-#include <filesystem>
 
 namespace scheduling {
 
@@ -25,21 +26,14 @@ class EtaSubscriber : public std::enable_shared_from_this<EtaSubscriber> {
     virtual ~EtaSubscriber() = default;
 };
 
-class EtaExtractor {
+class EtaExtractor : public Scheduler<EtaSubscriber, double> {
   public:
-    EtaExtractor() : executor(default_model_path, default_query_path) {}
+    EtaExtractor() : Scheduler(default_model_path, default_query_path) {}
     bool eta_computable() const { return std::filesystem::exists(strategy_path); }
-    void start();
-    void wait_for_eta();
-    void addSubscriber(std::shared_ptr<EtaSubscriber> subscriber)
-    {
-        subscribers.push_back(subscriber->weak_from_this());
-    }
+    void start() override;
 
   private:
-    UppaalExecutor executor;
-    std::vector<std::weak_ptr<EtaSubscriber>> subscribers;
-    void notify_eta(double eta);
+    void notify_subscribers(const double &) override;
 
     std::thread runner;
     void run();

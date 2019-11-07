@@ -1,0 +1,40 @@
+#ifndef SCHEDULING_SCHEDULER_HPP
+#define SCHEDULING_SCHEDULER_HPP
+
+#include "uppaal_executor.hpp"
+
+#include <filesystem>
+#include <memory>
+#include <thread>
+#include <vector>
+
+namespace scheduling {
+
+template <class Subscriber, class Notification>
+class Scheduler {
+  public:
+    Scheduler(const char *model_path, const char *query_path) : executor(model_path, query_path) {}
+    virtual void start() = 0;
+    void abort() { executor.abort(); };
+    void wait_for_result()
+    {
+        if (worker.joinable()) {
+            worker.join();
+        }
+    };
+    void add_subscriber(std::shared_ptr<Subscriber> subscriber)
+    {
+        subscribers.push_back(subscriber->weak_from_this());
+    }
+
+  protected:
+    std::vector<std::weak_ptr<Subscriber>> subscribers;
+    UppaalExecutor executor;
+    std::thread worker;
+    virtual void notify_subscribers(const Notification &) = 0;
+    virtual ~Scheduler() = default;
+};
+
+} // namespace scheduling
+
+#endif

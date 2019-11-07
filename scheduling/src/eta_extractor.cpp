@@ -11,11 +11,6 @@ void EtaExtractor::start()
     runner = std::thread(&EtaExtractor::run, this);
 }
 
-void EtaExtractor::wait_for_eta()
-{
-    runner.join();
-}
-
 void EtaExtractor::run()
 {
     if (!eta_computable()) {
@@ -25,13 +20,13 @@ void EtaExtractor::run()
     auto res = executor.execute();
     std::regex eta_response{R"(.+= ([\d\.]+))"};
     std::smatch eta_value;
-    if (std::regex_search(res, eta_value, eta_response)) {
+    if (res.has_value() && std::regex_search(res.value(), eta_value, eta_response)) {
         // index 0 is the whole string
-        notify_eta(stod(eta_value[1]));
+        notify_subscribers(stod(eta_value[1]));
     }
 }
 
-void EtaExtractor::notify_eta(double eta)
+void EtaExtractor::notify_subscribers(const double &eta)
 {
     std::for_each(std::begin(subscribers), std::end(subscribers), [eta](auto &&subscriber) {
         if (auto sub = subscriber.lock())

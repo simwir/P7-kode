@@ -1,6 +1,7 @@
 #ifndef STATION_SCHEDULER_HPP
 #define STATION_SCHEDULER_HPP
 
+#include "scheduler.hpp"
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
 #include <memory>
@@ -16,25 +17,17 @@ class StationScheduleSubscriber : public std::enable_shared_from_this<StationSch
     virtual ~StationScheduleSubscriber() {}
 };
 
-class StationScheduler {
+class StationScheduler : public Scheduler<StationScheduleSubscriber, std::vector<int>> {
   public:
-    StationScheduler() : executor("station_scheduling.xml", "station_scheduling.q") {}
-    void start();
-    void wait_for_schedule();
-    void addSubscriber(std::shared_ptr<StationScheduleSubscriber> subscriber);
+    StationScheduler() : Scheduler("station_scheduling.xml", "station_scheduling.q") {}
+    void start() override;
+    void run();
 
   private:
-    void run();
-    std::vector<int> convertResult(const std::vector<scheduling::SimulationExpression> &values);
-    void emitSchedule(const std::vector<int> &schedule);
-
-    std::thread worker;
-    std::vector<std::weak_ptr<StationScheduleSubscriber>> subscribers;
-
-    UppaalExecutor executor;
+    void notify_subscribers(const std::vector<int> &) override;
+    std::vector<int> convertResult(const std::vector<SimulationExpression> &values);
     UppaalSimulationParser parser;
 };
-
 } // namespace scheduling
 
 #endif // STATION_SCHEDULER_HPP

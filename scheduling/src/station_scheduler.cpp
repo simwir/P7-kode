@@ -16,31 +16,31 @@ void StationScheduler::start()
     worker = std::thread(&StationScheduler::run, this);
 }
 
-void StationScheduler::wait_for_schedule()
+/*void StationScheduler::wait_for_schedule()
 {
+if (worker.joinable()) {
     worker.join();
 }
-
-void StationScheduler::addSubscriber(std::shared_ptr<StationScheduleSubscriber> subscriber)
-{
-    subscribers.push_back(subscriber->weak_from_this());
-}
+}*/
 
 void StationScheduler::run()
 {
     std::cout << "Starting a new waypoint scheduling.\n";
 
     std::cout << "Executing..." << std::endl;
-    std::string result = executor.execute();
+    auto result = executor.execute();
+    if (!result.has_value()) {
+        return;
+    }
 
     std::cout << "Parsing..." << std::endl;
-    std::vector<SimulationExpression> values = parser.parse(result, 2);
+    std::vector<SimulationExpression> values = parser.parse(result.value(), 2);
 
     std::cout << "Composing..." << std::endl;
     std::vector<int> schedule = convertResult(values);
 
     std::cout << "Emitting..." << std::endl;
-    emitSchedule(schedule);
+    notify_subscribers(schedule);
 }
 
 std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
@@ -76,7 +76,7 @@ std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExp
     return schedule;
 }
 
-void StationScheduler::emitSchedule(const std::vector<int> &schedule)
+void StationScheduler::notify_subscribers(const std::vector<int> &schedule)
 {
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {
