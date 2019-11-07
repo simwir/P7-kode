@@ -1,9 +1,9 @@
+#include "robot/info.hpp"
 #include <map>
-#include <robot/info.hpp>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <sstream>
 
 namespace robot {
 Json::Value Info::to_json() const
