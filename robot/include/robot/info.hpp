@@ -1,11 +1,7 @@
 #ifndef ROBOT_INFO_HPP
 #define ROBOT_INFO_HPP
 
-#if __APPLE__
-#include <json/json.h>
-#else
-#include <jsoncpp/json/json.h>
-#endif
+#include <util/json.hpp>
 
 #include <map>
 #include <string>

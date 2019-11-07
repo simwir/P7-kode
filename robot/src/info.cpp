@@ -3,12 +3,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#if __APPLE__
-#include <json/json.h>
-#else
-#include <jsoncpp/json/json.h>
-#endif
+#include <sstream>
 
 namespace robot {
 Json::Value Info::to_json() const
