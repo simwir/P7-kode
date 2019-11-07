@@ -9,16 +9,17 @@
 #include "station_scheduler.hpp"
 
 extern int errno;
+
 namespace scheduling {
 void StationScheduler::start()
 {
-    shouldStop = false;
+    should_stop = false;
     worker = std::thread(&StationScheduler::run, this);
 }
 
 void StationScheduler::stop()
 {
-    shouldStop = true;
+    should_stop = true;
     worker.join();
 }
 
@@ -29,11 +30,7 @@ void StationScheduler::addSubscriber(std::shared_ptr<StationScheduleSubscriber> 
 
 void StationScheduler::run()
 {
-    while (true) {
-        if (shouldStop) {
-            break;
-        }
-
+    while (!should_stop) {
         std::cout << "Starting a new waypoint scheduling.\n";
 
         std::cout << "Executing..." << std::endl;
@@ -50,8 +47,7 @@ void StationScheduler::run()
     }
 }
 
-std::vector<int>
-StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
+std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
 {
     // Convert into queues
     std::queue<TimeValuePair> cur = parser.findFirstRunAsQueue(values, "Robot.cur_loc");

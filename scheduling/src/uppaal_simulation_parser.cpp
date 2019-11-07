@@ -6,36 +6,37 @@
 std::queue<scheduling::TimeValuePair> scheduling::UppaalSimulationParser::findFirstRunAsQueue(
     const std::vector<scheduling::SimulationExpression> &values, const std::string &name)
 {
-    auto value = std::find_if(values.begin(), values.end(),
-                              [&name](const scheduling::SimulationExpression &val) {
-                                  return val.name.compare(name) == 0;
-                              });
+    auto iter = std::find_if(values.begin(), values.end(),
+                             [&name](const scheduling::SimulationExpression &val) {
+                                 return val.name.compare(name) == 0;
+                             });
 
-    if (value == values.end()) {
+    if (iter == values.end()) {
         throw NameNotFoundException();
     }
 
-    scheduling::SimulationTrace first_run = value->runs.at(0);
+    scheduling::SimulationTrace first_run = iter->runs.at(0);
     return std::queue<scheduling::TimeValuePair>(
         std::deque<scheduling::TimeValuePair>(first_run.values.begin(), first_run.values.end()));
 }
 
 std::vector<scheduling::SimulationExpression>
-scheduling::UppaalSimulationParser::parse(std::string result, int formula)
+scheduling::UppaalSimulationParser::parse(const std::string &result, int formula_number)
 {
-    int startIndex = result.find("Verifying formula " + std::to_string(formula));
+    int startIndex = result.find("Verifying formula " + std::to_string(formula_number));
     int stopIndex =
         result.find("Verifying formula " +
-                    std::to_string(formula + 1)); // Equal to std::string::npos if not found.
+                    std::to_string(formula_number + 1)); // Equal to std::string::npos if not found.
 
+    std::string formula;
     if (stopIndex == std::string::npos) {
-        result = result.substr(startIndex);
+        formula = result.substr(startIndex);
     }
     else {
-        result = result.substr(startIndex, stopIndex - startIndex);
+        formula = result.substr(startIndex, stopIndex - startIndex);
     }
 
-    std::stringstream ss{result};
+    std::stringstream ss{formula};
     std::vector<scheduling::SimulationExpression> values;
 
     std::string line;

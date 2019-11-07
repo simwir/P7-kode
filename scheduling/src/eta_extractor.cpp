@@ -1,9 +1,8 @@
-
 #include "eta_extractor.hpp"
 
 #include <algorithm>
-#include <regex>
 #include <chrono>
+#include <regex>
 #include <thread>
 
 namespace scheduling {
