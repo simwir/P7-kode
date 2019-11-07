@@ -49,7 +49,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
-void robot::Master::load_webots_to_config(std::filesystem::path input_file)
+void robot::Master::load_webots_to_config(const std::filesystem::path &input_file)
 {
     std::ifstream infile(input_file);
     if (!infile.is_open()) {
@@ -147,17 +147,26 @@ void robot::Master::request_broadcast_info()
     broadcast_client.send("get_robot_info");
 }
 
-void robot::Master::send_robot_info(int robot_id, const robot::Info &robot_info)
+void robot::Master::request_controller_info()
 {
-    broadcast_client.send("post_robot_location, " + robot_info.to_json());
 }
 
-std::optional<std::string> robot::Master::receive_broadcast_info()
+void robot::Master::send_robot_info(int robot_id, const robot::Info &robot_info)
+{
+    broadcast_client.send("post_robot_location, " + robot_info.to_json().toStyledString());
+}
+
+std::string robot::Master::receive_broadcast_info()
 {
     std::vector<std::string> strings_from_broadcaster;
     strings_from_broadcaster = broadcast_client.receive();
     // Gets the latest info from the broadcaster
     return strings_from_broadcaster.back();
+}
+
+std::string robot::Master::receive_controller_info()
+{
+    return "";
 }
 
 void robot::Master::get_dynamic_state()

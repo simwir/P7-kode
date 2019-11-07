@@ -19,6 +19,12 @@ class RecievedMessageException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
+struct InfoMap {
+    static InfoMap from_json(const Json::Value &) { return {}; };
+};
+struct ControllerInfo {
+};
+
 class CannotOpenFileException : public std::exception {
     std::string message;
 
@@ -37,10 +43,10 @@ class Master {
     void get_dynamic_state();
     void request_broadcast_info();
     void send_robot_info(int robot_id, const Info &robot_info);
-    std::optional<std::string> receive_broadcast_info();
+    std::string receive_broadcast_info();
 
     void request_controller_info();
-    std::optional<std::string> receive_controller_info();
+    std::string receive_controller_info();
 
     void write_static_config(const std::filesystem::path &path);
     void write_dynamic_config(const std::filesystem::path &path);
