@@ -1,14 +1,9 @@
+#include "robot/info.hpp"
 #include <map>
-#include <robot/info.hpp>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-
-#if __APPLE__
-#include <json/json.h>
-#else
-#include <jsoncpp/json/json.h>
-#endif
 
 namespace robot {
 Json::Value Info::to_json() const
@@ -27,8 +22,8 @@ Json::Value Info::to_json() const
 
     json["waypoint_plan"] = Json::Value{Json::arrayValue};
 
-    for (const int &waypoint : waypoint_plan) {
-        json["waypoint_plan"].append(Json::Value{waypoint});
+    for (const scheduling::Action &waypoint : waypoint_plan) {
+        json["waypoint_plan"].append(waypoint.to_json());
     }
 
     return json;
@@ -36,12 +31,9 @@ Json::Value Info::to_json() const
 
 Info Info::from_json(const std::string &json)
 {
-    Json::CharReaderBuilder builder;
-    Json::CharReader *reader = builder.newCharReader();
+    std::stringstream ss(json);
     Json::Value root;
-    std::string errors;
-
-    reader->parse(json.c_str(), json.c_str() + json.size(), &root, &errors);
+    ss >> root;
 
     return Info::from_json(root);
 }
@@ -57,14 +49,13 @@ Info Info::from_json(const Json::Value &json)
         station_plan.push_back(itr.key().asInt());
     }
 
-    std::vector<int> waypoint_plan;
+    std::vector<scheduling::Action> waypoint_plan;
 
     for (auto itr = json["waypoint_plan"].begin(); itr != json["waypoint_plan"].end(); itr++) {
-        waypoint_plan.push_back(itr.key().asInt());
+        waypoint_plan.push_back(scheduling::Action::from_json(itr.key().asInt()));
     }
 
-    robot::Info info{json["id"].asInt(), location, station_plan, waypoint_plan,
-                     json["eta"].asDouble()};
+    Info info{json["id"].asInt(), location, station_plan, waypoint_plan, json["eta"].asDouble()};
 
     return info;
 }
@@ -99,7 +90,10 @@ Json::Value InfoMap::to_json() const
 
 InfoMap InfoMap::from_json(const std::string &json)
 {
-    return InfoMap::from_json(Json::Value{json});
+    Json::Value root;
+    std::stringstream str(json);
+    str >> root;
+    return InfoMap::from_json(root);
 }
 
 InfoMap InfoMap::from_json(const Json::Value &json)

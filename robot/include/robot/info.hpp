@@ -1,11 +1,8 @@
 #ifndef ROBOT_INFO_HPP
 #define ROBOT_INFO_HPP
 
-#if __APPLE__
-#include <json/json.h>
-#else
-#include <jsoncpp/json/json.h>
-#endif
+#include "util/json.hpp"
+#include "waypoint_scheduler.hpp"
 
 #include <map>
 #include <string>
@@ -17,7 +14,7 @@ struct Info {
     int id;
     std::pair<double, double> location;
     std::vector<int> station_plan;
-    std::vector<int> waypoint_plan;
+    std::vector<scheduling::Action> waypoint_plan;
     double eta;
 
     Json::Value to_json() const;
@@ -25,9 +22,8 @@ struct Info {
     static Info from_json(const Json::Value &json);
 };
 
-struct InfoMap {
-    std::map<int, Info> robot_info;
-
+class InfoMap {
+  public:
     InfoMap(){};
     InfoMap(const std::vector<Info> &infos);
     Json::Value to_json() const;
@@ -35,6 +31,9 @@ struct InfoMap {
     const Info &operator[](int index) const;
     static InfoMap from_json(const std::string &json);
     static InfoMap from_json(const Json::Value &json);
+
+  private:
+    std::map<int, Info> robot_info;
 };
 } // namespace robot
 

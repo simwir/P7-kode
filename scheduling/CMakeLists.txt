@@ -1,5 +1,8 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
+
 # set {SOURCES,PROJECT_LINK_LIBS} to expanded wildcards
 file(GLOB SOURCES "src/*.cpp")
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
@@ -8,13 +11,17 @@ list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
 add_library(scheduling ${SOURCES})
 #install(FILES DESTINATION bin)
-file(COPY waypoint_scheduling.xml DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-file(COPY waypoint_scheduling.q DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+configure_file(waypoint_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/waypoint_scheduling.xml COPYONLY)
+configure_file(waypoint_scheduling.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/waypoint_scheduling.q COPYONLY)
+configure_file(station_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_scheduling.xml COPYONLY)
+configure_file(station_scheduling.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_scheduling.q COPYONLY)
+configure_file(get_eta.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/get_eta.q COPYONLY)
 
 add_executable(test_scheduler ${SOURCES} src/main.cpp)
 target_link_libraries(test_scheduler
     scheduling
     pthread
+    ${JSONCPP_LIBRARIES}
 )
 install(TARGETS test_scheduler DESTINATION bin)
