@@ -72,7 +72,7 @@ void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn) {
             conn->send(e.what());
             std::cerr << "UnknownParameterException" << e.what() << std::endl; 
         } catch (tcp::ReceiveException &e) {
-            conn->send(e.what());
+            break;
             std::cerr << "ReceiveException" << e.what() << std::endl; 
         }
     }
