@@ -20,10 +20,12 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/scheduling/include
     ${PROJECT_SOURCE_DIR}/util/include
+    ${PROJECT_SOURCE_DIR}/config/include
 )
 
 # Libraries
 add_subdirectory(tcp)
+add_subdirectory(config)
 add_subdirectory(scheduling)
 
 # Executables

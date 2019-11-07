@@ -1,5 +1,5 @@
+#include "config/config.hpp"
 #include "robot/master.hpp"
-#include "robot/config.hpp"
 
 int main(int argc, char **argv)
 {
