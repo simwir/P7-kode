@@ -25,5 +25,3 @@ add_subdirectory(scheduling)
 add_subdirectory(tests)
 add_subdirectory(port_discovery)
 add_subdirectory(wbt-translator)
-
-target_link_libraries(stdc++fs)
