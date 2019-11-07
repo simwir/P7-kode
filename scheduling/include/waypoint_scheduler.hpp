@@ -3,6 +3,7 @@
 
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
+#include "util/json.hpp"
 #include <memory>
 #include <queue>
 #include <thread>
@@ -13,10 +14,12 @@ namespace scheduling {
 enum class ActionType { Hold, Waypoint };
 
 struct Action {
-    Action(ActionType type, int value) : type(type), value(value) {}
-
     ActionType type;
     int value;
+
+    Json::Value to_json() const;
+    static Action from_json(const std::string &json);
+    static Action from_json(const Json::Value &json);
 };
 
 class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {
@@ -28,7 +31,11 @@ class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointS
 class WaypointScheduler {
   public:
     WaypointScheduler() : executor("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
-    WaypointScheduler(const std::filesystem::path& model_path, const std::filesystem::path &query_path) : executor(model_path, query_path) {}
+    WaypointScheduler(const std::filesystem::path &model_path,
+                      const std::filesystem::path &query_path)
+        : executor(model_path, query_path)
+    {
+    }
     void start();
     void stop();
     void addSubscriber(std::shared_ptr<WaypointScheduleSubscriber> subscriber);

@@ -2,6 +2,7 @@
 #define ROBOT_INFO_HPP
 
 #include "util/json.hpp"
+#include "waypoint_scheduler.hpp"
 
 #include <map>
 #include <string>
@@ -9,18 +10,16 @@
 #include <vector>
 
 namespace robot {
-class Info {
-  public:
-    Json::Value to_json() const;
-    static Info from_json(const std::string &json);
-    static Info from_json(const Json::Value &json);
-
-  private:
+struct Info {
     int id;
     std::pair<double, double> location;
     std::vector<int> station_plan;
-    std::vector<int> waypoint_plan;
+    std::vector<scheduling::Action> waypoint_plan;
     double eta;
+
+    Json::Value to_json() const;
+    static Info from_json(const std::string &json);
+    static Info from_json(const Json::Value &json);
 };
 
 class InfoMap {

@@ -22,8 +22,8 @@ Json::Value Info::to_json() const
 
     json["waypoint_plan"] = Json::Value{Json::arrayValue};
 
-    for (const int &waypoint : waypoint_plan) {
-        json["waypoint_plan"].append(Json::Value{waypoint});
+    for (const scheduling::Action &waypoint : waypoint_plan) {
+        json["waypoint_plan"].append(waypoint.to_json());
     }
 
     return json;
@@ -49,14 +49,13 @@ Info Info::from_json(const Json::Value &json)
         station_plan.push_back(itr.key().asInt());
     }
 
-    std::vector<int> waypoint_plan;
+    std::vector<scheduling::Action> waypoint_plan;
 
     for (auto itr = json["waypoint_plan"].begin(); itr != json["waypoint_plan"].end(); itr++) {
-        waypoint_plan.push_back(itr.key().asInt());
+        waypoint_plan.push_back(scheduling::Action::from_json(itr.key().asInt()));
     }
 
-    robot::Info info{json["id"].asInt(), location, station_plan, waypoint_plan,
-                     json["eta"].asDouble()};
+    Info info{json["id"].asInt(), location, station_plan, waypoint_plan, json["eta"].asDouble()};
 
     return info;
 }
