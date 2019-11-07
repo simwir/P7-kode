@@ -8,7 +8,8 @@ struct CloseException : std::exception {
 
 class MessageException : public std::exception {
     std::string message;
-public:
+
+  public:
     MessageException(const std::string &in_message) : message(in_message) {}
 
     const char *what() const noexcept { return message.c_str(); }
