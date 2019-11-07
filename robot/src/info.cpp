@@ -38,25 +38,57 @@ Info Info::from_json(const std::string &json)
     return Info::from_json(root);
 }
 
+template <typename T>
+T get_field_as(const Json::Value& json, const std::string &field);
+
+template <>
+std::vector<int> get_field_as<std::vector<int>>(const Json::Value& json, const std::string &field) {
+    std::vector<int> vector;
+
+    if (!json.isMember(field)){
+        return vector;
+    }
+
+    for (auto itr = json[field].begin(); itr != json[field].end(); itr++) {
+        vector.push_back(itr.key().asInt());
+    }
+    return vector;
+}
+
+template <>
+std::pair<double, double> get_field_as<std::pair<double, double>>(const Json::Value& json, const std::string &field) {
+    std::pair<double, double> location{json["location"]["x"].asDouble(), 
+                                       json["location"]["y"].asDouble()};
+    return location;
+}
+
+template <>
+int get_field_as<int>(const Json::Value& json, const std::string &field) {
+    if (json.isMember(field)) {
+        return json[field].asInt();
+    } else throw new InvalidRobotInfo("Robot must know its own id");
+}
+
+template <>
+std::optional<double> get_field_as<std::optional<double>>(const Json::Value& json, const std::string &field) {
+    if (json.isMember(field)) {
+        return json[field].asDouble();
+    } else return std::nullopt;
+}
+
 Info Info::from_json(const Json::Value &json)
 {
-    std::pair<double, double> location{json["location"]["x"].asDouble(),
-                                       json["location"]["y"].asDouble()};
-
-    std::vector<int> station_plan;
-
-    for (auto itr = json["station_plan"].begin(); itr != json["station_plan"].end(); itr++) {
-        station_plan.push_back(itr.key().asInt());
+    if (!json.isMember("location") || !json.isMember("id")) {
+        throw new InvalidRobotInfo("The json value does not contain id or location");
     }
 
-    std::vector<int> waypoint_plan;
+    int id = get_field_as<int>(json, "id");
+    std::pair<double, double> location = get_field_as<std::pair<double, double>>(json, "location");
+    std::vector<int> station_plan = get_field_as<std::vector<int>>(json, "station_plan");
+    std::vector<int> waypoint_plan = get_field_as<std::vector<int>>(json, "waypoint_plan");
+    double eta = get_field_as<double>(json, "eta");
 
-    for (auto itr = json["waypoint_plan"].begin(); itr != json["waypoint_plan"].end(); itr++) {
-        waypoint_plan.push_back(itr.key().asInt());
-    }
-
-    robot::Info info{json["id"].asInt(), location, station_plan, waypoint_plan,
-                     json["eta"].asDouble()};
+    robot::Info info{id, location, station_plan, waypoint_plan, eta};
 
     return info;
 }
