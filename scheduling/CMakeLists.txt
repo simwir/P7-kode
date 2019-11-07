@@ -10,6 +10,8 @@ add_library(scheduling ${SOURCES})
 #install(FILES DESTINATION bin)
 file(COPY waypoint_scheduling.xml DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 file(COPY waypoint_scheduling.q DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY station_scheduling.xml DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY station_scheduling.q DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 
 add_executable(test_scheduler ${SOURCES} src/main.cpp)
