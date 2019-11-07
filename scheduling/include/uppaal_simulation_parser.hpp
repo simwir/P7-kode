@@ -44,9 +44,8 @@ struct SimulationExpression {
 class UppaalSimulationParser {
   public:
     std::vector<SimulationExpression> parse(const std::string &result, int formula_number);
-    std::queue<TimeValuePair>
-    findFirstRunAsQueue(const std::vector<scheduling::SimulationExpression> &values,
-                        const std::string &name);
+    std::queue<TimeValuePair> findFirstRunAsQueue(const std::vector<SimulationExpression> &values,
+                                                  const std::string &name);
 
   private:
     SimulationExpression parseValue(std::istream &ss, std::string &line);
