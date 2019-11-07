@@ -28,7 +28,7 @@ Function Broadcaster::parse_function(const std::string &function) {
 void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn) {
     std::unique_lock<std::mutex> lock(mutex);
     Json::Value result = robot_info.to_json();
-    lock.unlock;
+    lock.unlock();
     conn->send(result.toStyledString());
 }
 
