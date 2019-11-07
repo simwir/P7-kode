@@ -11,6 +11,6 @@ int main(int argc, char **argv)
     std::filesystem::path out_file = "static_conf.json";
 
     robot::Master master{"localhost", "localhost", 0, std::cin};
-    master.load_webots_to_config(world_file);
+    master.load_webots_to_config();
     master.write_static_config(out_file);
 }

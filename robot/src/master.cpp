@@ -49,15 +49,9 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
-void robot::Master::load_webots_to_config(const std::filesystem::path &input_file)
+void robot::Master::load_webots_to_config()
 {
-    std::ifstream infile(input_file);
-    if (!infile.is_open()) {
-        std::cerr << "The file " << input_file << " could not be opened.\n";
-        exit(1);
-    }
-    Parser parser = Parser(infile);
-    AST ast = parser.parse_stream();
+    AST ast = webots_parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
         throw MalformedWorldFileError{"No waypoints found"};
@@ -93,7 +87,7 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
     static_config.set("number_of_end_stations", endpoint_count);
     static_config.set("number_of_vias", via_count);
     static_config.set("number_of_waypoints", station_count + endpoint_count + via_count);
-    static_config.set("number_of_robots", parser.number_of_robots);
+    static_config.set("number_of_robots", webots_parser.number_of_robots);
 
     // Get distance matrix for waypoints
     std::vector<std::vector<double>> waypoint_matrix = distance_matrix{ast}.get_data();
@@ -187,4 +181,16 @@ void robot::Master::write_static_config(const std::filesystem::path &path)
 void robot::Master::write_dynamic_config(const std::filesystem::path &path)
 {
     dynamic_config.write_to_file(path.c_str());
+}
+
+void robot::Master::main_loop()
+{
+    load_webots_to_config();
+    write_static_config("static_conf.json");
+    while (running) {
+        get_dynamic_state();
+        // TODO write/broadcast dynamic state
+
+
+    }
 }

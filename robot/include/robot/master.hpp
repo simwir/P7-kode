@@ -39,7 +39,7 @@ class Master {
   public:
     Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
            std::istream &world_file);
-    void load_webots_to_config(const std::filesystem::path &input_file);
+    void load_webots_to_config();
     void get_dynamic_state();
     void request_broadcast_info();
     void send_robot_info(int robot_id, const Info &robot_info);
@@ -62,6 +62,8 @@ class Master {
 
     robot::InfoMap robot_info;
     robot::ControllerInfo controller_info;
+
+    bool running;
 };
 } // namespace robot
 #endif
