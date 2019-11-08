@@ -36,7 +36,7 @@ std::optional<std::string> scheduling::UppaalExecutor::execute()
 
         const char *command = "verifyta";
 
-        int ret = execlp(command, command, modelPath, queriesPath, nullptr);
+        int ret = execlp(command, command, model_path.c_str(), query_path.c_str(), nullptr);
 
         if (ret == -1) {
             throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) +
@@ -87,7 +87,6 @@ std::optional<std::string> scheduling::UppaalExecutor::execute()
         return ss.str();
     }
 }
-
 bool scheduling::UppaalExecutor::abort() {
     if (child_pid) {
         if (kill(*child_pid, SIGKILL) == 0) {

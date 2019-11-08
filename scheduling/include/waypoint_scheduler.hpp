@@ -23,12 +23,17 @@ struct Action {
 class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {
   public:
     virtual void newSchedule(const std::vector<Action> &schedule) = 0;
-    virtual ~WaypointScheduleSubscriber() {}
+    virtual ~WaypointScheduleSubscriber() = default;
 };
 
 class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vector<Action>> {
   public:
     WaypointScheduler() : Scheduler("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
+    WaypointScheduler(const std::filesystem::path &model_path,
+                      const std::filesystem::path &query_path)
+        : Scheduler(model_path, query_path)
+    {
+    }
 
   private:
     void start_worker() override { worker = std::thread{&WaypointScheduler::run, this}; }

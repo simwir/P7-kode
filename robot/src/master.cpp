@@ -29,7 +29,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     : id(robot_id), broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
 {
     std::string port_to_controller;
-    std::vector<std::string> recieved_strings;
+    std::string recieved_string;
 
     station_subscriber = std::make_shared<AsyncStationSubscriber>();
     waypoint_subscriber = std::make_shared<AsyncWaypointSubscriber>();
@@ -38,16 +38,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     // Connecting to the Port Discovery Service
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
     PDSClient.send("get_robot_info," + std::to_string(robot_id));
-    do {
-        recieved_strings = PDSClient.receive();
-    } while (recieved_strings.size() == 0);
-    if (recieved_strings.size() == 1) {
-        port_to_controller = recieved_strings[0];
-    }
-    else {
-        throw robot::RecievedMessageException("Recieved" + std::to_string(recieved_strings.size()) +
-                                              "messages while only one was expected.");
-    }
+    port_to_controller = PDSClient.receive_blocking();
 
     // Connecting to the WeBots Controller
     // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
@@ -159,10 +150,7 @@ void robot::Master::send_robot_info(const robot::Info &robot_info)
 
 std::string robot::Master::receive_broadcast_info()
 {
-    std::vector<std::string> strings_from_broadcaster;
-    strings_from_broadcaster = broadcast_client.receive();
-    // Gets the latest info from the broadcaster
-    return strings_from_broadcaster.back();
+    return broadcast_client.receive_blocking();
 }
 
 std::string robot::Master::receive_controller_info()
@@ -240,6 +228,9 @@ void robot::Master::main_loop()
             // TODO broadcast eta
         }
 
+        // if at waypoint
+        //    then tell robot of next waypoint;
+        //         abort waypoint scheduling; start new one
         if (controller_info.is_stopped()) {
             // TODO send new destination to robot
             // TODO broadcast position info
@@ -253,6 +244,8 @@ void robot::Master::main_loop()
 
             waypoint_scheduler.start();
 
+            // if committed to station dest or at station
+            //    then reschedule stations
             if (is_station(next_waypoint) || is_station(current_waypoint)) {
                 // TODO send state s.t. station scheduler starts at actual station
                 waypoint_scheduler.abort();
