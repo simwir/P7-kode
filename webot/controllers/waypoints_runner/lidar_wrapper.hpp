@@ -4,7 +4,7 @@
 #include <webots/Lidar.hpp>
 
 struct LidarWrapper {
-    webots::Lidar* lidar;
+    webots::Lidar *lidar;
 
     int get_number_of_points() const;
     const float *get_range_image() const;
