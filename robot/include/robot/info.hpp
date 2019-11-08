@@ -1,7 +1,7 @@
 #ifndef ROBOT_INFO_HPP
 #define ROBOT_INFO_HPP
 
-#include <json/json.h>
+#include "util/json.hpp"
 #include <utility>
 #include <vector>
 
