@@ -23,5 +23,6 @@ target_link_libraries(test_scheduler
     scheduling
     pthread
     ${JSONCPP_LIBRARIES}
+    stdc++fs
 )
 install(TARGETS test_scheduler DESTINATION bin)
