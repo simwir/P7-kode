@@ -11,7 +11,7 @@ Json::Value Info::to_json() const
     Json::Value json;
 
     json["id"] = id;
-    json["eta"] = eta;
+    json["eta"] = eta.has_value() ? eta.value() : Json::nullValue;
     json["location"]["x"] = location.first;
     json["location"]["y"] = location.second;
     json["station_plan"] = Json::Value{Json::arrayValue};

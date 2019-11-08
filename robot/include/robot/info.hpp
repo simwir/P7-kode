@@ -21,7 +21,7 @@ class InvalidRobotInfo : public std::exception {
 
 struct Info {
     int id;
-    std::optional<std::pair<double, double>> location;
+    std::pair<double, double> location;
     std::vector<int> station_plan;
     std::vector<scheduling::Action> waypoint_plan;
     std::optional<double> eta;
