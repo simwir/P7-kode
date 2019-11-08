@@ -14,4 +14,5 @@ endif(${JSONCPP_LIBRARY_DIRS})
 
 target_link_libraries(robot
   ${JSONCPP_LIBRARIES}
+  scheduling
 )
