@@ -64,7 +64,10 @@ std::vector<scheduling::Action> get_field_as<std::vector<scheduling::Action>>(co
     }
 
     for (auto itr = json[field].begin(); itr != json[field].end(); itr++) {
-            waypoint_plan.push_back(scheduling::Action::from_json(itr.key().asInt()));
+        std::string type_str = json[field][itr.key().asInt()]["type"].asString();
+        scheduling::ActionType type = type_str == "Hold" ? scheduling::ActionType::Hold : scheduling::ActionType::Waypoint;
+        int value = json[field][itr.key().asInt()]["value"].asInt();
+        waypoint_plan.push_back(scheduling::Action{type, value});
     }
     return waypoint_plan;
 }
