@@ -14,12 +14,14 @@ set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/tcp/include
+    ${PROJECT_SOURCE_DIR}/robot/include
     ${PROJECT_SOURCE_DIR}/scheduling/include
     ${PROJECT_SOURCE_DIR}/util/include
 )
 
 # Libraries
 add_subdirectory(tcp)
+add_subdirectory(robot)
 add_subdirectory(scheduling)
 
 # Executables

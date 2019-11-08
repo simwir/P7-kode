@@ -9,6 +9,40 @@
 
 extern int errno;
 
+Json::Value scheduling::Action::to_json() const
+{
+    Json::Value json;
+
+    json["type"] = type == scheduling::ActionType::Hold ? "Hold" : "Waypoint";
+    json["value"] = value;
+
+    return json;
+}
+
+scheduling::Action scheduling::Action::from_json(const std::string &json)
+{
+    std::stringstream ss(json);
+    Json::Value root;
+    ss >> root;
+
+    return scheduling::Action::from_json(root);
+}
+
+scheduling::Action scheduling::Action::from_json(const Json::Value &json)
+{
+    std::string type_str = json["type"].asString();
+
+    if (!(type_str.compare("Hold") == 0 || type_str.compare("Waypoint") == 0)) {
+        throw JsonConversionException{};
+    }
+
+    scheduling::ActionType type =
+        type_str == "Hold" ? scheduling::ActionType::Hold : scheduling::ActionType::Waypoint;
+    int value = json["value"].asInt();
+
+    return scheduling::Action{type, value};
+}
+
 void scheduling::WaypointScheduler::start()
 {
     worker = std::thread(&WaypointScheduler::run, this);
@@ -73,7 +107,7 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
 
         last_dest = dest_waypoint.front();
         dest_waypoint.pop();
-        schedule.push_back(scheduling::Action(scheduling::ActionType::Waypoint, last_dest.value));
+        schedule.push_back(scheduling::Action{scheduling::ActionType::Waypoint, last_dest.value});
 
         // Check when we reach that waypoint
         do {
@@ -97,7 +131,7 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
         }
 
         if (delay > 0) {
-            schedule.push_back(scheduling::Action(scheduling::ActionType::Hold, delay));
+            schedule.push_back(scheduling::Action{scheduling::ActionType::Hold, delay});
         }
     }
 

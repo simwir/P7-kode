@@ -51,5 +51,6 @@ _deps
 
 # Editors
 /.vscode
+build
 .ccls
 .idea
