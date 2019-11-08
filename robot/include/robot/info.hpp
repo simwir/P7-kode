@@ -10,13 +10,22 @@
 #include <vector>
 
 namespace robot {
+
+class InvalidRobotInfo : public std::exception {
+    std::string message;
+
+  public:
+    InvalidRobotInfo(const std::string &in_message) : message(in_message) {}
+    const char *what() const noexcept override { return message.c_str(); }
+};
+
 struct Info {
     int id;
-    std::pair<double, double> location;
+    std::optional<std::pair<double, double>> location;
     std::vector<int> station_plan;
     std::vector<scheduling::Action> waypoint_plan;
-    double eta;
-
+    std::optional<double> eta;
+    
     Json::Value to_json() const;
     static Info from_json(const std::string &json);
     static Info from_json(const Json::Value &json);
