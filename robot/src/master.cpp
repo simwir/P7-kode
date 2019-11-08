@@ -16,28 +16,16 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
                       int robot_id, std::istream &world_file)
     : broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
 {
-    std::string port_to_controller;
-    std::vector<std::string> recieved_strings;
-
     // Connecting to the Port Discovery Service
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
     PDSClient.send("get_robot," + std::to_string(robot_id));
-    do {
-        recieved_strings = PDSClient.receive();
-    } while (recieved_strings.size() == 0);
-    if (recieved_strings.size() == 1) {
-        port_to_controller = recieved_strings[0];
-    }
-    else {
-        throw robot::RecievedMessageException("Recieved" + std::to_string(recieved_strings.size()) +
-                                              "messages while only one was expected.");
-    }
-    
+    std::string port_to_controller = PDSClient.receive_blocking();
+
     // Connecting to the WeBots Controller
     // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
 }
 
-void robot::Master::load_webots_to_config(std::filesystem::path input_file)
+void robot::Master::load_webots_to_config(const std::filesystem::path &input_file)
 {
     std::ifstream infile(input_file);
     if (!infile.is_open()) {
@@ -107,11 +95,11 @@ void robot::Master::load_webots_to_config(std::filesystem::path input_file)
     for (size_t i = 0; i < rows; i++) {
         for (size_t h = 0; h < columns; h++) {
             if (ast.nodes.at(i).waypointType == WaypointType::eStation &&
-               ast.nodes.at(h).waypointType == WaypointType::eStation) {
-               jsonarray_apsp_distances.append(apsp_distances.at(i).at(h));
-           }
-       }
-   }
+                ast.nodes.at(h).waypointType == WaypointType::eStation) {
+                jsonarray_apsp_distances.append(apsp_distances.at(i).at(h));
+            }
+        }
+    }
 
     // Dump all waypoint information.
     Json::Value waypoint_list{Json::arrayValue};
@@ -135,18 +123,15 @@ void robot::Master::request_broadcast_info()
     broadcast_client.send("get_robot_locations");
 }
 
-void robot::Master::send_robot_info(int robot_id, const robot::Info& robot_info)
+void robot::Master::send_robot_info(int robot_id, const robot::Info &robot_info)
 {
-    broadcast_client.send("post_robot_location, " + robot_info.to_json());
+    broadcast_client.send("post_robot_location, " + robot_info.to_json().toStyledString());
 }
 
 std::string robot::Master::recv_broadcast_info()
 {
-    std::vector<std::string> strings_from_broadcaster;
-    strings_from_broadcaster = broadcast_client.receive();
-    
-    //Gets the latest info from the broadcaster
-    return strings_from_broadcaster.back();
+    // Gets the latest info from the broadcaster
+    return broadcast_client.receive_blocking();
 }
 
 void robot::Master::write_static_config(const std::filesystem::path &path)

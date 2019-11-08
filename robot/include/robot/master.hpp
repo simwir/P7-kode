@@ -3,10 +3,10 @@
 
 #include <filesystem>
 
-#include <tcp/client.hpp>
 #include "config.hpp"
 #include "info.hpp"
 #include "wbt-translator/webots_parser.hpp"
+#include <tcp/client.hpp>
 
 namespace robot {
 class RecievedMessageException : public std::exception {
@@ -34,7 +34,7 @@ class Master {
            std::istream &world_file);
     void load_webots_to_config(const std::filesystem::path &input_file);
     void request_broadcast_info();
-    void send_robot_info(int robot_id, const Info& robot_info);
+    void send_robot_info(int robot_id, const Info &robot_info);
     std::string recv_broadcast_info();
 
     void write_static_config(const std::filesystem::path &path);
