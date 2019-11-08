@@ -12,7 +12,8 @@ template <typename T, bool atomic = false>
 class _Pollable {
     T value;
     bool dirty = false;
-    std::conditional<atomic, std::mutex, void> mutex;
+    // typename specifies that the expression does name a type, which cannot otherwise be inferred.
+    typename std::conditional<atomic, std::mutex, std::nullptr_t>::type mutex;
 
   public:
     _Pollable() = default;
