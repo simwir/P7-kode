@@ -28,7 +28,11 @@ class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointS
 class WaypointScheduler {
   public:
     WaypointScheduler() : executor("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
-    WaypointScheduler(const std::filesystem::path& model_path, const std::filesystem::path &query_path) : executor(model_path, query_path) {}
+    WaypointScheduler(const std::filesystem::path &model_path,
+                      const std::filesystem::path &query_path)
+        : executor(model_path, query_path)
+    {
+    }
     void start();
     void stop();
     void addSubscriber(std::shared_ptr<WaypointScheduleSubscriber> subscriber);
