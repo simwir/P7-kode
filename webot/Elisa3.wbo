@@ -1,0 +1,34 @@
+#VRML_OBJ R2019b utf8
+Elisa3 {
+  translation -0.353622 -0.004415 0.174356
+  rotation -0.012130994917908774 0.9997515811696589 -0.01869799216676764 -1.9984193071795868
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Solid {
+        }
+        Lidar {
+          translation 0 0.04 0
+          rotationStep 0.261799
+          horizontalResolution 2048
+          fieldOfView 6.28328
+          numberOfLayers 1
+          maxRange 0.5
+          type "fixed"
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+}

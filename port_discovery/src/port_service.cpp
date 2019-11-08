@@ -123,13 +123,11 @@ void call_function(port_discovery::Function function, const std::vector<std::str
 void parse_message(std::shared_ptr<tcp::Connection> connection, std::map<int, int> &robot_map)
 {
     try {
-        auto messages = connection->receive();
-        for (const std::string &message : messages) {
-            std::cout << message << "\n" << std::endl;
-            std::vector<std::string> args = split(message, ',');
-            port_discovery::Function function = parse_function(args[0]);
-            call_function(function, args, robot_map, connection);
-        }
+        auto message = connection->receive_blocking();
+        std::cout << message << "\n" << std::endl;
+        std::vector<std::string> args = split(message, ',');
+        port_discovery::Function function = parse_function(args[0]);
+        call_function(function, args, robot_map, connection);
     }
     catch (tcp::MalformedMessageException &e) {
         std::cerr << "Malformed message: " << e.what() << std::endl;
