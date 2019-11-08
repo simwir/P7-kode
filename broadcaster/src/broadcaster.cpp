@@ -64,14 +64,10 @@ void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn)
 {
     while (true) {
         try {
-            auto messages = conn->receive();
-            if (!messages.empty()) {
-                for (const std::string &message : messages) {
-                    std::pair<std::string, std::string> result = split_message(message);
-                    Function function = parse_function(result.first);
-                    call_function(function, result.second, conn);
-                }
-            }
+            auto message = conn->receive_blocking();
+            std::pair<std::string, std::string> result = split_message(message);
+            Function function = parse_function(result.first);
+            call_function(function, result.second, conn);
         }
         catch (tcp::MalformedMessageException &e) {
             conn->send(e.what());
