@@ -1,7 +1,7 @@
 
 #include <fstream>
 
-#include "robot/config.hpp"
+#include "config/config.hpp"
 #include "robot/info.hpp"
 #include "robot/master.hpp"
 #include "tcp/client.hpp"
@@ -60,7 +60,7 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
 
     // Get number of stations, endpoints and waypoint
     int station_count = stations.size(), endpoint_count = end_stations.size(),
-        via_count = vias.size();
+        via_count = vias.size(), waypoint_count = station_count + endpoint_count + via_count;
 
     static_config.set("stations", stations);
     static_config.set("end_stations", end_stations);
@@ -68,7 +68,7 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
     static_config.set("number_of_stations", station_count);
     static_config.set("number_of_end_stations", endpoint_count);
     static_config.set("number_of_vias", via_count);
-    static_config.set("number_of_waypoints", station_count + endpoint_count + via_count);
+    static_config.set("number_of_waypoints", waypoint_count);
     static_config.set("number_of_robots", parser.number_of_robots);
 
     // Get distance matrix for waypoints
@@ -79,10 +79,8 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
 
     // Flatten waypoint distance matrix.
     Json::Value jsonarray_waypoint_matrix{Json::arrayValue};
-    size_t columns = waypoint_matrix.front().size();
-    size_t rows = waypoint_matrix.size();
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t h = 0; h < columns; h++) {
+    for (size_t i = 0; i < waypoint_count; i++) {
+        for (size_t h = 0; h < waypoint_count; h++) {
             jsonarray_waypoint_matrix.append(waypoint_matrix[i][h]);
         }
     }
@@ -90,10 +88,8 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
 
     // Flatten shortest paths between stations
     Json::Value jsonarray_apsp_distances{Json::arrayValue};
-    columns = apsp_distances.at(1).size();
-    rows = apsp_distances.size();
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t h = 0; h < columns; h++) {
+    for (size_t i = 0; i < waypoint_count; i++) {
+        for (size_t h = 0; h < waypoint_count; h++) {
             if (ast.nodes.at(i).waypointType == WaypointType::eStation &&
                 ast.nodes.at(h).waypointType == WaypointType::eStation) {
                 jsonarray_apsp_distances.append(apsp_distances.at(i).at(h));
