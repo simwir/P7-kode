@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "client.hpp"
+#include "tcp/client.hpp"
 #include "webots_server.hpp"
 
 const std::string PDS_PORT = "4444";
@@ -35,8 +35,8 @@ std::vector<Message> webots_server::Server::get_messages()
         size_t split_pos = raw_message.find(",");
         // If no ',' found we assume this to be a command without an argument.
         if (split_pos == std::string::npos) {
-            if (raw_message == "get_position") {
-                message_type = MessageType::get_position;
+            if (raw_message == "get_state") {
+                message_type = MessageType::get_state;
             }
             else {
                 send_message(Message{raw_message, MessageType::not_understood});
@@ -64,8 +64,8 @@ void webots_server::Server::send_message(const Message &message)
 {
     std::string payload;
     switch (message.type) {
-    case MessageType::get_position:
-        payload = "get_position," + message.payload;
+    case MessageType::get_state:
+        payload = "get_state," + message.payload;
         break;
     case MessageType::set_destination:
         payload = "set_destination," + message.payload;

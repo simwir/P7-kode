@@ -1,6 +1,6 @@
 #include "robot.hpp"
 #include "geo/geo.hpp"
-#include "server.hpp"
+#include "tcp/server.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -109,9 +109,10 @@ void robot_controller::communicate()
     using namespace webots_server;
     for (Message message : server.get_messages()) {
         switch (message.type) {
-        case MessageType::get_position: {
-            auto response = std::to_string(position.x) + "," + std::to_string(position.y);
-            server.send_message({response, MessageType::get_position});
+        case MessageType::get_state: {
+            auto response = std::to_string(position.x) + "," + std::to_string(position.y) + "," +
+                            (is_stopped ? "stopped" : "running");
+            server.send_message({response, MessageType::get_state});
             break;
         }
         case MessageType::set_destination: {
@@ -182,24 +183,28 @@ void robot_controller::go_straight_ahead()
     // adjust by angle-delta so we approach a direct line.
     left_motor->setVelocity(6 - 0.1 * relative_dest_angle.theta);
     right_motor->setVelocity(6 + 0.1 * relative_dest_angle.theta);
+    is_stopped = false;
 }
 
 void robot_controller::do_left_turn()
 {
     left_motor->setVelocity(-4);
     right_motor->setVelocity(4);
+    is_stopped = false;
 }
 
 void robot_controller::do_right_turn()
 {
     left_motor->setVelocity(4);
     right_motor->setVelocity(-4);
+    is_stopped = false;
 }
 
 void robot_controller::stop()
 {
     left_motor->setVelocity(0);
     right_motor->setVelocity(0);
+    is_stopped = true;
 }
 geo::Angle robot_controller::get_facing_angle() const
 {

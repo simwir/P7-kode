@@ -5,11 +5,11 @@
 #include <string>
 #include <vector>
 
-#include "server.hpp"
+#include "tcp/server.hpp"
 
 namespace webots_server {
 
-enum class MessageType { get_position, set_destination, not_understood };
+enum class MessageType { get_state, set_destination, not_understood };
 
 struct Message {
     std::string payload;

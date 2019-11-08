@@ -84,6 +84,7 @@ class robot_controller {
 
     webots_server::Server server;
 
+    bool is_stopped = true;
     bool has_destination = false;
     geo::GlobalPoint destination;
     std::optional<geo::GlobalPoint> bug_destination = std::nullopt;
