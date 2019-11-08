@@ -11,15 +11,11 @@
 extern int errno;
 
 namespace scheduling {
-void StationScheduler::start()
-{
-    worker = std::thread(&StationScheduler::run, this);
-}
 
 /*void StationScheduler::wait_for_schedule()
 {
 if (worker.joinable()) {
-    worker.join();
+worker.join();
 }
 }*/
 

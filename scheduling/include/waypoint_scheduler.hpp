@@ -29,9 +29,10 @@ class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointS
 class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vector<Action>> {
   public:
     WaypointScheduler() : Scheduler("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
-    void start() override;
 
   private:
+    void start_worker() override { worker = std::thread{&WaypointScheduler::run, this}; }
+
     void run();
     std::vector<scheduling::Action>
     convertResult(const std::vector<scheduling::SimulationExpression> &values);

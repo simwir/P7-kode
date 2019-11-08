@@ -26,14 +26,18 @@ std::optional<Json::Value> parse(const std::string s)
 
 robot::Master::Master(const std::string &robot_host, const std::string &broadcast_host,
                       int robot_id, std::istream &world_file)
-    : broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
+    : id(robot_id), broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
 {
     std::string port_to_controller;
     std::vector<std::string> recieved_strings;
 
+    station_subscriber = std::make_shared<AsyncStationSubscriber>();
+    waypoint_subscriber = std::make_shared<AsyncWaypointSubscriber>();
+    eta_subscriber = std::make_shared<AsyncEtaSubscriber>();
+
     // Connecting to the Port Discovery Service
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
-    PDSClient.send("get_robot," + std::to_string(robot_id));
+    PDSClient.send("get_robot_info," + std::to_string(robot_id));
     do {
         recieved_strings = PDSClient.receive();
     } while (recieved_strings.size() == 0);
@@ -79,6 +83,7 @@ void robot::Master::load_webots_to_config()
     // Get number of stations, endpoints and waypoint
     int station_count = stations.size(), endpoint_count = end_stations.size(),
         via_count = vias.size();
+    int number_of_waypoints = station_count + endpoint_count + via_count;
 
     static_config.set("stations", stations);
     static_config.set("end_stations", end_stations);
@@ -86,8 +91,9 @@ void robot::Master::load_webots_to_config()
     static_config.set("number_of_stations", station_count);
     static_config.set("number_of_end_stations", endpoint_count);
     static_config.set("number_of_vias", via_count);
-    static_config.set("number_of_waypoints", station_count + endpoint_count + via_count);
-    static_config.set("number_of_robots", webots_parser.number_of_robots);
+    static_config.set("number_of_waypoints", number_of_waypoints);
+    // TODO move to static config with help from broadcaster
+    // static_config.set("number_of_robots", webots_parser.number_of_robots);
 
     // Get distance matrix for waypoints
     std::vector<std::vector<double>> waypoint_matrix = distance_matrix{ast}.get_data();
@@ -110,8 +116,8 @@ void robot::Master::load_webots_to_config()
     Json::Value jsonarray_apsp_distances{Json::arrayValue};
     columns = apsp_distances.at(1).size();
     rows = apsp_distances.size();
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t h = 0; h < columns; h++) {
+    for (int i = 0; i < number_of_waypoints; i++) {
+        for (int h = 0; h < number_of_waypoints; h++) {
             if (ast.nodes.at(i).waypointType == WaypointType::eStation &&
                 ast.nodes.at(h).waypointType == WaypointType::eStation) {
                 jsonarray_apsp_distances.append(apsp_distances.at(i).at(h));
@@ -143,9 +149,10 @@ void robot::Master::request_broadcast_info()
 
 void robot::Master::request_controller_info()
 {
+    webot_client->send("get_state");
 }
 
-void robot::Master::send_robot_info(int robot_id, const robot::Info &robot_info)
+void robot::Master::send_robot_info(const robot::Info &robot_info)
 {
     broadcast_client.send("post_robot_location, " + robot_info.to_json().toStyledString());
 }
@@ -165,12 +172,15 @@ std::string robot::Master::receive_controller_info()
 
 void robot::Master::get_dynamic_state()
 {
+    std::cerr << "getting dynamic state\n";
     request_broadcast_info();
     request_controller_info();
     auto broadcast_info = receive_broadcast_info();
     auto controller_info = receive_controller_info();
     robot::InfoMap info_map = InfoMap::from_json(broadcast_info);
     // TODO load controller state
+
+    // TODO write schedules to config
 }
 
 void robot::Master::write_static_config(const std::filesystem::path &path)
@@ -187,10 +197,78 @@ void robot::Master::main_loop()
 {
     load_webots_to_config();
     write_static_config("static_conf.json");
+
+    station_scheduler.add_subscriber(station_subscriber->shared_from_this());
+    waypoint_scheduler.add_subscriber(waypoint_subscriber->shared_from_this());
+    eta_extractor.add_subscriber(eta_subscriber->shared_from_this());
+
+    // Bootstrap route
+    get_dynamic_state();
+    std::cerr << "scheduling station\n";
+    station_scheduler.start();
+    std::cerr << "started scheduling station\n";
+    station_scheduler.wait_for_result();
+    std::cerr << "done scheduling station\n";
+    // TODO Broadcast station schedule
+
+    get_dynamic_state();
+    std::cerr << "scheduling waypoint\n";
+    waypoint_scheduler.start();
+    std::cerr << "started scheduling waypoint\n";
+    waypoint_scheduler.wait_for_result();
+    std::cerr << "done scheduling waypoint\n";
+    // TODO broadcast waypoint schedule
+
     while (running) {
-        get_dynamic_state();
-        // TODO write/broadcast dynamic state
+        std::cerr << "loop\n";
 
+        // if station schedule invalidated or new station schedule
+        //    then reschedule waypoints
+        if (station_subscriber->is_dirty()) {
+            // TODO broadcast station schedule
+            // TODO save station schedule to file
+            waypoint_scheduler.start();
+        }
 
+        if (waypoint_subscriber->is_dirty()) {
+            // TODO set robot location from waypoint schedule
+            // TODO broadcast waypoint schedule
+        }
+
+        if (eta_subscriber->is_dirty()) {
+            // TODO adjust eta value for time delta
+            // TODO broadcast eta
+        }
+
+        if (controller_info.is_stopped()) {
+            // TODO send new destination to robot
+            // TODO broadcast position info
+
+            // TODO get actual index into waypoint schedule
+
+            // scaffolding variables and lambda. TODO cleanup
+            auto next_waypoint = waypoint_subscriber->get().at(0);
+            auto current_waypoint = next_waypoint;
+            auto is_station = [](auto &&) { return true; };
+
+            waypoint_scheduler.start();
+
+            if (is_station(next_waypoint) || is_station(current_waypoint)) {
+                // TODO send state s.t. station scheduler starts at actual station
+                waypoint_scheduler.abort();
+                station_scheduler.start();
+            }
+        }
+
+        // receive information from broadcaster and controller
+        // if new station or waypoint schedule ready
+        //    then broadcast it
+        // if new eta report ready
+        //    then broadcast it minus time elapsed
+        // if at waypoint
+        //    then tell robot of next waypoint;
+        //         abort waypoint scheduling; start new one
+        // if committed to station dest or at station
+        //    then reschedule stations
     }
 }

@@ -6,14 +6,9 @@
 #include <thread>
 
 namespace scheduling {
-void EtaExtractor::start()
-{
-    runner = std::thread(&EtaExtractor::run, this);
-}
-
 void EtaExtractor::run()
 {
-    if (!eta_computable()) {
+    while (!eta_computable()) {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(1s);
     }

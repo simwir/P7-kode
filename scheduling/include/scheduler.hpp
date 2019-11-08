@@ -14,7 +14,11 @@ template <class Subscriber, class Notification>
 class Scheduler {
   public:
     Scheduler(const char *model_path, const char *query_path) : executor(model_path, query_path) {}
-    virtual void start() = 0;
+    void start() {
+        abort();
+        start_worker();
+    }
+
     void abort() { executor.abort(); };
     void wait_for_result()
     {
@@ -28,6 +32,8 @@ class Scheduler {
     }
 
   protected:
+    virtual void start_worker()=0;
+    //virtual void run() = 0;
     std::vector<std::weak_ptr<Subscriber>> subscribers;
     UppaalExecutor executor;
     std::thread worker;

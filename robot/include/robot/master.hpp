@@ -3,6 +3,8 @@
 
 #include "config.hpp"
 #include "info.hpp"
+#include "robot/subscriber.hpp"
+#include "scheduling.hpp"
 #include "wbt-translator/webots_parser.hpp"
 #include <tcp/client.hpp>
 
@@ -23,6 +25,7 @@ struct InfoMap {
     static InfoMap from_json(const Json::Value &) { return {}; };
 };
 struct ControllerInfo {
+    bool is_stopped() { return true; }
 };
 
 class CannotOpenFileException : public std::exception {
@@ -42,7 +45,7 @@ class Master {
     void load_webots_to_config();
     void get_dynamic_state();
     void request_broadcast_info();
-    void send_robot_info(int robot_id, const Info &robot_info);
+    void send_robot_info(const Info &robot_info);
     std::string receive_broadcast_info();
 
     void request_controller_info();
@@ -54,6 +57,7 @@ class Master {
     void main_loop();
 
   private:
+    const int id;
     Config static_config;
     Config dynamic_config;
     std::unique_ptr<tcp::Client> webot_client;
@@ -62,6 +66,14 @@ class Master {
 
     robot::InfoMap robot_info;
     robot::ControllerInfo controller_info;
+
+    scheduling::StationScheduler station_scheduler;
+    scheduling::WaypointScheduler waypoint_scheduler;
+    scheduling::EtaExtractor eta_extractor;
+
+    std::shared_ptr<AsyncStationSubscriber> station_subscriber;
+    std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
+    std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
 
     bool running;
 };

@@ -20,10 +20,10 @@ class StationScheduleSubscriber : public std::enable_shared_from_this<StationSch
 class StationScheduler : public Scheduler<StationScheduleSubscriber, std::vector<int>> {
   public:
     StationScheduler() : Scheduler("station_scheduling.xml", "station_scheduling.q") {}
-    void start() override;
-    void run();
 
   private:
+    void start_worker() override { worker = std::thread{&StationScheduler::run, this}; }
+    void run();
     void notify_subscribers(const std::vector<int> &) override;
     std::vector<int> convertResult(const std::vector<SimulationExpression> &values);
     UppaalSimulationParser parser;

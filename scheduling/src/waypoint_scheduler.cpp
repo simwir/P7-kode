@@ -9,10 +9,6 @@
 
 extern int errno;
 
-void scheduling::WaypointScheduler::start()
-{
-    worker = std::thread(&WaypointScheduler::run, this);
-}
 
 void scheduling::WaypointScheduler::run()
 {

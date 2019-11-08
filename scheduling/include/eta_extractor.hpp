@@ -30,12 +30,12 @@ class EtaExtractor : public Scheduler<EtaSubscriber, double> {
   public:
     EtaExtractor() : Scheduler(default_model_path, default_query_path) {}
     bool eta_computable() const { return std::filesystem::exists(strategy_path); }
-    void start() override;
 
   private:
     void notify_subscribers(const double &) override;
 
-    std::thread runner;
+    void start_worker() override { worker = std::thread{&EtaExtractor::run, this}; }
+
     void run();
 
     // TODO WIP while PR #22 is not yet merged.
