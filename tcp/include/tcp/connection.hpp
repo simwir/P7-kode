@@ -2,6 +2,7 @@
 #define TCP_CONNECTION_HPP
 
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -51,7 +52,8 @@ class Connection : public std::enable_shared_from_this<Connection> {
     Connection(int fd) : fd(fd) { ready = true; }
     Connection() {}
     virtual ~Connection();
-    std::vector<std::string> receive(int flags = 0);
+    std::optional<std::string> receive_nonblocking();
+    std::string receive_blocking();
     ssize_t send(const std::string &message, int flags = 0);
     void close();
 
@@ -59,10 +61,10 @@ class Connection : public std::enable_shared_from_this<Connection> {
 
   protected:
     void set_fd(int fd);
-    void read_buffer(int flags);
-    std::vector<std::string> parse_messages();
+    std::optional<std::string> parse_message();
 
   private:
+    std::optional<std::string> receive(bool blocking);
     int fd;
     std::string obuffer;
     bool open = true;

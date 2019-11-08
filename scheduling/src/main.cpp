@@ -50,9 +50,25 @@ class LogEtaSubscriber : public scheduling::EtaSubscriber {
     void new_eta(const double eta) override { std::cout << "Eta found: " << eta << std::endl; }
 };
 
-int main()
+int main(int argc, char *argv[])
 {
     std::cout << "Starting...\n";
+
+    std::filesystem::path model_path, query_path;
+    const auto working_path = std::filesystem::current_path();
+    const auto bin_loc = std::filesystem::path{argv[0]}.remove_filename();
+
+    if (argc == 3) {
+        model_path = std::filesystem::path{argv[1]};
+        query_path = std::filesystem::path{argv[2]};
+    }
+    else {
+        model_path = working_path / bin_loc / "waypoint_scheduling.xml";
+        query_path = working_path / bin_loc / "waypoint_scheduling.q";
+    }
+
+    scheduling::WaypointScheduler scheduler{model_path, query_path};
+    auto logSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
     // Waypoints
     scheduling::WaypointScheduler waypointScheduler;
