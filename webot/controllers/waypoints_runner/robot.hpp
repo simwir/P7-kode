@@ -70,7 +70,7 @@ class RobotController {
     webots::Supervisor *robot;
     webots::GPS *frontGPS, *backGPS;
     webots::Motor *left_motor, *right_motor;
-    lidar_wrapper lidar;
+    LidarWrapper lidar;
     std::array<webots::DistanceSensor *, NUM_SENSORS> distance_sensors;
     std::array<webots::LED *, NUM_LEDS> leds;
 
@@ -91,10 +91,10 @@ class RobotController {
     {
         return std::round(((angle.theta + PI) / (2 * PI)) * lidar_resolution);
     }
-    
+
     geo::Angle index2angle(int index) const
     {
-        const auto angle = (static_cast<double>(index) / lidar_resolution) * 2 * PI - PI;
+        const double angle = (static_cast<double>(index) / lidar_resolution) * 2 * PI - PI;
         return geo::Angle{angle};
     }
 
@@ -118,7 +118,7 @@ class RobotController {
     bool first_iteration = true;
     Phase phase = Phase::Motion2Goal;
     double dfollowed;
-    
+
     geo::GlobalPoint position;
 
     void dump_readings_to_csv(const std::string& pcfilename = "point_cloud.csv",

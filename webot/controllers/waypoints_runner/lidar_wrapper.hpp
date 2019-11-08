@@ -3,7 +3,7 @@
 
 #include <webots/Lidar.hpp>
 
-struct lidar_wrapper {
+struct LidarWrapper {
     webots::Lidar* lidar;
 
     int get_number_of_points() const;

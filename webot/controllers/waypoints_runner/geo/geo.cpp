@@ -25,7 +25,7 @@ GlobalPoint get_midpoint(const GlobalPoint &p1, const GlobalPoint &p2)
 
 Angle angle_of_line(const GlobalPoint &p1, const GlobalPoint &p2)
 {
-    const auto res = std::atan2((-p2.y) - (-p1.y), p2.x - p1.x);
+    const double res = std::atan2((-p2.y) - (-p1.y), p2.x - p1.x);
     return Angle{res};
 }
 
@@ -64,7 +64,7 @@ Angle operator-(const Angle a)
 
 Angle abs_angle(const Angle a)
 {
-    if (a.theta < 0) 
+    if (a.theta < 0)
         return {-a.theta};
     else
         return {a.theta};
@@ -83,7 +83,7 @@ RelPoint rotate_point(const RelPoint &p, const Angle a)
 
 GlobalPoint to_global_coordinates(GlobalPoint rel_orig, Angle rel_angle, RelPoint rel_point)
 {
-    const auto rotated = rotate_point(rel_point, rel_angle);
+    const RelPoint rotated = rotate_point(rel_point, rel_angle);
     return GlobalPoint{rotated.x, rotated.y} + rel_orig;
 }
 } // namespace geo
