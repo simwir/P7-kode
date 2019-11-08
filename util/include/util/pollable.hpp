@@ -67,5 +67,4 @@ using AtomicPollable = _Pollable<T, true>;
 template <typename T>
 using Pollable = _Pollable<T, false>;
 
-
 #endif
