@@ -20,7 +20,7 @@ class StationScheduler {
   public:
     StationScheduler() : executor("station_scheduling.xml", "station_scheduling.q") {}
     void start();
-    void stop();
+    void wait_for_schedule();
     void addSubscriber(std::shared_ptr<StationScheduleSubscriber> subscriber);
 
   private:
@@ -30,7 +30,6 @@ class StationScheduler {
 
     std::thread worker;
     std::vector<std::weak_ptr<StationScheduleSubscriber>> subscribers;
-    bool should_stop;
 
     UppaalExecutor executor;
     UppaalSimulationParser parser;

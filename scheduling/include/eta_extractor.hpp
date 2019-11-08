@@ -30,7 +30,7 @@ class EtaExtractor {
     EtaExtractor() : executor(default_model_path, default_query_path) {}
     bool eta_computable() const { return std::filesystem::exists(strategy_path); }
     void start();
-    void stop();
+    void wait_for_eta();
     void addSubscriber(std::shared_ptr<EtaSubscriber> subscriber)
     {
         subscribers.push_back(subscriber->weak_from_this());
@@ -43,7 +43,6 @@ class EtaExtractor {
 
     std::thread runner;
     void run();
-    bool running = false;
 
     // TODO WIP while PR #22 is not yet merged.
     constexpr static auto *default_model_path = "waypoint_scheduling.xml";
