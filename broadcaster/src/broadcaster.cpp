@@ -22,8 +22,8 @@ Function Broadcaster::parse_function(const std::string &function)
     if (function == "get_robot_info") {
         return Function::get_robot_info;
     }
-    else if (function == "post_robot_location") {
-        return Function::post_robot_location;
+    else if (function == "post_robot_info") {
+        return Function::post_robot_info;
     }
     else {
         throw tcp::MessageException(function);
@@ -38,7 +38,7 @@ void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn)
     conn->send(result.toStyledString());
 }
 
-void Broadcaster::post_robot_location(const std::string &robot_payload)
+void Broadcaster::post_robot_info(const std::string &robot_payload)
 {
     std::scoped_lock<std::mutex> lock(mutex);
     robot::Info info = robot::Info::from_json(robot_payload);
@@ -49,8 +49,8 @@ void Broadcaster::call_function(Function function, const std::string &parameters
                                 std::shared_ptr<tcp::Connection> conn)
 {
     switch (function) {
-    case Function::post_robot_location:
-        post_robot_location(parameters);
+    case Function::post_robot_info:
+        post_robot_info(parameters);
         break;
     case Function::get_robot_info:
         get_robot_info(conn);

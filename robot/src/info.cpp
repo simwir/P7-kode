@@ -39,13 +39,14 @@ Info Info::from_json(const std::string &json)
 }
 
 template <typename T>
-T get_field_as(const Json::Value& json, const std::string &field);
+T get_field_as(const Json::Value &json, const std::string &field);
 
 template <>
-std::vector<int> get_field_as<std::vector<int>>(const Json::Value& json, const std::string &field) {
+std::vector<int> get_field_as<std::vector<int>>(const Json::Value &json, const std::string &field)
+{
     std::vector<int> vector;
 
-    if (!json.isMember(field)){
+    if (!json.isMember(field)) {
         return vector;
     }
 
@@ -56,7 +57,9 @@ std::vector<int> get_field_as<std::vector<int>>(const Json::Value& json, const s
 }
 
 template <>
-std::vector<scheduling::Action> get_field_as<std::vector<scheduling::Action>>(const Json::Value& json, const std::string &field) {
+std::vector<scheduling::Action>
+get_field_as<std::vector<scheduling::Action>>(const Json::Value &json, const std::string &field)
+{
     std::vector<scheduling::Action> waypoint_plan;
 
     if (!json.isMember(field)) {
@@ -65,7 +68,8 @@ std::vector<scheduling::Action> get_field_as<std::vector<scheduling::Action>>(co
 
     for (auto itr = json[field].begin(); itr != json[field].end(); itr++) {
         std::string type_str = json[field][itr.key().asInt()]["type"].asString();
-        scheduling::ActionType type = type_str == "Hold" ? scheduling::ActionType::Hold : scheduling::ActionType::Waypoint;
+        scheduling::ActionType type =
+            type_str == "Hold" ? scheduling::ActionType::Hold : scheduling::ActionType::Waypoint;
         int value = json[field][itr.key().asInt()]["value"].asInt();
         waypoint_plan.push_back(scheduling::Action{type, value});
     }
@@ -73,24 +77,33 @@ std::vector<scheduling::Action> get_field_as<std::vector<scheduling::Action>>(co
 }
 
 template <>
-std::pair<double, double> get_field_as<std::pair<double, double>>(const Json::Value& json, const std::string &field) {
-    std::pair<double, double> location{json["location"]["x"].asDouble(), 
+std::pair<double, double> get_field_as<std::pair<double, double>>(const Json::Value &json,
+                                                                  const std::string &field)
+{
+    std::pair<double, double> location{json["location"]["x"].asDouble(),
                                        json["location"]["y"].asDouble()};
     return location;
 }
 
 template <>
-int get_field_as<int>(const Json::Value& json, const std::string &field) {
+int get_field_as<int>(const Json::Value &json, const std::string &field)
+{
     if (json.isMember(field)) {
         return json[field].asInt();
-    } else throw new InvalidRobotInfo("Robot must know its own id");
+    }
+    else
+        throw new InvalidRobotInfo("Robot must know its own id");
 }
 
 template <>
-std::optional<double> get_field_as<std::optional<double>>(const Json::Value& json, const std::string &field) {
+std::optional<double> get_field_as<std::optional<double>>(const Json::Value &json,
+                                                          const std::string &field)
+{
     if (json.isMember(field)) {
         return json[field].asDouble();
-    } else return std::nullopt;
+    }
+    else
+        return std::nullopt;
 }
 
 Info Info::from_json(const Json::Value &json)
@@ -102,7 +115,8 @@ Info Info::from_json(const Json::Value &json)
     int id = get_field_as<int>(json, "id");
     std::pair<double, double> location = get_field_as<std::pair<double, double>>(json, "location");
     std::vector<int> station_plan = get_field_as<std::vector<int>>(json, "station_plan");
-    std::vector<scheduling::Action> waypoint_plan = get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
+    std::vector<scheduling::Action> waypoint_plan =
+        get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
     std::optional<double> eta = get_field_as<std::optional<double>>(json, "eta");
 
     robot::Info info{id, location, station_plan, waypoint_plan, eta};

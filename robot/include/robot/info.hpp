@@ -25,7 +25,7 @@ struct Info {
     std::vector<int> station_plan;
     std::vector<scheduling::Action> waypoint_plan;
     std::optional<double> eta;
-    
+
     Json::Value to_json() const;
     static Info from_json(const std::string &json);
     static Info from_json(const Json::Value &json);

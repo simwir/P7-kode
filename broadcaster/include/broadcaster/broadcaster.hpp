@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace broadcaster {
-enum class Function { get_robot_info, post_robot_location };
+enum class Function { get_robot_info, post_robot_info };
 
 class UnknownFunctionException : public std::exception {
     std::string message;
@@ -37,7 +37,7 @@ class Broadcaster {
     Function parse_function(const std::string &function);
     void parse_message(std::shared_ptr<tcp::Connection> conn);
     void get_robot_info(std::shared_ptr<tcp::Connection> conn);
-    void post_robot_location(const std::string &robot_payload);
+    void post_robot_info(const std::string &robot_payload);
 
   private:
     tcp::Server server;
