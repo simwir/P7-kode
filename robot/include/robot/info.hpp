@@ -2,10 +2,25 @@
 #define ROBOT_INFO_HPP
 
 #include <json/json.h>
+#include <ostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
 namespace robot {
+
+struct InfoParseError : public std::exception {
+    std::string _what;
+    InfoParseError(const std::string &msg) : _what("InfoParseError:" + msg) {}
+};
+
+struct ControllerState {
+    double x;
+    double y;
+    bool is_stopped;
+};
+ControllerState parse_controller_state(const std::string &s);
+
 struct Info {
     int id;
     std::pair<double, double> location;

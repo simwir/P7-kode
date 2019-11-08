@@ -24,9 +24,6 @@ class RecievedMessageException : public std::exception {
 struct InfoMap {
     static InfoMap from_json(const Json::Value &) { return {}; };
 };
-struct ControllerInfo {
-    bool is_stopped() { return true; }
-};
 
 class CannotOpenFileException : public std::exception {
     std::string message;
@@ -61,11 +58,12 @@ class Master {
     Config static_config;
     Config dynamic_config;
     std::unique_ptr<tcp::Client> webot_client;
+    std::unique_ptr<tcp::Client> webots_clock_client;
     tcp::Client broadcast_client;
     Parser webots_parser;
 
     robot::InfoMap robot_info;
-    robot::ControllerInfo controller_info;
+    robot::ControllerState controller_state;
 
     scheduling::StationScheduler station_scheduler;
     scheduling::WaypointScheduler waypoint_scheduler;
@@ -76,6 +74,12 @@ class Master {
     std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
 
     bool running;
+
+    void broadcast_eta(double extracted_eta);
+    void broadcast_position(std::pair<double, double> pos);
+
+    double get_webots_time();
+    double last_webots_time;
 };
 } // namespace robot
 #endif

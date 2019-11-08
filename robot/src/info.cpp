@@ -4,6 +4,32 @@
 
 #include <json/json.h>
 
+namespace robot {
+robot::ControllerState parse_controller_state(const std::string &s)
+{
+    std::stringstream ss{s};
+    double x, y;
+    std::string state;
+    char sink;
+    ss >> x >> sink;
+    if (!ss || sink != ',') {
+        throw robot::InfoParseError("could not parse controller state from " + s);
+    }
+    ss >> y >> sink;
+    if (!ss || sink != ',') {
+        throw robot::InfoParseError("could not parse controller state from " + s);
+    }
+    ss >> state;
+    if (state == "stopped") {
+        return robot::ControllerState{x, y, true};
+    }
+    else if (state == "running") {
+        return robot::ControllerState{x, y, false};
+    }
+    else
+        throw robot::InfoParseError("invalid value for state " + state);
+}
+} // namespace robot
 Json::Value robot::Info::to_json() const
 {
     Json::Value json;

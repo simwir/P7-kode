@@ -152,10 +152,11 @@ std::string robot::Master::receive_broadcast_info()
 {
     return broadcast_client.receive_blocking();
 }
-
+ 
 std::string robot::Master::receive_controller_info()
 {
-    return "";
+    webot_client->send("get_state");
+    return webot_client->receive_blocking();
 }
 
 void robot::Master::get_dynamic_state()
@@ -164,7 +165,8 @@ void robot::Master::get_dynamic_state()
     request_broadcast_info();
     request_controller_info();
     auto broadcast_info = receive_broadcast_info();
-    auto controller_info = receive_controller_info();
+    auto _controller_state = receive_controller_info();
+    controller_state = robot::parse_controller_state(_controller_state);
     robot::InfoMap info_map = InfoMap::from_json(broadcast_info);
     // TODO load controller state
 
@@ -226,12 +228,16 @@ void robot::Master::main_loop()
         if (eta_subscriber->is_dirty()) {
             // TODO adjust eta value for time delta
             // TODO broadcast eta
+            double current_time = get_webots_time();
+            double time_delta = current_time - last_webots_time;
+
+            broadcast_eta(eta_subscriber->get() - time_delta);
         }
 
         // if at waypoint
         //    then tell robot of next waypoint;
         //         abort waypoint scheduling; start new one
-        if (controller_info.is_stopped()) {
+        if (controller_state.is_stopped) {
             // TODO send new destination to robot
             // TODO broadcast position info
 
@@ -264,4 +270,15 @@ void robot::Master::main_loop()
         // if committed to station dest or at station
         //    then reschedule stations
     }
+}
+
+double robot::Master::get_webots_time()
+{
+    webots_clock_client->send("get_time");
+    auto msg = webots_clock_client->receive_blocking();
+    return stod(msg);
+}
+
+void robot::Master::broadcast_eta(double eta)
+{
 }
