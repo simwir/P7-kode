@@ -1,4 +1,14 @@
-
+/**
+ * Test setup depends on Catch2, available at https://github.com/catchorg/Catch2.
+ * Simply take the header-only download and place the header in this directory with name "catch.hpp".
+ * Recommended to run following command _once_ (takes a while) to precompile main for the test setup:
+ *   $ clang++ catch-main.cpp -c
+ *
+ * Afterwards, you can compile and run the actual tests as follows:
+ *   $ clang++ geotests.cpp geo.cpp -std=c++17 -Wall -pedantic -c && clang++ -std=c++17 -Wall -o
+ *          geotests geo.o catch-main.o geotests.o
+ *   $ ./geotests
+ */
 
 #include "geo.hpp"
 #include <cassert>
@@ -16,6 +26,8 @@ TEST_CASE("angle arithmetic", "[angle]")
     Angle a4{PI};
     Angle a5{-PI};
     Angle a6{2 * PI};
+    Angle a7{1 + 2 * PI};
+    Angle a8{- 1 - 2 * PI};
 
     Angle small_pos{0.1};
     Angle large_pos{-0.1};
@@ -24,11 +36,14 @@ TEST_CASE("angle arithmetic", "[angle]")
     {
         REQUIRE(a1.theta == Approx{1.5});
         REQUIRE(a2.theta == Approx{0});
-        REQUIRE(a3.theta == Approx{2 * PI - 1.5});
+        REQUIRE(a3.theta == Approx{-1.5});
 
-        REQUIRE(a4.theta == Approx{PI});
-        REQUIRE(a5.theta == Approx{PI});
+        REQUIRE(a4.theta == Approx{-PI});
+        REQUIRE(a5.theta == Approx{-PI});
         REQUIRE(a6.theta == Approx{0});
+        
+        REQUIRE(a7.theta == Approx{1});
+        REQUIRE(a8.theta == Approx{-1});
     }
 
     SECTION("arithmetic")
@@ -38,7 +53,7 @@ TEST_CASE("angle arithmetic", "[angle]")
 
         REQUIRE((small_pos - large_pos).theta == Approx{0.2});
         REQUIRE((a4 - small_pos).theta == Approx{3.0415926535});
-        REQUIRE((a5 - Angle{0}).theta == Approx(PI));
+        REQUIRE((a5 - Angle{0}).theta == Approx(-PI));
 
         REQUIRE((Angle{PI} - Angle{-PI}).theta == Approx{0});
         REQUIRE((Angle{PI} + Angle{-PI}).theta == Approx{0});
@@ -46,7 +61,7 @@ TEST_CASE("angle arithmetic", "[angle]")
 
     SECTION("negate")
     {
-        REQUIRE((-a1).theta == Approx{2 * PI - 1.5});
+        REQUIRE((-a1).theta == Approx{- 1.5});
         REQUIRE((-Angle{0}).theta == Approx{0});
     }
 }
@@ -63,8 +78,8 @@ TEST_CASE("point operations", "[point]")
     {
         REQUIRE(angle_of_line(orig, p2).theta == Approx{PI / 2});
         REQUIRE(angle_of_line(orig, p1).theta == Approx{0});
-        REQUIRE(angle_of_line(orig, p3).theta == Approx{PI});
-        REQUIRE(angle_of_line(orig, p4).theta == Approx{3 * PI / 2});
+        REQUIRE(angle_of_line(orig, p3).theta == Approx{-PI});
+        REQUIRE(angle_of_line(orig, p4).theta == Approx{-PI / 2});
     }
     SECTION("addition")
     {

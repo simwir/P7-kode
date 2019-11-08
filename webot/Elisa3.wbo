@@ -1,21 +1,23 @@
 #VRML_OBJ R2019b utf8
 Elisa3 {
-  hidden position_0_0 100.94044645349216
-  hidden position_0_1 97.12014253684322
-  hidden linearVelocity_0 3.349404841993141e-05 -3.316205556540074e-07 0.0025732621766856754
-  hidden angularVelocity_0 4.904485951435572e-05 -0.4200363422930576 -6.815729776662344e-05
-  hidden rotation_4 0 0 -1 0.4094815386187735
-  hidden linearVelocity_4 0.007634383366797239 -2.1766406330242e-08 0.00615608364698218
-  hidden angularVelocity_4 1.3857845464419507 -0.4231353572044512 -3.1186986884962917
-  hidden rotation_5 0 0 1 3.4108223780301654
-  hidden linearVelocity_5 -0.007702775192159805 -6.914072990367416e-07 -0.0007082797947593932
-  hidden angularVelocity_5 -0.17542023934030918 -0.41732100942759714 0.37351750827971075
-  translation 0.31278248033922945 -7.841301042962878e-06 0.28009388183588374
-  rotation 0.018348277990769116 0.996114800629578 -0.0861315543890231 -0.4290131621667231
+  translation -0.353622 -0.004415 0.174356
+  rotation -0.012130994917908774 0.9997515811696589 -0.01869799216676764 -1.9984193071795868
   controller "waypoints_runner"
+  supervisor TRUE
   extensionSlot [
     Group {
       children [
+        Solid {
+        }
+        Lidar {
+          translation 0 0.04 0
+          rotationStep 0.261799
+          horizontalResolution 2048
+          fieldOfView 6.28328
+          numberOfLayers 1
+          maxRange 0.5
+          type "fixed"
+        }
         GPS {
           translation 0.02 0.03 0
           name "gps1"

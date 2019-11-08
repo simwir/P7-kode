@@ -12,10 +12,12 @@ constexpr double PI = 3.1415926535;
 #endif
 
 namespace geo {
+    
+double constrain_angle(double angle);
 
 struct Angle {
     double theta;
-    Angle(const double angle) : theta(std::fmod(angle + 2 * PI, 2 * PI)) { assert(theta >= 0); }
+    Angle(const double angle) : theta(constrain_angle(angle)) { }
     Angle() : theta(0) {}
 };
 
@@ -30,7 +32,10 @@ struct Point2D {
 
     static Point2D from_polar(const double r, Angle a)
     {
-        return Point2D{r * std::cos(a.theta), r * std::sin(a.theta)};
+        const auto angle = a.theta;
+        const auto x = r * std::cos(angle);
+        const auto y = -r * std::sin(angle);
+        return Point2D{x, y};
     }
 };
 
@@ -41,7 +46,7 @@ GlobalPoint operator+(const GlobalPoint &p1, const GlobalPoint &p2);
 GlobalPoint operator-(const GlobalPoint &p1, const GlobalPoint &p2);
 std::ostream &operator<<(std::ostream &os, const GlobalPoint &p);
 std::ostream &operator<<(std::ostream &os, const RelPoint &p);
-GlobalPoint get_average(const GlobalPoint &p1, const GlobalPoint &p2);
+GlobalPoint get_midpoint(const GlobalPoint &p1, const GlobalPoint &p2);
 Angle angle_of_line(const GlobalPoint &p1, const GlobalPoint &p2);
 double euclidean_dist(const GlobalPoint &p1, const GlobalPoint &p2);
 double euclidean_dist(const RelPoint &p1, const RelPoint &p2);

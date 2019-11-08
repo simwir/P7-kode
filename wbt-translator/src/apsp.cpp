@@ -1,6 +1,6 @@
-#include "apsp.hpp"
+#include "wbt-translator/apsp.hpp"
 
-#include "distance_matrix.hpp"
+#include "wbt-translator/distance_matrix.hpp"
 #include <cfloat>
 #include <sstream>
 

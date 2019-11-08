@@ -7,6 +7,10 @@
 #include <iostream>
 #include <optional>
 #include <stdexcept>
+#include <cstdlib>
+
+constexpr double DIST_TO_GOAL_THRESHOLD = 0.01;
+constexpr double ROBOT_RADIUS = 0.021;
 
 geo::RelPoint from_lidar_point(const webots::LidarPoint &point)
 {
@@ -18,7 +22,7 @@ std::ostream &operator<<(std::ostream &os, const webots::LidarPoint &point)
     return os << point.x << ", " << point.z;
 }
 
-void robot_controller::dump_readings_to_csv(const std::string &pcfilename,
+void RobotController::dump_readings_to_csv(const std::string &pcfilename,
                                             const std::string &rangefilename)
 {
     std::ofstream pc{pcfilename};
@@ -48,9 +52,8 @@ int getRobotId(webots::Supervisor *robot)
     return self->getField("id")->getSFInt32();
 }
 
-robot_controller::robot_controller(webots::Supervisor *robot)
-    : time_step((int)robot->getBasicTimeStep()), robot(robot),
-      server(std::to_string(getRobotId(robot)))
+RobotController::RobotController(webots::Supervisor *robot)
+    : time_step((int)robot->getBasicTimeStep()), robot(robot), dfollowed(std::numeric_limits<double>::max())
 {
     left_motor = robot->getMotor("left wheel motor");
     right_motor = robot->getMotor("right wheel motor");
@@ -69,42 +72,41 @@ robot_controller::robot_controller(webots::Supervisor *robot)
     lidar.enable(time_step);
     lidar_resolution = lidar.get_resolution();
     lidar_max_range = lidar.get_max_range();
-    lidar_range_values.resize(lidar.get_number_of_points());
-    // point_cloud.resize(lidar.get_number_of_points());
-    point_cloud.resize(lidar.get_number_of_points());
+    lidar_min_range = lidar.get_min_range();
+    lidar_range_values.resize(lidar_resolution);
+    //point_cloud.resize(lidar_resolution);
     lidar_fov = lidar.get_fov();
 
     for (int i = 0; i < NUM_SENSORS; ++i) {
         distance_sensors[i] = robot->getDistanceSensor("ps" + std::to_string(i));
         distance_sensors[i]->enable(time_step);
     }
-}
-
-void robot_controller::update_sensor_values()
-{
-    std::transform(distance_sensors.begin(), distance_sensors.end(), sensor_readings.begin(),
-                   [](auto *ds) { return ds->getValue(); });
-    facing_angle = get_facing_angle();
-    absolute_dest_angle = geo::angle_of_line(gps_reading_to_point(backGPS), get_destination());
-    relative_dest_angle = facing_angle - absolute_dest_angle;
-    absolute_goal_angle = geo::angle_of_line(gps_reading_to_point(backGPS), destination);
-    relative_goal_angle = facing_angle - absolute_goal_angle;
-
-    // angle_to_dest = facing_angle - dest_angle;
-    position = get_position();
-    dist_to_dest = has_destination ? geo::euclidean_dist(position, destination) : -1;
-
-    const auto *pointcloud = lidar.get_point_cloud();
-    const auto num_points = lidar.get_number_of_points();
-    for (int i = 0; i < num_points; ++i) {
-        point_cloud[i] = from_lidar_point(pointcloud[i]);
-        auto dist = geo::euclidean_dist({0, 0}, point_cloud[i]);
-        auto nextval = dist <= 0.95 * lidar_max_range ? std::make_optional(dist) : std::nullopt;
-        lidar_range_values[i] = nextval;
+    for (int i = 0; i < NUM_LEDS; ++i) {
+        leds[i] = robot->getLED("led" + std::to_string(i));
     }
 }
 
-void robot_controller::communicate()
+void RobotController::update_sensor_values()
+{
+    std::transform(distance_sensors.begin(), distance_sensors.end(), sensor_readings.begin(),
+                   [](auto *ds) { return ds->getValue(); });
+
+    position = get_position();
+    cur_dist2goal = geo::euclidean_dist(position, goal);
+
+    const float *range_image = lidar.get_range_image();
+    const int quarter = lidar_resolution / 4;
+    for (int i = 0; i < lidar_resolution; ++i) {
+        const int index = lidar_resolution - 1 - (i - quarter + lidar_resolution) % lidar_resolution;
+
+        float dist = range_image[i];
+        auto nextval = 1.01 * lidar_min_range <= dist && dist <= 0.99 * lidar_max_range ? std::make_optional(dist) : std::nullopt;
+
+        lidar_range_values[index] = nextval;
+    }
+}
+
+void RobotController::communicate()
 {
     using namespace webots_server;
     for (Message message : server.get_messages()) {
@@ -131,200 +133,343 @@ void robot_controller::communicate()
     }
 }
 
-void robot_controller::run_simulation()
+void RobotController::run_simulation()
 {
-    set_destination(geo::GlobalPoint{-0.68, 0.79});
+    set_goal(geo::GlobalPoint{-0.68, 0.79});
     while (robot->step(time_step) != -1) {
-        // std::cout << lidar.get_number_of_points() << std::endl;
-        num_steps++;
         communicate();
-        update_sensor_values();
-        /*if (!has_destination)
-          break;*/
-
-        // std::cout << "facing angle: " << facing_angle.theta
-        //           << "\tabsolute dest angle: " << absolute_dest_angle
-        //           << "\trelative dest angle: " << relative_dest_angle
-        //           << "\tabsolute goal angle: " << absolute_goal_angle
-        //           << "\trelative goal angle: " << relative_goal_angle
-        //           << std::endl;
-        // std::printf("\tgps:  {x:%lf, z:%lf}\n", frontGPS->getValues()[0],
-        // frontGPS->getValues()[2]);
-
-        // if (std::abs(relative_dest_angle.theta - PI) < PI / 2) {
-        if (num_steps % 50 == 1)
-            tangent_bug_get_destination();
-        //}
-
-        /*if (num_steps % 5 != 0) {
+        if (first_iteration) {
+            first_iteration = false;
             continue;
-            }*/
+        }
 
-        // std::printf("\tgoal: {x:%lf, y:%lf}", destination.x, destination.y);
-        // std::printf("\tdest: {x:%lf, y:%lf}\n", get_destination().x, get_destination().y);
-
-        if (dist_to_dest < DESTINATION_BUFFER_DISTANCE) {
+        if (!has_goal) {
             stop();
+            continue;
         }
-        else if (geo::abs_angle(relative_dest_angle).theta < ANGLE_SENSITIVITY) {
-            go_straight_ahead();
+
+        update_sensor_values();
+
+        if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
+            stop();
+            continue;
         }
-        else if (relative_dest_angle.theta > PI) {
-            do_right_turn();
+
+        if (phase == Phase::BoundaryFollowing) {
+            phase = boundary_following();
         }
-        else if (relative_dest_angle.theta < PI) {
-            do_left_turn();
+        else {
+            phase = motion2goal();
         }
     }
 }
 
-void robot_controller::go_straight_ahead()
+Phase RobotController::motion2goal() {
+    prev_dist2goal = cur_dist2goal;
+
+    // Straight to goal
+    geo::Angle angle2goal = get_relative_angle_to_goal();
+    int lidar_value_index = angle2index(angle2goal);
+    std::optional<double> range2goal = lidar_range_values[lidar_value_index];
+    if ((!range2goal.has_value() || cur_dist2goal < range2goal.value()) && clear()) {
+        std::cerr << "Towards goal: " << angle2goal << ", " << !range2goal.has_value() << std::endl;
+        go_towards_angle(angle2goal);
+
+        return Phase::Motion2Goal;
+    }
+
+    // Around obstacles
+    auto discontinuities = get_discontinuity_points();
+
+    double min_heuristic = std::numeric_limits<double>::max();
+    geo::GlobalPoint best_point;
+    DiscontinuityDirection dir;
+    for (const auto &[point, direction] : discontinuities) {
+        double h = geo::euclidean_dist(position, point) + geo::euclidean_dist(point, goal);
+
+        if (h < min_heuristic) {
+            min_heuristic = h;
+            best_point = point;
+            dir = direction;
+        }
+    }
+
+    if (geo::euclidean_dist(best_point, goal) > prev_dist2goal) {
+        std::cerr << "Changing phase to boundary following" << std::endl;
+        dfollowed = std::numeric_limits<double>::max();
+        update_dfollowed();
+        return Phase::BoundaryFollowing;
+    }
+    else {
+        go_to_discontinuity(best_point, dir);
+
+        return Phase::Motion2Discontinuity;
+    }
+}
+
+void RobotController::go_to_discontinuity(geo::GlobalPoint point, DiscontinuityDirection dir) {
+    geo::Angle angle = get_angle_to_point(point);
+    std::cerr << "Towards discontinuity: " << angle << ", " << (dir == DiscontinuityDirection::Left) << std::endl;
+
+    const double dist = geo::euclidean_dist(position, point);
+    const double rectified_remaining_dist = (1 - std::min(1.0, dist));
+    const double angle_correction = rectified_remaining_dist * PI / 4 *
+        (dir == DiscontinuityDirection::Left ? 1 : -1);
+
+    go_towards_angle(angle + angle_correction);
+}
+
+bool RobotController::clear() {
+    if (phase == Phase::Motion2Goal) {
+        return true;
+    }
+
+    for (int i = 0; i < lidar_resolution; ++i) {
+        const geo::Angle angle = index2angle(i);
+        const geo::Angle diff = abs_angle(angle - get_relative_angle_to_goal());
+
+        if (diff.theta <= PI / 2 &&
+            lidar_range_values[i].has_value() &&
+            abs(geo::RelPoint::from_polar(lidar_range_values[i].value(), diff).y) <= ROBOT_RADIUS) {
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+Phase RobotController::boundary_following() {
+    if (dreach() + 0.05 < dfollowed) {
+        std::cerr << "Changing phase to motion to goal" << std::endl;
+        return Phase::Motion2Goal;
+    }
+
+    auto discontinuities = get_discontinuity_points();
+
+    double best_angle = std::numeric_limits<double>::max();
+    geo::GlobalPoint best_point;
+    DiscontinuityDirection dir;
+    for (const auto &[point, direction] : discontinuities) {
+        const geo::Angle point_angle = get_angle_to_point(point);
+        if (abs_angle(point_angle).theta < best_angle) {
+            best_point = point;
+            dir = direction;
+            best_angle = abs_angle(point_angle).theta;
+        }
+    }
+
+    go_to_discontinuity(best_point, dir);
+
+    update_dfollowed();
+    return Phase::BoundaryFollowing;
+}
+
+void RobotController::update_dfollowed() {
+    double obstacle2goal = std::numeric_limits<double>::max();
+
+    const geo::Angle facing_angle = get_facing_angle();
+
+    for (int i = 0; i < lidar_resolution; ++i) {
+        if (lidar_range_values[i].has_value()) {
+            const geo::Angle angle = index2angle(i);
+
+            geo::RelPoint point = geo::RelPoint::from_polar(lidar_range_values[i].value(), angle);
+
+            const geo::GlobalPoint global_point = geo::to_global_coordinates(position, facing_angle, point);
+
+            obstacle2goal = std::min(obstacle2goal, geo::euclidean_dist(global_point, goal));
+        }
+    }
+
+    dfollowed = std::min(dfollowed, obstacle2goal);
+}
+
+geo::Angle RobotController::normal_angle() {
+    std::vector<geo::Angle> candidates;
+    double normal_dist = std::numeric_limits<double>::max();
+
+    for (int i = 0; i < lidar_resolution; ++i) {
+        if (!lidar_range_values[i].has_value()) {
+            continue;
+        }
+
+        if (lidar_range_values[i].value() < (normal_dist - 0.0001)) {
+            candidates.clear();
+            candidates.push_back(index2angle(i));
+            normal_dist = lidar_range_values[i].value();
+        }
+        else if (abs(lidar_range_values[i].value() - normal_dist) < 0.0001) {
+            candidates.push_back(index2angle(i));
+            normal_dist = 0.99 * normal_dist + 0.01 * lidar_range_values[i].value(); // Exponential decay
+        }
+    }
+
+    double sum = 0;
+    for (const geo::Angle angle : candidates) {
+      sum += angle.theta;
+    }
+
+    return geo::Angle{sum / candidates.size()};
+}
+
+double RobotController::dreach() {
+    double min_dist = std::numeric_limits<double>::max();
+
+    const geo::Angle facing_angle = get_facing_angle();
+
+    for (int i = 0; i < lidar_resolution; ++i) {
+        const double dist = lidar_range_values[i].has_value() ? lidar_range_values[i].value() : lidar_max_range;
+        const geo::Angle angle = index2angle(i);
+
+        geo::RelPoint point = geo::RelPoint::from_polar(dist, angle);
+
+        const geo::GlobalPoint global_point = geo::to_global_coordinates(position, facing_angle, point);
+
+        min_dist = std::min(min_dist, geo::euclidean_dist(global_point, goal));
+    }
+
+    return min_dist;
+}
+
+void RobotController::go_towards_angle(const geo::Angle& angle) {
+    geo::Angle abs = geo::abs_angle(angle);
+
+    if (angle.theta > PI / 10) {
+        std::cerr << "Turning left" << std::endl;
+        do_left_turn();
+    }
+    else if (angle.theta < -PI / 10) {
+        std::cerr << "Turning right" << std::endl;
+        do_right_turn();
+    }
+    else if (abs.theta < 0.5 * (PI / 180)) { // If we are off by less than 0.5 degrees, we will not perform any correction
+        std::cerr << "Going straight ahead" << std::endl;
+        go_straight_ahead();
+    }
+    else {
+        std::cerr << "Going straight with adjustment" << std::endl;
+        go_adjusted_straight(angle);
+    }
+}
+
+void RobotController::go_adjusted_straight(const geo::Angle& angle)
 {
-    // adjust by angle-delta so we approach a direct line.
-    left_motor->setVelocity(6 - 0.1 * relative_dest_angle.theta);
-    right_motor->setVelocity(6 + 0.1 * relative_dest_angle.theta);
+    left_motor->setVelocity(8 - 3.5 * angle.theta);
+    right_motor->setVelocity(8 + 3.5 * angle.theta);
+    set_leds(Direction::Straight);
     is_stopped = false;
 }
 
-void robot_controller::do_left_turn()
+void RobotController::go_straight_ahead()
+{
+    left_motor->setVelocity(6);
+    right_motor->setVelocity(6);
+    set_leds(Direction::Straight);
+}
+
+void RobotController::do_left_turn()
 {
     left_motor->setVelocity(-4);
     right_motor->setVelocity(4);
     is_stopped = false;
+    set_leds(Direction::Left);
 }
 
-void robot_controller::do_right_turn()
+void RobotController::do_right_turn()
 {
     left_motor->setVelocity(4);
     right_motor->setVelocity(-4);
     is_stopped = false;
+    set_leds(Direction::Right);
 }
 
-void robot_controller::stop()
+void RobotController::set_leds(Direction dir) {
+    leds[0]->set(0);
+    leds[1]->set(dir == Direction::Left);
+    leds[2]->set(dir == Direction::Left);
+    leds[3]->set(dir == Direction::Left);
+    leds[4]->set(dir == Direction::Right);
+    leds[5]->set(dir == Direction::Right);
+    leds[6]->set(dir == Direction::Right);
+    leds[7]->set(0);
+}
+
+void RobotController::stop()
 {
     left_motor->setVelocity(0);
     right_motor->setVelocity(0);
     is_stopped = true;
 }
-geo::Angle robot_controller::get_facing_angle() const
+
+geo::Angle RobotController::get_facing_angle() const
 {
     return geo::angle_of_line(gps_reading_to_point(backGPS), gps_reading_to_point(frontGPS));
 }
 
-geo::Angle robot_controller::get_angle_to_dest() const
+geo::Angle RobotController::get_angle_to_goal() const
 {
-    if (!has_destination)
-        throw DestinationNotDefinedException{};
-    return geo::angle_of_line(get_destination(), gps_reading_to_point(frontGPS));
+    return geo::angle_of_line(get_position(), goal);
 }
 
-geo::Angle robot_controller::get_angle_to_goal() const
+geo::Angle RobotController::get_relative_angle_to_goal() const
 {
-    return geo::angle_of_line(destination, gps_reading_to_point(frontGPS));
+    return get_angle_to_goal() - get_facing_angle();
 }
 
-geo::GlobalPoint robot_controller::get_position() const
+geo::Angle RobotController::get_angle_to_point(const geo::GlobalPoint& point) const
 {
-    return geo::get_average(gps_reading_to_point(frontGPS), gps_reading_to_point(backGPS));
+    geo::Angle angle = geo::angle_of_line(get_position(), point);
+    return angle - get_facing_angle();
 }
 
-bool robot_controller::destination_unreachable() const
+geo::GlobalPoint RobotController::get_position() const
 {
-    int lidar_idx = get_closest_lidar_point(0);
-    if (std::abs(relative_dest_angle.theta) < 0.01)
-        return lidar_range_values[lidar_idx].has_value();
-    //&& lidar_range_values[lidar_idx].value() < lidar_max_range;
-    else {
-        return false;
-    }
+    return geo::get_midpoint(gps_reading_to_point(frontGPS), gps_reading_to_point(backGPS));
 }
 
-std::vector<geo::GlobalPoint> robot_controller::get_discontinuity_points() const
+std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> RobotController::get_discontinuity_points() const
 {
-    // int _i = 0;
-    // std::for_each(std::begin(lidar_range_values), std::end(lidar_range_values), [&_i](auto val) {
-    //     if (val.has_value())
-    //         std::cout << val.value() << ' ';
-    //     ++_i;
-    // });
-    std::vector<geo::GlobalPoint> discontinuities;
+    std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> discontinuities;
+    constexpr float CONTINUITY_THRESHOLD = 0.05f;
+    const geo::Angle facing_angle = get_facing_angle();
 
-    // refactoring target
-    /*discontinuities.push_back(to_global_coordinates(
-      lidar_value_to_point(get_closest_lidar_point(get_angle_to_goal()))));*/
+    for (int i = 0; i < lidar_resolution; ++i) {
+        int next = (i + 1) % lidar_resolution;
+        // Switch from object in range to not in range or vice versa
+        if (lidar_range_values[i].has_value() != lidar_range_values[next].has_value()) {
+            const double dist = lidar_range_values[i].has_value() ? lidar_range_values[i].value() : lidar_max_range;
+            const geo::Angle angle = index2angle(i);
 
-    bool is_in_range = lidar_range_values[0].has_value();
-    constexpr float THRESHOLD = 0.05f;
-    float last_range_value =
-        is_in_range ? lidar_range_values[0].value() : std::numeric_limits<float>::max();
+            geo::RelPoint point = geo::RelPoint::from_polar(dist, angle);
+            DiscontinuityDirection direction = DiscontinuityDirection::Right;
 
-    for (size_t i = 1; i < lidar_range_values.size(); ++i) {
-        // switch from object in range to not in range
-        if (is_in_range != lidar_range_values[i].has_value()) {
-            std::cerr << "switched in_range \n";
-            is_in_range = !is_in_range;
-            discontinuities.push_back(
-                geo::to_global_coordinates(position, facing_angle, point_cloud[i]));
+            if (lidar_range_values[i].has_value()) {
+              direction = DiscontinuityDirection::Left;
+            }
+
+            discontinuities.push_back(std::make_pair(
+                geo::to_global_coordinates(position, facing_angle, point),
+                direction
+            ));
         }
         // big jump in object distance - assume new object.
-        else if (is_in_range && abs(lidar_range_values[i].value() - last_range_value) > THRESHOLD) {
-            std::cerr << "object switch found \n";
-            // std::cerr << lidar_value_to_point(i) << '\t' << lidar_value_to_point(i - 1);
-            discontinuities.push_back(
-                geo::to_global_coordinates(position, facing_angle, point_cloud[i]));
-            discontinuities.push_back(
-                geo::to_global_coordinates(position, facing_angle, point_cloud[i - 1]));
-        }
-        // TODO not working!
-        // add point in direct path to destination if possible
-        else if ((!lidar_range_values[i].has_value() ||
-                  lidar_range_values[i].value() < dist_to_dest)) {
-            auto global_point = geo::to_global_coordinates(position, facing_angle, point_cloud[i]);
-            auto angle_diff =
-                geo::abs_angle(absolute_goal_angle - geo::angle_of_line(position, global_point))
-                    .theta;
-            // std::cerr << "angle_diff " << angle_diff << '\n';
-            // TODO logic if goal is closer than lidar point
-            if (angle_diff <= PI / (lidar.get_number_of_points())) {
-                auto tangent_point =
-                    geo::to_global_coordinates(position, facing_angle, point_cloud[i]);
-                std::cerr << "tangent point inserted " << tangent_point << std::endl;
-                discontinuities.push_back(tangent_point);
+        else if (lidar_range_values[i].has_value() && abs(lidar_range_values[i].value() - lidar_range_values[next].value()) > CONTINUITY_THRESHOLD) {
+            const geo::Angle angle = index2angle(i);
+
+            geo::RelPoint point = geo::RelPoint::from_polar(lidar_range_values[i].value(), angle);
+            DiscontinuityDirection direction = DiscontinuityDirection::Right;
+
+            if (lidar_range_values[i].value() < lidar_range_values[next].value()) {
+              direction = DiscontinuityDirection::Left;
             }
-        }
-        if (is_in_range) {
-            last_range_value = lidar_range_values[i].value();
+
+            discontinuities.push_back(std::make_pair(
+                geo::to_global_coordinates(position, facing_angle, point),
+                direction
+            ));
         }
     }
-    std::cerr << std::endl;
+
     return discontinuities;
-}
-
-void robot_controller::tangent_bug_get_destination()
-{
-    auto discontinuities = get_discontinuity_points();
-    std::cerr << "bugging\tlen " << discontinuities.size() << std::endl;
-    // std::for_each(std::begin(discontinuities), std::end(discontinuities),
-    //             [](auto pt) { std::cerr << pt << ' '; });
-
-    double min_heuristic = std::numeric_limits<double>::max();
-    geo::GlobalPoint best_point;
-    // TODO abort if no discontinuities
-    for (const geo::GlobalPoint &point : discontinuities) {
-        double h = geo::euclidean_dist(position, point) + geo::euclidean_dist(point, destination);
-        if (h < min_heuristic) {
-            min_heuristic = h;
-            best_point = point;
-        }
-    }
-    std::cerr << "min_heuristic: " << min_heuristic << std::endl;
-    std::cerr << "best point " << best_point << std::endl;
-    if (min_heuristic > prev_heuristic_dist) {
-
-        // TODO do proper boundary following
-        //        throw bad_bug_routing{};
-    }
-    bug_destination = best_point;
-    prev_heuristic_dist = min_heuristic;
-    dump_readings_to_csv();
 }
