@@ -7,11 +7,11 @@
  */
 template <typename T>
 class Pollable {
-    T &&value;
+    T value;
     bool dirty = false;
 
 public:
-    Pollable() : dirty(false) {}
+    Pollable() = default;
     Pollable(T &&value) : value(value), dirty(false) {}
 
     Pollable(const Pollable<T> &) = default;
@@ -33,7 +33,7 @@ public:
         this->value = value;
     }
 
-    T get() const
+    T get()
     {
         dirty = false;
         return value;
@@ -45,7 +45,7 @@ public:
         return *this;
     }
 
-    T operator*() const { return get(); }
+    T operator*() { return get(); }
     operator bool() const { return dirty; }
 };
 
