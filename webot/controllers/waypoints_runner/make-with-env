@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+export LD_LIBRARY_PATH=~/opt/webots/lib:$LD_LIBRARY_PATH
+export WEBOTS_HOME=/home/waefwerf/opt/webots
+make $@

@@ -45,13 +45,11 @@ scheduling::Action scheduling::Action::from_json(const Json::Value &json)
 
 void scheduling::WaypointScheduler::start()
 {
-    should_stop = false;
     worker = std::thread(&WaypointScheduler::run, this);
 }
 
-void scheduling::WaypointScheduler::stop()
+void scheduling::WaypointScheduler::wait_for_schedule()
 {
-    should_stop = true;
     worker.join();
 }
 
@@ -63,21 +61,19 @@ void scheduling::WaypointScheduler::addSubscriber(
 
 void scheduling::WaypointScheduler::run()
 {
-    while (!should_stop) {
-        std::cout << "Starting a new waypoint scheduling." << std::endl;
+    std::cout << "Starting a new waypoint scheduling." << std::endl;
 
-        std::cout << "Executing..." << std::endl;
-        std::string result = executor.execute();
+    std::cout << "Executing..." << std::endl;
+    std::string result = executor.execute();
 
-        std::cout << "Parsing..." << std::endl;
-        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
+    std::cout << "Parsing..." << std::endl;
+    std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
 
-        std::cout << "Composing..." << std::endl;
-        std::vector<scheduling::Action> schedule = convertResult(values);
+    std::cout << "Composing..." << std::endl;
+    std::vector<scheduling::Action> schedule = convertResult(values);
 
-        std::cout << "Emitting..." << std::endl;
-        emitSchedule(schedule);
-    }
+    std::cout << "Emitting..." << std::endl;
+    emitSchedule(schedule);
 }
 
 std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(

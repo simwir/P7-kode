@@ -12,8 +12,8 @@ Json::Value Info::to_json() const
 
     json["id"] = id;
     json["eta"] = eta.has_value() ? eta.value() : Json::nullValue;
-    json["location"]["x"] = location.first;
-    json["location"]["y"] = location.second;
+    json["location"]["x"] = location.x;
+    json["location"]["y"] = location.y;
     json["station_plan"] = Json::Value{Json::arrayValue};
 
     for (const int &station : station_plan) {
@@ -67,22 +67,20 @@ get_field_as<std::vector<scheduling::Action>>(const Json::Value &json, const std
     }
 
     for (auto itr = json[field].begin(); itr != json[field].end(); itr++) {
-        std::string type_str = json[field][itr.key().asInt()]["type"].asString();
+        auto &arr_value = json[field][itr.key().asInt()];
+        std::string type_str = arr_value["type"].asString();
         scheduling::ActionType type =
             type_str == "Hold" ? scheduling::ActionType::Hold : scheduling::ActionType::Waypoint;
-        int value = json[field][itr.key().asInt()]["value"].asInt();
+        int value = arr_value["value"].asInt();
         waypoint_plan.push_back(scheduling::Action{type, value});
     }
     return waypoint_plan;
 }
 
 template <>
-std::pair<double, double> get_field_as<std::pair<double, double>>(const Json::Value &json,
-                                                                  const std::string &field)
+robot::Point get_field_as<robot::Point>(const Json::Value &json, const std::string &field)
 {
-    std::pair<double, double> location{json["location"]["x"].asDouble(),
-                                       json["location"]["y"].asDouble()};
-    return location;
+    return robot::Point{json[field]["x"].asDouble(), json[field]["y"].asDouble()};
 }
 
 template <>
@@ -92,7 +90,7 @@ int get_field_as<int>(const Json::Value &json, const std::string &field)
         return json[field].asInt();
     }
     else
-        throw new InvalidRobotInfo("Robot must know its own id");
+        throw InvalidRobotInfo("Field not found: " + field);
 }
 
 template <>
@@ -109,24 +107,21 @@ std::optional<double> get_field_as<std::optional<double>>(const Json::Value &jso
 Info Info::from_json(const Json::Value &json)
 {
     if (!json.isMember("location") || !json.isMember("id")) {
-        throw new InvalidRobotInfo("The json value does not contain id or location");
+        throw InvalidRobotInfo("The json value does not contain id or location");
     }
 
     int id = get_field_as<int>(json, "id");
-    std::pair<double, double> location = get_field_as<std::pair<double, double>>(json, "location");
-    std::vector<int> station_plan = get_field_as<std::vector<int>>(json, "station_plan");
-    std::vector<scheduling::Action> waypoint_plan =
-        get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
-    std::optional<double> eta = get_field_as<std::optional<double>>(json, "eta");
+    auto location = get_field_as<robot::Point>(json, "location");
+    auto station_plan = get_field_as<std::vector<int>>(json, "station_plan");
+    auto waypoint_plan = get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
+    auto eta = get_field_as<std::optional<double>>(json, "eta");
 
-    robot::Info info{id, location, station_plan, waypoint_plan, eta};
-
-    return info;
+    return robot::Info{id, location, station_plan, waypoint_plan, eta};
 }
 
 InfoMap::InfoMap(const std::vector<Info> &infos)
 {
-    for (Info info : infos) {
+    for (const Info& info : infos) {
         (*this)[info.id] = info;
     }
 }

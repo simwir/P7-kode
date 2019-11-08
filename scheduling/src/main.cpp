@@ -100,9 +100,9 @@ int main(int argc, char *argv[])
     sleep(120);
 
     std::cout << "Stopping schedulers\n";
-    waypointScheduler.stop();
-    stationScheduler.stop();
-    eta_extractor.stop();
+    waypointScheduler.wait_for_schedule();
+    stationScheduler.wait_for_schedule();
+    eta_extractor.wait_for_eta();
 
     return 0;
 }
