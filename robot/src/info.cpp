@@ -2,8 +2,6 @@
 #include <utility>
 #include <vector>
 
-#include <json/json.h>
-
 Json::Value robot::Info::to_json() const
 {
     Json::Value json;
