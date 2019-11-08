@@ -121,7 +121,7 @@ Info Info::from_json(const Json::Value &json)
 
 InfoMap::InfoMap(const std::vector<Info> &infos)
 {
-    for (const Info& info : infos) {
+    for (const Info &info : infos) {
         (*this)[info.id] = info;
     }
 }

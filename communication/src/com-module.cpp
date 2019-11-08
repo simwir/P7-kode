@@ -1,4 +1,4 @@
-#include "broadcaster/broadcaster.hpp"
+#include "communication/com-module.hpp"
 #include "tcp/connection.hpp"
 #include "tcp/exception.hpp"
 
@@ -6,7 +6,7 @@
 #include <mutex>
 #include <thread>
 
-namespace broadcaster {
+namespace communication {
 
 std::mutex mutex;
 
@@ -17,7 +17,7 @@ std::pair<std::string, std::string> split_message(const std::string &message)
     return std::pair{start, end};
 }
 
-Function Broadcaster::parse_function(const std::string &function)
+Function ComModule::parse_function(const std::string &function)
 {
     if (function == "get_robot_info") {
         return Function::get_robot_info;
@@ -30,7 +30,7 @@ Function Broadcaster::parse_function(const std::string &function)
     }
 }
 
-void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn)
+void ComModule::get_robot_info(std::shared_ptr<tcp::Connection> conn)
 {
     std::unique_lock<std::mutex> lock(mutex);
     Json::Value result = robot_info.to_json();
@@ -38,15 +38,15 @@ void Broadcaster::get_robot_info(std::shared_ptr<tcp::Connection> conn)
     conn->send(result.toStyledString());
 }
 
-void Broadcaster::post_robot_info(const std::string &robot_payload)
+void ComModule::post_robot_info(const std::string &robot_payload)
 {
     std::scoped_lock<std::mutex> lock(mutex);
     robot::Info info = robot::Info::from_json(robot_payload);
     robot_info[info.id] = info;
 }
 
-void Broadcaster::call_function(Function function, const std::string &parameters,
-                                std::shared_ptr<tcp::Connection> conn)
+void ComModule::call_function(Function function, const std::string &parameters,
+                              std::shared_ptr<tcp::Connection> conn)
 {
     switch (function) {
     case Function::post_robot_info:
@@ -56,11 +56,11 @@ void Broadcaster::call_function(Function function, const std::string &parameters
         get_robot_info(conn);
         break;
     default:
-        throw UnknownFunctionException("Function not implementet");
+        throw UnknownFunctionException("Function not implemented");
     }
 }
 
-void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn)
+void ComModule::parse_message(std::shared_ptr<tcp::Connection> conn)
 {
     while (true) {
         try {
@@ -88,13 +88,13 @@ void Broadcaster::parse_message(std::shared_ptr<tcp::Connection> conn)
     }
 }
 
-void Broadcaster::start_broadcasting()
+void ComModule::start_broadcasting()
 {
     std::cout << "Waiting for connections on port: " << server.get_port() << std::endl;
     while (true) {
         std::shared_ptr<tcp::Connection> conn = server.accept();
-        std::thread t1(&Broadcaster::parse_message, this, conn);
+        std::thread t1(&ComModule::parse_message, this, conn);
         t1.detach();
     }
 }
-} // namespace broadcaster
+} // namespace communication

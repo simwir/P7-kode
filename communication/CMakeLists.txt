@@ -1,4 +1,4 @@
-include_directories(${PROJECT_SOURCE_DIR}/broadcaster/include)
+include_directories(${PROJECT_SOURCE_DIR}/communication/include)
 
 file(GLOB SOURCES "src/*.cpp")
 

@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace broadcaster {
+namespace communication {
 enum class Function { get_robot_info, post_robot_info };
 
 class UnknownFunctionException : public std::exception {
@@ -27,9 +27,9 @@ class UnknownParameterException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-class Broadcaster {
+class ComModule {
   public:
-    Broadcaster(int port) : server(port) {}
+    ComModule(int port) : server(port) {}
 
     void start_broadcasting();
     void call_function(Function function, const std::string &parameters,

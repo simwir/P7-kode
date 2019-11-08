@@ -1,4 +1,4 @@
-#include <broadcaster/broadcaster.hpp>
+#include "communication/com-module.hpp"
 #include <iostream>
 
 int main(int argc, char **argv)
@@ -9,7 +9,7 @@ int main(int argc, char **argv)
                   << std::endl;
         exit(0);
     }
-    broadcaster::Broadcaster broadcaster(std::stoi(argv[1]));
+    communication::ComModule broadcaster(std::stoi(argv[1]));
     broadcaster.start_broadcasting();
     return 0;
 }

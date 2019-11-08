@@ -28,5 +28,5 @@ add_subdirectory(scheduling)
 # Executables
 add_subdirectory(tests)
 add_subdirectory(port_discovery)
-add_subdirectory(broadcaster)
+add_subdirectory(communication)
 add_subdirectory(wbt-translator)
