@@ -45,6 +45,6 @@ class ComModule {
     robot::InfoMap robot_info;
 };
 
-} // namespace broadcaster
+} // namespace communication
 
 #endif // BROADCASTER_HPP
