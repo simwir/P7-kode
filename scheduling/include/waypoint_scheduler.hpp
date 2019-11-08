@@ -34,7 +34,7 @@ class WaypointScheduler {
     {
     }
     void start();
-    void stop();
+    void wait_for_schedule();
     void addSubscriber(std::shared_ptr<WaypointScheduleSubscriber> subscriber);
 
   private:
@@ -45,7 +45,6 @@ class WaypointScheduler {
 
     std::thread worker;
     std::vector<std::weak_ptr<WaypointScheduleSubscriber>> subscribers;
-    bool should_stop;
 
     UppaalExecutor executor;
     UppaalSimulationParser parser;

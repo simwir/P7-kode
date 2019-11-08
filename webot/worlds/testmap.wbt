@@ -7,7 +7,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation 0.1151019771789315 0.8698243975520322 0.4797468627023475 3.794654624283696
-  position -1.1416518317275077 1.2807436327659467 -0.5921245625252853
+  positio  -1.1416518317275077 1.2807436327659467 -0.5921245625252853
   follow "Elisa-3"
 }
 TexturedBackground {
@@ -173,6 +173,7 @@ Elisa3 {
   translation -0.270445 -9.853e-06 0.0800296
   rotation 7.5511099997413215e-06 -0.999999999965743 3.3904399998838536e-06 0.662722
   controller "waypoints_runner"
+  supervisor TRUE
   extensionSlot [
     Group {
       children [
@@ -196,6 +197,7 @@ Elisa3 {
       ]
     }
   ]
+  id 1
 }
 Robot {
   controller "Wall_clock"
