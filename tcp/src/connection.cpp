@@ -40,11 +40,10 @@ std::optional<std::string> tcp::Connection::parse_message()
     start_pos = obuffer.find("#|");
     end_pos = obuffer.find("|#");
 
-    if (start_pos != 0) {
-        throw tcp::MalformedMessageException(obuffer);
-    }
-
     if (end_pos != std::string::npos) {
+        if (start_pos != 0) {
+            throw tcp::MalformedMessageException(obuffer);
+        }
         message = obuffer.substr(start_pos + 2, end_pos - 2);
         obuffer.erase(start_pos, end_pos + 2);
         return std::optional{message};
