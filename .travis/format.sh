@@ -41,7 +41,7 @@ git diff > clang_format.patch
 
 if [ -s clang_format.patch ]
 then
-    echo "Clang format found possible changes."
+    echo "Clang format found possible changes:"
     cat clang_format.patch
     exit 1
 fi
