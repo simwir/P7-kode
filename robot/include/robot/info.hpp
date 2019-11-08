@@ -37,7 +37,7 @@ struct Info {
 
 class InfoMap {
   public:
-    InfoMap(){};
+    InfoMap() = default;
     InfoMap(const std::vector<Info> &infos);
     Json::Value to_json() const;
     Info &operator[](int index);

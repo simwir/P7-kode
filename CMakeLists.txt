@@ -3,6 +3,7 @@ project(p7)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall")
 
 include(ExternalProject)
 
@@ -27,4 +28,5 @@ add_subdirectory(scheduling)
 # Executables
 add_subdirectory(tests)
 add_subdirectory(port_discovery)
+add_subdirectory(communication)
 add_subdirectory(wbt-translator)
