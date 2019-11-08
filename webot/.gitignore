@@ -1,4 +1,9 @@
 # Webot
 *.cache
 *.wbproj
+
+# c++
+*.o
+*.out
+*.d
 controllers/waypoints_runner/waypoints_runner

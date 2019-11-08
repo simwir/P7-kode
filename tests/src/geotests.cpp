@@ -1,8 +1,8 @@
 /**
  * Test setup depends on Catch2, available at https://github.com/catchorg/Catch2.
- * Simply take the header-only download and place the header in this directory with name "catch.hpp".
- * Recommended to run following command _once_ (takes a while) to precompile main for the test setup:
- *   $ clang++ catch-main.cpp -c
+ * Simply take the header-only download and place the header in this directory with name
+ * "catch.hpp". Recommended to run following command _once_ (takes a while) to precompile main for
+ * the test setup: $ clang++ catch-main.cpp -c
  *
  * Afterwards, you can compile and run the actual tests as follows:
  *   $ clang++ geotests.cpp geo.cpp -std=c++17 -Wall -pedantic -c && clang++ -std=c++17 -Wall -o
@@ -27,7 +27,7 @@ TEST_CASE("angle arithmetic", "[angle]")
     Angle a5{-PI};
     Angle a6{2 * PI};
     Angle a7{1 + 2 * PI};
-    Angle a8{- 1 - 2 * PI};
+    Angle a8{-1 - 2 * PI};
 
     Angle small_pos{0.1};
     Angle large_pos{-0.1};
@@ -41,7 +41,7 @@ TEST_CASE("angle arithmetic", "[angle]")
         REQUIRE(a4.theta == Approx{-PI});
         REQUIRE(a5.theta == Approx{-PI});
         REQUIRE(a6.theta == Approx{0});
-        
+
         REQUIRE(a7.theta == Approx{1});
         REQUIRE(a8.theta == Approx{-1});
     }
@@ -61,7 +61,7 @@ TEST_CASE("angle arithmetic", "[angle]")
 
     SECTION("negate")
     {
-        REQUIRE((-a1).theta == Approx{- 1.5});
+        REQUIRE((-a1).theta == Approx{-1.5});
         REQUIRE((-Angle{0}).theta == Approx{0});
     }
 }
