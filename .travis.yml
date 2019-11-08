@@ -1,0 +1,27 @@
+dist: bionic
+
+language: cpp
+compiler: clang
+
+os: linux
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-bionic-8
+    packages:
+      - clang-8
+      - clang-format-8
+      - libjsoncpp-dev
+      - g++-8
+
+before_install:
+    - export CC=clang-8
+    - export CXX=clang++-8    
+
+jobs:
+  include:
+    - stage: Build
+      script: ./.travis/build.sh
+    - stage: Format
+      script: ./.travis/format.sh

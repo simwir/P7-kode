@@ -1,3 +1,4 @@
 # Webot
 *.cache
 *.wbproj
+controllers/waypoints_runner/waypoints_runner
