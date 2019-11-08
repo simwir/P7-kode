@@ -82,8 +82,9 @@ class Master {
     void broadcast_position(std::pair<double, double> pos);
 
     double get_webots_time();
-    double last_webots_time;
-    double hold_untill;
+    double current_webots_time = 0;
+    double eta_start_time = 0;
+    double hold_untill = 0;
 };
 } // namespace robot
 #endif

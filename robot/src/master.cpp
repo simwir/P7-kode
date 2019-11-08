@@ -152,7 +152,7 @@ std::string robot::Master::receive_broadcast_info()
 {
     return broadcast_client.receive_blocking();
 }
- 
+
 std::string robot::Master::receive_controller_info()
 {
     webot_client->send("get_state");
@@ -185,9 +185,11 @@ void robot::Master::write_dynamic_config(const std::filesystem::path &path)
     dynamic_config.write_to_file(path.c_str());
 }
 
-void robot::Master::set_robot_destination(int waypoint){
+void robot::Master::set_robot_destination(int waypoint)
+{
     Translation point = ast.nodes.at(waypoint).translation;
-    webot_client->send("set_destination," + std::to_string(point.x) + "," + std::to_string(point.z));
+    webot_client->send("set_destination," + std::to_string(point.x) + "," +
+                       std::to_string(point.z));
 }
 
 void robot::Master::main_loop()
@@ -217,6 +219,7 @@ void robot::Master::main_loop()
     // TODO broadcast waypoint schedule
 
     while (running) {
+        current_webots_time = get_webots_time();
         std::cerr << "loop\n";
 
         // if station schedule invalidated or new station schedule
@@ -232,11 +235,10 @@ void robot::Master::main_loop()
             // TODO broadcast waypoint schedule
         }
 
+        // if new eta report ready
+        //    then broadcast it minus time elapsed
         if (eta_subscriber->is_dirty()) {
-            // TODO adjust eta value for time delta
-            // TODO broadcast eta
-            double current_time = get_webots_time();
-            double time_delta = current_time - last_webots_time;
+            double time_delta = current_webots_time - eta_start_time;
 
             broadcast_eta(eta_subscriber->get() - time_delta);
         }
@@ -244,42 +246,40 @@ void robot::Master::main_loop()
         // if at waypoint
         //    then tell robot of next waypoint;
         //         abort waypoint scheduling; start new one
-        if (controller_state.is_stopped) {
-            // TODO send new destination to robot
+        if (controller_state.is_stopped && current_webots_time > hold_untill) {
             // TODO broadcast position info
 
-            // TODO get actual index into waypoint schedule
+            if (waypoint_subscriber->get().empty()) {
+                waypoint_scheduler.wait_for_result();
+            }
 
-            // scaffolding variables and lambda. TODO cleanup
-            scheduling::Action next_waypoint = waypoint_subscriber->get().at(0);
-            auto current_waypoint = next_waypoint;
-            auto is_station = [](auto &&) { return true; };
-            if (next_waypoint.type == scheduling::ActionType::Hold){
-                hold_untill = get_webots_time() + next_waypoint.value;
-            } else {
+            scheduling::Action current_waypoint = waypoint_subscriber->get().front();
+            waypoint_subscriber->get().pop_front();
+            scheduling::Action next_waypoint = waypoint_subscriber->get().front();
+
+            auto is_station = [&](int id) {
+                return ast.nodes.at(id).waypointType == WaypointType::eStation;
+            };
+
+            // hold for n units in webots time
+            if (next_waypoint.type == scheduling::ActionType::Hold) {
+                hold_untill = current_webots_time + next_waypoint.value;
+            }
+            else {
                 set_robot_destination(next_waypoint.value);
             }
-            waypoint_scheduler.start();
 
             // if committed to station dest or at station
             //    then reschedule stations
-            if (is_station(next_waypoint) || is_station(current_waypoint)) {
+            if (is_station(next_waypoint.value) || is_station(current_waypoint.value)) {
                 // TODO send state s.t. station scheduler starts at actual station
                 waypoint_scheduler.abort();
                 station_scheduler.start();
             }
+            else {
+                waypoint_scheduler.start();
+            }
         }
-
-        // receive information from broadcaster and controller
-        // if new station or waypoint schedule ready
-        //    then broadcast it
-        // if new eta report ready
-        //    then broadcast it minus time elapsed
-        // if at waypoint
-        //    then tell robot of next waypoint;
-        //         abort waypoint scheduling; start new one
-        // if committed to station dest or at station
-        //    then reschedule stations
     }
 }
 
