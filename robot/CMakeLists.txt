@@ -12,6 +12,7 @@ add_executable(robot ${SOURCES})
 target_link_libraries(robot
   tcp
   wbt-translator
+  config
   ${JSONCPP_LIBRARIES}
 )
 

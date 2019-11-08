@@ -6,10 +6,10 @@
 #include <vector>
 
 template <>
-std::vector<int> robot::convert_from_json<std::vector<int>>(const Json::Value &value)
+std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &value)
 {
     if (value.type() != Json::ValueType::arrayValue) {
-        throw robot::InvalidValueException();
+        throw config::InvalidValueException();
     }
 
     std::vector<int> result;
@@ -21,83 +21,83 @@ std::vector<int> robot::convert_from_json<std::vector<int>>(const Json::Value &v
     return result;
 }
 
-robot::Config::Config(const std::string &file_path)
+config::Config::Config(const std::string &file_path)
 {
     load_from_file(file_path);
 }
 
-void robot::Config::load_from_file(const std::string &file_path)
+void config::Config::load_from_file(const std::string &file_path)
 {
     std::ifstream config_file(file_path);
     config_file >> json;
 }
 
-void robot::Config::write_to_file(const std::string &file_path)
+void config::Config::write_to_file(const std::string &file_path)
 {
     std::ofstream config_file(file_path);
     config_file << json;
 }
 
 template <>
-int robot::Config::get<int>(const std::string &key)
+int config::Config::get<int>(const std::string &key)
 {
     if (!json.isMember(key)) {
-        throw robot::InvalidKeyException(key);
+        throw config::InvalidKeyException(key);
     };
 
     return json[key].asInt();
 }
 
 template <>
-std::string robot::Config::get<std::string>(const std::string &key)
+std::string config::Config::get<std::string>(const std::string &key)
 {
     if (!json.isMember(key)) {
-        throw robot::InvalidKeyException(key);
+        throw config::InvalidKeyException(key);
     };
 
     return json[key].asString();
 }
 
 template <>
-double robot::Config::get<double>(const std::string &key)
+double config::Config::get<double>(const std::string &key)
 {
     if (!json.isMember(key)) {
-        throw robot::InvalidKeyException(key);
+        throw config::InvalidKeyException(key);
     };
 
     return json[key].asDouble();
 }
 
 template <>
-std::vector<int> robot::Config::get<std::vector<int>>(const std::string &key)
+std::vector<int> config::Config::get<std::vector<int>>(const std::string &key)
 {
     if (!json.isMember(key)) {
-        throw robot::InvalidKeyException(key);
+        throw config::InvalidKeyException(key);
     }
 
     if (json[key].type() != Json::ValueType::arrayValue) {
-        throw robot::InvalidValueException();
+        throw config::InvalidValueException();
     }
 
-    return robot::convert_from_json<std::vector<int>>(json[key]);
+    return config::convert_from_json<std::vector<int>>(json[key]);
 }
 
 template <>
 std::map<int, std::vector<int>>
-robot::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
+config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
 {
     if (!json.isMember(key)) {
-        throw robot::InvalidKeyException(key);
+        throw config::InvalidKeyException(key);
     }
 
     if (json[key].type() != Json::ValueType::objectValue) {
-        throw robot::InvalidValueException();
+        throw config::InvalidValueException();
     }
 
     std::map<int, std::vector<int>> result;
 
     for (auto itr = json[key].begin(); itr != json[key].end(); itr++) {
-        std::vector<int> value = robot::convert_from_json<std::vector<int>>(json[key][itr.name()]);
+        std::vector<int> value = config::convert_from_json<std::vector<int>>(json[key][itr.name()]);
         result.insert({itr.key().asInt(), value});
     }
 

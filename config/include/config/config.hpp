@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace robot {
+namespace config {
 struct InvalidValueException : std::exception {
     const char *what() const noexcept { return "Invalid value"; }
 };
@@ -57,6 +57,6 @@ class Config {
         }
     }
 };
-} // namespace robot
+} // namespace config
 
 #endif

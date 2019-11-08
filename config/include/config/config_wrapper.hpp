@@ -1,8 +1,8 @@
 #ifndef CONFIG_WRAPPER_HPP
 #define CONFIG_WRAPPER_HPP
 
-#define CONFIG_GETTER(type, key)                                                                   \
-    type key() { return config.get<type>(#key); }
+#define STATIC_CONFIG_GETTER(type, key)                                                            \
+    type key() { return static_config.get<type>(#key); }
 
 #ifdef __cplusplus
 extern "C" {

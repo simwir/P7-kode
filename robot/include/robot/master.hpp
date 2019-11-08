@@ -41,8 +41,8 @@ class Master {
     void write_dynamic_config(const std::filesystem::path &path);
 
   private:
-    Config static_config;
-    Config dynamic_config;
+    config::Config static_config;
+    config::Config dynamic_config;
     std::unique_ptr<tcp::Client> webot_client;
     tcp::Client broadcast_client;
     Parser webots_parser;
