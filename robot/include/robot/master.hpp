@@ -51,6 +51,8 @@ class Master {
     void write_static_config(const std::filesystem::path &path);
     void write_dynamic_config(const std::filesystem::path &path);
 
+    void set_robot_destination(int);
+
     void main_loop();
 
   private:
@@ -61,6 +63,7 @@ class Master {
     std::unique_ptr<tcp::Client> webots_clock_client;
     tcp::Client broadcast_client;
     Parser webots_parser;
+    AST ast;
 
     robot::InfoMap robot_info;
     robot::ControllerState controller_state;
@@ -80,6 +83,7 @@ class Master {
 
     double get_webots_time();
     double last_webots_time;
+    double hold_untill;
 };
 } // namespace robot
 #endif

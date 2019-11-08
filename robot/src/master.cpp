@@ -46,7 +46,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
 
 void robot::Master::load_webots_to_config()
 {
-    AST ast = webots_parser.parse_stream();
+    ast = webots_parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
         throw MalformedWorldFileError{"No waypoints found"};
@@ -185,6 +185,11 @@ void robot::Master::write_dynamic_config(const std::filesystem::path &path)
     dynamic_config.write_to_file(path.c_str());
 }
 
+void robot::Master::set_robot_destination(int waypoint){
+    Translation point = ast.nodes.at(waypoint).translation;
+    webot_client->send("set_destination," + std::to_string(point.x) + "," + std::to_string(point.z));
+}
+
 void robot::Master::main_loop()
 {
     load_webots_to_config();
@@ -246,10 +251,14 @@ void robot::Master::main_loop()
             // TODO get actual index into waypoint schedule
 
             // scaffolding variables and lambda. TODO cleanup
-            auto next_waypoint = waypoint_subscriber->get().at(0);
+            scheduling::Action next_waypoint = waypoint_subscriber->get().at(0);
             auto current_waypoint = next_waypoint;
             auto is_station = [](auto &&) { return true; };
-
+            if (next_waypoint.type == scheduling::ActionType::Hold){
+                hold_untill = get_webots_time() + next_waypoint.value;
+            } else {
+                set_robot_destination(next_waypoint.value);
+            }
             waypoint_scheduler.start();
 
             // if committed to station dest or at station
