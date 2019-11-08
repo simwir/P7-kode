@@ -12,6 +12,7 @@ namespace scheduling {
 
 template <class Subscriber, class Notification>
 class Scheduler {
+    static_assert(std::is_base_of<std::enable_shared_from_this<Subscriber>, Subscriber>::value, "subscriber type must enable shared from this.");
   public:
     Scheduler(const char *model_path, const char *query_path) : executor(model_path, query_path) {}
     Scheduler(const std::filesystem::path &model_path, const std::filesystem::path &query_path)
