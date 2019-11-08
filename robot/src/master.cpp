@@ -106,7 +106,7 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
     for (auto &[id, waypoint] : ast.nodes) {
         waypoint_list.append(Json::objectValue);
         auto &last = waypoint_list[waypoint_list.size() - 1];
-        last["id"] = id;
+        last["id"] = Json::Value{static_cast<int>(id)};
         last["x"] = waypoint.translation.x;
         last["y"] = waypoint.translation.z;
         last["type"] = to_string(waypoint.waypointType);

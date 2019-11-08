@@ -11,6 +11,7 @@ pkg_check_modules(JSONCPP jsoncpp)
 add_executable(robot ${SOURCES})
 target_link_libraries(robot
   tcp
+  stdc++fs
   wbt-translator
   ${JSONCPP_LIBRARIES}
 )
