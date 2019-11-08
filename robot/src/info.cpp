@@ -99,7 +99,7 @@ Info Info::from_json(const Json::Value &json)
     int id = get_field_as<int>(json, "id");
     std::pair<double, double> location = get_field_as<std::pair<double, double>>(json, "location");
     std::vector<int> station_plan = get_field_as<std::vector<int>>(json, "station_plan");
-    std::vector<int> waypoint_plan = get_field_as<std::vector<int>>(json, "waypoint_plan");
+    std::vector<scheduling::Action> waypoint_plan = get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
     double eta = get_field_as<double>(json, "eta");
 
     robot::Info info{id, location, station_plan, waypoint_plan, eta};
