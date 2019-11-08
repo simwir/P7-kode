@@ -12,7 +12,7 @@ template <typename T, bool atomic = false>
 class _Pollable {
     T value;
     bool dirty = false;
-    typename std::enable_if<atomic, std::mutex>::type mutex;
+    std::conditional<atomic, std::mutex, void> mutex;
 
   public:
     _Pollable() = default;
