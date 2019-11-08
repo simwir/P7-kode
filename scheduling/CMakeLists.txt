@@ -22,6 +22,7 @@ add_executable(test_scheduler ${SOURCES} src/main.cpp)
 target_link_libraries(test_scheduler
     scheduling
     pthread
+    stdc++fs
     ${JSONCPP_LIBRARIES}
 )
 install(TARGETS test_scheduler DESTINATION bin)
