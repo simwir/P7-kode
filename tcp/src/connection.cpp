@@ -2,12 +2,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <string>
 
-#include <connection.hpp>
-#include <tcp_exception.hpp>
+#include <tcp/connection.hpp>
+#include <tcp/exception.hpp>
 
 constexpr int BUFFER_SIZE = 256;
 
@@ -32,54 +33,40 @@ ssize_t tcp::Connection::send(const std::string &message, int flags)
     return bytes;
 }
 
-void tcp::Connection::read_buffer(int flags)
-{
-    char buffer[BUFFER_SIZE];
-
-    while (true) {
-        std::memset(buffer, 0, BUFFER_SIZE);
-        ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, flags | MSG_DONTWAIT);
-
-        if (bytes == -1) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                break;
-            }
-            else {
-                throw tcp::ReceiveException(errno);
-            }
-        }
-        else if (bytes == 0) {
-            throw tcp::ReceiveException(); // If this happens, wud
-        }
-        else {
-            obuffer.append(buffer, bytes);
-        }
-    }
-}
-
-std::vector<std::string> tcp::Connection::parse_messages()
+std::optional<std::string> tcp::Connection::parse_message()
 {
     size_t start_pos, end_pos;
-    std::vector<std::string> messages;
+    std::string message;
     start_pos = obuffer.find("#|");
     end_pos = obuffer.find("|#");
 
-    while (end_pos != std::string::npos) {
-        if (start_pos != 0) {
-            throw tcp::MalformedMessageException(obuffer);
-        }
-
-        messages.push_back(obuffer.substr(start_pos + 2, end_pos - 2));
-        obuffer.erase(start_pos, end_pos + 2);
-
-        start_pos = obuffer.find("#|");
-        end_pos = obuffer.find("|#");
+    if (start_pos != 0) {
+        throw tcp::MalformedMessageException(obuffer);
     }
 
-    return messages;
+    if (end_pos != std::string::npos) {
+        message = obuffer.substr(start_pos + 2, end_pos - 2);
+        obuffer.erase(start_pos, end_pos + 2);
+        return std::optional{message};
+    }
+    else {
+        return std::nullopt;
+    }
 }
 
-std::vector<std::string> tcp::Connection::receive(int flags)
+std::string tcp::Connection::receive_blocking()
+{
+    auto received = receive(true);
+    assert(received.has_value());
+    return received.value(); // When called blocking we know a value is present.
+}
+
+std::optional<std::string> tcp::Connection::receive_nonblocking()
+{
+    return receive(false);
+}
+
+std::optional<std::string> tcp::Connection::receive(bool blocking)
 {
     if (!ready) {
         throw ConnectionException("Connection not ready");
@@ -89,8 +76,34 @@ std::vector<std::string> tcp::Connection::receive(int flags)
         throw ConnectionException("Connection not open");
     }
 
-    read_buffer(flags);
-    return parse_messages();
+    auto message = parse_message();
+    if (message) {
+        return message;
+    }
+
+    char buffer[BUFFER_SIZE];
+
+    do {
+        std::memset(buffer, 0, BUFFER_SIZE);
+        ssize_t bytes = ::recv(fd, buffer, BUFFER_SIZE, blocking ? 0 : MSG_DONTWAIT);
+
+        if (bytes == -1) {
+            // If the MSG_DONTWAIT flag is set recv might return with -1 and errno to one of
+            // the following values indicating that no error occurred, but the recv buffer was empty
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                return std::nullopt;
+            }
+            else {
+                throw tcp::ReceiveException(errno);
+            }
+        }
+
+        obuffer.append(buffer, bytes);
+        message = parse_message();
+        // repeat if received message was incomplete.
+    } while (!message);
+
+    return message;
 }
 
 void tcp::Connection::set_fd(int fd)
