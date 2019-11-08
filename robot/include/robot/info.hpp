@@ -18,6 +18,9 @@ struct ControllerState {
     double x;
     double y;
     bool is_stopped;
+
+    Json::Value to_json() const;
+    static ControllerState from_json(const Json::Value &json);
 };
 ControllerState parse_controller_state(const std::string &s);
 

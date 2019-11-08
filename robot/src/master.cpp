@@ -166,11 +166,13 @@ void robot::Master::get_dynamic_state()
     request_controller_info();
     auto broadcast_info = receive_broadcast_info();
     auto _controller_state = receive_controller_info();
+    robot_info = robot::InfoMap::from_json(broadcast_info);
     controller_state = robot::parse_controller_state(_controller_state);
-    robot::InfoMap info_map = InfoMap::from_json(broadcast_info);
-    // TODO load controller state
-
     // TODO write schedules to config
+
+    // TODO wait for broadcaster merge
+    // dynamic_config.set("robot_info", robot_info.to_json());
+    dynamic_config.set("our_state", controller_state.to_json());
 }
 
 void robot::Master::write_static_config(const std::filesystem::path &path)

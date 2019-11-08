@@ -29,6 +29,24 @@ robot::ControllerState parse_controller_state(const std::string &s)
     else
         throw robot::InfoParseError("invalid value for state " + state);
 }
+robot::ControllerState robot::ControllerState::from_json(const Json::Value &json)
+{
+    return robot::ControllerState{
+            json["x"].asDouble(),
+            json["y"].asDouble(),
+            json["stopped"].asBool()
+    };
+}
+
+Json::Value robot::ControllerState::to_json() const
+{
+    Json::Value val{Json::objectValue};
+    val["x"] = x;
+    val["y"] = y;
+    val["stopped"] = is_stopped;
+    return val;
+}
+
 } // namespace robot
 Json::Value robot::Info::to_json() const
 {
