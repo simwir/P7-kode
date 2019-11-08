@@ -34,7 +34,7 @@ void accepter(Robot *robot)
 void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot)
 {
     while (true) {
-        auto message = connection->receive_blocking();
+        connection->receive_blocking();
         connection->send(std::to_string(robot->getTime()));
     }
 }
