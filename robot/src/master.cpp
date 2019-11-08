@@ -1,7 +1,7 @@
 
 #include <fstream>
 
-#include "config/config.hpp"
+#include "robot/config.hpp"
 #include "robot/info.hpp"
 #include "robot/master.hpp"
 #include "tcp/client.hpp"
