@@ -21,12 +21,12 @@ class SendException : public std::exception {
 };
 
 class ReceiveException : public std::exception {
-    int err = 0;
     std::string msg;
 
   public:
+    int err = 0;
     ReceiveException(int err)
-        : err(err), msg("Could not read receive buffer: " + std::to_string(err))
+        : msg("Could not read receive buffer: " + std::to_string(err)), err(err)
     {
     }
 
