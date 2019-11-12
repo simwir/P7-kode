@@ -22,7 +22,7 @@ class Scheduler {
 
     void start()
     {
-        abort();
+        //abort();
         start_worker();
     }
 

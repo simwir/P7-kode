@@ -1,9 +1,9 @@
 #ifndef ROBOT_INFO_HPP
 #define ROBOT_INFO_HPP
 
-#include <util/json.hpp>
 #include <ostream>
 #include <stdexcept>
+#include <util/json.hpp>
 #include <utility>
 #include <vector>
 
@@ -12,6 +12,8 @@ namespace robot {
 struct InfoParseError : public std::exception {
     std::string _what;
     InfoParseError(const std::string &msg) : _what("InfoParseError:" + msg) {}
+
+    const char *what() const noexcept override { return _what.c_str(); }
 };
 
 struct ControllerState {

@@ -20,14 +20,15 @@ robot::ControllerState parse_controller_state(const std::string &s)
         throw robot::InfoParseError("could not parse controller state from " + s);
     }
     ss >> state;
-    if (state == "stopped") {
+    if (state == "holding") {
         return robot::ControllerState{x, y, true};
     }
     else if (state == "running") {
         return robot::ControllerState{x, y, false};
     }
-    else
-        throw robot::InfoParseError("invalid value for state " + state);
+    else {
+        throw robot::InfoParseError("invalid value for state: " + state);
+    }
 }
 robot::ControllerState robot::ControllerState::from_json(const Json::Value &json)
 {

@@ -43,7 +43,6 @@ class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vect
     convertResult(const std::vector<scheduling::SimulationExpression> &values);
     void notify_subscribers(const std::vector<Action> &) override;
 
-    std::thread worker;
     UppaalSimulationParser parser;
 };
 

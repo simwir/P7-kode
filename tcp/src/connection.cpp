@@ -40,13 +40,14 @@ std::optional<std::string> tcp::Connection::parse_message()
     start_pos = obuffer.find("#|");
     end_pos = obuffer.find("|#");
 
-    if (start_pos != 0) {
-        throw tcp::MalformedMessageException(obuffer);
-    }
-
     if (end_pos != std::string::npos) {
-        message = obuffer.substr(start_pos + 2, end_pos - 2);
-        obuffer.erase(start_pos, end_pos + 2);
+        // end sequence without matching start
+        if (start_pos == std::string::npos) {
+            throw tcp::MalformedMessageException(obuffer);
+        }
+        message = obuffer.substr(start_pos + 2, end_pos - start_pos - 2);
+        // anything between a previous end sequence and new start sequence can simply be discarded.
+        obuffer.erase(0, end_pos + 2);
         return std::optional{message};
     }
     else {

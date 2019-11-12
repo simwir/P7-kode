@@ -10,6 +10,7 @@
 
 #define PORT_TO_BROADCASTER "5435"
 #define PORT_TO_PDS "4444"
+#define PORT_TO_WALL_CLOCK "5555"
 
 std::optional<Json::Value> parse(const std::string s)
 {
@@ -37,11 +38,13 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
 
     // Connecting to the Port Discovery Service
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
-    PDSClient.send("get_robot_info," + std::to_string(robot_id));
+    PDSClient.send("get_robot," + std::to_string(robot_id));
     port_to_controller = PDSClient.receive_blocking();
+    // TODO handle/report error if PDS does not know a port yet
 
     // Connecting to the WeBots Controller
-    // webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
+    webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
+    webots_clock_client = std::make_unique<tcp::Client>("127.0.0.1", PORT_TO_WALL_CLOCK);
 }
 
 void robot::Master::load_webots_to_config()
@@ -155,7 +158,6 @@ std::string robot::Master::receive_broadcast_info()
 
 std::string robot::Master::receive_controller_info()
 {
-    webot_client->send("get_state");
     return webot_client->receive_blocking();
 }
 
@@ -209,6 +211,7 @@ void robot::Master::main_loop()
     station_scheduler.wait_for_result();
     std::cerr << "done scheduling station\n";
     // TODO Broadcast station schedule
+    // TODO set waypoint scheduler start/dest
 
     get_dynamic_state();
     std::cerr << "scheduling waypoint\n";
@@ -218,6 +221,7 @@ void robot::Master::main_loop()
     std::cerr << "done scheduling waypoint\n";
     // TODO broadcast waypoint schedule
 
+    running = true;
     while (running) {
         current_webots_time = get_webots_time();
         std::cerr << "loop\n";
@@ -225,6 +229,7 @@ void robot::Master::main_loop()
         // if station schedule invalidated or new station schedule
         //    then reschedule waypoints
         if (station_subscriber->is_dirty()) {
+            station_subscriber->get();
             // TODO broadcast station schedule
             // TODO save station schedule to file
             waypoint_scheduler.start();
@@ -280,6 +285,8 @@ void robot::Master::main_loop()
                 waypoint_scheduler.start();
             }
         }
+        std::cerr << "writing dynamic config" << std::endl;
+        write_dynamic_config("dynamic_config.json");
     }
 }
 
@@ -287,7 +294,13 @@ double robot::Master::get_webots_time()
 {
     webots_clock_client->send("get_time");
     auto msg = webots_clock_client->receive_blocking();
-    return stod(msg);
+    std::stringstream ss{msg};
+    double time;
+    ss >> time;
+    if (!(ss.good() || ss.eof())) {
+        throw std::logic_error{"Error: couldn't parse time from " + msg};
+    }
+    return time;
 }
 
 void robot::Master::broadcast_eta(double eta)

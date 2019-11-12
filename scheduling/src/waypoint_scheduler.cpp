@@ -12,21 +12,21 @@ extern int errno;
 
 void scheduling::WaypointScheduler::run()
 {
-    std::cout << "Starting a new waypoint scheduling." << std::endl;
+    std::cerr << "Starting a new waypoint scheduling." << std::endl;
 
-    std::cout << "Executing..." << std::endl;
+    std::cerr << "Executing..." << std::endl;
     auto result = executor.execute();
-    if (result.has_value()) {
+    if (!result.has_value()) {
         return;
     }
 
-    std::cout << "Parsing..." << std::endl;
+    std::cerr << "Parsing..." << std::endl;
     std::vector<scheduling::SimulationExpression> values = parser.parse(result.value(), 2);
 
-    std::cout << "Composing..." << std::endl;
+    std::cerr << "Composing..." << std::endl;
     std::vector<scheduling::Action> schedule = convertResult(values);
 
-    std::cout << "Emitting..." << std::endl;
+    std::cerr << "Emitting..." << std::endl;
     notify_subscribers(schedule);
 }
 

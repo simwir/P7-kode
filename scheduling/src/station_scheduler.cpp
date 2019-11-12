@@ -21,21 +21,21 @@ worker.join();
 
 void StationScheduler::run()
 {
-    std::cout << "Starting a new waypoint scheduling.\n";
+    std::cerr << "Starting a new station scheduling.\n";
 
-    std::cout << "Executing..." << std::endl;
+    std::cerr << "Executing..." << std::endl;
     auto result = executor.execute();
     if (!result.has_value()) {
         return;
     }
 
-    std::cout << "Parsing..." << std::endl;
+    std::cerr << "Parsing..." << std::endl;
     std::vector<SimulationExpression> values = parser.parse(result.value(), 2);
 
-    std::cout << "Composing..." << std::endl;
+    std::cerr << "Composing..." << std::endl;
     std::vector<int> schedule = convertResult(values);
 
-    std::cout << "Emitting..." << std::endl;
+    std::cerr << "Emitting..." << std::endl;
     notify_subscribers(schedule);
 }
 

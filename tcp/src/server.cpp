@@ -14,7 +14,9 @@ tcp::Server::Server(int in_port, int backlog)
     sockaddr_in server_address;
     socklen_t length = sizeof(sockaddr);
 
+    int option = 1;
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 
     std::memset(&server_address, 0, sizeof server_address);
     server_address.sin_family = AF_INET;

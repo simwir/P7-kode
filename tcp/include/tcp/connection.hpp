@@ -9,6 +9,15 @@
 
 namespace tcp {
 
+class ConnectException : public std::exception {
+    std::string _what;
+
+  public:
+    ConnectException(const std::string &msg) : _what("ConnectException: " + msg) {}
+
+    const char *what() const noexcept { return _what.c_str(); }
+};
+
 class SendException : public std::exception {
     std::string message;
 
