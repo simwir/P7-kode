@@ -35,7 +35,6 @@ include_directories(
 add_subdirectory(tcp)
 add_subdirectory(config)
 add_subdirectory(scheduling)
-add_subdirectory(shared_test)
 
 # Executables
 add_subdirectory(tests)
