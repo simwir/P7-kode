@@ -15,7 +15,7 @@ configure_file(station_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_
 configure_file(station_scheduling.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_scheduling.q COPYONLY)
 configure_file(get_eta.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/get_eta.q COPYONLY)
 
-add_executable(test_scheduler ${SOURCES} src/main.cpp)
+add_executable(test_scheduler src/main.cpp)
 target_link_libraries(test_scheduler
     scheduling
     pthread

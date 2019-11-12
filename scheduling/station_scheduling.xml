@@ -5,28 +5,36 @@
 
 hybrid clock total;
 
-const int NUM_STATIONS = 10;
-const int NUM_END_STATIONS = 2;
-const int MAX_ROBOTS = 5;
-const double UNCERTAINTY = 1.1;
+import "libconfig.so" {
+    int number_of_stations();
+    int number_of_end_stations();
+    int number_of_robots();
+    int current_station();
+    double uncertainty();
+};
 
-typedef int[1, NUM_STATIONS] station_t;
-typedef int[1, MAX_ROBOTS] robot_t;
+const int NUM_STATIONS = number_of_stations();
+const int NUM_END_STATIONS = number_of_end_stations();
+const int MAX_ROBOTS = number_of_robots();
+const double UNCERTAINTY = uncertainty();
 
-const robot_t CUR_ROBOT = 1;
+// typedef int[1, NUM_STATIONS] station_t;
+// typedef int[1, MAX_ROBOTS] robot_t;
+
+const int[1, MAX_ROBOTS] CUR_ROBOT = 1;
 
 const int ALL = (1 &lt;&lt; NUM_STATIONS) - 1; // Encoding 0b11_1111_1111. We use this variable to simulate bitwise not since UPPAAL does not support this out of the box.
 const int[0, ALL] endstations = 18; // Encoding 0b00_0001_0010.
 
-bool is_endstation(station_t id) {
+bool is_endstation(int[1, NUM_STATIONS] id) {
     int[0, 1 &lt;&lt; NUM_STATIONS] is = endstations &amp; (1 &lt;&lt; (id - 1));
 
     return is != 0;
 }
 
-typedef int[CUR_ROBOT + 1, MAX_ROBOTS] other_robot_t;
+// typedef int[CUR_ROBOT + 1, MAX_ROBOTS] other_robot_t;
 
-const int dist[station_t][station_t] = {
+const int dist[int[1, NUM_STATIONS]][int[1, NUM_STATIONS]] = {
     {  0,  5,  7,  5,  4,  8,  2,  3,  9, 12 },
     {  2,  0,  9, 12,  1,  2,  6,  3,  8,  4 },
     {  8,  4,  0,  1,  2, 11,  1, 14, 18,  7 },
@@ -39,21 +47,21 @@ const int dist[station_t][station_t] = {
     {  8, 10, 18,  7,  4,  6,  3, 14,  2,  0 }
 };
 
-broadcast chan arr[station_t][robot_t], done[robot_t];</declaration>
-	<template>
-		<name>OtherRobot</name>
-		<parameter>other_robot_t id</parameter>
-		<declaration>const int[0, NUM_STATIONS] schedule[other_robot_t][station_t] = {
+const int[0, NUM_STATIONS] schedule[int[CUR_ROBOT + 1, MAX_ROBOTS]][int[1, NUM_STATIONS]] = {
     {8,  7,  3,  9,  4,  5,  0,  0,  0,  0},
     {7,  1,  6,  4,  3, 10,  8,  9,  5,  0},
     {8,  6,  7,  2,  0,  0,  0,  0,  0,  0},
     {7,  6,  2,  0,  0,  0,  0,  0,  0,  0}
 };
 
-clock x;
+broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], done[int[1, MAX_ROBOTS]];</declaration>
+	<template>
+		<name>OtherRobot</name>
+		<parameter>int[CUR_ROBOT + 1, MAX_ROBOTS] id</parameter>
+		<declaration>clock x;
 
 int[1, NUM_STATIONS + 1] step_index = 1;
-station_t cur_loc;
+int[1, NUM_STATIONS] cur_loc;
 int[0, NUM_STATIONS] dest;
 
 int[0, NUM_STATIONS] next_station() {
@@ -122,8 +130,8 @@ dest = next_station()</label>
 int[0, ALL] visited = 0;
 const int[0, ALL] init_visited = 0;
 
-station_t cur_loc;
-station_t dest;
+int[1, NUM_STATIONS] cur_loc;
+int[1, NUM_STATIONS] dest;
 
 bool all_nonend() {
     int[0, ALL] not_end = endstations ^ ALL;
@@ -143,18 +151,18 @@ bool allvisited() {
     return endstation_visited();
 }
 
-bool not_visited(station_t id) {
+bool not_visited(int[1, NUM_STATIONS] id) {
     int[0, ALL] is = visited &amp; (1 &lt;&lt; (id - 1));
 
     return is == 0;
 }
 
-void set_visited(station_t id) {
+void set_visited(int[1, NUM_STATIONS] id) {
     visited |= 1 &lt;&lt; (id - 1);
 }
 
 
-bool can_visit(station_t id) {
+bool can_visit(int[1, NUM_STATIONS] id) {
     if (endstation_visited()) {
         return false;
     }
@@ -179,12 +187,12 @@ bool more_visited() {
     return count &gt;= 3;
 }</declaration>
 		<location id="id5" x="-637" y="-246">
-			<name x="-663" y="-280">Choose</name>
+			<name x="-620" y="-238">Choose</name>
 			<committed/>
 		</location>
-		<location id="id6" x="-398" y="-246">
-			<name x="-433" y="-289">EnRoute</name>
-			<label kind="invariant" x="-527" y="-229">x &lt;= dist[cur_loc][dest] * UNCERTAINTY</label>
+		<location id="id6" x="-365" y="-246">
+			<name x="-400" y="-289">EnRoute</name>
+			<label kind="invariant" x="-494" y="-229">x &lt;= dist[cur_loc][dest] * UNCERTAINTY</label>
 		</location>
 		<location id="id7" x="-187" y="-51">
 			<name x="-170" y="-59">Waiting</name>
@@ -193,7 +201,16 @@ bool more_visited() {
 			<name x="-926" y="-263">Done</name>
 			<label kind="invariant" x="-926" y="-246">total' == 0</label>
 		</location>
-		<init ref="id5"/>
+		<location id="id9" x="-637" y="-374">
+			<name x="-647" y="-408">Start</name>
+			<committed/>
+		</location>
+		<init ref="id9"/>
+		<transition controllable="false">
+			<source ref="id9"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-629" y="-348">cur_loc = current_station()</label>
+		</transition>
 		<transition controllable="false">
 			<source ref="id5"/>
 			<target ref="id8"/>
@@ -218,14 +235,14 @@ set_visited(cur_loc)</label>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id6"/>
-			<label kind="select" x="-569" y="-297">id : station_t</label>
-			<label kind="guard" x="-569" y="-280">can_visit(id)</label>
-			<label kind="assignment" x="-569" y="-263">dest = id</label>
+			<label kind="select" x="-595" y="-297">id : int[1, NUM_STATIONS]</label>
+			<label kind="guard" x="-595" y="-280">can_visit(id)</label>
+			<label kind="assignment" x="-595" y="-263">dest = id</label>
 		</transition>
 	</template>
 	<template>
 		<name>Station</name>
-		<parameter>station_t station_id</parameter>
+		<parameter>int[1, NUM_STATIONS] station_id</parameter>
 		<declaration>const int MAX_QUEUE = 10;
 
 clock proc;
@@ -234,7 +251,7 @@ int[0, MAX_ROBOTS] list[MAX_QUEUE];
 int[0, MAX_QUEUE] num_in_queue = 0;
 
 // Put an element at the end of the queue
-void enqueue(robot_t element)
+void enqueue(int[1, MAX_ROBOTS] element)
 {
     list[num_in_queue++] = element;
 
@@ -257,23 +274,23 @@ void dequeue()
 }
 
 // Returns the front element of the queue
-robot_t front()
+int[1, MAX_ROBOTS] front()
 {
    return list[0];
 }</declaration>
-		<location id="id9" x="-442" y="-348">
+		<location id="id10" x="-442" y="-348">
 			<name x="-425" y="-374">Idle</name>
 			<label kind="invariant" x="-646" y="-340">proc &lt;= 6 * UNCERTAINTY</label>
 		</location>
-		<location id="id10" x="-654" y="-476">
+		<location id="id11" x="-654" y="-476">
 			<name x="-705" y="-510">CDeQ</name>
 			<committed/>
 		</location>
-		<init ref="id9"/>
+		<init ref="id10"/>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id9"/>
-			<label kind="select" x="-433" y="-255">id : robot_t</label>
+			<source ref="id10"/>
+			<target ref="id10"/>
+			<label kind="select" x="-433" y="-255">id : int[1, MAX_ROBOTS]</label>
 			<label kind="synchronisation" x="-433" y="-238">arr[station_id][id]?</label>
 			<label kind="assignment" x="-433" y="-221">enqueue(id)</label>
 			<nail x="-442" y="-263"/>
@@ -281,22 +298,22 @@ robot_t front()
 			<nail x="-255" y="-348"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id10"/>
-			<target ref="id9"/>
+			<source ref="id11"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-799" y="-433">num_in_queue &gt; 0</label>
 			<label kind="synchronisation" x="-799" y="-416">done[front()]!</label>
 			<label kind="assignment" x="-799" y="-399">dequeue()</label>
 			<nail x="-654" y="-348"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id10"/>
-			<target ref="id9"/>
+			<source ref="id11"/>
+			<target ref="id10"/>
 			<label kind="guard" x="-636" y="-510">num_in_queue == 0</label>
 			<nail x="-442" y="-476"/>
 		</transition>
 		<transition controllable="false">
-			<source ref="id9"/>
-			<target ref="id10"/>
+			<source ref="id10"/>
+			<target ref="id11"/>
 			<label kind="guard" x="-612" y="-399">proc &gt;= 6</label>
 			<label kind="assignment" x="-612" y="-416">proc = 0</label>
 		</transition>

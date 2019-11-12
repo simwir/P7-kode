@@ -14,7 +14,7 @@ target_link_libraries(robot
   stdc++fs
   wbt-translator
   config
-  ${JSONCPP_LIBRARIES}
+  jsoncpp
 )
 
 install(TARGETS robot DESTINATION bin)

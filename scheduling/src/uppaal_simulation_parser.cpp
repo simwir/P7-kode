@@ -23,8 +23,8 @@ std::queue<scheduling::TimeValuePair> scheduling::UppaalSimulationParser::findFi
 std::vector<scheduling::SimulationExpression>
 scheduling::UppaalSimulationParser::parse(const std::string &result, int formula_number)
 {
-    int startIndex = result.find("Verifying formula " + std::to_string(formula_number));
-    int stopIndex =
+    const size_t startIndex = result.find("Verifying formula " + std::to_string(formula_number));
+    const size_t stopIndex =
         result.find("Verifying formula " +
                     std::to_string(formula_number + 1)); // Equal to std::string::npos if not found.
 
