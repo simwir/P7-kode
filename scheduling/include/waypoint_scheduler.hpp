@@ -4,6 +4,7 @@
 #include "scheduler.hpp"
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
+#include "util/json.hpp"
 #include <memory>
 #include <queue>
 #include <thread>
@@ -14,10 +15,12 @@ namespace scheduling {
 enum class ActionType { Hold, Waypoint };
 
 struct Action {
-    Action(ActionType type, int value) : type(type), value(value) {}
-
     ActionType type;
     int value;
+
+    Json::Value to_json() const;
+    static Action from_json(const std::string &json);
+    static Action from_json(const Json::Value &json);
 };
 
 class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {

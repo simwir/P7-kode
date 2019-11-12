@@ -21,10 +21,6 @@ class RecievedMessageException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-struct InfoMap {
-    static InfoMap from_json(const Json::Value &) { return {}; };
-};
-
 class CannotOpenFileException : public std::exception {
     std::string message;
 
