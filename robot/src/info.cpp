@@ -42,8 +42,8 @@ robot::ControllerState robot::ControllerState::from_json(const Json::Value &json
 Json::Value robot::ControllerState::to_json() const
 {
     Json::Value val{Json::objectValue};
-    val["x"] = x;
-    val["y"] = y;
+    val["x"] = position.x;
+    val["y"] = position.y;
     val["stopped"] = is_stopped;
     return val;
 }

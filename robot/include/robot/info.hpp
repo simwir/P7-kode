@@ -20,15 +20,6 @@ struct InfoParseError : public std::exception {
     const char *what() const noexcept override { return _what.c_str(); }
 };
 
-struct ControllerState {
-    double x;
-    double y;
-    bool is_stopped;
-
-    Json::Value to_json() const;
-    static ControllerState from_json(const Json::Value &json);
-};
-ControllerState parse_controller_state(const std::string &s);
 class InvalidRobotInfo : public std::exception {
     std::string message;
 
@@ -40,6 +31,17 @@ class InvalidRobotInfo : public std::exception {
 struct Point {
     double x, y;
 };
+
+struct ControllerState {
+    Point position;
+    bool is_stopped;
+
+    ControllerState() = default;
+    ControllerState(double x, double y, bool is_stopped) : position(Point{x, y}), is_stopped(is_stopped) {}
+    Json::Value to_json() const;
+    static ControllerState from_json(const Json::Value &json);
+};
+ControllerState parse_controller_state(const std::string &s);
 
 struct Info {
     int id;

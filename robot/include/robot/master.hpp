@@ -6,10 +6,29 @@
 #include "robot/subscriber.hpp"
 #include "scheduling.hpp"
 #include "wbt-translator/webots_parser.hpp"
+#include "util/euclid.hpp"
 #include <tcp/client.hpp>
 
 #include <filesystem>
 #include <optional>
+
+const std::filesystem::path dynamic_conf = "dynamic_config.json";
+const std::filesystem::path static_conf = "static_config.json";
+
+#define DESTINATION "destination"
+#define CURRENT_WAYPOINT "current_waypoint"
+#define CURRENT_STATION "current_station"
+#define ROBOT_INFO_MAP "robot_info_map"
+#define SELF_STATE "self_state"
+
+#define STATIONS "stations"
+#define END_STATIONS "end_stations"
+#define VIAS "vias"
+#define NUMBER_OF_STATIONS "number_of_stations"
+#define NUMBER_OF_END_STATIONS "number_of_end_stations"
+#define NUMBER_OF_VIAS "number_of_vias"
+#define NUMBER_OF_WAYPOINTS "number_of_waypoints"
+
 
 namespace robot {
 class RecievedMessageException : public std::exception {
@@ -37,15 +56,17 @@ class Master {
            std::istream &world_file);
     void load_webots_to_config();
     void get_dynamic_state();
+    void update_dynamic_state();
+
     void request_broadcast_info();
-    void send_robot_info(const Info &robot_info);
+    void send_robot_info();
     std::string receive_broadcast_info();
 
     void request_controller_info();
     std::string receive_controller_info();
 
-    void write_static_config(const std::filesystem::path &path);
-    void write_dynamic_config(const std::filesystem::path &path);
+    void write_static_config();
+    void write_dynamic_config();
 
     void set_robot_destination(int);
 
@@ -61,6 +82,8 @@ class Master {
     Parser webots_parser;
     AST ast;
 
+    void broadcast_state();
+    robot::Info current_state;
     robot::InfoMap robot_info;
     robot::ControllerState controller_state;
 
@@ -74,13 +97,12 @@ class Master {
 
     bool running;
 
-    void broadcast_eta(double extracted_eta);
-    void broadcast_position(std::pair<double, double> pos);
-
     double get_webots_time();
     double current_webots_time = 0;
     double eta_start_time = 0;
     double hold_untill = 0;
+
+    int get_closest_waypoint(std::function<bool(Waypoint)> pred);
 };
 } // namespace robot
 #endif
