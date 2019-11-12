@@ -3,30 +3,30 @@
 
 #include <webots/DistanceSensor.hpp>
 #include <webots/GPS.hpp>
+#include <webots/LED.hpp>
 #include <webots/Lidar.hpp>
 #include <webots/Motor.hpp>
 #include <webots/Robot.hpp>
 #include <webots/Supervisor.hpp>
-#include <webots/LED.hpp>
 
 #include <array>
 #include <optional>
 #include <stdexcept>
-#include <vector>
 #include <utility>
+#include <vector>
 
-#include "lidar_wrapper.hpp"
 #include "geo/geo.hpp"
+#include "lidar_wrapper.hpp"
+#include "webots_server.hpp"
 
 constexpr auto NUM_SENSORS = 8;
 constexpr auto NUM_LEDS = 8;
 constexpr auto ANGLE_SENSITIVITY = 0.8;
 constexpr auto DESTINATION_BUFFER_DISTANCE = 0.05;
 
-
-enum class Direction {Left, Right, Straight};
-enum class Phase {Motion2Goal, Motion2Discontinuity, BoundaryFollowing};
-enum class DiscontinuityDirection {Left, Right};
+enum class Direction { Left, Right, Straight };
+enum class Phase { Motion2Goal, Motion2Discontinuity, BoundaryFollowing };
+enum class DiscontinuityDirection { Left, Right };
 
 class RobotController {
   public:
@@ -36,6 +36,8 @@ class RobotController {
     void run_simulation();
     Phase motion2goal();
     Phase boundary_following();
+
+    void communicate();
 
     void set_goal(const geo::GlobalPoint &point)
     {
@@ -50,7 +52,7 @@ class RobotController {
     geo::Angle get_facing_angle() const;
     geo::Angle get_angle_to_goal() const;
     geo::Angle get_relative_angle_to_goal() const;
-    geo::Angle get_angle_to_point(const geo::GlobalPoint& point) const;
+    geo::Angle get_angle_to_point(const geo::GlobalPoint &point) const;
     void update_dfollowed();
     bool clear();
     double dreach();
@@ -84,10 +86,13 @@ class RobotController {
     std::vector<std::optional<double>> lidar_range_values;
     std::vector<geo::RelPoint> point_cloud;
 
+    webots_server::Server server;
+
+    bool is_stopped = true;
     bool has_goal = false;
     geo::GlobalPoint goal;
 
-    int angle2index(const geo::Angle& angle) const
+    int angle2index(const geo::Angle &angle) const
     {
         return std::round(((angle.theta + PI) / (2 * PI)) * lidar_resolution);
     }
@@ -98,15 +103,16 @@ class RobotController {
         return geo::Angle{angle};
     }
 
-    std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>> get_discontinuity_points() const;
-    void go_towards_angle(const geo::Angle& angle);
+    std::vector<std::pair<geo::GlobalPoint, DiscontinuityDirection>>
+    get_discontinuity_points() const;
+    void go_towards_angle(const geo::Angle &angle);
     void go_to_discontinuity(geo::GlobalPoint point, DiscontinuityDirection dir);
 
     // actions
     void do_left_turn();
     void do_right_turn();
     void go_straight_ahead();
-    void go_adjusted_straight(const geo::Angle& angle);
+    void go_adjusted_straight(const geo::Angle &angle);
     void stop();
     void set_leds(Direction dir);
 
@@ -121,9 +127,8 @@ class RobotController {
 
     geo::GlobalPoint position;
 
-    void dump_readings_to_csv(const std::string& pcfilename = "point_cloud.csv",
-                              const std::string& rangefilename = "range_values.csv");
-
+    void dump_readings_to_csv(const std::string &pcfilename = "point_cloud.csv",
+                              const std::string &rangefilename = "range_values.csv");
 };
 
 #endif

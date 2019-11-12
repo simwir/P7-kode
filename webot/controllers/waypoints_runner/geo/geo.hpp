@@ -12,12 +12,12 @@ constexpr double PI = 3.1415926535;
 #endif
 
 namespace geo {
-    
+
 double constrain_angle(double angle);
 
 struct Angle {
     double theta;
-    Angle(const double angle) : theta(constrain_angle(angle)) { }
+    Angle(const double angle) : theta(constrain_angle(angle)) {}
     Angle() : theta(0) {}
 };
 

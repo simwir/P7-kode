@@ -41,10 +41,10 @@ double euclidean_dist(const RelPoint &p1, const RelPoint &p2)
 
 double constrain_angle(double angle)
 {
-   angle = std::fmod(angle + PI, 2 * PI);
-   if (angle < 0)
-       angle += 2 * PI;
-   return angle - PI;
+    angle = std::fmod(angle + PI, 2 * PI);
+    if (angle < 0)
+        angle += 2 * PI;
+    return angle - PI;
 }
 
 Angle operator+(const Angle a1, const Angle a2)
