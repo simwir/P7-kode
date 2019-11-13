@@ -26,6 +26,9 @@ void other_robot_waypoint_schedules(
     int* matrix); // * 2 because we expect to visit each waypoint at most
                                           // once and hold at most once at each waypoint.
 
+void __ON_CONSTRUCT__();
+void __ON_DESTRUCT__();
+
 #ifdef __cplusplus
 }
 #endif
