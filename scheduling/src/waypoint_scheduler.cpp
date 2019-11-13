@@ -43,24 +43,21 @@ scheduling::Action scheduling::Action::from_json(const Json::Value &json)
     return scheduling::Action{type, value};
 }
 
-void scheduling::WaypointScheduler::run()
+void scheduling::WaypointScheduler::start_worker()
 {
-    std::cerr << "Starting a new waypoint scheduling." << std::endl;
+    std::cerr << "WaypointScheduler: Starting a new waypoint scheduling." << std::endl;
 
-    std::cerr << "Executing..." << std::endl;
-    auto result = executor.execute();
-    if (!result.has_value()) {
-        return;
-    }
+    std::cerr << "WaypointScheduler: Executing..." << std::endl;
+    executor.execute([&](const std::string &result) {
+        std::cerr << "WaypointScheduler: Parsing..." << std::endl;
+        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
 
-    std::cerr << "Parsing..." << std::endl;
-    std::vector<scheduling::SimulationExpression> values = parser.parse(result.value(), 2);
+        std::cerr << "WaypointScheduler: Composing..." << std::endl;
+        std::vector<scheduling::Action> schedule = convertResult(values);
 
-    std::cerr << "Composing..." << std::endl;
-    std::vector<scheduling::Action> schedule = convertResult(values);
-
-    std::cerr << "Emitting..." << std::endl;
-    notify_subscribers(schedule);
+        std::cerr << "WaypointScheduler: Emitting..." << std::endl;
+        notify_subscribers(schedule);
+    });
 }
 
 std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(

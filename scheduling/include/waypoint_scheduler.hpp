@@ -7,7 +7,6 @@
 #include "util/json.hpp"
 #include <memory>
 #include <queue>
-#include <thread>
 #include <vector>
 
 namespace scheduling {
@@ -39,7 +38,7 @@ class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vect
     }
 
   private:
-    void start_worker() override { worker = std::thread{&WaypointScheduler::run, this}; }
+    void start_worker() override;
 
     void run();
     std::vector<scheduling::Action>

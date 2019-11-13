@@ -34,9 +34,7 @@ class EtaExtractor : public Scheduler<EtaSubscriber, double> {
   private:
     void notify_subscribers(const double &) override;
 
-    void start_worker() override { worker = std::thread{&EtaExtractor::run, this}; }
-
-    void run();
+    void start_worker() override;
 
     // TODO WIP while PR #22 is not yet merged.
     constexpr static auto *default_model_path = "waypoint_scheduling.xml";

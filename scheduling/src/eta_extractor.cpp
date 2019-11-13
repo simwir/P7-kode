@@ -6,19 +6,21 @@
 #include <thread>
 
 namespace scheduling {
-void EtaExtractor::run()
+void EtaExtractor::start_worker()
 {
-    while (!eta_computable()) {
-        using namespace std::chrono_literals;
-        std::this_thread::sleep_for(1s);
+    if (!eta_computable()) {
+        std::cerr << "WARNING: could not start eta extractor due to missing strategy file"
+                  << std::endl;
+        return;
     }
-    auto res = executor.execute();
-    std::regex eta_response{R"(.+= ([\d\.]+))"};
-    std::smatch eta_value;
-    if (res.has_value() && std::regex_search(res.value(), eta_value, eta_response)) {
-        // index 0 is the whole string
-        notify_subscribers(stod(eta_value[1]));
-    }
+    executor.execute([&](const std::string& res) {
+        std::regex eta_response{R"(.+= ([\d\.]+))"};
+        std::smatch eta_value;
+        if (std::regex_search(res, eta_value, eta_response)) {
+            // index 0 is the whole string
+            notify_subscribers(stod(eta_value[1]));
+        }
+    });
 }
 
 void EtaExtractor::notify_subscribers(const double &eta)

@@ -1,9 +1,9 @@
 // POSIX includes
 #include <errno.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <signal.h>
 
 // Other includes
 #include <iostream>
@@ -17,7 +17,7 @@ constexpr int PARENT_WRITE = 3;
 
 constexpr int NO_FLAGS = 0;
 
-std::optional<std::string> scheduling::UppaalExecutor::execute()
+void scheduling::UppaalExecutor::execute(std::function<void(const std::string&)> callback)
 {
     pid_t pid;
     int fd[4];
@@ -25,7 +25,7 @@ std::optional<std::string> scheduling::UppaalExecutor::execute()
     pipe(fd);
     pipe(fd + 2);
 
-    std::cerr << "forking... ";
+    std::cerr << "forking... \n";
     pid = fork();
     std::cerr << "done!" << std::endl;
 
@@ -46,61 +46,80 @@ std::optional<std::string> scheduling::UppaalExecutor::execute()
                                       ".");
         }
 
-        // child_pid = std::nullopt;
-        return "";
+        child_pid = std::nullopt;
     }
     else {
-        std::cerr << "Parent!" << std::endl;
-        //child_pid = pid;
+        std::cerr << "Parent to PID " << pid << std::endl;
+        child_pid = {pid};
         // Parent
         close(fd[CHILD_WRITE]);
         close(fd[CHILD_READ]);
 
         // Wait for completion
         std::cout << "Waiting for completion...\n";
-        int status;
-        waitpid(pid, &status, NO_FLAGS);
-        std::cout << "Scheduling complete with status " << status << ".\n";
+        worker = std::thread([&]() -> void {
+            int status;
+            int res = waitpid(pid, &status, NO_FLAGS);
+            if (res == -1) {
+                std::cerr << errno << std::endl;
+            }
+            child_pid = std::nullopt;
+            std::cout << "Scheduling complete with status " << status << ".\n";
 
-        if (WIFSIGNALED(status)) { //Is true if the pid was terminated by a signal
-            std::cerr << "was signaled\n";
-            //child_pid = {};
-            return std::nullopt;
-        }
+            if (WIFSIGNALED(status)) { // Is true if the pid was terminated by a signal
+                std::cerr << "was signaled\n";
+                child_pid = {};
+                return;
+            }
 
-        // Only do something if we actually did get a result
-        if (status != 0) {
+            // Only do something if we actually did get a result
+            if (status != 0) {
+                // Cleanup after use
+                close(fd[PARENT_WRITE]);
+                close(fd[PARENT_READ]);
+
+                throw SchedulingException{"Could not start verifyta."};
+            }
+
+            // Read all from pipe
+            std::stringstream ss;
+            char buffer[2048];
+            ssize_t bytes = 0;
+
+            while ((bytes = read(fd[PARENT_READ], buffer, 2048)) > 0) {
+                ss.write(buffer, bytes);
+            }
+
             // Cleanup after use
             close(fd[PARENT_WRITE]);
             close(fd[PARENT_READ]);
 
-            throw SchedulingException{"Could not start verifyta."};
-        }
-
-        // Read all from pipe
-        std::stringstream ss;
-        char buffer[2048];
-        ssize_t bytes = 0;
-
-        while ((bytes = read(fd[PARENT_READ], buffer, 2048)) > 0) {
-            ss.write(buffer, bytes);
-        }
-
-        // Cleanup after use
-        close(fd[PARENT_WRITE]);
-        close(fd[PARENT_READ]);
-
-        return ss.str();
+            callback(ss.str());
+        });
     }
 }
-bool scheduling::UppaalExecutor::abort() {
+bool scheduling::UppaalExecutor::abort()
+{
     if (child_pid) {
-        if (kill(*child_pid, SIGKILL) == 0) {
+        std::cerr << "killing\n";
+        if (kill(*child_pid, SIGTERM) == 0) {
+            std::cerr << "successfully killed :D" << std::endl;
             child_pid = std::nullopt;
             return true;
         }
-        // TODO report error?
-        return false;
+        else {
+            // ESRCH = process not found. Treat this as a success.
+            if (0 && errno == ESRCH) {
+                child_pid = std::nullopt;
+                return true;
+            }
+            else {
+                std::cerr << errno << std::endl;
+
+                return false;
+            }
+        }
     }
-    return false;
+    // success
+    return true;
 }

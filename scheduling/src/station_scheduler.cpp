@@ -19,24 +19,21 @@ worker.join();
 }
 }*/
 
-void StationScheduler::run()
+void StationScheduler::start_worker()
 {
-    std::cerr << "Starting a new station scheduling.\n";
+    std::cerr << "StationScheduler: Starting a new station scheduling.\n";
 
-    std::cerr << "Executing..." << std::endl;
-    auto result = executor.execute();
-    if (!result.has_value()) {
-        return;
-    }
+    std::cerr << "StationScheduler: Executing..." << std::endl;
+    executor.execute([&](const std::string &result) {
+        std::cerr << "StationScheduler: Parsing..." << std::endl;
+        std::vector<SimulationExpression> values = parser.parse(result, 2);
 
-    std::cerr << "Parsing..." << std::endl;
-    std::vector<SimulationExpression> values = parser.parse(result.value(), 2);
+        std::cerr << "StationScheduler: Composing..." << std::endl;
+        std::vector<int> schedule = convertResult(values);
 
-    std::cerr << "Composing..." << std::endl;
-    std::vector<int> schedule = convertResult(values);
-
-    std::cerr << "Emitting..." << std::endl;
-    notify_subscribers(schedule);
+        std::cerr << "StationScheduler: Emitting..." << std::endl;
+        notify_subscribers(schedule);
+    });
 }
 
 std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)

@@ -10,9 +10,12 @@
 
 namespace scheduling {
 
+
 template <class Subscriber, class Notification>
 class Scheduler {
-    static_assert(std::is_base_of<std::enable_shared_from_this<Subscriber>, Subscriber>::value, "subscriber type must enable shared from this.");
+    static_assert(std::is_base_of<std::enable_shared_from_this<Subscriber>, Subscriber>::value,
+                  "subscriber type must enable shared from this.");
+
   public:
     Scheduler(const char *model_path, const char *query_path) : executor(model_path, query_path) {}
     Scheduler(const std::filesystem::path &model_path, const std::filesystem::path &query_path)
@@ -26,13 +29,17 @@ class Scheduler {
         start_worker();
     }
 
-    void abort() { executor.abort(); };
+    void abort()
+    {
+        if (!executor.abort())
+            throw AbortException{""};
+    }
+
     void wait_for_result()
     {
-        if (worker.joinable()) {
-            worker.join();
-        }
-    };
+        executor.wait_for_result();
+    }
+
     void add_subscriber(std::shared_ptr<Subscriber> subscriber)
     {
         subscribers.push_back(subscriber->weak_from_this());
@@ -40,10 +47,8 @@ class Scheduler {
 
   protected:
     virtual void start_worker() = 0;
-    // virtual void run() = 0;
     std::vector<std::weak_ptr<Subscriber>> subscribers;
     UppaalExecutor executor;
-    std::thread worker;
     virtual void notify_subscribers(const Notification &) = 0;
     virtual ~Scheduler() = default;
 };
