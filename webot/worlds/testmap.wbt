@@ -199,3 +199,6 @@ Elisa3 {
   ]
   id 1
 }
+Robot {
+  controller "Wall_clock"
+}
