@@ -1,8 +1,9 @@
 #include "config/config_wrapper.hpp"
 #include "config/config.hpp"
 #include "util/log.hpp"
+
 #include <iostream>
-#include <typeinfo>
+#include <limits>
 
 Log log{"libconfig.log"};
 
@@ -67,7 +68,7 @@ CONFIG_GETTER(int32_t, int, dynamic_config, destination, 0);
 void endstation(int32_t number_of_stations, int8_t* arr) {
   load();
   try {
-    auto tmp = static_config.get<std::vector<bool>>("endstation");
+    static auto tmp = static_config.get<std::vector<bool>>("endstation");
     for (int i = 0; i < number_of_stations; i++) {
       arr[i] = tmp.at(i);
     }
@@ -80,7 +81,7 @@ void endstation(int32_t number_of_stations, int8_t* arr) {
 void station_visited(int32_t number_of_stations, int8_t* arr) {
   load();
   try {
-    auto tmp = dynamic_config.get<std::vector<bool>>("station_visited");
+    static auto tmp = dynamic_config.get<std::vector<bool>>("station_visited");
     for (int i = 0; i < number_of_stations; i++) {
       arr[i] = tmp.at(i);
     }
@@ -90,7 +91,7 @@ void station_visited(int32_t number_of_stations, int8_t* arr) {
   }
 }
 
-void station_dist(int32_t number_of_stations, int32_t* arr) {
+/*void station_dist(int32_t number_of_stations, int32_t* arr) {
   load();
   try {
     auto tmp = static_config.get<std::vector<std::vector<int>>>("station_dist");
@@ -103,12 +104,24 @@ void station_dist(int32_t number_of_stations, int32_t* arr) {
   catch (const std::exception& e) {
     log << e.what();
   }
+}*/
+
+int32_t get_station_dist(int32_t from, int32_t to) {
+  load();
+  try {
+    static auto dist = static_config.get<std::vector<std::vector<int>>>("station_dist");
+    return dist.at(from - 1).at(to - 1);
+  }
+  catch (const std::exception& e) {
+    log << e.what();
+    return std::numeric_limits<int>::max();
+  }
 }
 
 void station_schedule(int32_t number_of_stations, int32_t number_of_robots, int32_t* arr) {
   load();
   try {
-    auto tmp = dynamic_config.get<std::vector<std::vector<int>>>("station_schedule");
+    static auto tmp = dynamic_config.get<std::vector<std::vector<int>>>("station_schedule");
     for (int i = 0; i < number_of_robots - 1; i++) {
       for (int j = 0; j < number_of_stations; j++) {
         arr[i * number_of_stations + j] = tmp.at(i).at(j);
@@ -123,7 +136,7 @@ void station_schedule(int32_t number_of_stations, int32_t number_of_robots, int3
 void eta(int32_t number_of_robots, double* arr) {
   load();
   try {
-    auto tmp = dynamic_config.get<std::vector<double>>("eta");
+    static auto tmp = dynamic_config.get<std::vector<double>>("eta");
     for (int i = 0; i < number_of_robots - 1; i++) {
       arr[i] = tmp.at(i);
     }
@@ -136,7 +149,7 @@ void eta(int32_t number_of_robots, double* arr) {
 void waypoint_dist(int32_t number_of_waypoints, int32_t* arr) {
   load();
   try {
-    auto tmp = static_config.get<std::vector<std::vector<int>>>("waypoint_dist");
+    static auto tmp = static_config.get<std::vector<std::vector<int>>>("waypoint_dist");
     for (int i = 0; i < number_of_waypoints; i++) {
       for (int j = 0; j < number_of_waypoints; j++) {
         arr[i * number_of_waypoints + j] = tmp.at(i).at(j);
@@ -151,7 +164,7 @@ void waypoint_dist(int32_t number_of_waypoints, int32_t* arr) {
 void waypoint_visited(int32_t number_of_waypoints, int8_t* arr) {
   load();
   try {
-    auto tmp = dynamic_config.get<std::vector<bool>>("waypoint_visited");
+    static auto tmp = dynamic_config.get<std::vector<bool>>("waypoint_visited");
     for (int i = 0; i < number_of_waypoints; i++) {
       arr[i] = tmp.at(i);
     }
@@ -164,7 +177,7 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t* arr) {
 void station_waypoint(int32_t number_of_stations, int32_t* arr) {
   load();
   try {
-    auto tmp = static_config.get<std::vector<int>>("station_waypoint");
+    static auto tmp = static_config.get<std::vector<int>>("station_waypoint");
     for (int i = 0; i < number_of_stations; i++) {
       arr[i] = tmp.at(i);
     }
