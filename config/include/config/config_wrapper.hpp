@@ -1,30 +1,32 @@
 #ifndef CONFIG_WRAPPER_HPP
 #define CONFIG_WRAPPER_HPP
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int number_of_stations();
-int number_of_end_stations();
-int number_of_robots();
-int number_of_waypoints();
-int waypoint_passing_time();
-int station_passing_time();
-int current_station();
-int current_waypoint();
-int destination();
+int32_t number_of_stations();
+int32_t number_of_end_stations();
+int32_t number_of_robots();
+int32_t number_of_waypoints();
+int32_t waypoint_passing_time();
+int32_t station_passing_time();
+int32_t current_station();
+int32_t current_waypoint();
+int32_t destination();
 double uncertainty();
-void station_distance_matrix(int number_of_stations,
-                             int* matrix);
-void waypoint_distance_matrix(int number_of_waypoints,
-                              int* matrix);
-void other_robot_station_schedules(int number_of_robots, int number_of_stations,
-                                   int* matrix);
-void other_robot_waypoint_schedules(
-    int number_of_robots, int number_of_waypoints,
-    int* matrix); // * 2 because we expect to visit each waypoint at most
-                                          // once and hold at most once at each waypoint.
+
+int8_t* is_endstation();
+int8_t* station_visited();
+int32_t* station_dist();
+int32_t* station_schedule();
+int32_t* eta();
+int32_t* waypoint_dist();
+int32_t* waypoint_visited();
+int32_t* station_waypoint();
+int32_t* waypoint_schedule();
 
 void __ON_CONSTRUCT__();
 void __ON_DESTRUCT__();
