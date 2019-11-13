@@ -15,10 +15,20 @@ import "libconfig.so" {
 };
 
 const int NUM_STATIONS = number_of_stations();
+const int NUM_STATIONS_SQUARED = NUM_STATIONS * NUM_STATIONS;
 const int NUM_END_STATIONS = number_of_end_stations();
 const int MAX_ROBOTS = number_of_robots();
 const int STATION_PASSING_TIME = station_passing_time();
 const double UNCERTAINTY = uncertainty();
+const int SCHEDULE_SIZE = (MAX_ROBOTS - 1) * NUM_STATIONS;
+
+import "libconfig.so" {
+    void endstation(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
+    void station_visited(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
+    void station_dist(int num_stations, int&amp; arr[NUM_STATIONS_SQUARED]);
+    void station_schedule(int num_stations, int num_robot, double&amp; arr[SCHEDULE_SIZE]);
+    void eta(int num_robot, double&amp; arr[int[1, NUM_STATIONS]]);
+};
 
 // typedef int[1, NUM_STATIONS] station_t;
 // typedef int[1, MAX_ROBOTS] robot_t;
@@ -27,21 +37,15 @@ const int[1, MAX_ROBOTS] CUR_ROBOT = 1;
 
 // typedef int[CUR_ROBOT + 1, MAX_ROBOTS] other_robot_t;
 
-const bool is_endstation[int[1, NUM_STATIONS]] = {false, false, false, false, false, true, false, false, true, false};
-bool visited[int[1, NUM_STATIONS]] = {false, false, false, false, false, false, false, false, false, false};
+bool loaded = false;
+bool is_endstation[int[1, NUM_STATIONS]];
+bool visited[int[1, NUM_STATIONS]];
 
-const int dist[int[1, NUM_STATIONS]][int[1, NUM_STATIONS]] = {
-    {  0,  5,  7,  5,  4,  8,  2,  3,  9, 12 },
-    {  2,  0,  9, 12,  1,  2,  6,  3,  8,  4 },
-    {  8,  4,  0,  1,  2, 11,  1, 14, 18,  7 },
-    { 20,  4, 13,  0,  3, 12, 10,  6,  5, 16 },
-    {  2,  6, 17,  3,  0,  1,  7,  9, 16, 12 },
-    { 18, 11,  8, 14,  4,  0, 10, 13, 19,  5 },
-    {  9, 18, 14,  8,  3,  7,  0, 13,  6,  2 },
-    { 17, 10, 19,  5,  1, 12, 15,  0, 11, 20 },
-    { 17, 20,  5, 12, 16, 11, 13,  9,  0,  1 },
-    {  8, 10, 18,  7,  4,  6,  3, 14,  2,  0 }
-};
+int dist[NUM_STATIONS_SQUARED];
+
+int get_dist(int[1, NUM_STATIONS] from, int[1, NUM_STATIONS] to) {
+    return dist[(from - 1) * NUM_STATIONS + to - 1];
+}
 
 const int[0, NUM_STATIONS] schedule[int[CUR_ROBOT + 1, MAX_ROBOTS]][int[1, NUM_STATIONS]] = {
     {8,  7,  3,  9,  4,  5,  0,  0,  0,  0},
@@ -69,7 +73,7 @@ int[0, NUM_STATIONS] next_station() {
 }</declaration>
 		<location id="id0" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
-			<label kind="invariant" x="-484" y="-229">x &lt;= dist[cur_loc][dest] * UNCERTAINTY</label>
+			<label kind="invariant" x="-527" y="-229">x &lt;= get_dist(cur_loc, dest) * UNCERTAINTY</label>
 		</location>
 		<location id="id1" x="-187" y="-51">
 			<name x="-170" y="-59">Waiting</name>
@@ -89,7 +93,8 @@ int[0, NUM_STATIONS] next_station() {
 		<transition controllable="false">
 			<source ref="id4"/>
 			<target ref="id2"/>
-			<label kind="assignment" x="-629" y="-340">x = 0,
+			<label kind="guard" x="-629" y="-340">loaded</label>
+			<label kind="assignment" x="-629" y="-323">x = 0,
 dest = next_station()</label>
 		</transition>
 		<transition controllable="false">
@@ -108,7 +113,7 @@ dest = next_station()</label>
 		<transition controllable="false">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-178" y="-204">x &gt;= dist[cur_loc][dest]</label>
+			<label kind="guard" x="-178" y="-204">x &gt;= get_dist(cur_loc, dest)</label>
 			<label kind="synchronisation" x="-178" y="-187">arr[cur_loc][id]!</label>
 			<label kind="assignment" x="-178" y="-170">cur_loc = dest</label>
 			<nail x="-187" y="-246"/>
@@ -116,7 +121,7 @@ dest = next_station()</label>
 		<transition controllable="false">
 			<source ref="id2"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-561" y="-238">dest != 0</label>
+			<label kind="guard" x="-612" y="-238">dest != 0</label>
 		</transition>
 	</template>
 	<template>
@@ -160,6 +165,13 @@ bool can_visit(int[1, NUM_STATIONS] id) {
     }
 
     return !visited[id];
+}
+
+void set_global() {
+    endstation(NUM_STATIONS, is_endstation);
+    station_visited(NUM_STATIONS, visited);
+    station_dist(NUM_STATIONS, dist);
+    loaded = true;
 }</declaration>
 		<location id="id5" x="-637" y="-246">
 			<name x="-620" y="-238">Choose</name>
@@ -167,7 +179,7 @@ bool can_visit(int[1, NUM_STATIONS] id) {
 		</location>
 		<location id="id6" x="-365" y="-246">
 			<name x="-400" y="-289">EnRoute</name>
-			<label kind="invariant" x="-494" y="-229">x &lt;= dist[cur_loc][dest] * UNCERTAINTY</label>
+			<label kind="invariant" x="-527" y="-229">x &lt;= get_dist(cur_loc, dest) * UNCERTAINTY</label>
 		</location>
 		<location id="id7" x="-187" y="-51">
 			<name x="-170" y="-59">Waiting</name>
@@ -184,7 +196,8 @@ bool can_visit(int[1, NUM_STATIONS] id) {
 		<transition controllable="false">
 			<source ref="id9"/>
 			<target ref="id5"/>
-			<label kind="assignment" x="-629" y="-348">cur_loc = current_station()</label>
+			<label kind="assignment" x="-629" y="-348">cur_loc = current_station(),
+set_global()</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id5"/>
@@ -202,7 +215,7 @@ visited[cur_loc] = true</label>
 		<transition controllable="false">
 			<source ref="id6"/>
 			<target ref="id7"/>
-			<label kind="guard" x="-170" y="-204">x &gt;= dist[cur_loc][dest]</label>
+			<label kind="guard" x="-170" y="-204">x &gt;= get_dist(cur_loc, dest)</label>
 			<label kind="synchronisation" x="-170" y="-187">arr[cur_loc][CUR_ROBOT]!</label>
 			<label kind="assignment" x="-170" y="-170">cur_loc = dest</label>
 			<nail x="-187" y="-246"/>

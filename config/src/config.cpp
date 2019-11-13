@@ -6,32 +6,64 @@
 #include <vector>
 
 template <>
-std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &value)
+std::vector<double> config::convert_from_json<std::vector<double>>(const Json::Value &arr)
 {
-    if (value.type() != Json::ValueType::arrayValue) {
+    if (arr.type() != Json::ValueType::arrayValue) {
         throw config::InvalidValueException{};
     }
 
-    std::vector<int> result;
+    std::vector<double> result;
 
-    for (auto itr = value.begin(); itr != value.end(); itr++) {
-        result.push_back(value[itr.index()].asInt());
+    for (auto elem : arr) {
+        result.push_back(elem.asDouble());
     }
 
     return result;
 }
 
 template <>
-std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value &value)
+std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &arr)
 {
-    if (value.type() != Json::ValueType::arrayValue) {
+    if (arr.type() != Json::ValueType::arrayValue) {
+        throw config::InvalidValueException{};
+    }
+
+    std::vector<int> result;
+
+    for (auto elem : arr) {
+        result.push_back(elem.asInt());
+    }
+
+    return result;
+}
+
+template <>
+std::vector<std::vector<int>> config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
+{
+    if (arr.type() != Json::ValueType::arrayValue) {
+        throw config::InvalidValueException{};
+    }
+
+    std::vector<std::vector<int>> result;
+
+    for (auto elem : arr) {
+        result.push_back(config::convert_from_json<std::vector<int>>(elem));
+    }
+
+    return result;
+}
+
+template <>
+std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value &arr)
+{
+    if (arr.type() != Json::ValueType::arrayValue) {
         throw config::InvalidValueException{};
     }
 
     std::vector<bool> result;
 
-    for (auto itr = value.begin(); itr != value.end(); itr++) {
-        result.push_back(value[itr.index()].asBool());
+    for (auto elem : arr) {
+        result.push_back(elem.asBool());
     }
 
     return result;
@@ -95,6 +127,16 @@ std::vector<int> config::Config::get<std::vector<int>>(const std::string &key)
 }
 
 template <>
+std::vector<std::vector<int>> config::Config::get<std::vector<std::vector<int>>>(const std::string &key)
+{
+    if (!json.isMember(key)) {
+        throw config::InvalidKeyException{key};
+    }
+
+    return config::convert_from_json<std::vector<std::vector<int>>>(json[key]);
+}
+
+template <>
 std::vector<bool> config::Config::get<std::vector<bool>>(const std::string &key)
 {
     if (!json.isMember(key)) {
@@ -102,6 +144,16 @@ std::vector<bool> config::Config::get<std::vector<bool>>(const std::string &key)
     }
 
     return config::convert_from_json<std::vector<bool>>(json[key]);
+}
+
+template <>
+std::vector<double> config::Config::get<std::vector<double>>(const std::string &key)
+{
+    if (!json.isMember(key)) {
+        throw config::InvalidKeyException{key};
+    }
+
+    return config::convert_from_json<std::vector<double>>(json[key]);
 }
 
 template <>

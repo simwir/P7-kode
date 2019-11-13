@@ -18,18 +18,18 @@ int32_t current_waypoint();
 int32_t destination();
 double uncertainty();
 
-int8_t* is_endstation();
-int8_t* station_visited();
-int32_t* station_dist();
-int32_t* station_schedule();
-int32_t* eta();
-int32_t* waypoint_dist();
-int32_t* waypoint_visited();
-int32_t* station_waypoint();
-int32_t* waypoint_schedule();
+// Station schedule related
+void endstation(int32_t num_stations, int8_t* arr); // Length = number_of_stations
+void station_visited(int32_t num_stations, int8_t* arr); // Length = number_of_stations
+void station_dist(int32_t num_stations, int32_t* arr); // Length = number_of_stations ^ 2
+void station_schedule(int32_t num_stations, int32_t num_robots, int32_t* arr); // Length = (number_of_robots - 1) * number_of_stations
+void eta(int32_t num_robots, double* arr); // Length = (number_of_robots - 1)
 
-void __ON_CONSTRUCT__();
-void __ON_DESTRUCT__();
+// Waypoint schedule related
+void waypoint_dist(int32_t number_of_waypoints, int32_t* arr); // Length = number_of_waypoints ^ 2
+void waypoint_visited(int32_t number_of_stations, int8_t* arr); // Length = number_of_stations
+void station_waypoint(int32_t number_of_stations, int32_t* arr); // Length = number_of_stations
+void waypoint_schedule(int32_t number_of_waypoints, int32_t number_of_robots, int32_t* arr); // Length = (number_of_robots - 1) * number_of_waypoints * 4
 
 #ifdef __cplusplus
 }
