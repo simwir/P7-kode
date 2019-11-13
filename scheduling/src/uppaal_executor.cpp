@@ -94,13 +94,13 @@ std::optional<std::string> scheduling::UppaalExecutor::execute()
     }
 }
 bool scheduling::UppaalExecutor::abort() {
-    // if (child_pid) {
-    //     if (kill(*child_pid, SIGKILL) == 0) {
-    //         child_pid = std::nullopt;
-    //         return true;
-    //     }
-    //     // TODO report error?
-    //     return false;
-    // }
-    // return false;
+    if (child_pid) {
+        if (kill(*child_pid, SIGKILL) == 0) {
+            child_pid = std::nullopt;
+            return true;
+        }
+        // TODO report error?
+        return false;
+    }
+    return false;
 }

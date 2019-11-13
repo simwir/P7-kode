@@ -35,7 +35,7 @@ class UppaalExecutor {
   private:
     const std::filesystem::path model_path;
     const std::filesystem::path query_path;
-    //std::optional<int> child_pid;
+    std::optional<int> child_pid;
 };
 
 } // namespace scheduling
