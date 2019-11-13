@@ -30,14 +30,10 @@ class SendException : public std::exception {
 };
 
 class ReceiveException : public std::exception {
-    int err = 0;
     std::string msg;
 
   public:
-    ReceiveException(int err)
-        : err(err), msg("Could not read receive buffer: " + std::to_string(err))
-    {
-    }
+    ReceiveException(int err) : msg("Could not read receive buffer: " + std::to_string(err)) {}
 
     ReceiveException() : msg("Got 0 bytes") {}
 
