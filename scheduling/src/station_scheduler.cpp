@@ -23,8 +23,7 @@ void StationScheduler::start_worker()
 {
     std::cerr << "StationScheduler: Starting a new station scheduling.\n";
 
-    std::cerr << "StationScheduler: Executing..." << std::endl;
-    executor.execute([&](const std::string &result) {
+    auto callback = [&](const std::string &result) {
         std::cerr << "StationScheduler: Parsing..." << std::endl;
         std::vector<SimulationExpression> values = parser.parse(result, 2);
 
@@ -33,7 +32,9 @@ void StationScheduler::start_worker()
 
         std::cerr << "StationScheduler: Emitting..." << std::endl;
         notify_subscribers(schedule);
-    });
+    };
+    std::cerr << "StationScheduler: Executing..." << std::endl;
+    executor.execute(callback);
 }
 
 std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
@@ -71,6 +72,11 @@ std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExp
 
 void StationScheduler::notify_subscribers(const std::vector<int> &schedule)
 {
+    std::cerr << "notifying subs with \n";
+    for (auto v : schedule) {
+        std::cerr << " " << v;
+    }
+    std::cerr << std::endl;
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {
             sub->newSchedule(schedule);

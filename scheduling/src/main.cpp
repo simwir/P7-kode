@@ -67,42 +67,45 @@ int main(int argc, char *argv[])
         query_path = working_path / bin_loc / "waypoint_scheduling.q";
     }
 
-    scheduling::WaypointScheduler scheduler{model_path, query_path};
-    auto logSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
-
-    // Waypoints
-    scheduling::WaypointScheduler waypointScheduler;
-    auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
-
-    std::cout << "Adding waypoint subscriber\n";
-    waypointScheduler.add_subscriber(logWaypointSubscriber->shared_from_this());
-
-    std::cout << "Starting waypoint scheduler\n";
-    waypointScheduler.start();
+    scheduling::StationScheduler scheduler{model_path, query_path};
+    auto logSubscriber = std::make_shared<LogStationScheduleSubscriber>();
 
     // Stations
     scheduling::StationScheduler stationScheduler;
     auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
 
-    std::cout << "Adding station subscriber\n";
+    std::cout << "main: \tAdding station subscriber\n";
     stationScheduler.add_subscriber(logStationSubscriber->shared_from_this());
 
-    std::cout << "Starting station scheduler\n";
+    std::cout << "main: \tStarting station scheduler\n";
     stationScheduler.start();
+    //sleep(5);
+    //stationScheduler.start();
 
-    scheduling::EtaExtractor eta_extractor;
-    auto eta_logger = std::make_shared<LogEtaSubscriber>();
-    eta_extractor.add_subscriber(eta_logger->shared_from_this());
+    // Stations
+    // scheduling::StationScheduler stationScheduler;
+    // auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
 
-    std::cout << "Starting ETA extractor";
-    eta_extractor.start();
+    // std::cout << "main: \tAdding station subscriber\n";
+    // stationScheduler.add_subscriber(logStationSubscriber->shared_from_this());
 
-    sleep(120);
+    // std::cout << "main: \tStarting station scheduler\n";
+    // stationScheduler.start();
 
-    std::cout << "Stopping schedulers\n";
-    waypointScheduler.wait_for_result();
+    // scheduling::EtaExtractor eta_extractor;
+    // auto eta_logger = std::make_shared<LogEtaSubscriber>();
+    // eta_extractor.add_subscriber(eta_logger->shared_from_this());
+
+    // std::cout << "main: \tStarting ETA extractor";
+    // eta_extractor.start();
+
+    // //sleep(120);
+
+    std::cout << "main: \tStopping schedulers\n";
     stationScheduler.wait_for_result();
-    eta_extractor.wait_for_result();
+    // stationScheduler.wait_for_result();
+    // eta_extractor.wait_for_result();
 
+    std::cout << "main: \treturning from main" << std::endl;
     return 0;
 }

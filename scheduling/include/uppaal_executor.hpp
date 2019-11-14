@@ -36,7 +36,7 @@ class UppaalExecutor {
         : model_path(model_path), query_path(query_path)
     {
     }
-    void execute(std::function<void(const std::string&)>);
+    void execute(std::function<void(const std::string&)> callback);
 
     // return true if aborted successfully or there was nothing to abort.
     bool abort();
