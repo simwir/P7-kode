@@ -52,14 +52,25 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
         close(fd[PARENT_WRITE]);
 
         // Wait for completion
-        std::cout << "Waiting for completion...\n";
+        std::cout << "Waiting for completion..." << std::endl;
         worker = std::thread([&, parent_read = fd[PARENT_READ], callback]() -> void {
             int status;
-            if (!has_pid())
-                return;
+
+            std::unique_lock get_pid{pid_lock};
+            if (!child_pid.has_value()) {
+                return; // TODO better behaviour?
+            }
+            else {
+                pid = child_pid.value();
+            }
+            get_pid.unlock();
+
             int res = waitpid(pid, &status, NO_FLAGS);
             if (res == -1) {
-                std::cerr << errno << std::endl;
+                std::cerr << "ERROR: waitpid failed with errno " << errno << std::endl;
+                if (errno == ECHILD) {
+                    std::cerr << "ERROR: ECHILD (no child processes) for PID " << pid << std::endl;
+                }
             }
             reset_pid();
             std::cout << "Scheduling complete with status " << status << ".\n";
@@ -70,7 +81,7 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
             }
 
             // Only do something if we actually did get a result
-            if (status != 0) {
+            if (!WIFEXITED(status) && !(WEXITSTATUS(status) == EXIT_SUCCESS)) {
                 // Cleanup after use
                 close(parent_read);
 
@@ -110,12 +121,12 @@ bool scheduling::UppaalExecutor::abort()
         }
         else {
             // ESRCH = process not found. Treat this as a success.
-            if (0 && errno == ESRCH) {
+            if (errno == ESRCH) {
                 child_pid = std::nullopt;
                 return true;
             }
             else {
-                std::cerr << errno << std::endl;
+                std::cerr << "WARNING: could not abort. errno: " << errno << std::endl;
 
                 return false;
             }

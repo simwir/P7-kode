@@ -131,6 +131,12 @@ void tcp::Connection::close()
     open = false;
 }
 
+std::string tcp::Connection::atomic_blocking_request(const std::string& msg, int flags) {
+    std::scoped_lock _{con_lock};
+    send(msg, flags);
+    return receive_blocking();
+}
+
 tcp::Connection::~Connection()
 {
     if (open)

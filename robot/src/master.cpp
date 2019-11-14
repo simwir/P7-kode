@@ -227,7 +227,7 @@ void robot::Master::main_loop()
 
     get_dynamic_state();
 
-    dynamic_config.set(DESTINATION, station_subscriber->get().at(0));
+    dynamic_config.set(DESTINATION, station_subscriber->read().at(0));
     dynamic_config.set(CURRENT_WAYPOINT, get_closest_waypoint([](auto) { return true; }));
     write_dynamic_config();
     std::cerr << "scheduling waypoint\n";
@@ -247,7 +247,6 @@ void robot::Master::main_loop()
         //    then reschedule waypoints
         if (station_subscriber->is_dirty()) {
             got_fresh_info = true;
-            station_subscriber->get();
             // TODO save station schedule to file
             // Assuming that there will not be two HOLD instructions in a row.
             scheduling::Action act = waypoint_subscriber->get().front();
@@ -255,7 +254,7 @@ void robot::Master::main_loop()
                 act = waypoint_subscriber->get().at(1);
             }
             dynamic_config.set(CURRENT_WAYPOINT, act.value);
-            dynamic_config.set(DESTINATION, station_subscriber->get().at(0));
+            dynamic_config.set(DESTINATION, station_subscriber->read().at(0));
             waypoint_scheduler.start();
         }
 
@@ -282,6 +281,7 @@ void robot::Master::main_loop()
             // TODO broadcast position info
 
             if (waypoint_subscriber->get().empty()) {
+                std::cerr << "NOTE: waiting for waypoint result" << std::endl;
                 waypoint_scheduler.wait_for_result();
             }
 
@@ -323,8 +323,7 @@ void robot::Master::main_loop()
 
 double robot::Master::get_webots_time()
 {
-    webots_clock_client->send("get_time");
-    auto msg = webots_clock_client->receive_blocking();
+    auto msg = webots_clock_client->atomic_blocking_request("get_time");
     std::stringstream ss{msg};
     double time;
     ss >> time;

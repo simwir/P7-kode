@@ -5,6 +5,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <mutex>
 #include <vector>
 
 namespace tcp {
@@ -62,6 +63,8 @@ class Connection : public std::enable_shared_from_this<Connection> {
     ssize_t send(const std::string &message, int flags = 0);
     void close();
 
+    std::string atomic_blocking_request(const std::string &message, int flags = 0);
+
     bool closed();
 
   protected:
@@ -74,6 +77,7 @@ class Connection : public std::enable_shared_from_this<Connection> {
     std::string obuffer;
     bool open = true;
     bool ready;
+    std::mutex con_lock;
 
     friend class Server;
 };

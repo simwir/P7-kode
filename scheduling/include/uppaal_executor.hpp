@@ -68,6 +68,11 @@ class UppaalExecutor {
         return child_pid.has_value();
     }
 
+    int get_pid() {
+        std::scoped_lock _{pid_lock};
+        return *child_pid;
+    }
+
     std::thread worker;
     std::mutex pid_lock;
     std::optional<int> child_pid;
