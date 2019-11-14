@@ -7,21 +7,24 @@
 #include "waypoint_scheduler.hpp"
 
 #include <deque>
+#include <mutex>
 
 namespace robot {
 class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
-                               public Pollable<std::deque<int>> {
+                               public Pollable<std::vector<int>> {
+    std::mutex mutex;
     void newSchedule(const std::vector<int> &schedule) override {
-        std::deque<int> queue{std::begin(schedule), std::end(schedule)};
-        reset(queue);
+        std::scoped_lock _{mutex};
+        reset(schedule);
     }
 };
 
 class AsyncWaypointSubscriber : public scheduling::WaypointScheduleSubscriber,
-                                public Pollable<std::deque<scheduling::Action>> {
+                                public Pollable<std::vector<scheduling::Action>> {
+    std::mutex mutex;
     void newSchedule(const std::vector<scheduling::Action> &schedule) override {
-        std::deque<scheduling::Action> queue{std::begin(schedule), std::end(schedule)};
-        reset(queue);
+        std::scoped_lock _{mutex};
+        reset(schedule);
     }
 };
 

@@ -40,6 +40,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
     PDSClient.send("get_robot," + std::to_string(robot_id));
     port_to_controller = PDSClient.receive_blocking();
+    std::cerr << port_to_controller << std::endl;
     // TODO handle/report error if PDS does not know a port yet
 
     // Connecting to the WeBots Controller
@@ -149,10 +150,8 @@ void robot::Master::request_controller_info()
 
 void robot::Master::send_robot_info()
 {
-    current_state.station_plan = std::vector<int>{std::begin(station_subscriber->get()),
-                                                  std::end(station_subscriber->get())};
-    current_state.waypoint_plan = std::vector<scheduling::Action>{
-        std::begin(waypoint_subscriber->get()), std::end(waypoint_subscriber->get())};
+    current_state.station_plan = station_subscriber->get();
+    current_state.waypoint_plan = waypoint_subscriber->get();
     current_state.location = controller_state.position;
     broadcast_client.send("post_robot_info," + current_state.to_json().toStyledString());
 }
@@ -287,7 +286,7 @@ void robot::Master::main_loop()
             }
 
             scheduling::Action current_waypoint = waypoint_subscriber->get().front();
-            waypoint_subscriber->get().pop_front();
+            waypoint_subscriber->get().erase(std::begin(waypoint_subscriber->get()));
             scheduling::Action next_waypoint = waypoint_subscriber->get().front();
 
             auto is_station = [&](int id) {

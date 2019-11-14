@@ -1,10 +1,10 @@
 // POSIX includes
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 // Other includes
 #include <iostream>
@@ -43,11 +43,9 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
             throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) +
                                       ".");
         }
-
-        child_pid = std::nullopt;
     }
     else {
-        child_pid = {pid};
+        reset_pid(pid);
         // Parent
         close(fd[CHILD_WRITE]);
         close(fd[CHILD_READ]);
@@ -55,18 +53,19 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
         // Wait for completion
         std::cout << "Waiting for completion...\n";
-        worker = std::thread([&, parent_read=fd[PARENT_READ], callback]() -> void {
+        worker = std::thread([&, parent_read = fd[PARENT_READ], callback]() -> void {
             int status;
+            if (!has_pid())
+                return;
             int res = waitpid(pid, &status, NO_FLAGS);
             if (res == -1) {
                 std::cerr << errno << std::endl;
             }
-            child_pid = std::nullopt;
+            reset_pid();
             std::cout << "Scheduling complete with status " << status << ".\n";
 
             if (WIFSIGNALED(status)) { // Is true if the pid was terminated by a signal
                 std::cerr << "was signaled" << std::endl;
-                child_pid = {};
                 return;
             }
 
@@ -100,6 +99,7 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
 bool scheduling::UppaalExecutor::abort()
 {
+    std::scoped_lock _{pid_lock};
     if (child_pid) {
         if (kill(*child_pid, SIGTERM) == 0) {
             child_pid = std::nullopt;

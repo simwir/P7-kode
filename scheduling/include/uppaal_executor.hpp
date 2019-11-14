@@ -1,12 +1,13 @@
 #ifndef UPPAAL_EXECUTOR_HPP
 #define UPPAAL_EXECUTOR_HPP
 
-#include <functional>
-#include <thread>
 #include <filesystem>
+#include <functional>
 #include <iostream>
+#include <mutex>
 #include <optional>
 #include <string>
+#include <thread>
 
 namespace scheduling {
 
@@ -36,20 +37,17 @@ class UppaalExecutor {
         : model_path(model_path), query_path(query_path)
     {
     }
-    void execute(std::function<void(const std::string&)> callback);
+    void execute(std::function<void(const std::string &)> callback);
 
     // return true if aborted successfully or there was nothing to abort.
     bool abort();
 
-    bool joinable() const {
-        return worker.joinable();
-    }
+    bool joinable() const { return worker.joinable(); }
 
-    void join() {
-        worker.join();
-    }
+    void join() { worker.join(); }
 
-    void wait_for_result() {
+    void wait_for_result()
+    {
         if (joinable()) {
             join();
         }
@@ -59,7 +57,19 @@ class UppaalExecutor {
     const std::filesystem::path model_path;
     const std::filesystem::path query_path;
 
+    void reset_pid(std::optional<int> val = std::nullopt)
+    {
+        std::scoped_lock _{pid_lock};
+        child_pid = val;
+    }
+    bool has_pid()
+    {
+        std::scoped_lock _{pid_lock};
+        return child_pid.has_value();
+    }
+
     std::thread worker;
+    std::mutex pid_lock;
     std::optional<int> child_pid;
 };
 
