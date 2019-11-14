@@ -118,18 +118,16 @@ int32_t get_station_dist(int32_t from, int32_t to) {
   }
 }
 
-void station_schedule(int32_t number_of_stations, int32_t number_of_robots, int32_t* arr) {
+int32_t next_robot_station(int32_t robot, int32_t step) {
   load();
   try {
     static auto tmp = dynamic_config.get<std::vector<std::vector<int>>>("station_schedule");
-    for (int i = 0; i < number_of_robots - 1; i++) {
-      for (int j = 0; j < number_of_stations; j++) {
-        arr[i * number_of_stations + j] = tmp.at(i).at(j);
-      }
-    }
+    auto robot_schedule = tmp.at(robot - 1);
+    return robot_schedule.size() > step ? robot_schedule.at(step) : 0;
   }
   catch (const std::exception& e) {
     log << e.what();
+    return 0;
   }
 }
 

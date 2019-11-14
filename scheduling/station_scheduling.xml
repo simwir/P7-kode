@@ -12,6 +12,7 @@ import "libconfig.so" {
     int current_station();
     int station_passing_time();
     double uncertainty();
+    int next_robot_station(int robot, int step);
     int get_station_dist(int from, int to);
 };
 
@@ -21,13 +22,11 @@ const int NUM_END_STATIONS = number_of_end_stations();
 const int MAX_ROBOTS = number_of_robots();
 const int STATION_PASSING_TIME = station_passing_time();
 const double UNCERTAINTY = uncertainty();
-const int SCHEDULE_SIZE = (MAX_ROBOTS - 1) * NUM_STATIONS;
 
 import "libconfig.so" {
     void endstation(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
     void station_visited(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
     // void station_dist(int num_stations, int&amp; arr[NUM_STATIONS_SQUARED]);
-    void station_schedule(int num_stations, int num_robot, double&amp; arr[SCHEDULE_SIZE]);
     void eta(int num_robot, double&amp; arr[int[1, NUM_STATIONS]]);
 };
 
@@ -48,29 +47,22 @@ int get_dist(int[1, NUM_STATIONS] from, int[1, NUM_STATIONS] to) {
     return dist[(from - 1) * NUM_STATIONS + to - 1];
 }*/
 
-const int[0, NUM_STATIONS] schedule[int[CUR_ROBOT + 1, MAX_ROBOTS]][int[1, NUM_STATIONS]] = {
-    {8,  7,  3,  9,  4,  5,  0,  0,  0,  0},
-    {7,  1,  6,  4,  3, 10,  8,  9,  5,  0},
-    {8,  6,  7,  2,  0,  0,  0,  0,  0,  0},
-    {7,  6,  2,  0,  0,  0,  0,  0,  0,  0}
-};
-
 broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], done[int[1, MAX_ROBOTS]];</declaration>
 	<template>
 		<name>OtherRobot</name>
 		<parameter>int[CUR_ROBOT + 1, MAX_ROBOTS] id</parameter>
 		<declaration>clock x;
 
-int[1, NUM_STATIONS + 1] step_index = 1;
+int[0, NUM_STATIONS] step_index = 0;
 int[1, NUM_STATIONS] cur_loc;
 int[0, NUM_STATIONS] dest;
 
 int[0, NUM_STATIONS] next_station() {
-    if (step_index == NUM_STATIONS + 1) {
+    if (step_index == NUM_STATIONS) {
         return 0;
     }
 
-    return schedule[id][step_index++];
+    return next_robot_station(id, step_index++);
 }</declaration>
 		<location id="id0" x="-398" y="-246">
 			<name x="-433" y="-289">EnRoute</name>
@@ -326,7 +318,7 @@ system OtherRobot, Robot, Station;
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=150] (&lt;&gt; Robot.Done)</formula>
+			<formula>Pr[&lt;=150] (&lt;&gt; OtherRobot(2).cur_loc == 8)</formula>
 			<comment></comment>
 		</query>
 		<query>
