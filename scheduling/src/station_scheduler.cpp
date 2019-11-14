@@ -72,11 +72,6 @@ std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExp
 
 void StationScheduler::notify_subscribers(const std::vector<int> &schedule)
 {
-    std::cerr << "notifying subs with \n";
-    for (auto v : schedule) {
-        std::cerr << " " << v;
-    }
-    std::cerr << std::endl;
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {
             sub->newSchedule(schedule);

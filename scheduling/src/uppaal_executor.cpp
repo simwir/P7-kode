@@ -26,12 +26,9 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
     pipe(fd);
     pipe(fd + 2);
 
-    std::cerr << "forking... \n";
     pid = fork();
-    std::cerr << "done!" << std::endl;
 
     if (pid == 0) {
-        std::cerr << "Child!" << std::endl;
         // Child
         dup2(fd[CHILD_WRITE], STDOUT_FILENO);
         dup2(fd[CHILD_READ], STDIN_FILENO);
@@ -50,7 +47,6 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
         child_pid = std::nullopt;
     }
     else {
-        std::cerr << "Parent to PID " << pid << std::endl;
         child_pid = {pid};
         // Parent
         close(fd[CHILD_WRITE]);
@@ -87,24 +83,17 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
             char buffer[2048];
             ssize_t bytes = 0;
 
-            /*int flags = fcntl(fd[PARENT_READ], F_GETFL, 0);
-              fcntl(fd[PARENT_READ], F_SETFL, flags | O_NONBLOCK);*/
             while ((bytes = read(parent_read, buffer, 2048)) > 0) {
-                //std::cerr << buffer << std::endl;
                 ss.write(buffer, bytes);
             }
             if (errno == EAGAIN) {
                 std::cerr << "ERROR: verifyta did not provide any input" << std::endl;
             }
 
-            std::cout << ss.str() << std::endl;
-
             // Cleanup after use
             close(parent_read);
 
-            std::cerr << "invoking callback" << std::endl;
             callback(ss.str());
-            std::cerr << "callback done" << std::endl;
         });
     }
 }
@@ -112,11 +101,10 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 bool scheduling::UppaalExecutor::abort()
 {
     if (child_pid) {
-        std::cerr << "killing\n";
         if (kill(*child_pid, SIGTERM) == 0) {
-            std::cerr << "successfully killed :D" << std::endl;
             child_pid = std::nullopt;
 
+            // force join the thread to reset thread state.
             wait_for_result();
             return true;
         }
