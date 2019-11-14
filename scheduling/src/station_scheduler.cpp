@@ -11,36 +11,30 @@
 extern int errno;
 
 namespace scheduling {
-void StationScheduler::start()
+
+/*void StationScheduler::wait_for_schedule()
 {
-    worker = std::thread(&StationScheduler::run, this);
+if (worker.joinable()) {
+worker.join();
 }
+}*/
 
-void StationScheduler::wait_for_schedule()
+void StationScheduler::start_worker()
 {
-    worker.join();
-}
+    std::cerr << "StationScheduler: Starting a new station scheduling.\n";
 
-void StationScheduler::addSubscriber(std::shared_ptr<StationScheduleSubscriber> subscriber)
-{
-    subscribers.push_back(subscriber->weak_from_this());
-}
+    auto callback = [&](const std::string &result) {
+        std::cerr << "StationScheduler: Parsing..." << std::endl;
+        std::vector<SimulationExpression> values = parser.parse(result, 2);
 
-void StationScheduler::run()
-{
-    std::cout << "Starting a new waypoint scheduling.\n";
+        std::cerr << "StationScheduler: Composing..." << std::endl;
+        std::vector<int> schedule = convertResult(values);
 
-    std::cout << "Executing..." << std::endl;
-    std::string result = executor.execute();
-
-    std::cout << "Parsing..." << std::endl;
-    std::vector<SimulationExpression> values = parser.parse(result, 2);
-
-    std::cout << "Composing..." << std::endl;
-    std::vector<int> schedule = convertResult(values);
-
-    std::cout << "Emitting..." << std::endl;
-    emitSchedule(schedule);
+        std::cerr << "StationScheduler: Emitting..." << std::endl;
+        notify_subscribers(schedule);
+    };
+    std::cerr << "StationScheduler: Executing..." << std::endl;
+    executor.execute(callback);
 }
 
 std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
@@ -76,7 +70,7 @@ std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExp
     return schedule;
 }
 
-void StationScheduler::emitSchedule(const std::vector<int> &schedule)
+void StationScheduler::notify_subscribers(const std::vector<int> &schedule)
 {
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {

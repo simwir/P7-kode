@@ -1,8 +1,10 @@
 // POSIX includes
 #include <errno.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 // Other includes
 #include <iostream>
@@ -16,7 +18,7 @@ constexpr int PARENT_WRITE = 3;
 
 constexpr int NO_FLAGS = 0;
 
-std::string scheduling::UppaalExecutor::execute()
+void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)> callback)
 {
     pid_t pid;
     int fd[4];
@@ -42,41 +44,83 @@ std::string scheduling::UppaalExecutor::execute()
                                       ".");
         }
 
-        return "";
+        child_pid = std::nullopt;
     }
     else {
+        child_pid = {pid};
         // Parent
         close(fd[CHILD_WRITE]);
         close(fd[CHILD_READ]);
+        close(fd[PARENT_WRITE]);
 
         // Wait for completion
         std::cout << "Waiting for completion...\n";
-        int status;
-        waitpid(pid, &status, NO_FLAGS);
-        std::cout << "Scheduling complete with status " << status << ".\n";
+        worker = std::thread([&, parent_read=fd[PARENT_READ], callback]() -> void {
+            int status;
+            int res = waitpid(pid, &status, NO_FLAGS);
+            if (res == -1) {
+                std::cerr << errno << std::endl;
+            }
+            child_pid = std::nullopt;
+            std::cout << "Scheduling complete with status " << status << ".\n";
 
-        // Only do something if we actually did get a result
-        if (status != 0) {
+            if (WIFSIGNALED(status)) { // Is true if the pid was terminated by a signal
+                std::cerr << "was signaled" << std::endl;
+                child_pid = {};
+                return;
+            }
+
+            // Only do something if we actually did get a result
+            if (status != 0) {
+                // Cleanup after use
+                close(parent_read);
+
+                throw SchedulingException{"Could not start verifyta."};
+            }
+
+            // Read all from pipe
+            std::stringstream ss;
+            char buffer[2048];
+            ssize_t bytes = 0;
+
+            while ((bytes = read(parent_read, buffer, 2048)) > 0) {
+                ss.write(buffer, bytes);
+            }
+            if (errno == EAGAIN) {
+                std::cerr << "ERROR: verifyta did not provide any input" << std::endl;
+            }
+
             // Cleanup after use
-            close(fd[PARENT_WRITE]);
-            close(fd[PARENT_READ]);
+            close(parent_read);
 
-            throw SchedulingException{"Could not start verifyta."};
-        }
-
-        // Read all from pipe
-        std::stringstream ss;
-        char buffer[2048];
-        ssize_t bytes = 0;
-
-        while ((bytes = read(fd[PARENT_READ], buffer, 2048)) > 0) {
-            ss.write(buffer, bytes);
-        }
-
-        // Cleanup after use
-        close(fd[PARENT_WRITE]);
-        close(fd[PARENT_READ]);
-
-        return ss.str();
+            callback(ss.str());
+        });
     }
+}
+
+bool scheduling::UppaalExecutor::abort()
+{
+    if (child_pid) {
+        if (kill(*child_pid, SIGTERM) == 0) {
+            child_pid = std::nullopt;
+
+            // force join the thread to reset thread state.
+            wait_for_result();
+            return true;
+        }
+        else {
+            // ESRCH = process not found. Treat this as a success.
+            if (0 && errno == ESRCH) {
+                child_pid = std::nullopt;
+                return true;
+            }
+            else {
+                std::cerr << errno << std::endl;
+
+                return false;
+            }
+        }
+    }
+    // success
+    return true;
 }

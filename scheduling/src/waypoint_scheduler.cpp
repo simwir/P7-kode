@@ -43,37 +43,21 @@ scheduling::Action scheduling::Action::from_json(const Json::Value &json)
     return scheduling::Action{type, value};
 }
 
-void scheduling::WaypointScheduler::start()
+void scheduling::WaypointScheduler::start_worker()
 {
-    worker = std::thread(&WaypointScheduler::run, this);
-}
+    std::cerr << "WaypointScheduler: Starting a new waypoint scheduling." << std::endl;
 
-void scheduling::WaypointScheduler::wait_for_schedule()
-{
-    worker.join();
-}
+    std::cerr << "WaypointScheduler: Executing..." << std::endl;
+    executor.execute([&](const std::string &result) {
+        std::cerr << "WaypointScheduler: Parsing..." << std::endl;
+        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
 
-void scheduling::WaypointScheduler::addSubscriber(
-    std::shared_ptr<scheduling::WaypointScheduleSubscriber> subscriber)
-{
-    subscribers.push_back(subscriber->weak_from_this());
-}
+        std::cerr << "WaypointScheduler: Composing..." << std::endl;
+        std::vector<scheduling::Action> schedule = convertResult(values);
 
-void scheduling::WaypointScheduler::run()
-{
-    std::cout << "Starting a new waypoint scheduling." << std::endl;
-
-    std::cout << "Executing..." << std::endl;
-    std::string result = executor.execute();
-
-    std::cout << "Parsing..." << std::endl;
-    std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
-
-    std::cout << "Composing..." << std::endl;
-    std::vector<scheduling::Action> schedule = convertResult(values);
-
-    std::cout << "Emitting..." << std::endl;
-    emitSchedule(schedule);
+        std::cerr << "WaypointScheduler: Emitting..." << std::endl;
+        notify_subscribers(schedule);
+    });
 }
 
 std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
@@ -138,7 +122,8 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
     return schedule;
 }
 
-void scheduling::WaypointScheduler::emitSchedule(const std::vector<scheduling::Action> &schedule)
+void scheduling::WaypointScheduler::notify_subscribers(
+    const std::vector<scheduling::Action> &schedule)
 {
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {

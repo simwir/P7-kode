@@ -1,12 +1,12 @@
 #ifndef WAYPOINT_SCHEDULER_HPP
 #define WAYPOINT_SCHEDULER_HPP
 
+#include "scheduler.hpp"
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
 #include "util/json.hpp"
 #include <memory>
 #include <queue>
-#include <thread>
 #include <vector>
 
 namespace scheduling {
@@ -28,28 +28,23 @@ class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointS
     virtual ~WaypointScheduleSubscriber() = default;
 };
 
-class WaypointScheduler {
+class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vector<Action>> {
   public:
-    WaypointScheduler() : executor("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
+    WaypointScheduler() : Scheduler("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
     WaypointScheduler(const std::filesystem::path &model_path,
                       const std::filesystem::path &query_path)
-        : executor(model_path, query_path)
+        : Scheduler(model_path, query_path)
     {
     }
-    void start();
-    void wait_for_schedule();
-    void addSubscriber(std::shared_ptr<WaypointScheduleSubscriber> subscriber);
 
   private:
+    void start_worker() override;
+
     void run();
     std::vector<scheduling::Action>
     convertResult(const std::vector<scheduling::SimulationExpression> &values);
-    void emitSchedule(const std::vector<Action> &schedule);
+    void notify_subscribers(const std::vector<Action> &) override;
 
-    std::thread worker;
-    std::vector<std::weak_ptr<WaypointScheduleSubscriber>> subscribers;
-
-    UppaalExecutor executor;
     UppaalSimulationParser parser;
 };
 
