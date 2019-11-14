@@ -1,3 +1,21 @@
+/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 #include <algorithm>
 #include <exception>
 #include <iostream>
@@ -9,15 +27,47 @@
 
 extern int errno;
 
+Json::Value scheduling::Action::to_json() const
+{
+    Json::Value json;
+
+    json["type"] = type == scheduling::ActionType::Hold ? "Hold" : "Waypoint";
+    json["value"] = value;
+
+    return json;
+}
+
+scheduling::Action scheduling::Action::from_json(const std::string &json)
+{
+    std::stringstream ss(json);
+    Json::Value root;
+    ss >> root;
+
+    return scheduling::Action::from_json(root);
+}
+
+scheduling::Action scheduling::Action::from_json(const Json::Value &json)
+{
+    std::string type_str = json["type"].asString();
+
+    if (!(type_str.compare("Hold") == 0 || type_str.compare("Waypoint") == 0)) {
+        throw JsonConversionException{};
+    }
+
+    scheduling::ActionType type =
+        type_str == "Hold" ? scheduling::ActionType::Hold : scheduling::ActionType::Waypoint;
+    int value = json["value"].asInt();
+
+    return scheduling::Action{type, value};
+}
+
 void scheduling::WaypointScheduler::start()
 {
-    should_stop = false;
     worker = std::thread(&WaypointScheduler::run, this);
 }
 
-void scheduling::WaypointScheduler::stop()
+void scheduling::WaypointScheduler::wait_for_schedule()
 {
-    should_stop = true;
     worker.join();
 }
 
@@ -29,21 +79,19 @@ void scheduling::WaypointScheduler::addSubscriber(
 
 void scheduling::WaypointScheduler::run()
 {
-    while (!should_stop) {
-        std::cout << "Starting a new waypoint scheduling." << std::endl;
+    std::cout << "Starting a new waypoint scheduling." << std::endl;
 
-        std::cout << "Executing..." << std::endl;
-        std::string result = executor.execute();
+    std::cout << "Executing..." << std::endl;
+    std::string result = executor.execute();
 
-        std::cout << "Parsing..." << std::endl;
-        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
+    std::cout << "Parsing..." << std::endl;
+    std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
 
-        std::cout << "Composing..." << std::endl;
-        std::vector<scheduling::Action> schedule = convertResult(values);
+    std::cout << "Composing..." << std::endl;
+    std::vector<scheduling::Action> schedule = convertResult(values);
 
-        std::cout << "Emitting..." << std::endl;
-        emitSchedule(schedule);
-    }
+    std::cout << "Emitting..." << std::endl;
+    emitSchedule(schedule);
 }
 
 std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
@@ -77,7 +125,7 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
 
         last_dest = dest_waypoint.front();
         dest_waypoint.pop();
-        schedule.push_back(scheduling::Action(scheduling::ActionType::Waypoint, last_dest.value));
+        schedule.push_back(scheduling::Action{scheduling::ActionType::Waypoint, last_dest.value});
 
         // Check when we reach that waypoint
         do {
@@ -101,7 +149,7 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
         }
 
         if (delay > 0) {
-            schedule.push_back(scheduling::Action(scheduling::ActionType::Hold, delay));
+            schedule.push_back(scheduling::Action{scheduling::ActionType::Hold, delay});
         }
     }
 
