@@ -91,21 +91,6 @@ void station_visited(int32_t number_of_stations, int8_t* arr) {
   }
 }
 
-/*void station_dist(int32_t number_of_stations, int32_t* arr) {
-  load();
-  try {
-    auto tmp = static_config.get<std::vector<std::vector<int>>>("station_dist");
-    for (int i = 0; i < number_of_stations; i++) {
-      for (int j = 0; j < number_of_stations; j++) {
-        arr[i * number_of_stations + j] = tmp.at(i).at(j);
-      }
-    }
-  }
-  catch (const std::exception& e) {
-    log << e.what();
-  }
-}*/
-
 int32_t get_station_dist(int32_t from, int32_t to) {
   load();
   try {
@@ -122,7 +107,7 @@ int32_t next_robot_station(int32_t robot, int32_t step) {
   load();
   try {
     static auto tmp = dynamic_config.get<std::vector<std::vector<int>>>("station_schedule");
-    auto robot_schedule = tmp.at(robot - 1);
+    auto robot_schedule = tmp.at(robot - 2);
     return robot_schedule.size() > step ? robot_schedule.at(step) : 0;
   }
   catch (const std::exception& e) {
@@ -131,16 +116,15 @@ int32_t next_robot_station(int32_t robot, int32_t step) {
   }
 }
 
-void eta(int32_t number_of_robots, double* arr) {
+double eta(int32_t robot) {
   load();
   try {
     static auto tmp = dynamic_config.get<std::vector<double>>("eta");
-    for (int i = 0; i < number_of_robots - 1; i++) {
-      arr[i] = tmp.at(i);
-    }
+    return tmp.at(robot - 1);
   }
   catch (const std::exception& e) {
     log << e.what();
+    return 0;
   }
 }
 
