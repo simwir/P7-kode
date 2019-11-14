@@ -21,3 +21,12 @@ target_link_libraries(robot
 )
 
 install(TARGETS robot DESTINATION bin)
+
+add_library(librobot ${SOURCES})
+target_link_libraries(librobot
+  tcp
+  stdc++fs
+  wbt-translator
+  ${JSONCPP_LIBRARIES}
+  scheduling
+)

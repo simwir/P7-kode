@@ -20,7 +20,7 @@
 #define ROBOT_INFO_HPP
 
 #include "util/json.hpp"
-#include "scheduling/waypoint_scheduler.hpp"
+#include "waypoint_scheduler.hpp"
 
 #include <map>
 #include <string>

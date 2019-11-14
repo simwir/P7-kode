@@ -10,6 +10,6 @@ target_link_libraries(broadcaster
     pthread
     tcp
     ${JSONCPP_LIBRARIES}
-    robot
+    librobot
 )
 install(TARGETS broadcaster DESTINATION bin)
