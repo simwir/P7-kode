@@ -3,6 +3,7 @@ project(p7)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall")
 
 include(ExternalProject)
 
@@ -24,7 +25,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/tcp/include
     ${PROJECT_SOURCE_DIR}/robot/include
     ${PROJECT_SOURCE_DIR}/wbt-translator/include
-    ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/scheduling/include
     ${PROJECT_SOURCE_DIR}/util/include
     ${PROJECT_SOURCE_DIR}/config/include
@@ -33,10 +33,11 @@ include_directories(
 # Libraries
 add_subdirectory(tcp)
 add_subdirectory(config)
+add_subdirectory(robot)
 add_subdirectory(scheduling)
 
 # Executables
 add_subdirectory(tests)
 add_subdirectory(port_discovery)
+add_subdirectory(communication)
 add_subdirectory(wbt-translator)
-add_subdirectory(robot)
