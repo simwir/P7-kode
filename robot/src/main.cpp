@@ -12,11 +12,9 @@ int main(int argc, char **argv)
     std::filesystem::path world_path{argv[1]};
     std::filesystem::path out_file = "static_conf.json";
 
-    std::cerr << "constructing master... ";
     std::ifstream world_file{world_path};
     robot::Master master{argv[2], argv[2], 1, world_file};
     // master.load_webots_to_config();
     // master.write_static_config(out_file);
-    std::cerr << "starting master\n";
     master.main_loop();
 }

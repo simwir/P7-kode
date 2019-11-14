@@ -8,6 +8,9 @@
 #include "wbt-translator/distance_matrix.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
+#include "spdlog/spdlog.h"
+
+
 #define PORT_TO_BROADCASTER "5435"
 #define PORT_TO_PDS "4444"
 #define PORT_TO_WALL_CLOCK "5555"
@@ -37,9 +40,11 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     eta_subscriber = std::make_shared<AsyncEtaSubscriber>();
 
     // Connecting to the Port Discovery Service
+    spdlog::info("Attempting to connect to port discovery service on {}...", robot_host);
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
     PDSClient.send("get_robot," + std::to_string(robot_id));
     port_to_controller = PDSClient.receive_blocking();
+    spdlog::info("Controller can be found on port {}.", port_to_controller);
     std::cerr << port_to_controller << std::endl;
     // TODO handle/report error if PDS does not know a port yet
 
