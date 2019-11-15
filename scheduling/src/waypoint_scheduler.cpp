@@ -24,6 +24,7 @@
 #include <utility>
 
 #include <waypoint_scheduler.hpp>
+#include "spdlog/spdlog.h"
 
 extern int errno;
 
@@ -79,18 +80,18 @@ void scheduling::WaypointScheduler::addSubscriber(
 
 void scheduling::WaypointScheduler::run()
 {
-    std::cout << "Starting a new waypoint scheduling." << std::endl;
+    spdlog::info("Starting a new waypoint scheduling.");
 
-    std::cout << "Executing..." << std::endl;
+    spdlog::info("Executing...");
     std::string result = executor.execute();
 
-    std::cout << "Parsing..." << std::endl;
-    std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
+    spdlog::info("Parsing...");
+    std::vector<SimulationExpression> values = parser.parse(result, 2);
 
-    std::cout << "Composing..." << std::endl;
+    spdlog::info("Composing...");
     std::vector<scheduling::Action> schedule = convertResult(values);
 
-    std::cout << "Emitting..." << std::endl;
+    spdlog::info("Emitting...");
     emitSchedule(schedule);
 }
 

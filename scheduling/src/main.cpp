@@ -26,25 +26,22 @@
 #include "eta_extractor.hpp"
 #include "station_scheduler.hpp"
 #include "waypoint_scheduler.hpp"
+#include "spdlog/spdlog.h"
 
 class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber {
     void newSchedule(const std::vector<scheduling::Action> &schedule) override
     {
-        std::time_t result = std::time(nullptr);
-        std::cout << "Got new waypoint schedule at " << std::asctime(std::localtime(&result));
+        spdlog::info("Got new waypoint schedule");
 
         for (auto action : schedule) {
-            std::cout << "Action: ";
+            std::string type = "Unknown";
             if (action.type == scheduling::ActionType::Hold) {
-                std::cout << "Hold";
+                type = "Hold";
             }
             else if (action.type == scheduling::ActionType::Waypoint) {
-                std::cout << "Waypoint";
+                type = "Waypoint";
             }
-            else {
-                std::cout << "Unknown";
-            }
-            std::cout << ", Value: " << action.value << std::endl;
+            spdlog::info("Action: {}, Value: {}", type, action.value);
         }
     }
 };
@@ -52,25 +49,26 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
 class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber {
     void newSchedule(const std::vector<int> &schedule) override
     {
-        std::time_t result = std::time(nullptr);
-        std::cout << "Got new station schedule at " << std::asctime(std::localtime(&result));
+        spdlog::info("Got new station schedule");
 
-        std::cout << "Stations: ";
+        std::stringstream ss;
+        ss << "Stations: ";
         for (auto station : schedule) {
-            std::cout << station << " ";
+            ss << station << " ";
         }
 
-        std::cout << std::endl;
+        spdlog::info(ss.str());
     }
 };
 
 class LogEtaSubscriber : public scheduling::EtaSubscriber {
-    void new_eta(const double eta) override { std::cout << "Eta found: " << eta << std::endl; }
+    void new_eta(const double eta) override { spdlog::info("Eta found: {}", eta); }
 };
 
 int main(int argc, char *argv[])
 {
-    std::cout << "Starting...\n";
+    spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [thread %t] %v");
+    spdlog::info("Starting...");
 
     std::filesystem::path model_path, query_path;
     const auto working_path = std::filesystem::current_path();
@@ -92,35 +90,35 @@ int main(int argc, char *argv[])
     scheduling::WaypointScheduler waypointScheduler;
     auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
-    std::cout << "Adding waypoint subscriber\n";
+    spdlog::info("Adding waypoint subscriber");
     waypointScheduler.addSubscriber(logWaypointSubscriber->shared_from_this());
 
-    std::cout << "Starting waypoint scheduler\n";
+    spdlog::info("Starting waypoint scheduler");
     waypointScheduler.start();
 
     // Stations
     scheduling::StationScheduler stationScheduler;
     auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
 
-    std::cout << "Adding station subscriber\n";
+    spdlog::info("Adding station subscriber");
     stationScheduler.addSubscriber(logStationSubscriber->shared_from_this());
 
-    std::cout << "Starting station scheduler\n";
+    spdlog::info("Starting station scheduler");
     stationScheduler.start();
 
-    scheduling::EtaExtractor eta_extractor;
+    /*scheduling::EtaExtractor eta_extractor;
     auto eta_logger = std::make_shared<LogEtaSubscriber>();
     eta_extractor.addSubscriber(eta_logger->shared_from_this());
 
-    std::cout << "Starting ETA extractor";
-    eta_extractor.start();
+    spdlog::info("Starting ETA extractor");
+    eta_extractor.start();*/
 
     sleep(120);
 
-    std::cout << "Stopping schedulers\n";
+    spdlog::info("Stopping schedulers");
     waypointScheduler.wait_for_schedule();
     stationScheduler.wait_for_schedule();
-    eta_extractor.wait_for_eta();
+    //eta_extractor.wait_for_eta();
 
     return 0;
 }

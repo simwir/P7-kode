@@ -26,6 +26,7 @@
 #include <iostream>
 #include <sstream>
 #include <uppaal_executor.hpp>
+#include "spdlog/spdlog.h"
 
 constexpr int PARENT_READ = 0;
 constexpr int CHILD_WRITE = 1;
@@ -68,10 +69,10 @@ std::string scheduling::UppaalExecutor::execute()
         close(fd[CHILD_READ]);
 
         // Wait for completion
-        std::cout << "Waiting for completion...\n";
+        spdlog::info("Waiting for completion...");
         int status;
         waitpid(pid, &status, NO_FLAGS);
-        std::cout << "Scheduling complete with status " << status << ".\n";
+        spdlog::info("Scheduling complete with status {}", status);
 
         // Only do something if we actually did get a result
         if (status != 0) {
