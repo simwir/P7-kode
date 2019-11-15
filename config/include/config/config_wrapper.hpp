@@ -25,6 +25,10 @@
 extern "C" {
 #endif
 
+#define DONE 0
+#define HOLD 1
+#define WAYPOINT 2
+
 int32_t number_of_stations();
 int32_t number_of_end_stations();
 int32_t number_of_robots();
@@ -44,11 +48,11 @@ int32_t next_robot_station(int32_t robot, int32_t step);
 double eta(int32_t robot);
 
 // Waypoint schedule related
-void waypoint_dist(int32_t number_of_waypoints, int32_t *arr);   // Length = number_of_waypoints ^ 2
+int32_t get_waypoint_dist(int32_t from, int32_t to);
 void waypoint_visited(int32_t number_of_stations, int8_t *arr);  // Length = number_of_stations
-void station_waypoint(int32_t number_of_stations, int32_t *arr); // Length = number_of_stations
-void waypoint_schedule(int32_t number_of_waypoints, int32_t number_of_robots,
-                       int32_t *arr); // Length = (number_of_robots - 1) * number_of_waypoints * 4
+void station_waypoint_mapping(int32_t number_of_stations, int32_t *arr); // Length = number_of_stations
+int32_t get_next_action_type(int32_t robot, int32_t step);
+int32_t get_next_action_value(int32_t robot, int32_t step);
 
 #ifdef __cplusplus
 }

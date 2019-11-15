@@ -23,6 +23,17 @@
 #include <string>
 #include <vector>
 
+
+template <>
+std::pair<std::string, int> config::convert_from_json<std::pair<std::string, int>>(const Json::Value &arr)
+{
+    if (arr.type() != Json::ValueType::arrayValue) {
+        throw config::InvalidValueException{};
+    }
+
+    return std::make_pair(arr[0].asString(), arr[1].asInt());
+}
+
 template <>
 std::vector<double> config::convert_from_json<std::vector<double>>(const Json::Value &arr)
 {
@@ -194,6 +205,29 @@ config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
     for (Json::Value::const_iterator itr = obj_map.begin(); itr != obj_map.end(); itr++) {
         std::vector<int> value = config::convert_from_json<std::vector<int>>(*itr);
         result.insert({itr.key().asInt(), value});
+    }
+
+    return result;
+}
+
+template <>
+std::vector<std::vector<std::pair<std::string, int>>>
+config::Config::get<std::vector<std::vector<std::pair<std::string, int>>>>(const std::string &key) {
+    if (!json.isMember(key)) {
+        throw config::InvalidKeyException{key};
+    }
+
+    std::vector<std::vector<std::pair<std::string, int>>> result;
+    for (const auto& json_row : json[key]) {
+        if (json_row.type() != Json::ValueType::arrayValue) {
+            throw config::InvalidValueException{};
+        }
+
+        std::vector<std::pair<std::string, int>> row;
+        for (const auto& elem : json_row) {
+            row.push_back(convert_from_json<std::pair<std::string, int>>(elem));
+        }
+        result.push_back(row);
     }
 
     return result;

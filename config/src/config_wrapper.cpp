@@ -154,19 +154,16 @@ double eta(int32_t robot)
     }
 }
 
-void waypoint_dist(int32_t number_of_waypoints, int32_t *arr)
+int32_t get_waypoint_dist(int32_t from, int32_t to)
 {
     load();
     try {
         static auto tmp = static_config.get<std::vector<std::vector<int>>>("waypoint_dist");
-        for (int i = 0; i < number_of_waypoints; i++) {
-            for (int j = 0; j < number_of_waypoints; j++) {
-                arr[i * number_of_waypoints + j] = tmp.at(i).at(j);
-            }
-        }
+        return tmp.at(from - 1).at(to - 1);
     }
     catch (const std::exception &e) {
         log << e.what();
+        return -1;
     }
 }
 
@@ -184,7 +181,7 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t *arr)
     }
 }
 
-void station_waypoint(int32_t number_of_stations, int32_t *arr)
+void station_waypoint_mapping(int32_t number_of_stations, int32_t *arr)
 {
     load();
     try {
@@ -198,18 +195,43 @@ void station_waypoint(int32_t number_of_stations, int32_t *arr)
     }
 }
 
-void waypoint_schedule(int32_t number_of_stations, int32_t number_of_robots, int32_t *arr)
+int32_t convert_to_action(std::pair<std::string, int> pair) {
+  if (pair.first.compare("WAYPOINT") == 0) {
+    return WAYPOINT;
+  }
+  else if (pair.first.compare("HOLD") == 0) {
+    return HOLD;
+  }
+
+  return DONE;
+}
+
+int32_t get_next_action_type(int32_t robot, int32_t step)
 {
     load();
     try {
-        /*auto tmp = dynamic_config.get<std::vector<std::vector<int>>>("station_schedule");
-        for (int i = 0; i < num_robots - 1; i++) {
-          for (int j = 0; j < number_of_stations; j++) {
-            arr[i * number_of_stations + j] = tmp.at(i).at(j);
-          }
-        }*/
+        static auto tmp = dynamic_config.get<std::vector<std::vector<std::pair<std::string, int>>>>("station_schedule");
+        auto robot_schedule = tmp.at(robot - 2);
+
+        return robot_schedule.size() > step ? convert_to_action(robot_schedule.at(step)) : DONE;
     }
     catch (const std::exception &e) {
         log << e.what();
+        return DONE;
+    }
+}
+
+int32_t get_next_action_value(int32_t robot, int32_t step)
+{
+    load();
+    try {
+        static auto tmp = dynamic_config.get<std::vector<std::vector<std::pair<std::string, int>>>>("station_schedule");
+        auto robot_schedule = tmp.at(robot - 2);
+
+        return robot_schedule.size() > step ? robot_schedule.at(step).second : 0;
+    }
+    catch (const std::exception &e) {
+        log << e.what();
+        return 0;
     }
 }

@@ -5,10 +5,38 @@
 
 hybrid clock total;
 
+const int DONE = 0;
+const int HOLD = 1;
+const int WAYPOINT = 2;
+
+typedef struct {
+    int type;
+    int value;
+} action_t;
+
+import "libconfig.so" {
+    int number_of_stations();
+    int number_of_robots();
+    int number_of_waypoints();
+    int waypoint_passing_time();
+    int station_passing_time();
+    int current_waypoint();
+    int destination();
+    double uncertainty();
+    int get_waypoint_dist(int from, int to);
+    int get_next_action_type(int robot, int step);
+    int get_next_action_value(int robot, int step);
+};
+
 const int NUM_STATIONS = 10;
 const int NUM_WAYPOINTS = 28;
 const int MAX_ROBOTS = 5;
 const double UNCERTAINTY = 1.1;
+
+import "libconfig.so" {
+    void waypoint_visited(int num_waypoints, bool&amp; arr[int[1, NUM_WAYPOINTS]]);
+    void station_waypoint_mapping(int num_stations, int&amp; arr[int[1, NUM_STATIONS]]);
+};
 
 typedef int[1, NUM_STATIONS] station_t;
 typedef int[1, NUM_WAYPOINTS] waypoint_t;
