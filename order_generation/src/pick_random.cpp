@@ -32,7 +32,7 @@ template <typename T>
 std::vector<T> pick_n_random(std::vector<T> choices, int n)
 {
     if (n > choices.size()) {
-        throw std::invalid_argument("Cannot picker " + std::to_string(n) +
+        throw std::invalid_argument("Cannot pick " + std::to_string(n) +
                                     " elements from a vector of size " +
                                     std::to_string(choices.size()));
     }
