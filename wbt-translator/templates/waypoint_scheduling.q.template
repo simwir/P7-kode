@@ -1,0 +1,19 @@
+//This file was generated from (Academic) UPPAAL 4.1.20-stratego-6 (rev. 0DC1FC6317AF6369), October 2019
+
+/*
+
+*/
+strategy realistic = minE (total) [<=500] %¤STRATEGY_VAR_LIST¤% : <> Robot.Done
+
+/*
+
+*/
+simulate 1 [<= 100] {\
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding\
+} under realistic
+
+
+/*
+
+*/
+saveStrategy("waypoint_strategy.json", realistic)

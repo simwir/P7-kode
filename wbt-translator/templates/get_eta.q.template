@@ -1,0 +1,5 @@
+strategy realistic = loadStrategy %¤STRATEGY_VAR_LIST¤% ("waypoint_strategy.json")
+
+/*
+*/
+E[<=200; 1000] (max: total) under realistic
