@@ -3,7 +3,7 @@ project(p7)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall")
+set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall -Werror -m32")
 
 include(ExternalProject)
 
@@ -12,8 +12,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -m32")
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
