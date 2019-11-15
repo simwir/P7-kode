@@ -13,11 +13,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
 
-# find_package(PkgConfig REQUIRED)
-# pkg_check_modules(JSONCPP jsoncpp)
-#
-# #link_directories(${JSONCPP_LIBRARY_DIRS})
-# #link_directories(lib)
 set(JSONCPP_ARCHIVE ${PROJECT_SOURCE_DIR}/lib/jsoncpp/libjsoncpp.a)
 
 include_directories(
