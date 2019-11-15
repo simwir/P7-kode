@@ -21,6 +21,7 @@ const int NUM_STATIONS = number_of_stations();
 const int NUM_STATIONS_SQUARED = NUM_STATIONS * NUM_STATIONS;
 const int NUM_END_STATIONS = number_of_end_stations();
 const int MAX_ROBOTS = number_of_robots();
+const int[1, MAX_ROBOTS] CUR_ROBOT = 1;
 const int STATION_PASSING_TIME = station_passing_time();
 const double UNCERTAINTY = uncertainty();
 
@@ -29,22 +30,8 @@ import "libconfig.so" {
     void station_visited(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
 };
 
-// typedef int[1, NUM_STATIONS] station_t;
-// typedef int[1, MAX_ROBOTS] robot_t;
-
-const int[1, MAX_ROBOTS] CUR_ROBOT = 1;
-
-// typedef int[CUR_ROBOT + 1, MAX_ROBOTS] other_robot_t;
-
-bool loaded = false;
 bool is_endstation[int[1, NUM_STATIONS]];
 bool visited[int[1, NUM_STATIONS]];
-
-/*int dist[NUM_STATIONS_SQUARED];
-
-int get_dist(int[1, NUM_STATIONS] from, int[1, NUM_STATIONS] to) {
-    return dist[(from - 1) * NUM_STATIONS + to - 1];
-}*/
 
 broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], done[int[1, MAX_ROBOTS]];</declaration>
 	<template>
@@ -90,7 +77,6 @@ int[0, NUM_STATIONS] next_station() {
 		<transition controllable="false">
 			<source ref="id5"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-629" y="-467">loaded</label>
 			<label kind="assignment" x="-629" y="-450">cur_loc = next_station(),
 robot_eta = eta(id)</label>
 		</transition>
@@ -175,8 +161,6 @@ bool can_visit(int[1, NUM_STATIONS] id) {
 void set_global() {
     endstation(NUM_STATIONS, is_endstation);
     station_visited(NUM_STATIONS, visited);
-    // station_dist(NUM_STATIONS, dist);
-    loaded = true;
 }</declaration>
 		<location id="id6" x="-637" y="-246">
 			<name x="-705" y="-238">Choose</name>
