@@ -4,6 +4,8 @@
 #include <mutex>
 #include <type_traits>
 
+#include "util/meta.hpp"
+
 /**
  * Wrapper class around a value that can be updated from elsewhere and be polled for
  * whether such updates have happened.
@@ -43,6 +45,14 @@ class Pollable {
         return value;
     }
 
+    void pop()
+    {
+        static_assert(meta::is_container<T>::value, "cannot pop from non-container");
+        std::scoped_lock lock{mutex};
+        auto it = value.begin();
+        value.erase(it);
+    }
+
     /**
      * read the value from the pollable, clearing the dirty flag.
      */
@@ -53,7 +63,8 @@ class Pollable {
         return value;
     }
 
-    void clean() {
+    void clean()
+    {
         std::scoped_lock lock{mutex};
         dirty = false;
     }

@@ -55,6 +55,7 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
         std::cout << "Waiting for completion..." << std::endl;
         worker = std::thread([&, parent_read = fd[PARENT_READ], callback]() -> void {
             int status;
+            int pid;
 
             std::unique_lock get_pid{pid_lock};
             if (!child_pid.has_value()) {

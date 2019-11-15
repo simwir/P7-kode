@@ -11,7 +11,7 @@ class distance_matrix {
     distance_matrix(const AST &ast);
 
     std::string to_uppaal_declaration() const;
-    std::vector<std::vector<double>> get_data() {return _data;}
+    std::vector<std::vector<double>> get_data() { return _data; }
 
     double &data(size_t i, size_t j) { return _data[i][j]; }
 

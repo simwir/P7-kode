@@ -13,7 +13,8 @@ namespace robot {
 class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
                                public Pollable<std::vector<int>> {
     std::mutex mutex;
-    void newSchedule(const std::vector<int> &schedule) override {
+    void newSchedule(const std::vector<int> &schedule) override
+    {
         std::scoped_lock _{mutex};
         reset(schedule);
     }
@@ -22,7 +23,8 @@ class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
 class AsyncWaypointSubscriber : public scheduling::WaypointScheduleSubscriber,
                                 public Pollable<std::vector<scheduling::Action>> {
     std::mutex mutex;
-    void newSchedule(const std::vector<scheduling::Action> &schedule) override {
+    void newSchedule(const std::vector<scheduling::Action> &schedule) override
+    {
         std::scoped_lock _{mutex};
         reset(schedule);
     }

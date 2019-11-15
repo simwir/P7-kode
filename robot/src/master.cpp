@@ -202,6 +202,7 @@ void robot::Master::set_robot_destination(int waypoint)
     Translation point = ast.nodes.at(waypoint).translation;
     webot_client->send("set_destination," + std::to_string(point.x) + "," +
                        std::to_string(point.z));
+    dynamic_config.set(DESTINATION, waypoint);
 }
 
 void robot::Master::main_loop()
@@ -241,6 +242,7 @@ void robot::Master::main_loop()
     while (running) {
         bool got_fresh_info = false;
         current_webots_time = get_webots_time();
+        get_dynamic_state();
         std::cerr << "loop\n";
 
         // if station schedule invalidated or new station schedule
@@ -286,7 +288,7 @@ void robot::Master::main_loop()
             }
 
             scheduling::Action current_waypoint = waypoint_subscriber->get().front();
-            waypoint_subscriber->get().erase(std::begin(waypoint_subscriber->get()));
+            waypoint_subscriber->pop();
             scheduling::Action next_waypoint = waypoint_subscriber->get().front();
 
             auto is_station = [&](int id) {

@@ -10,7 +10,6 @@
 
 namespace scheduling {
 
-
 template <class Subscriber, class Notification>
 class Scheduler {
     static_assert(std::is_base_of<std::enable_shared_from_this<Subscriber>, Subscriber>::value,
@@ -35,10 +34,7 @@ class Scheduler {
             throw AbortException{""};
     }
 
-    void wait_for_result()
-    {
-        executor.wait_for_result();
-    }
+    void wait_for_result() { executor.wait_for_result(); }
 
     void add_subscriber(std::shared_ptr<Subscriber> subscriber)
     {

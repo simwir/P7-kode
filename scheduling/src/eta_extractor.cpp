@@ -13,7 +13,7 @@ void EtaExtractor::start_worker()
                   << std::endl;
         return;
     }
-    executor.execute([&](const std::string& res) {
+    executor.execute([&](const std::string &res) {
         std::regex eta_response{R"(.+= ([\d\.]+))"};
         std::smatch eta_value;
         if (std::regex_search(res, eta_value, eta_response)) {

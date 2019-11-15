@@ -68,7 +68,8 @@ class UppaalExecutor {
         return child_pid.has_value();
     }
 
-    int get_pid() {
+    int get_pid()
+    {
         std::scoped_lock _{pid_lock};
         return *child_pid;
     }

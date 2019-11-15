@@ -110,7 +110,8 @@ std::vector<int> Parser::parse_adjlist()
     return adjlist;
 }
 
-std::string to_string(WaypointType wptype) {
+std::string to_string(WaypointType wptype)
+{
     switch (wptype) {
     case WaypointType::eVia:
         return "via";

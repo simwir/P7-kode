@@ -37,7 +37,10 @@ struct ControllerState {
     bool is_stopped;
 
     ControllerState() = default;
-    ControllerState(double x, double y, bool is_stopped) : position(Point{x, y}), is_stopped(is_stopped) {}
+    ControllerState(double x, double y, bool is_stopped)
+        : position(Point{x, y}), is_stopped(is_stopped)
+    {
+    }
     Json::Value to_json() const;
     static ControllerState from_json(const Json::Value &json);
 };

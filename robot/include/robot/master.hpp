@@ -5,8 +5,8 @@
 #include "info.hpp"
 #include "robot/subscriber.hpp"
 #include "scheduling.hpp"
-#include "wbt-translator/webots_parser.hpp"
 #include "util/euclid.hpp"
+#include "wbt-translator/webots_parser.hpp"
 #include <tcp/client.hpp>
 
 #include <filesystem>
@@ -28,7 +28,6 @@ const std::filesystem::path static_conf = "static_config.json";
 #define NUMBER_OF_END_STATIONS "number_of_end_stations"
 #define NUMBER_OF_VIAS "number_of_vias"
 #define NUMBER_OF_WAYPOINTS "number_of_waypoints"
-
 
 namespace robot {
 class RecievedMessageException : public std::exception {
