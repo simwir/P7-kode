@@ -13,7 +13,7 @@ add_library(scheduling ${SOURCES})
 target_link_libraries(scheduling
     pthread
     stdc++fs
-    jsoncpp
+    ${JSONCPP_ARCHIVE}
 )
 #install(FILES DESTINATION bin)
 
@@ -26,8 +26,5 @@ configure_file(get_eta.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/get_eta.q COPYONLY)
 add_executable(test_scheduler src/main.cpp)
 target_link_libraries(test_scheduler
     scheduling
-    pthread
-    stdc++fs
-    jsoncpp
 )
 install(TARGETS test_scheduler DESTINATION bin)

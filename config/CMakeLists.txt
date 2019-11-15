@@ -5,7 +5,7 @@ file(GLOB SOURCES "src/*.cpp")
 add_library(config SHARED ${SOURCES})
 
 target_link_libraries(config
-  jsoncpp
+  ${JSONCPP_ARCHIVE}
 )
 
 #set_target_properties(config PROPERTIES COMPILE_FLAGS "-fpic")

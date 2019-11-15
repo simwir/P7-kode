@@ -189,9 +189,10 @@ config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
     }
 
     std::map<int, std::vector<int>> result;
+    Json::Value obj_map = json[key];
 
-    for (auto itr = json[key].begin(); itr != json[key].end(); itr++) {
-        std::vector<int> value = config::convert_from_json<std::vector<int>>(json[key][itr.name()]);
+    for (Json::Value::const_iterator itr = obj_map.begin(); itr != obj_map.end(); itr++) {
+        std::vector<int> value = config::convert_from_json<std::vector<int>>(*itr);
         result.insert({itr.key().asInt(), value});
     }
 

@@ -17,7 +17,8 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 
 #link_directories(${JSONCPP_LIBRARY_DIRS})
-link_directories(lib)
+#link_directories(lib)
+set(JSONCPP_ARCHIVE ${PROJECT_SOURCE_DIR}/lib/libjsoncpp.a)
 
 include_directories(
     ${JSONCPP_INCLUDE_DIRS}

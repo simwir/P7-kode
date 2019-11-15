@@ -339,7 +339,7 @@ system OtherRobot, Robot, Station;
 			<comment></comment>
 		</query>
 		<query>
-			<formula>Pr[&lt;=130] (&lt;&gt; Robot.robot_eta == 3)</formula>
+			<formula>Pr[&lt;=130] (&lt;&gt; Robot.Done)</formula>
 			<comment></comment>
 		</query>
 		<query>

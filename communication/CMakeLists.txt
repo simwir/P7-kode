@@ -5,11 +5,11 @@ file(GLOB SOURCES "src/*.cpp")
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 
-add_executable(broadcaster ${SOURCES})
-target_link_libraries(broadcaster
+add_executable(communication ${SOURCES})
+target_link_libraries(communication
     pthread
     tcp
-    jsoncpp
+    ${JSONCPP_ARCHIVE}
     librobot
 )
-install(TARGETS broadcaster DESTINATION bin)
+install(TARGETS communication DESTINATION bin)
