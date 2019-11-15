@@ -1,5 +1,5 @@
 #include "robot/config.hpp"
-#include "robot/master.hpp"
+#include "robot/orchestrator.hpp"
 
 int main(int argc, char **argv)
 {
@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     std::filesystem::path world_file{argv[1]};
     std::filesystem::path out_file = "static_conf.json";
 
-    robot::Master master{"localhost", "localhost", 0, std::cin};
-    master.load_webots_to_config(world_file);
-    master.write_static_config(out_file);
+    robot::Orchestrator orchestrator{"localhost", "localhost", 0, std::cin};
+    orchestrator.load_webots_to_config(world_file);
+    orchestrator.write_static_config(out_file);
 }

@@ -28,10 +28,10 @@ class CannotOpenFileException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-class Master {
+class Orchestrator {
   public:
-    Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
-           std::istream &world_file);
+    Orchestrator(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
+                 std::istream &world_file);
     void load_webots_to_config(const std::filesystem::path &input_file);
     void request_broadcast_info();
     void send_robot_info(int robot_id, const Info &robot_info);
@@ -41,6 +41,10 @@ class Master {
     void write_dynamic_config(const std::filesystem::path &path);
 
   private:
+    void add_waypoint_matrix(const AST &ast, int waypoint_count);
+    void add_station_matrix(const AST &ast, int waypoint_count);
+    void dump_waypoint_info(const AST &ast);
+
     Config static_config;
     Config dynamic_config;
     std::unique_ptr<tcp::Client> webot_client;
