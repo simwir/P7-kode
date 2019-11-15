@@ -100,15 +100,18 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
     // Dump all waypoint information.
     Json::Value waypoint_list{Json::arrayValue};
     for (auto &[id, waypoint] : ast.nodes) {
-        waypoint_list.append(Json::objectValue);
-        auto &last = waypoint_list[waypoint_list.size() - 1];
-        last["id"] = Json::Value{static_cast<int>(id)};
-        last["x"] = waypoint.translation.x;
-        last["y"] = waypoint.translation.z;
-        last["type"] = to_string(waypoint.waypointType);
-        last["adjList"] = Json::Value{Json::arrayValue};
-        std::for_each(std::begin(waypoint.adjlist), std::end(waypoint.adjlist),
-                      [&last](int adj) { last["adjList"].append(adj); });
+        Json::Value waypoint_obj{Json::objectValue};
+        waypoint_obj["id"] = Json::Value{static_cast<int>(id)};
+        waypoint_obj["x"] = Json::Value{waypoint.translation.x};
+        waypoint_obj["y"] = Json::Value{waypoint.translation.z};
+        waypoint_obj["type"] = Json::Value{to_string(waypoint.waypointType)};
+        waypoint_obj["adjList"] = Json::Value{Json::arrayValue};
+
+        for (int adj : waypoint.adjlist) {
+            waypoint_obj["adjList"].append(Json::Value{adj});
+        }
+
+        waypoint_list.append(waypoint_obj);
     }
     static_config.set("waypoints", waypoint_list);
     static_config.set("station_distance_matrix", jsonarray_apsp_distances);
