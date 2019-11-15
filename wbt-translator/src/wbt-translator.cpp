@@ -6,9 +6,9 @@
 
 #include "wbt-translator/apsp.hpp"
 #include "wbt-translator/distance_matrix.hpp"
+#include "wbt-translator/query_template_writer.hpp"
 #include "wbt-translator/uppaal-printer.hpp"
 #include "wbt-translator/webots_parser.hpp"
-#include "wbt-translator/query_template_writer.hpp"
 
 void print_help(const char *const execute_location)
 {
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 
     if (optquery) {
         std::ifstream template_file{template_path};
-        if (!template_file.is_open()){
+        if (!template_file.is_open()) {
             std::cerr << "Could not open the template file: " << template_path << std::endl;
             exit(1);
         }
