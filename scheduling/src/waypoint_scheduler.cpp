@@ -25,6 +25,7 @@
 
 #include <waypoint_scheduler.hpp>
 
+
 extern int errno;
 
 Json::Value scheduling::Action::to_json() const
@@ -63,17 +64,17 @@ scheduling::Action scheduling::Action::from_json(const Json::Value &json)
 
 void scheduling::WaypointScheduler::start_worker()
 {
-    std::cerr << "WaypointScheduler: Starting a new waypoint scheduling." << std::endl;
+    logger.info("WaypointScheduler: Starting a new waypoint scheduling.");
 
-    std::cerr << "WaypointScheduler: Executing..." << std::endl;
+    logger.info("WaypointScheduler: Executing...");
     executor.execute([&](const std::string &result) {
-        std::cerr << "WaypointScheduler: Parsing..." << std::endl;
+        logger.info("WaypointScheduler: Parsing...");
         std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
 
-        std::cerr << "WaypointScheduler: Composing..." << std::endl;
+        logger.info("WaypointScheduler: Composing...");
         std::vector<scheduling::Action> schedule = convertResult(values);
 
-        std::cerr << "WaypointScheduler: Emitting..." << std::endl;
+        logger.info("WaypointScheduler: Emitting...");
         notify_subscribers(schedule);
     });
 }
@@ -149,3 +150,4 @@ void scheduling::WaypointScheduler::notify_subscribers(
         }
     }
 }
+

@@ -23,6 +23,7 @@
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
 #include "util/json.hpp"
+#include "util/logger.hpp"
 #include <memory>
 #include <queue>
 #include <vector>

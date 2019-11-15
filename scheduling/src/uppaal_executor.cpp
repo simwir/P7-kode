@@ -29,6 +29,7 @@
 #include <sstream>
 #include <uppaal_executor.hpp>
 
+
 constexpr int PARENT_READ = 0;
 constexpr int CHILD_WRITE = 1;
 constexpr int CHILD_READ = 2;
@@ -70,7 +71,7 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
         close(fd[PARENT_WRITE]);
 
         // Wait for completion
-        std::cout << "Waiting for completion..." << std::endl;
+        logger.info("Waiting for completion...");
         worker = std::thread([&, parent_read = fd[PARENT_READ], callback]() -> void {
             int status;
 
@@ -85,16 +86,16 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
             int res = waitpid(pid, &status, NO_FLAGS);
             if (res == -1) {
-                std::cerr << "ERROR: waitpid failed with errno " << errno << std::endl;
+                logger.error("waitpid failed with errno {}", errno);
                 if (errno == ECHILD) {
-                    std::cerr << "ERROR: ECHILD (no child processes) for PID " << pid << std::endl;
+                    logger.error("ECHILD (no child processes) for PID {}", pid);
                 }
             }
             reset_pid();
-            std::cout << "Scheduling complete with status " << status << ".\n";
+            logger.info("Scheduling complete with status {}", status);
 
             if (WIFSIGNALED(status)) { // Is true if the pid was terminated by a signal
-                std::cerr << "was signaled" << std::endl;
+                logger.info("was signaled");
                 return;
             }
 
@@ -115,7 +116,7 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
                 ss.write(buffer, bytes);
             }
             if (errno == EAGAIN) {
-                std::cerr << "ERROR: verifyta did not provide any input" << std::endl;
+                logger.error("verifyta did not provide any input");
             }
 
             // Cleanup after use
@@ -144,7 +145,7 @@ bool scheduling::UppaalExecutor::abort()
                 return true;
             }
             else {
-                std::cerr << "WARNING: could not abort. errno: " << errno << std::endl;
+                logger.warn("could not abort. errno: {}", errno);
 
                 return false;
             }
@@ -153,3 +154,4 @@ bool scheduling::UppaalExecutor::abort()
     // success
     return true;
 }
+

@@ -9,6 +9,7 @@ int main(int argc, char **argv)
         std::cerr << "please give a path and an IP address in that order\n";
         exit(1);
     }
+
     std::filesystem::path world_path{argv[1]};
     std::filesystem::path out_file = "static_conf.json";
 

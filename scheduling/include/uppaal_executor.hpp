@@ -27,6 +27,7 @@
 #include <string>
 #include <thread>
 
+#include "util/logger.hpp"
 namespace scheduling {
 
 struct AbortException : public std::exception {
@@ -90,7 +91,6 @@ class UppaalExecutor {
         std::scoped_lock _{pid_lock};
         return *child_pid;
     }
-
     std::thread worker;
     std::mutex pid_lock;
     std::optional<int> child_pid;

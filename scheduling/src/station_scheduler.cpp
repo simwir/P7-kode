@@ -30,28 +30,21 @@ extern int errno;
 
 namespace scheduling {
 
-/*void StationScheduler::wait_for_schedule()
-{
-if (worker.joinable()) {
-worker.join();
-}
-}*/
-
 void StationScheduler::start_worker()
 {
-    std::cerr << "StationScheduler: Starting a new station scheduling.\n";
+    logger.info("StationScheduler: Starting a new station scheduling.");
 
     auto callback = [&](const std::string &result) {
-        std::cerr << "StationScheduler: Parsing..." << std::endl;
+        logger.info("StationScheduler: Parsing...");
         std::vector<SimulationExpression> values = parser.parse(result, 2);
 
-        std::cerr << "StationScheduler: Composing..." << std::endl;
+        logger.info("StationScheduler: Composing...");
         std::vector<int> schedule = convertResult(values);
 
-        std::cerr << "StationScheduler: Emitting..." << std::endl;
+        logger.info("StationScheduler: Emitting...");
         notify_subscribers(schedule);
     };
-    std::cerr << "StationScheduler: Executing..." << std::endl;
+    logger.info("StationScheduler: Executing...");
     executor.execute(callback);
 }
 

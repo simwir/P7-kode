@@ -28,7 +28,7 @@ target_link_libraries(librobot
   wbt-translator
   scheduling
   ${JSONCPP_LIBRARIES}
-  scheduling
+  util
 )
 
 install(TARGETS robot DESTINATION bin)

@@ -25,6 +25,7 @@ include_directories(
 # Libraries
 add_subdirectory(tcp)
 add_subdirectory(scheduling)
+add_subdirectory(util)
 
 # Executables
 add_subdirectory(tests)

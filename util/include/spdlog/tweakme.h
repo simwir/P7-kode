@@ -3,6 +3,7 @@
 
 #pragma once
 
+#define SPDLOG_PREVENT_CHILD_FD
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Edit this file to squeeze more performance, and to customize supported

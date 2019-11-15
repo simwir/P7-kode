@@ -10,6 +10,9 @@ list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 #file(GLOB PROJECT_STATIC_LINK_LIBS "lib/*.a")
 
 add_library(scheduling ${SOURCES})
+target_link_libraries(scheduling
+  util
+)
 #install(FILES DESTINATION bin)
 
 configure_file(waypoint_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/waypoint_scheduling.xml COPYONLY)

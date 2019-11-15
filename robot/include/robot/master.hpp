@@ -7,6 +7,7 @@
 #include "scheduling.hpp"
 #include "wbt-translator/webots_parser.hpp"
 #include "util/euclid.hpp"
+#include "util/logger.hpp"
 #include <tcp/client.hpp>
 
 #include <filesystem>

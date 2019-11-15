@@ -8,8 +8,7 @@
 #include "wbt-translator/distance_matrix.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
-#include "spdlog/spdlog.h"
-
+#include "util/logger.hpp"
 
 #define PORT_TO_BROADCASTER "5435"
 #define PORT_TO_PDS "4444"
@@ -39,13 +38,13 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     waypoint_subscriber = std::make_shared<AsyncWaypointSubscriber>();
     eta_subscriber = std::make_shared<AsyncEtaSubscriber>();
 
+
     // Connecting to the Port Discovery Service
-    spdlog::info("Attempting to connect to port discovery service on {}...", robot_host);
+    logger.info("Attempting to connect to port discovery service on {}...", robot_host);
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
     PDSClient.send("get_robot," + std::to_string(robot_id));
     port_to_controller = PDSClient.receive_blocking();
-    spdlog::info("Controller can be found on port {}.", port_to_controller);
-    std::cerr << port_to_controller << std::endl;
+    logger.info("Controller can be found on port {}.", port_to_controller);
     // TODO handle/report error if PDS does not know a port yet
 
     // Connecting to the WeBots Controller
@@ -173,7 +172,7 @@ std::string robot::Master::receive_controller_info()
 
 void robot::Master::get_dynamic_state()
 {
-    std::cerr << "getting dynamic state\n";
+    logger.info("getting dynamic state");
     request_broadcast_info();
     request_controller_info();
     auto broadcast_info = receive_broadcast_info();
@@ -224,29 +223,29 @@ void robot::Master::main_loop()
                            return wp.waypointType == WaypointType::eStation;
                        }));
     write_dynamic_config();
-    std::cerr << "scheduling station\n";
+    logger.info("scheduling station");
     station_scheduler.start();
-    std::cerr << "started scheduling station\n";
+    logger.info("started scheduling station");
     station_scheduler.wait_for_result();
-    std::cerr << "done scheduling station\n";
+    logger.info("done scheduling station");
 
     get_dynamic_state();
 
     dynamic_config.set(DESTINATION, station_subscriber->read().at(0));
     dynamic_config.set(CURRENT_WAYPOINT, get_closest_waypoint([](auto) { return true; }));
     write_dynamic_config();
-    std::cerr << "scheduling waypoint\n";
+    logger.info("scheduling waypoint");
     waypoint_scheduler.start();
-    std::cerr << "started scheduling waypoint\n";
+    logger.info("started scheduling waypoint");
     waypoint_scheduler.wait_for_result();
-    std::cerr << "done scheduling waypoint\n";
+    logger.info("done scheduling waypoint");
     send_robot_info();
 
     running = true;
     while (running) {
         bool got_fresh_info = false;
         current_webots_time = get_webots_time();
-        std::cerr << "loop\n";
+        logger.info("loop");
 
         // if station schedule invalidated or new station schedule
         //    then reschedule waypoints

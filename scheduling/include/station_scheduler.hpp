@@ -22,6 +22,7 @@
 #include "scheduler.hpp"
 #include "uppaal_executor.hpp"
 #include "uppaal_simulation_parser.hpp"
+#include "util/logger.hpp"
 #include <memory>
 #include <queue>
 #include <thread>
@@ -47,7 +48,7 @@ class StationScheduler : public Scheduler<StationScheduleSubscriber, std::vector
   private:
     void run();
     void start_worker() override;
-    void notify_subscribers(const std::vector<int>&) override;
+    void notify_subscribers(const std::vector<int> &) override;
     std::vector<int> convertResult(const std::vector<SimulationExpression> &values);
     UppaalSimulationParser parser;
 };
