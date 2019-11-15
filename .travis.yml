@@ -14,6 +14,7 @@ addons:
       - clang-format-8
       - libjsoncpp-dev
       - g++-8-multilib
+      - g++-multilib
 
 before_install:
     - export CC=clang-8
