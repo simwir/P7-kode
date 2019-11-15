@@ -9,7 +9,7 @@ add_executable(broadcaster ${SOURCES})
 target_link_libraries(broadcaster
     pthread
     tcp
-    ${JSONCPP_LIBRARIES}
+    jsoncpp
     librobot
 )
 install(TARGETS broadcaster DESTINATION bin)

@@ -13,7 +13,7 @@ add_library(scheduling ${SOURCES})
 target_link_libraries(scheduling
     pthread
     stdc++fs
-    ${JSONCPP_LIBRARIES}
+    jsoncpp
 )
 #install(FILES DESTINATION bin)
 
@@ -28,6 +28,6 @@ target_link_libraries(test_scheduler
     scheduling
     pthread
     stdc++fs
-    ${JSONCPP_LIBRARIES}
+    jsoncpp
 )
 install(TARGETS test_scheduler DESTINATION bin)
