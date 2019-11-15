@@ -101,14 +101,14 @@ void robot::Master::load_webots_to_config(const std::filesystem::path &input_fil
     Json::Value waypoint_list{Json::arrayValue};
     for (auto &[id, waypoint] : ast.nodes) {
         Json::Value waypoint_obj{Json::objectValue};
-        waypoint_obj["id"] = Json::Value{static_cast<int>(id)};
-        waypoint_obj["x"] = Json::Value{waypoint.translation.x};
-        waypoint_obj["y"] = Json::Value{waypoint.translation.z};
-        waypoint_obj["type"] = Json::Value{to_string(waypoint.waypointType)};
+        waypoint_obj["id"] = static_cast<int>(id);
+        waypoint_obj["x"] = waypoint.translation.x;
+        waypoint_obj["y"] = waypoint.translation.z;
+        waypoint_obj["type"] = to_string(waypoint.waypointType);
         waypoint_obj["adjList"] = Json::Value{Json::arrayValue};
 
         for (int adj : waypoint.adjlist) {
-            waypoint_obj["adjList"].append(Json::Value{adj});
+            waypoint_obj["adjList"].append(adj);
         }
 
         waypoint_list.append(waypoint_obj);
