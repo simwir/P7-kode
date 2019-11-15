@@ -18,9 +18,21 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/robot/include
     ${PROJECT_SOURCE_DIR}/scheduling/include
     ${PROJECT_SOURCE_DIR}/util/include
+    ${PROJECT_SOURCE_DIR}/lib/catch
+    ${PROJECT_SOURCE_DIR}/lib/spdlog
 )
 
+# JsonCpp
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
+
+if(${JSONCPP_LIBRARY_DIRS})
+  link_libraries(${JSONCPP_LIBRARY_DIRS})
+  include_directories("${JSONCPP_INCLUDE_DIRS}")
+endif(${JSONCPP_LIBRARY_DIRS})
+
 # Libraries
+add_subdirectory(lib)
 add_subdirectory(tcp)
 add_subdirectory(robot)
 add_subdirectory(scheduling)
