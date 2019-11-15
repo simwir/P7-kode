@@ -82,9 +82,9 @@ CONFIG_GETTER(int32_t, int, static_config, waypoint_passing_time, 0);
 CONFIG_GETTER(int32_t, int, static_config, station_passing_time, 0);
 CONFIG_GETTER(double, double, static_config, uncertainty, 0.0);
 
-CONFIG_GETTER(int32_t, int, dynamic_config, current_station, 0);
-CONFIG_GETTER(int32_t, int, dynamic_config, current_waypoint, 0);
+CONFIG_GETTER(int32_t, int, dynamic_config, next_station, 0);
 CONFIG_GETTER(int32_t, int, dynamic_config, destination, 0);
+CONFIG_GETTER(int32_t, int, dynamic_config, next_waypoint, 0);
 
 void endstation(int32_t number_of_stations, int8_t *arr)
 {
@@ -159,7 +159,7 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
     load();
     try {
         static auto tmp = static_config.get<std::vector<std::vector<int>>>("waypoint_dist");
-        return tmp.at(from - 1).at(to - 1);
+        return tmp.at(from).at(to);
     }
     catch (const std::exception &e) {
         log << e.what();
@@ -181,7 +181,7 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t *arr)
     }
 }
 
-void station_waypoint_mapping(int32_t number_of_stations, int32_t *arr)
+void station_list(int32_t number_of_stations, int32_t *arr)
 {
     load();
     try {
