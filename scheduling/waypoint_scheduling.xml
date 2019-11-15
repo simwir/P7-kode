@@ -175,7 +175,7 @@ next_t next_step() {
 }</declaration>
 		<location id="id2" x="-280" y="-246">
 			<name x="-289" y="-297">BetweenWaypoints</name>
-			<label kind="invariant" x="-289" y="-280">x &lt;= waypoint_dist[cur][next.value] * UNCERTAINTY</label>
+			<label kind="invariant" x="-289" y="-280">x &lt;= get_waypoint_dist(cur, next.value) * UNCERTAINTY</label>
 		</location>
 		<location id="id3" x="-637" y="-246">
 			<name x="-714" y="-246">Choose</name>
@@ -275,7 +275,7 @@ int[0, NUM_WAYPOINTS - 1] dest_waypoint;</declaration>
 		</location>
 		<location id="id10" x="-399" y="-399">
 			<name x="-501" y="-442">BetweenWaypoints</name>
-			<label kind="invariant" x="-901" y="-408">x &lt;= waypoint_dist[cur_waypoint][dest_waypoint] * UNCERTAINTY</label>
+			<label kind="invariant" x="-901" y="-408">x &lt;= get_waypoint_dist(cur_waypoint, dest_waypoint) * UNCERTAINTY</label>
 		</location>
 		<location id="id11" x="-398" y="-246">
 			<name x="-467" y="-272">Choose</name>
@@ -333,7 +333,7 @@ int[0, NUM_WAYPOINTS - 1] dest_waypoint;</declaration>
 		<transition controllable="false">
 			<source ref="id10"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-331" y="-459">x &gt;= waypoint_dist[cur_waypoint][dest_waypoint]</label>
+			<label kind="guard" x="-331" y="-459">x &gt;= get_waypoint_dist(cur_waypoint, dest_waypoint)</label>
 			<label kind="assignment" x="-331" y="-442">cur_waypoint = dest_waypoint,
 visited[cur_waypoint] = true, x = 0</label>
 		</transition>
@@ -341,7 +341,7 @@ visited[cur_waypoint] = true, x = 0</label>
 			<source ref="id11"/>
 			<target ref="id10"/>
 			<label kind="select" x="-391" y="-365">id : int[0, NUM_WAYPOINTS - 1]</label>
-			<label kind="guard" x="-391" y="-348">waypoint_dist[cur_waypoint][id] != -1 &amp;&amp;
+			<label kind="guard" x="-391" y="-348">get_waypoint_dist(cur_waypoint, id) != -1 &amp;&amp;
 dest != cur_waypoint</label>
 			<label kind="assignment" x="-391" y="-314">dest_waypoint = id,
 x = 0</label>
@@ -371,6 +371,7 @@ system Waypoint, OtherRobot, Robot;</system>
 	OtherRobot(5).cur,
 	OtherRobot(5).next.type,
 	OtherRobot(5).next.value,
+	Robot.visited[0],
 	Robot.visited[1],
 	Robot.visited[2],
 	Robot.visited[3],
@@ -398,11 +399,11 @@ system Waypoint, OtherRobot, Robot;</system>
 	Robot.visited[25],
 	Robot.visited[26],
 	Robot.visited[27],
-	Robot.visited[28],
 	Robot.dest,
 	Robot.cur_waypoint,
 	Robot.dest_waypoint
 } -&gt; {
+	Waypoint(0).num_in_queue,
 	Waypoint(1).num_in_queue,
 	Waypoint(2).num_in_queue,
 	Waypoint(3).num_in_queue,
@@ -430,7 +431,6 @@ system Waypoint, OtherRobot, Robot;</system>
 	Waypoint(25).num_in_queue,
 	Waypoint(26).num_in_queue,
 	Waypoint(27).num_in_queue,
-	Waypoint(28).num_in_queue,
 	Robot.x
 } : &lt;&gt; Robot.Done</formula>
 			<comment></comment>
@@ -454,6 +454,7 @@ system Waypoint, OtherRobot, Robot;</system>
 	OtherRobot(5).cur,
 	OtherRobot(5).next.type,
 	OtherRobot(5).next.value,
+	Robot.visited[0],
 	Robot.visited[1],
 	Robot.visited[2],
 	Robot.visited[3],
@@ -481,11 +482,11 @@ system Waypoint, OtherRobot, Robot;</system>
 	Robot.visited[25],
 	Robot.visited[26],
 	Robot.visited[27],
-	Robot.visited[28],
 	Robot.dest,
 	Robot.cur_waypoint,
 	Robot.dest_waypoint
 } -&gt; {
+	Waypoint(0).num_in_queue,
 	Waypoint(1).num_in_queue,
 	Waypoint(2).num_in_queue,
 	Waypoint(3).num_in_queue,
@@ -513,7 +514,6 @@ system Waypoint, OtherRobot, Robot;</system>
 	Waypoint(25).num_in_queue,
 	Waypoint(26).num_in_queue,
 	Waypoint(27).num_in_queue,
-	Waypoint(28).num_in_queue,
 	Robot.x
 } : &lt;&gt; Robot.Done</formula>
 			<comment></comment>
