@@ -17,12 +17,21 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifndef ORDER_RANDOM_GENERATOR
+#define ORDER_RANDOM_GENERATOR
+
+#include "order/generator.hpp"
 #include <vector>
 
-namespace order_generation {
-template <typename T>
-T pick_random(const std::vector<T> &choices);
+namespace order {
+class RandomGenerator : public Generator {
+    std::vector<int> stations;
 
-template <typename T>
-std::vector<T> pick_n_random(std::vector<T> choices, int n);
-} // namespace order_generation
+  public:
+    RandomGenerator(std::vector<int> stations);
+    Order generate_order(int size) const;
+    std::vector<Order> generate_orders(std::vector<int> sizes) const;
+};
+} // namespace order
+
+#endif

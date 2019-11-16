@@ -17,25 +17,38 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "order_generator.hpp"
-#include "pick_random.hpp"
+#include "order/order.hpp"
+#include <sstream>
 
-namespace order_generation {
-OrderGenerator::OrderGenerator(std::vector<int> stations) : stations(stations){};
-
-Order OrderGenerator::generate_order(int size) const
+namespace order {
+Json::Value Order::to_json() const
 {
-    return Order{pick_n_random(stations, size)};
-}
+    Json::Value json{Json::arrayValue};
 
-std::vector<Order> OrderGenerator::generate_orders(std::vector<int> sizes) const
-{
-    std::vector<Order> orders;
-
-    for (int size : sizes) {
-        orders.push_back(generate_order(size));
+    for (int station : stations) {
+        json.append(Json::Value{station});
     }
 
-    return orders;
+    return json;
 }
-} // namespace order_generation
+
+Order Order::from_json(const std::string &json)
+{
+    std::stringstream ss(json);
+    Json::Value root{Json::arrayValue};
+    ss >> root;
+
+    return Order::from_json(root);
+}
+
+Order Order::from_json(const Json::Value &json)
+{
+    std::vector<int> stations;
+
+    for (auto station : json) {
+        stations.push_back(station.asInt());
+    }
+
+    return Order{stations};
+}
+} // namespace order

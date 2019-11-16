@@ -17,16 +17,24 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "order.hpp"
-#include <vector>
+#ifndef ORDER_GENERATION_SERVICE_HPP
+#define ORDER_GENERATION_SERVICE_HPP
 
-namespace order_generation {
-class OrderGenerator {
-    std::vector<int> stations;
+#include "order/generator.hpp"
+#include "tcp/connection.hpp"
+#include "tcp/server.hpp"
+#include <memory>
+
+namespace order {
+class GenerationService {
+    tcp::Server server;
+    Generator &generator;
+    void parse_message(std::shared_ptr<tcp::Connection> connection);
 
   public:
-    OrderGenerator(std::vector<int> stations);
-    Order generate_order(int size) const;
-    std::vector<Order> generate_orders(std::vector<int> sizes) const;
+    GenerationService(int port, Generator &generator);
+    void start();
 };
-} // namespace order_generation
+} // namespace order
+
+#endif

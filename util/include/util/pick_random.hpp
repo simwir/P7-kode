@@ -17,10 +17,34 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <algorithm>
+#include <string>
 #include <vector>
 
-namespace order_generation {
-struct Order {
-    std::vector<int> stations;
-};
-} // namespace order_generation
+template <typename T>
+T pick_random(const std::vector<T> &choices)
+{
+    return choices[rand() % choices.size()];
+}
+
+template <typename T>
+std::vector<T> pick_n_random(std::vector<T> choices, int n)
+{
+    if (n > choices.size()) {
+        throw std::invalid_argument("Cannot pick " + std::to_string(n) +
+                                    " elements from a vector of size " +
+                                    std::to_string(choices.size()));
+    }
+
+    std::vector<T> selected;
+
+    // Pick a random element, add to selected and remove from choices. Ensures
+    // no duplicates in the selected vector.
+    for (int i = 0; i < n; ++i) {
+        int element = pick_random(choices);
+        selected.push_back(element);
+        choices.erase(std::remove(choices.begin(), choices.end(), element), choices.end());
+    }
+
+    return selected;
+}

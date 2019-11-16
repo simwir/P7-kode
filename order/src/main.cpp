@@ -17,36 +17,25 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "pick_random.hpp"
-#include <algorithm>
-#include <string>
+#include "order/generation_service.hpp"
+#include "order/order.hpp"
+#include "order/random_generator.hpp"
+#include <iostream>
+#include <vector>
 
-namespace order_generation {
-template <typename T>
-T pick_random(const std::vector<T> &choices)
-{
-    return choices[rand() % choices.size()];
-}
+using namespace order;
 
-template <typename T>
-std::vector<T> pick_n_random(std::vector<T> choices, int n)
+int main(int argc, char *argv[])
 {
-    if (n > choices.size()) {
-        throw std::invalid_argument("Cannot pick " + std::to_string(n) +
-                                    " elements from a vector of size " +
-                                    std::to_string(choices.size()));
+    std::vector<int> stations;
+
+    for (int i = 1; i < argc; ++i) {
+        stations.push_back(atoi(argv[i]));
     }
 
-    std::vector<T> selected;
+    RandomGenerator generator = RandomGenerator{stations};
+    GenerationService service = GenerationService{5555, generator};
+    service.start();
 
-    // Pick a random element, add to selected and remove from choices. Ensures
-    // no duplicates in the selected vector.
-    for (int i = 0; i < n; ++i) {
-        int element = pick_random(choices);
-        selected.push_back(element);
-        choices.erase(std::remove(choices.begin(), choices.end(), element), choices.end());
-    }
-
-    return selected;
+    return 0;
 }
-} // namespace order_generation
