@@ -17,7 +17,7 @@ class Log {
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         char *timestamp = std::ctime(&now);
 
-        std::string timestampWithoutEndl(timestamp);
+        std::string timestampWithoutEndl{timestamp};
         timestampWithoutEndl = timestampWithoutEndl.substr(0, 24);
 
         log << "[" << timestampWithoutEndl << "]: " << val << std::endl;
