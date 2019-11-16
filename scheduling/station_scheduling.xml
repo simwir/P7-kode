@@ -9,7 +9,6 @@ import "libconfig.so" {
     int number_of_stations();
     int number_of_end_stations();
     int number_of_robots();
-    int current_station();
     int station_passing_time();
     double uncertainty();
     int next_robot_station(int robot, int step);
@@ -26,6 +25,7 @@ const int STATION_PASSING_TIME = station_passing_time();
 const double UNCERTAINTY = uncertainty();
 
 import "libconfig.so" {
+    int[1, NUM_STATIONS] next_station();
     void endstation(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
     void station_visited(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
 };
@@ -118,7 +118,7 @@ dest = next_station()</label>
 		<name>Robot</name>
 		<declaration>clock x;
 
-int[1, NUM_STATIONS] cur_loc = current_station();
+int[1, NUM_STATIONS] cur_loc = next_station();
 int[1, NUM_STATIONS] dest;
 const double robot_eta = eta(CUR_ROBOT);
 
