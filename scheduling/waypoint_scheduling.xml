@@ -12,7 +12,7 @@ import "libconfig.so" {
     int waypoint_passing_time();
     int station_passing_time();
     int next_waypoint();
-    int next_station();
+    int destination();
     double uncertainty();
     int get_waypoint_dist(int from, int to);
     int get_next_action_type(int robot, int step);
@@ -277,7 +277,7 @@ get_waypoint_dist(cur, next.value) != -1</label>
 
 bool visited[int[0, NUM_WAYPOINTS - 1]];
 
-const int[0, NUM_WAYPOINTS - 1] dest = next_station();
+const int[0, NUM_WAYPOINTS - 1] dest = destination();
 
 int[0, NUM_WAYPOINTS - 1] cur_waypoint = next_waypoint();
 int[0, NUM_WAYPOINTS - 1] dest_waypoint;
