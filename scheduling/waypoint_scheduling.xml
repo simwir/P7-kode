@@ -23,6 +23,8 @@ const int NUM_STATIONS = number_of_stations();
 const int NUM_WAYPOINTS = number_of_waypoints();
 const int MAX_ROBOTS = number_of_robots();
 const double UNCERTAINTY = uncertainty();
+const int NON_STATION_PASSING = waypoint_passing_time();
+const int STATION_PASSING = station_passing_time();
 
 import "libconfig.so" {
     void waypoint_visited(int num_waypoints, bool&amp; arr[int[0, NUM_WAYPOINTS - 1]]);
@@ -41,8 +43,6 @@ broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]],
 		<name>Waypoint</name>
 		<parameter>int[0, NUM_WAYPOINTS - 1] id</parameter>
 		<declaration>const int MAX_QUEUE = MAX_ROBOTS;
-const int NON_STATION_PASSING = waypoint_passing_time();
-const int STATION_PASSING = station_passing_time();
 
 clock x;
 
