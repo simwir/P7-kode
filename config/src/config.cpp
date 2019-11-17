@@ -17,18 +17,20 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "config/config.hpp"
+#include "util/log.hpp"
 
 #include <fstream>
 #include <map>
 #include <string>
 #include <vector>
 
+extern Log log;
 
 template <>
 std::pair<std::string, int> config::convert_from_json<std::pair<std::string, int>>(const Json::Value &arr)
 {
     if (arr.type() != Json::ValueType::arrayValue) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{"convert_from_json<std::pair<std::string, int>>"};
     }
 
     return std::make_pair(arr[0].asString(), arr[1].asInt());
@@ -38,7 +40,7 @@ template <>
 std::vector<double> config::convert_from_json<std::vector<double>>(const Json::Value &arr)
 {
     if (arr.type() != Json::ValueType::arrayValue) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{"convert_from_json<std::vector<double>>"};
     }
 
     std::vector<double> result;
@@ -54,7 +56,7 @@ template <>
 std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &arr)
 {
     if (arr.type() != Json::ValueType::arrayValue) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{"convert_from_json<std::vector<int>>"};
     }
 
     std::vector<int> result;
@@ -71,7 +73,7 @@ std::vector<std::vector<int>>
 config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 {
     if (arr.type() != Json::ValueType::arrayValue) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{"<std::vector<std::vector<int>>>"};
     }
 
     std::vector<std::vector<int>> result;
@@ -87,7 +89,7 @@ template <>
 std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value &arr)
 {
     if (arr.type() != Json::ValueType::arrayValue) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{"convert_from_json<std::vector<bool>>"};
     }
 
     std::vector<bool> result;
@@ -196,7 +198,7 @@ config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
     }
 
     if (json[key].type() != Json::ValueType::objectValue) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{"get<std::map<int, std::vector<int>>>"};
     }
 
     std::map<int, std::vector<int>> result;
@@ -220,7 +222,7 @@ config::Config::get<std::vector<std::vector<std::pair<std::string, int>>>>(const
     std::vector<std::vector<std::pair<std::string, int>>> result;
     for (const auto& json_row : json[key]) {
         if (json_row.type() != Json::ValueType::arrayValue) {
-            throw config::InvalidValueException{};
+            throw config::InvalidValueException{"get<std::vector<std::vector<std::pair<std::string, int>>>>"};
         }
 
         std::vector<std::pair<std::string, int>> row;
@@ -231,4 +233,102 @@ config::Config::get<std::vector<std::vector<std::pair<std::string, int>>>>(const
     }
 
     return result;
+}
+
+template <>
+std::vector<std::vector<int>> config::Config::get<std::vector<std::vector<int>>>(const std::string &key1, const std::string &key2) {
+    if (!json.isMember(key1)) {
+        throw config::InvalidKeyException{key1};
+    }
+
+    std::vector<std::vector<int>> result;
+    for (const auto& level1 : json[key1]) {
+        if (level1.type() != Json::ValueType::objectValue) {
+            throw config::InvalidValueException{"get<std::vector<std::vector<int>>> level1"};
+        }
+
+        if (!level1.isMember(key2)) {
+            throw config::InvalidKeyException{key2};
+        }
+
+        if (level1[key2].type() != Json::ValueType::objectValue && level1[key2].type() != Json::ValueType::arrayValue) {
+            throw config::InvalidValueException{"get<std::vector<std::vector<int>>> level2"};
+        }
+
+        std::vector<int> row;
+        for (const auto& elem : level1[key2]) {
+            row.push_back(elem.asInt());
+        }
+        result.push_back(row);
+    }
+
+    return result;
+}
+
+template <>
+std::vector<double> config::Config::get<std::vector<double>>(const std::string &key1, const std::string &key2) {
+    if (!json.isMember(key1)) {
+        throw config::InvalidKeyException{key1};
+    }
+
+    std::vector<double> result;
+    for (const auto& level1 : json[key1]) {
+        if (level1.type() != Json::ValueType::objectValue) {
+            throw config::InvalidValueException{"get<std::vector<double>>"};
+        }
+
+        if (!level1.isMember(key2)) {
+            throw config::InvalidKeyException{key2};
+        }
+        result.push_back(level1[key2].asDouble());
+    }
+
+    return result;
+}
+
+template <>
+std::vector<std::vector<std::pair<std::string, int>>> config::Config::get<std::vector<std::vector<std::pair<std::string, int>>>>(const std::string &key1, const std::string &key2) {
+  if (!json.isMember(key1)) {
+      throw config::InvalidKeyException{key1};
+  }
+
+  std::vector<std::vector<std::pair<std::string, int>>> result;
+  for (const auto& level1 : json[key1]) {
+      if (level1.type() != Json::ValueType::objectValue) {
+          throw config::InvalidValueException{"get<std::vector<std::vector<std::pair<std::string, int>>>> level1"};
+      }
+
+      if (!level1.isMember(key2)) {
+          throw config::InvalidKeyException{key2};
+      }
+
+      if (level1[key2].type() != Json::ValueType::objectValue && level1[key2].type() != Json::ValueType::arrayValue) {
+          throw config::InvalidValueException{"get<std::vector<std::vector<std::pair<std::string, int>>>> level2"};
+      }
+
+      std::vector<std::pair<std::string, int>> row;
+      for (const auto& elem : level1[key2]) {
+          row.push_back(std::make_pair(elem["type"].asString(), elem["value"].asInt()));
+      }
+      result.push_back(row);
+  }
+
+  return result;
+}
+
+int config::Config::getSize(const std::string &key)
+{
+    if (!json.isMember(key)) {
+        throw config::InvalidKeyException{key};
+    }
+
+    if (json[key].type() == Json::ValueType::arrayValue) {
+        return json[key].size();
+    }
+    else if (json[key].type() == Json::ValueType::objectValue) {
+        return json[key].size();
+    }
+    else {
+        throw config::InvalidValueException{"getSize " + key};
+    }
 }

@@ -26,11 +26,11 @@ const double UNCERTAINTY = uncertainty();
 
 import "libconfig.so" {
     int[1, NUM_STATIONS] next_station();
-    void endstation(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
+    // void endstation(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
     void station_visited(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
 };
 
-bool is_endstation[int[1, NUM_STATIONS]];
+// bool is_endstation[int[1, NUM_STATIONS]];
 bool visited[int[1, NUM_STATIONS]];
 
 broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], done[int[1, MAX_ROBOTS]];</declaration>
@@ -122,9 +122,13 @@ int[1, NUM_STATIONS] cur_loc = next_station();
 int[1, NUM_STATIONS] dest;
 const double robot_eta = eta(CUR_ROBOT);
 
+bool is_endstation(int[1, NUM_STATIONS] id) {
+    return id &lt;= NUM_END_STATIONS;
+}
+
 bool all_nonend() {
     for (id : int[1, NUM_STATIONS]) {
-        if (!is_endstation[id] &amp;&amp; !visited[id]) {
+        if (!is_endstation(id) &amp;&amp; !visited[id]) {
             return false;
         }
     }
@@ -134,7 +138,7 @@ bool all_nonend() {
 
 bool endstation_visited() {
     for (id : int[1, NUM_STATIONS]) {
-        if (is_endstation[id] &amp;&amp; visited[id]) {
+        if (is_endstation(id) &amp;&amp; visited[id]) {
             return true;
         }
     }
@@ -151,7 +155,7 @@ bool can_visit(int[1, NUM_STATIONS] id) {
         return false;
     }
 
-    if (is_endstation[id]) {
+    if (is_endstation(id)) {
         return !visited[id] &amp;&amp; all_nonend();
     }
 
@@ -159,7 +163,7 @@ bool can_visit(int[1, NUM_STATIONS] id) {
 }
 
 void set_global() {
-    endstation(NUM_STATIONS, is_endstation);
+    //endstation(NUM_STATIONS, is_endstation);
     station_visited(NUM_STATIONS, visited);
 }</declaration>
 		<location id="id6" x="-637" y="-246">
