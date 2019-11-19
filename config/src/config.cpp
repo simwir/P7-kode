@@ -39,7 +39,7 @@ std::pair<std::string, int> config::convert_from_json<std::pair<std::string, int
 template <>
 std::vector<double> config::convert_from_json<std::vector<double>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{"convert_from_json<std::vector<double>>"};
     }
 
@@ -55,7 +55,7 @@ std::vector<double> config::convert_from_json<std::vector<double>>(const Json::V
 template <>
 std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{"convert_from_json<std::vector<int>>"};
     }
 
@@ -72,7 +72,7 @@ template <>
 std::vector<std::vector<int>>
 config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{"<std::vector<std::vector<int>>>"};
     }
 
@@ -88,7 +88,7 @@ config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 template <>
 std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{"convert_from_json<std::vector<bool>>"};
     }
 
@@ -197,8 +197,13 @@ config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
         throw config::InvalidKeyException{key};
     }
 
+<<<<<<< HEAD
     if (json[key].type() != Json::ValueType::objectValue) {
         throw config::InvalidValueException{"get<std::map<int, std::vector<int>>>"};
+=======
+    if (!json[key].isObject()) {
+        throw config::InvalidValueException{};
+>>>>>>> uppaal-config
     }
 
     std::map<int, std::vector<int>> result;
