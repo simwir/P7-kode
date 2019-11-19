@@ -79,7 +79,7 @@ void get_robot(int id, const std::map<int, int> &robot_map,
                std::shared_ptr<tcp::Connection> connection)
 {
     try {
-        std::unique_lock<std::mutex> lock{robot_map_lock};   
+        std::unique_lock<std::mutex> lock{robot_map_lock};
         const std::string message = std::to_string(robot_map.at(id));
         lock.unlock();
         connection->send(message);
