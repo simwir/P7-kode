@@ -79,7 +79,9 @@ void get_robot(int id, const std::map<int, int> &robot_map,
                std::shared_ptr<tcp::Connection> connection)
 {
     try {
+        std::scoped_lock l{robot_map_lock};
         const std::string message = std::to_string(robot_map.at(id));
+        l.~scoped_lock;
         connection->send(message);
     }
     catch (std::out_of_range &e) {
