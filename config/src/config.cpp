@@ -184,7 +184,7 @@ config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
         throw config::InvalidKeyException{key};
     }
 
-    if (json[key].type() != Json::ValueType::objectValue) {
+    if (!json[key].isObject()) {
         throw config::InvalidValueException{};
     }
 
