@@ -26,7 +26,7 @@
 template <>
 std::vector<double> config::convert_from_json<std::vector<double>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
@@ -42,7 +42,7 @@ std::vector<double> config::convert_from_json<std::vector<double>>(const Json::V
 template <>
 std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
@@ -59,7 +59,7 @@ template <>
 std::vector<std::vector<int>>
 config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
@@ -75,7 +75,7 @@ config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 template <>
 std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
