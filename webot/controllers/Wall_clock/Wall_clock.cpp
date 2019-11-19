@@ -20,8 +20,8 @@
 #include <thread>
 #include <webots/Robot.hpp>
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 using namespace webots;
 
