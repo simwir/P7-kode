@@ -30,7 +30,7 @@ class InvalidValueException : public std::exception {
     std::string message;
 
   public:
-    InvalidValueException(const std::string &str) : message("Invalid value: " + str) {};
+    InvalidValueException(const std::string &str) : message("Invalid value: " + str){};
     const char *what() const noexcept { return message.c_str(); }
 };
 
@@ -38,7 +38,7 @@ class InvalidKeyException : public std::exception {
     std::string message;
 
   public:
-    InvalidKeyException(const std::string &key) : message("Key not found: " + key) {};
+    InvalidKeyException(const std::string &key) : message("Key not found: " + key){};
     const char *what() const noexcept { return message.c_str(); };
 };
 
