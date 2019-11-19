@@ -43,8 +43,8 @@ struct ControllerState {
     }
     Json::Value to_json() const;
     static ControllerState from_json(const Json::Value &json);
+    static ControllerState parse(const std::string &s);
 };
-ControllerState parse_controller_state(const std::string &s);
 
 struct Info {
     int id;
