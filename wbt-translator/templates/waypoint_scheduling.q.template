@@ -22,16 +22,17 @@
 /*
 
 */
-strategy plan = minE (total) [<=200] : <> Robot.Done
+strategy realistic = minE (total) [<=500] %¤STRATEGY_VAR_LIST¤% : <> Robot.Done
 
 /*
 
 */
-simulate 1 [<= 200] {\
-    Robot.cur_loc, Robot.dest\
-} under plan
+simulate 1 [<= 100] {\
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding\
+} under realistic
+
 
 /*
 
 */
-saveStrategy("station_strategy.json", plan)
+saveStrategy("waypoint_strategy.json", realistic)

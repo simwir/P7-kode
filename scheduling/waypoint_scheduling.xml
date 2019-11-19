@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>// Place global declarations here.
+	<declaration>/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 hybrid clock total;
 
@@ -35,7 +52,7 @@ const int[1, MAX_ROBOTS] CUR_ROBOT = 1;
 
 int[0, NUM_WAYPOINTS - 1] station_waypoint[int[1, NUM_STATIONS]];
 
-broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], 
+broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]],
                done[int[1, MAX_ROBOTS]],
                go[int[1, MAX_ROBOTS]],
                queue[int[0, NUM_WAYPOINTS - 1]][int[1, MAX_ROBOTS]];</declaration>
@@ -169,10 +186,10 @@ next_t next_step() {
     else {
         _next.type = DONE;
     }
-    
+
     _next.value = get_next_action_value(id, step_index);
     step_index++;
-    
+
     return _next;
 }</declaration>
 		<location id="id2" x="-280" y="-246">
