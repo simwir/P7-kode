@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace robot {
-robot::ControllerState parse_controller_state(const std::string &s)
+robot::ControllerState ControllerState::parse(const std::string &s)
 {
     std::stringstream ss{s};
     double x, y;

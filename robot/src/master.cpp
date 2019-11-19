@@ -131,7 +131,7 @@ void robot::Master::load_webots_to_config()
     for (auto &[id, waypoint] : ast.nodes) {
         waypoint_list.append(Json::objectValue);
         auto &last = waypoint_list[waypoint_list.size() - 1];
-        last["id"] = id;
+        last["id"] = static_cast<int>(id);
         last["x"] = waypoint.translation.x;
         last["y"] = waypoint.translation.z;
         last["type"] = to_string(waypoint.waypointType);
@@ -183,7 +183,7 @@ void robot::Master::get_dynamic_state()
     auto broadcast_info = receive_broadcast_info();
     auto _controller_state = receive_controller_info();
     robot_info = robot::InfoMap::from_json(broadcast_info);
-    controller_state = robot::parse_controller_state(_controller_state);
+    controller_state = robot::ControllerState::parse(_controller_state);
     // TODO write schedules to config
 
     dynamic_config.set(ROBOT_INFO_MAP, robot_info.to_json());
