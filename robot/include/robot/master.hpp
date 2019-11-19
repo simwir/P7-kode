@@ -16,18 +16,20 @@ const std::filesystem::path dynamic_conf = "dynamic_config.json";
 const std::filesystem::path static_conf = "static_config.json";
 
 #define DESTINATION "destination"
-#define CURRENT_WAYPOINT "current_waypoint"
-#define CURRENT_STATION "current_station"
+#define NEXT_WAYPOINT "next_waypoint"
+#define NEXT_STATION "next_station"
 #define ROBOT_INFO_MAP "robot_info_map"
 #define SELF_STATE "self_state"
 
 #define STATIONS "stations"
 #define END_STATIONS "end_stations"
 #define VIAS "vias"
-#define NUMBER_OF_STATIONS "number_of_stations"
-#define NUMBER_OF_END_STATIONS "number_of_end_stations"
-#define NUMBER_OF_VIAS "number_of_vias"
-#define NUMBER_OF_WAYPOINTS "number_of_waypoints"
+
+constexpr int UPDATE_INTERVAL_MS = 5000;
+
+constexpr int STATION_DELAY = 6;
+constexpr int WAYPOINT_DELAY = 3;
+constexpr double UNCERTAINTY = 1.1;
 
 namespace robot {
 class RecievedMessageException : public std::exception {
@@ -64,6 +66,8 @@ class Master {
     void request_controller_info();
     std::string receive_controller_info();
 
+    std::optional<std::vector<int>> get_new_order();
+
     void write_static_config();
     void write_dynamic_config();
 
@@ -81,6 +85,11 @@ class Master {
     Parser webots_parser;
     AST ast;
 
+    std::vector<int> stations;
+    std::vector<int> end_stations;
+    std::vector<int> vias;
+    std::vector<int> waypoints;
+
     void broadcast_state();
     robot::Info current_state;
     robot::InfoMap robot_info;
@@ -94,12 +103,26 @@ class Master {
     std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
     std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
 
+    void set_station_visited(int station)
+    {
+        if (auto it = std::find(order.begin(), order.end(), station); it != order.end()) {
+            order.erase(it);
+        }
+        visited_waypoints.push_back(station);
+    };
+    std::vector<int> order;
+
+    // visited waypoints since last station we were at.
+    std::vector<int> visited_waypoints;
+
     bool running;
 
-    double get_webots_time();
-    double current_webots_time = 0;
+    int get_webots_time();
+    double current_time = 0;
     double eta_start_time = 0;
-    double hold_untill = 0;
+    double hold_until = 0;
+
+    int last_update_time;
 
     int get_closest_waypoint(std::function<bool(Waypoint)> pred);
 };

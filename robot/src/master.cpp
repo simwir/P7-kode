@@ -32,9 +32,16 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     std::string port_to_controller;
     std::string recieved_string;
 
-    station_subscriber = std::make_shared<AsyncStationSubscriber>();
-    waypoint_subscriber = std::make_shared<AsyncWaypointSubscriber>();
+    load_webots_to_config();
+    write_static_config();
+
+    station_subscriber = std::make_shared<AsyncStationSubscriber>(stations);
+    waypoint_subscriber = std::make_shared<AsyncWaypointSubscriber>(waypoints);
     eta_subscriber = std::make_shared<AsyncEtaSubscriber>();
+
+    station_scheduler.add_subscriber(station_subscriber->shared_from_this());
+    waypoint_scheduler.add_subscriber(waypoint_subscriber->shared_from_this());
+    eta_extractor.add_subscriber(eta_subscriber->shared_from_this());
 
     // Connecting to the Port Discovery Service
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
@@ -56,11 +63,13 @@ void robot::Master::load_webots_to_config()
     if (ast.nodes.size() == 0) {
         throw MalformedWorldFileError{"No waypoints found"};
     }
+    stations.clear();
+    end_stations.clear();
+    vias.clear();
+    waypoints.clear();
 
-    std::vector<int> stations;
-    std::vector<int> end_stations;
-    std::vector<int> vias;
     for (auto &[id, waypoint] : ast.nodes) {
+        waypoints.push_back(id);
         switch (waypoint.waypointType) {
         case WaypointType::eStation:
             stations.push_back(id);
@@ -84,10 +93,6 @@ void robot::Master::load_webots_to_config()
     static_config.set(STATIONS, stations);
     static_config.set(END_STATIONS, end_stations);
     static_config.set(VIAS, vias);
-    static_config.set(NUMBER_OF_STATIONS, station_count);
-    static_config.set(NUMBER_OF_END_STATIONS, endpoint_count);
-    static_config.set(NUMBER_OF_VIAS, via_count);
-    static_config.set(NUMBER_OF_WAYPOINTS, number_of_waypoints);
     // TODO move to static config with help from broadcaster
     // static_config.set("number_of_robots", webots_parser.number_of_robots);
 
@@ -136,6 +141,9 @@ void robot::Master::load_webots_to_config()
     }
     static_config.set("waypoints", waypoint_list);
     static_config.set("station_distance_matrix", jsonarray_apsp_distances);
+    static_config.set("station_delay", STATION_DELAY);
+    static_config.set("waypoint_delay", WAYPOINT_DELAY);
+    static_config.set("uncertainty", UNCERTAINTY);
 }
 
 void robot::Master::request_broadcast_info()
@@ -153,7 +161,8 @@ void robot::Master::send_robot_info()
     current_state.station_plan = station_subscriber->get();
     current_state.waypoint_plan = waypoint_subscriber->get();
     current_state.location = controller_state.position;
-    broadcast_client.send("post_robot_info," + current_state.to_json().toStyledString());
+    last_update_time = current_time;
+    broadcast_client.send("put_robot_info," + current_state.to_json().toStyledString());
 }
 
 std::string robot::Master::receive_broadcast_info()
@@ -207,16 +216,10 @@ void robot::Master::set_robot_destination(int waypoint)
 
 void robot::Master::main_loop()
 {
-    load_webots_to_config();
-    write_static_config();
-
-    station_scheduler.add_subscriber(station_subscriber->shared_from_this());
-    waypoint_scheduler.add_subscriber(waypoint_subscriber->shared_from_this());
-    eta_extractor.add_subscriber(eta_subscriber->shared_from_this());
 
     // Bootstrap route
     get_dynamic_state();
-    dynamic_config.set(CURRENT_STATION, get_closest_waypoint([](auto wp) {
+    dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
                            return wp.waypointType == WaypointType::eStation;
                        }));
     write_dynamic_config();
@@ -229,7 +232,7 @@ void robot::Master::main_loop()
     get_dynamic_state();
 
     dynamic_config.set(DESTINATION, station_subscriber->read().at(0));
-    dynamic_config.set(CURRENT_WAYPOINT, get_closest_waypoint([](auto) { return true; }));
+    dynamic_config.set(NEXT_WAYPOINT, get_closest_waypoint([](auto) { return true; }));
     write_dynamic_config();
     std::cerr << "scheduling waypoint\n";
     waypoint_scheduler.start();
@@ -241,7 +244,7 @@ void robot::Master::main_loop()
     running = true;
     while (running) {
         bool got_fresh_info = false;
-        current_webots_time = get_webots_time();
+        current_time = get_webots_time();
         get_dynamic_state();
         std::cerr << "loop\n";
 
@@ -255,30 +258,31 @@ void robot::Master::main_loop()
             if (act.type == scheduling::ActionType::Hold) {
                 act = waypoint_subscriber->get().at(1);
             }
-            dynamic_config.set(CURRENT_WAYPOINT, act.value);
+            dynamic_config.set(NEXT_WAYPOINT, act.value);
             dynamic_config.set(DESTINATION, station_subscriber->read().at(0));
             waypoint_scheduler.start();
         }
 
         if (waypoint_subscriber->is_dirty()) {
             got_fresh_info = true;
-            // TODO set robot location from waypoint schedule
-            // TODO broadcast waypoint schedule
+            current_state.waypoint_plan = waypoint_subscriber->read();
+            eta_extractor.start();
         }
 
         // if new eta report ready
         //    then broadcast it minus time elapsed
         if (eta_subscriber->is_dirty()) {
             got_fresh_info = true;
-            double time_delta = current_webots_time - eta_start_time;
+            double time_delta = current_time - eta_start_time;
             double current_eta = eta_subscriber->get() - time_delta;
             current_state.eta = current_eta;
+            dynamic_config.set("station_eta", current_eta);
         }
 
         // if at waypoint
         //    then tell robot of next waypoint;
         //         abort waypoint scheduling; start new one
-        if (controller_state.is_stopped && current_webots_time > hold_untill) {
+        if (controller_state.is_stopped && current_time > hold_until) {
             got_fresh_info = true;
             // TODO broadcast position info
 
@@ -290,6 +294,9 @@ void robot::Master::main_loop()
             scheduling::Action current_waypoint = waypoint_subscriber->get().front();
             waypoint_subscriber->pop();
             scheduling::Action next_waypoint = waypoint_subscriber->get().front();
+            if (current_waypoint.type != scheduling::ActionType::Hold) {
+                visited_waypoints.push_back(current_waypoint.value);
+            }
 
             auto is_station = [&](int id) {
                 return ast.nodes.at(id).waypointType == WaypointType::eStation;
@@ -297,7 +304,7 @@ void robot::Master::main_loop()
 
             // hold for n units in webots time
             if (next_waypoint.type == scheduling::ActionType::Hold) {
-                hold_untill = current_webots_time + next_waypoint.value;
+                hold_until = current_time + next_waypoint.value;
             }
             else {
                 set_robot_destination(next_waypoint.value);
@@ -306,16 +313,28 @@ void robot::Master::main_loop()
             // if committed to station dest or at station
             //    then reschedule stations
             if (is_station(next_waypoint.value) || is_station(current_waypoint.value)) {
-                // TODO send state s.t. station scheduler starts at actual station
+                // previous waypoint scheduling is obsolete since we're at/going to a station
                 waypoint_scheduler.abort();
+                visited_waypoints.clear();
+
+                // setup input for station scheduling.
+                set_station_visited(next_waypoint.value);
+
+                dynamic_config.set("stations_to_visit", order);
+                write_dynamic_config();
                 station_scheduler.start();
             }
             else {
+                dynamic_config.set("visited_waypoints", visited_waypoints);
+
+                write_dynamic_config();
                 waypoint_scheduler.start();
             }
         }
-        // TODO maybe just broadcast anyway after a while?
-        if (got_fresh_info) {
+        // send update if there are new things to report
+        if (got_fresh_info || current_time - last_update_time >= UPDATE_INTERVAL_MS) {
+            // TODO Maybe update ETA based on time elapsed since last update.
+            // Not an immediately trivial change since ETAs might become negative.
             send_robot_info();
             std::cerr << "writing dynamic config" << std::endl;
             write_dynamic_config();
@@ -323,16 +342,15 @@ void robot::Master::main_loop()
     }
 }
 
-double robot::Master::get_webots_time()
+int robot::Master::get_webots_time()
 {
     auto msg = webots_clock_client->atomic_blocking_request("get_time");
-    std::stringstream ss{msg};
-    double time;
-    ss >> time;
-    if (!(ss.good() || ss.eof())) {
+    try {
+        return std::stoi(msg);
+    }
+    catch (std::invalid_argument &e) {
         throw std::logic_error{"Error: couldn't parse time from " + msg};
     }
-    return time;
 }
 
 int robot::Master::get_closest_waypoint(std::function<bool(Waypoint)> pred)

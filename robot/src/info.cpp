@@ -56,7 +56,7 @@ Json::Value Info::to_json() const
     Json::Value json;
 
     json["id"] = id;
-    json["eta"] = eta.has_value() ? eta.value() : Json::nullValue;
+    json["station_eta"] = eta.has_value() ? eta.value() : Json::nullValue;
     json["location"]["x"] = location.x;
     json["location"]["y"] = location.y;
     json["station_plan"] = Json::Value{Json::arrayValue};
@@ -159,7 +159,7 @@ Info Info::from_json(const Json::Value &json)
     auto location = get_field_as<robot::Point>(json, "location");
     auto station_plan = get_field_as<std::vector<int>>(json, "station_plan");
     auto waypoint_plan = get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
-    auto eta = get_field_as<std::optional<double>>(json, "eta");
+    auto eta = get_field_as<std::optional<double>>(json, "station_eta");
 
     return robot::Info{id, location, station_plan, waypoint_plan, eta};
 }
