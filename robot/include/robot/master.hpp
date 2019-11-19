@@ -99,7 +99,7 @@ class Master {
     double get_webots_time();
     double current_webots_time = 0;
     double eta_start_time = 0;
-    double hold_untill = 0;
+    double hold_until = 0;
 
     int get_closest_waypoint(std::function<bool(Waypoint)> pred);
 };

@@ -278,7 +278,7 @@ void robot::Master::main_loop()
         // if at waypoint
         //    then tell robot of next waypoint;
         //         abort waypoint scheduling; start new one
-        if (controller_state.is_stopped && current_webots_time > hold_untill) {
+        if (controller_state.is_stopped && current_webots_time > hold_until) {
             got_fresh_info = true;
             // TODO broadcast position info
 
@@ -297,7 +297,7 @@ void robot::Master::main_loop()
 
             // hold for n units in webots time
             if (next_waypoint.type == scheduling::ActionType::Hold) {
-                hold_untill = current_webots_time + next_waypoint.value;
+                hold_until = current_webots_time + next_waypoint.value;
             }
             else {
                 set_robot_destination(next_waypoint.value);
