@@ -16,11 +16,39 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef UPPAAL_PRINTER_HPP
-#define UPPAAL_PRINTER_HPP
+#ifndef META_HPP
+#define META_HPP
 
-#include "wbt-translator/webots_parser.hpp"
+#include <type_traits>
 
-std::string print_waypoints_of_type(const AST &ast, const WaypointType type);
+namespace meta {
+
+template <typename T, typename = void>
+struct is_container : std::false_type {
+};
+
+template <typename T>
+using element_type = decltype(std::begin(std::declval<T &>()));
+
+template <typename T>
+struct is_container<T, std::void_t<element_type<T>>> : std::true_type {
+};
+template <typename T>
+constexpr auto is_container_v = is_container<T>::value;
+
+template <typename T, typename = void>
+struct is_string : std::false_type {
+};
+
+template <typename T>
+struct is_string<T, std::enable_if_t<is_container<T>::value>>
+    : std::is_same<element_type<T>, char> {
+};
+
+// incomplete type to allow error printing
+template <typename Err>
+struct unsupported;
+
+} // namespace meta
 
 #endif

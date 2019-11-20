@@ -53,3 +53,5 @@ _deps
 /.vscode
 .ccls
 .idea
+TAGS
+.dir-locals.el

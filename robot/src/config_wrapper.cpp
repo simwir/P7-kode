@@ -16,11 +16,28 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef UPPAAL_PRINTER_HPP
-#define UPPAAL_PRINTER_HPP
+#include "robot/config_wrapper.hpp"
+#include "robot/config.hpp"
 
-#include "wbt-translator/webots_parser.hpp"
+robot::Config config;
 
-std::string print_waypoints_of_type(const AST &ast, const WaypointType type);
+void set_config_path(char *file_path)
+{
+    config.load_from_file(file_path);
+}
 
-#endif
+CONFIG_GETTER(int, number_of_stations);
+CONFIG_GETTER(int, number_of_end_stations);
+CONFIG_GETTER(int, number_of_robots);
+CONFIG_GETTER(int, number_of_waypoints);
+CONFIG_GETTER(int, waypoint_passing_time);
+CONFIG_GETTER(int, station_passing_time);
+CONFIG_GETTER(int, current_station);
+CONFIG_GETTER(int, current_waypoint);
+CONFIG_GETTER(int, destination);
+CONFIG_GETTER(double, uncertainty);
+
+void station_distance_matrix(int number_of_stations,
+                             int matrix[number_of_stations][number_of_stations])
+{
+}

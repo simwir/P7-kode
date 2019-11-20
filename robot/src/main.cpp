@@ -16,11 +16,19 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef UPPAAL_PRINTER_HPP
-#define UPPAAL_PRINTER_HPP
+#include "robot/config.hpp"
+#include "robot/orchestrator.hpp"
 
-#include "wbt-translator/webots_parser.hpp"
+int main(int argc, char **argv)
+{
+    if (argc != 2) {
+        std::cerr << "please give a path\n";
+        exit(1);
+    }
+    std::filesystem::path world_file{argv[1]};
+    std::filesystem::path out_file = "static_conf.json";
 
-std::string print_waypoints_of_type(const AST &ast, const WaypointType type);
-
-#endif
+    robot::Orchestrator orchestrator{"localhost", "localhost", 0, std::cin};
+    orchestrator.load_webots_to_config(world_file);
+    orchestrator.write_static_config(out_file);
+}
