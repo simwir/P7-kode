@@ -41,7 +41,6 @@ int32_t next_waypoint();
 double uncertainty();
 
 // Station schedule related
-// void endstation(int32_t num_stations, int8_t *arr);      // Length = number_of_stations
 void station_visited(int32_t num_stations, int8_t *arr); // Length = number_of_stations
 int32_t get_station_dist(int32_t from, int32_t to);
 int32_t next_robot_station(int32_t robot, int32_t step);

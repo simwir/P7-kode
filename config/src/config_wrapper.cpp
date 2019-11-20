@@ -91,13 +91,14 @@ int32_t number_of_robots()
 {
     load();
     try {
+        // We always have at least one robot (that is ourself)
         static auto tmp = dynamic_config.getSize("robot_info_map") + 1;
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "number_of_end_stations";
+        log << "number_of_robots";
         log << e.what();
-        return 1;
+        return 1; // We always have at least one robot
     }
 }
 
@@ -177,7 +178,7 @@ int32_t next_station()
     catch (const std::exception &e) {
         log << "next_station";
         log << e.what();
-        return 0;
+        return 0; // 0 is not a valid station index, and thus UPPAAL wil complain (as it should for this case).
     }
 }
 
@@ -191,23 +192,9 @@ int32_t destination()
     catch (const std::exception &e) {
         log << "destination";
         log << e.what();
-        return 0;
+        return -1; // -1 is not a valid waypoint id, and thus UPPAAL wil complain (as it should for this case).
     }
 }
-
-/*void endstation(int32_t number_of_stations, int8_t *arr)
-{
-    load();
-    try {
-        static auto tmp = static_config.get<std::vector<bool>>("endstation");
-        for (int i = 0; i < number_of_stations; i++) {
-            arr[i] = tmp.at(i);
-        }
-    }
-    catch (const std::exception &e) {
-        log << e.what();
-    }
-}*/
 
 static std::vector<bool> convert_visited_stations()
 {
@@ -220,8 +207,10 @@ static std::vector<bool> convert_visited_stations()
     std::vector<bool> visited;
 
     for (const auto &station : endstations) {
-        visited.push_back(std::find(visited_stations.begin(), visited_stations.end(), station) !=
-                          visited_stations.end());
+        visited.push_back(
+          std::find(visited_stations.begin(), visited_stations.end(), station) !=
+                          visited_stations.end()
+        );
     }
 
     return visited;
@@ -248,12 +237,12 @@ int32_t get_station_dist(int32_t from, int32_t to)
     try {
         static auto dist =
             static_config.get<std::vector<std::vector<int>>>("station_distance_matrix");
-        return dist.at(from - 1).at(to - 1);
+        return dist.at(from - 1).at(to - 1); // We subtract 1 because stations are 1 indexed.
     }
     catch (const std::exception &e) {
         log << "get_station_dist";
         log << e.what();
-        return std::numeric_limits<int>::max();
+        return std::numeric_limits<int>::max(); // It is very unlikely that we use this path, because
     }
 }
 
@@ -274,11 +263,13 @@ static std::vector<std::vector<int>> convert_robot_next_station()
         for (const auto &station : station_plan) {
             auto it = std::find(endstations.begin(), endstations.end(), station);
 
-            if (it == plan.end()) {
+            if (it == endstations.end()) {
                 throw config::InvalidValueException{"convert_robot_next_station"};
             }
 
-            plan.push_back(std::distance(endstations.begin(), it));
+            // We add 1 because stations are 1 indexed
+            auto distance = std::distance(endstations.begin(), it) + 1;
+            plan.push_back(distance);
         }
 
         plans.push_back(plan);
@@ -292,13 +283,17 @@ int32_t next_robot_station(int32_t robot, int32_t step)
     load();
     try {
         static auto tmp = convert_robot_next_station();
+        // Other robots start their index 2 but vectors start their index at 0.
+        // Therefore, we substract 2.
         auto robot_schedule = tmp.at(robot - 2);
+
+        // 0 means that we are done
         return robot_schedule.size() > step ? robot_schedule.at(step) : 0;
     }
     catch (const std::exception &e) {
         log << "next_robot_station";
         log << e.what();
-        return 0;
+        return 0; // 0 means that we are done
     }
 }
 
@@ -315,6 +310,8 @@ double eta(int32_t robot)
     load();
     try {
         static auto tmp = convert_eta();
+        // Robots are indexed from 1 but vectors are indexed 0.
+        // Therefore, we substract 1.
         return tmp.at(robot - 1);
     }
     catch (const std::exception &e) {
@@ -335,7 +332,7 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
     catch (const std::exception &e) {
         log << "get_waypoint_dist";
         log << e.what();
-        return -1;
+        return -1; // -1 impies that there is no edge from -> to. 
     }
 }
 
@@ -423,6 +420,8 @@ int32_t get_next_action_type(int32_t robot, int32_t step)
     load();
     try {
         static auto tmp = get_waypoint_plan();
+        // Other robot index start at 2.
+        // Therefore, we subtract 2.
         auto robot_schedule = tmp.at(robot - 2);
 
         return robot_schedule.size() > step ? convert_to_action(robot_schedule.at(step)) : DONE;
@@ -439,6 +438,8 @@ int32_t get_next_action_value(int32_t robot, int32_t step)
     load();
     try {
         static auto tmp = get_waypoint_plan();
+        // Other robot index start at 2.
+        // Therefore, we subtract 2.
         auto robot_schedule = tmp.at(robot - 2);
 
         return robot_schedule.size() > step ? robot_schedule.at(step).second : 0;
