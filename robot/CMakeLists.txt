@@ -34,6 +34,7 @@ add_library(librobot ${SOURCES})
 target_link_libraries(librobot
   tcp
   stdc++fs
+  config
   wbt-translator
   scheduling
   ${JSONCPP_LIBRARIES}

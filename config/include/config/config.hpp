@@ -19,14 +19,13 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <util/json.hpp>
-
+#include "util/json.hpp"
 #include "util/meta.hpp"
 #include <string>
 #include <type_traits>
 #include <vector>
 
-namespace robot {
+namespace config {
 struct InvalidValueException : std::exception {
     const char *what() const noexcept { return "Invalid value"; }
 };
@@ -76,6 +75,6 @@ class Config {
         }
     }
 };
-} // namespace robot
+} // namespace config
 
 #endif

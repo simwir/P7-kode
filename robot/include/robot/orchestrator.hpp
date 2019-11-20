@@ -20,7 +20,7 @@
 #ifndef ORCHESTRATOR_HPP
 #define ORCHESTRATOR_HPP
 
-#include "config.hpp"
+#include "config/config.hpp"
 #include "info.hpp"
 #include "robot/subscriber.hpp"
 #include "scheduling.hpp"
@@ -100,8 +100,8 @@ class Orchestrator {
 
   private:
     const int id;
-    Config static_config;
-    Config dynamic_config;
+    config::Config static_config;
+    config::Config dynamic_config;
     std::unique_ptr<tcp::Client> robot_client;
     std::unique_ptr<tcp::Client> clock_client;
     tcp::Client broadcast_client;
