@@ -26,7 +26,8 @@ target_link_libraries(librobot
   tcp
   stdc++fs
   wbt-translator
-  ${JSONCPP_LIBRARIES}
+  config
+  ${JSONCPP_ARCHIVE}
   scheduling
 )
 

@@ -18,9 +18,6 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP jsoncpp)
-
 # set {SOURCES,PROJECT_LINK_LIBS} to expanded wildcards
 file(GLOB SOURCES "src/*.cpp")
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
