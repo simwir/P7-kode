@@ -20,6 +20,7 @@
 #include <thread>
 #include <webots/Robot.hpp>
 
+#include <cmath>
 #include <iostream>
 
 using namespace webots;
@@ -53,6 +54,7 @@ void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot)
 {
     while (true) {
         connection->receive_blocking();
-        connection->send(std::to_string(robot->getTime()));
+        // Convert double seconds to long millis.
+        connection->send(std::to_string(std::lround(robot->getTime() * 1000)));
     }
 }
