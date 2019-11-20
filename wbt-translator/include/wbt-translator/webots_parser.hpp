@@ -77,9 +77,7 @@ struct AST {
         }
     }
 
-    size_t num_waypoints() const {
-        return nodes.size();
-    }
+    size_t num_waypoints() const { return nodes.size(); }
 };
 
 class Parser {

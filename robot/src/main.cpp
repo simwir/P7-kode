@@ -19,20 +19,32 @@
 #include "robot/config.hpp"
 #include "robot/orchestrator.hpp"
 
+#include <filesystem>
 #include <fstream>
 
 int main(int argc, char **argv)
 {
-    if (argc != 3) {
-        std::cerr << "please give a path and an IP address in that order\n";
+    if (argc < 3 || argc > 4) {
+        std::cerr << "Usage:\n"
+                  << "\t" << argv[0] << " <webots world (.wbt)> <IP> [<webots closk host>]";
         exit(1);
     }
     std::filesystem::path world_path{argv[1]};
+    if (!std::filesystem::exists(world_path)) {
+        std::cerr << "Cannot find file " << world_path << std::endl;
+        exit(1);
+    }
+    if (world_path.extension() != ".wbt") {
+        std::cerr << "Expected webots world file (*.wbt)" << std::endl;
+        exit(1);
+    }
 
     std::cerr << "constructing orchestrator... ";
     std::ifstream world_file{world_path};
+
+    std::string clock_host = argc == 4 ? argv[3] : "127.0.0.1";
+
     robot::Orchestrator orchestrator{argv[2], argv[2], 1, world_file};
     std::cerr << "starting orchestrator\n";
     orchestrator.main_loop();
-
 }

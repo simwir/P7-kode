@@ -71,6 +71,17 @@ struct MalformedMessageException : public std::exception {
     const char *what() const noexcept { return message.c_str(); }
 };
 
+class InvalidPortFormat : public std::exception {
+    std::string message;
+
+  public:
+    InvalidPortFormat(const std::string &message) : message(message) {}
+
+    const char *what() const noexcept { return message.c_str(); }
+};
+
+void validate_port_format(const std::string &port);
+
 class Connection : public std::enable_shared_from_this<Connection> {
   public:
     Connection(int fd) : fd(fd) { ready = true; }

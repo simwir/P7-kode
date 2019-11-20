@@ -161,3 +161,20 @@ tcp::Connection::~Connection()
     if (open)
         close();
 }
+
+void tcp::validate_port_format(const std::string &port)
+{
+    try {
+        // assert that we can parse the port into an int.
+        int port_id = std::stoi(port);
+        if (port_id < 0) {
+            throw tcp::InvalidPortFormat{port};
+        }
+    }
+    catch (std::invalid_argument &) {
+        throw tcp::InvalidPortFormat{port};
+    }
+    catch (std::out_of_range &) {
+        throw tcp::InvalidPortFormat{port};
+    }
+}

@@ -19,20 +19,22 @@ class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
     AsyncStationSubscriber(std::vector<int> station_ids) : station_ids(station_ids) {}
 
   private:
+    const std::vector<int> station_ids;
+
     void newSchedule(const std::vector<int> &schedule) override
     {
         std::scoped_lock _{mutex};
-        std::vector<int> _schedule;
+        // translate UPPAAL indices to station IDs.
+        std::vector<int> translated_schedule;
         for (auto i : schedule) {
             std::cerr << i << ' ';
         }
         std::cerr << std::endl;
-        _schedule.resize(schedule.size());
-        std::transform(schedule.begin(), schedule.end(), _schedule.begin(),
+        translated_schedule.resize(schedule.size());
+        std::transform(schedule.begin(), schedule.end(), translated_schedule.begin(),
                        [&](int uppaal_idx) { return station_ids.at(uppaal_idx); });
-        reset(std::move(_schedule));
+        reset(std::move(translated_schedule));
     }
-    const std::vector<int> station_ids;
 };
 
 class AsyncWaypointSubscriber : public scheduling::WaypointScheduleSubscriber,

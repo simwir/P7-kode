@@ -73,7 +73,7 @@ class CannotOpenFileException : public std::exception {
 class Orchestrator {
   public:
     Orchestrator(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
-           std::istream &world_file);
+                 std::istream &world_file, const std::string &clock_host = "127.0.0.1");
     void load_webots_to_config();
     void get_dynamic_state();
     void update_dynamic_state();
@@ -97,12 +97,13 @@ class Orchestrator {
     void add_waypoint_matrix(const AST &ast);
     void add_station_matrix(const AST &ast);
     void dump_waypoint_info(const AST &ast);
+
   private:
     const int id;
     Config static_config;
     Config dynamic_config;
-    std::unique_ptr<tcp::Client> webot_client;
-    std::unique_ptr<tcp::Client> webots_clock_client;
+    std::unique_ptr<tcp::Client> robot_client;
+    std::unique_ptr<tcp::Client> clock_client;
     tcp::Client broadcast_client;
     Parser webots_parser;
     AST ast;

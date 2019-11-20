@@ -30,24 +30,11 @@
 #define PORT_TO_PDS "4444"
 #define PORT_TO_WALL_CLOCK "5555"
 
-std::optional<Json::Value> parse(const std::string s)
-{
-    Json::Value value;
-    std::stringstream ss{s};
-    try {
-        ss >> value;
-        return {value};
-    }
-    catch (std::exception &e) {
-        return std::nullopt;
-    }
-}
-
 robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::string &broadcast_host,
-                                  int robot_id, std::istream &world_file)
+                                  int robot_id, std::istream &world_file,
+                                  const std::string &clock_host)
     : id(robot_id), broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
 {
-    std::string port_to_controller;
     std::string recieved_string;
 
     load_webots_to_config();
@@ -64,13 +51,14 @@ robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::stri
     // Connecting to the Port Discovery Service
     tcp::Client PDSClient{robot_host, PORT_TO_PDS};
     PDSClient.send("get_robot," + std::to_string(robot_id));
-    port_to_controller = PDSClient.receive_blocking();
+    std::string port_to_controller = PDSClient.receive_blocking();
     std::cerr << port_to_controller << std::endl;
-    // TODO handle/report error if PDS does not know a port yet
+    // crash and burn if the port is not valid (such as if there is no port).
+    tcp::validate_port_format(port_to_controller);
 
     // Connecting to the WeBots Controller
-    webot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
-    webots_clock_client = std::make_unique<tcp::Client>("127.0.0.1", PORT_TO_WALL_CLOCK);
+    robot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
+    clock_client = std::make_unique<tcp::Client>(clock_host, PORT_TO_WALL_CLOCK);
     current_state.id = id;
 }
 
@@ -98,15 +86,8 @@ void robot::Orchestrator::load_webots_to_config()
         case WaypointType::eVia:
             vias.push_back(id);
             break;
-        default:
-            throw std::runtime_error{""};
         }
     }
-
-    // Get number of stations, endpoints and waypoint
-    int station_count = stations.size(), endpoint_count = end_stations.size(),
-        via_count = vias.size();
-    int number_of_waypoints = station_count + endpoint_count + via_count;
 
     static_config.set(STATIONS, stations);
     static_config.set(END_STATIONS, end_stations);
@@ -178,6 +159,7 @@ void robot::Orchestrator::dump_waypoint_info(const AST &ast)
     }
     static_config.set("waypoints", waypoint_list);
 }
+
 void robot::Orchestrator::request_broadcast_info()
 {
     broadcast_client.send("get_robot_info");
@@ -185,7 +167,7 @@ void robot::Orchestrator::request_broadcast_info()
 
 void robot::Orchestrator::request_controller_info()
 {
-    webot_client->send("get_state");
+    robot_client->send("get_state");
 }
 
 void robot::Orchestrator::send_robot_info()
@@ -204,7 +186,7 @@ std::string robot::Orchestrator::receive_broadcast_info()
 
 std::string robot::Orchestrator::receive_controller_info()
 {
-    return webot_client->receive_blocking();
+    return robot_client->receive_blocking();
 }
 
 void robot::Orchestrator::get_dynamic_state()
@@ -216,7 +198,6 @@ void robot::Orchestrator::get_dynamic_state()
     auto _controller_state = receive_controller_info();
     robot_info = robot::InfoMap::from_json(broadcast_info);
     controller_state = robot::ControllerState::parse(_controller_state);
-    // TODO write schedules to config
 
     dynamic_config.set(ROBOT_INFO_MAP, robot_info.to_json());
     dynamic_config.set(SELF_STATE, controller_state.to_json());
@@ -241,7 +222,7 @@ void robot::Orchestrator::write_dynamic_config()
 void robot::Orchestrator::set_robot_destination(int waypoint)
 {
     Translation point = ast.nodes.at(waypoint).translation;
-    webot_client->send("set_destination," + std::to_string(point.x) + "," +
+    robot_client->send("set_destination," + std::to_string(point.x) + "," +
                        std::to_string(point.z));
     dynamic_config.set(DESTINATION, waypoint);
 }
@@ -251,6 +232,7 @@ void robot::Orchestrator::main_loop()
 
     // Bootstrap route
     get_dynamic_state();
+    // set next station to our closest during the bootstrapping (before any actual schedule exists).
     dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
                            return wp.waypointType == WaypointType::eStation;
                        }));
@@ -316,7 +298,6 @@ void robot::Orchestrator::main_loop()
         //         abort waypoint scheduling; start new one
         if (controller_state.is_stopped && current_time > hold_until) {
             got_fresh_info = true;
-            // TODO broadcast position info
 
             if (waypoint_subscriber->get().empty()) {
                 std::cerr << "NOTE: waiting for waypoint result" << std::endl;
@@ -330,10 +311,6 @@ void robot::Orchestrator::main_loop()
                 visited_waypoints.push_back(current_waypoint.value);
             }
 
-            auto is_station = [&](int id) {
-                return ast.nodes.at(id).waypointType == WaypointType::eStation;
-            };
-
             // hold for n units in webots time
             if (next_waypoint.type == scheduling::ActionType::Hold) {
                 hold_until = current_time + next_waypoint.value;
@@ -342,6 +319,9 @@ void robot::Orchestrator::main_loop()
                 set_robot_destination(next_waypoint.value);
             }
 
+            auto is_station = [&](int id) {
+                return ast.nodes.at(id).waypointType == WaypointType::eStation;
+            };
             // if committed to station dest or at station
             //    then reschedule stations
             if (is_station(next_waypoint.value) || is_station(current_waypoint.value)) {
@@ -376,7 +356,7 @@ void robot::Orchestrator::main_loop()
 
 int robot::Orchestrator::get_webots_time()
 {
-    auto msg = webots_clock_client->atomic_blocking_request("get_time");
+    auto msg = clock_client->atomic_blocking_request("get_time");
     try {
         return std::stoi(msg);
     }
