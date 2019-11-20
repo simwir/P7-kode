@@ -64,9 +64,9 @@ port_discovery::Function parse_function(const std::string &function)
 
 void add_robot(int id, int port, std::map<int, int> &robot_map)
 {
+    std::scoped_lock l{robot_map_lock};
     auto search = robot_map.find(id);
     if (search == robot_map.end()) {
-        std::scoped_lock l{robot_map_lock};
         robot_map.insert(std::make_pair(id, port));
         std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
     }
@@ -79,7 +79,9 @@ void get_robot(int id, const std::map<int, int> &robot_map,
                std::shared_ptr<tcp::Connection> connection)
 {
     try {
+        std::unique_lock<std::mutex> lock{robot_map_lock};
         const std::string message = std::to_string(robot_map.at(id));
+        lock.unlock();
         connection->send(message);
     }
     catch (std::out_of_range &e) {
