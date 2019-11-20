@@ -6,8 +6,9 @@
 #include "util/pollable.hpp"
 #include "waypoint_scheduler.hpp"
 
-#include <deque>
+#include <iostream>
 #include <mutex>
+#include <vector>
 
 namespace robot {
 class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
@@ -22,6 +23,10 @@ class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
     {
         std::scoped_lock _{mutex};
         std::vector<int> _schedule;
+        for (auto i : schedule) {
+            std::cerr << i << ' ';
+        }
+        std::cerr << std::endl;
         _schedule.resize(schedule.size());
         std::transform(schedule.begin(), schedule.end(), _schedule.begin(),
                        [&](int uppaal_idx) { return station_ids.at(uppaal_idx); });
