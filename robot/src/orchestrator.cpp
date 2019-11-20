@@ -1,8 +1,26 @@
+/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 #include <fstream>
 
 #include "robot/config.hpp"
 #include "robot/info.hpp"
-#include "robot/master.hpp"
+#include "robot/orchestrator.hpp"
 #include "tcp/client.hpp"
 #include "wbt-translator/apsp.hpp"
 #include "wbt-translator/distance_matrix.hpp"
@@ -25,8 +43,8 @@ std::optional<Json::Value> parse(const std::string s)
     }
 }
 
-robot::Master::Master(const std::string &robot_host, const std::string &broadcast_host,
-                      int robot_id, std::istream &world_file)
+robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::string &broadcast_host,
+                                  int robot_id, std::istream &world_file)
     : id(robot_id), broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
 {
     std::string port_to_controller;
@@ -56,7 +74,7 @@ robot::Master::Master(const std::string &robot_host, const std::string &broadcas
     current_state.id = id;
 }
 
-void robot::Master::load_webots_to_config()
+void robot::Orchestrator::load_webots_to_config()
 {
     ast = webots_parser.parse_stream();
 
@@ -93,45 +111,64 @@ void robot::Master::load_webots_to_config()
     static_config.set(STATIONS, stations);
     static_config.set(END_STATIONS, end_stations);
     static_config.set(VIAS, vias);
+
     // TODO move to static config with help from broadcaster
     // static_config.set("number_of_robots", webots_parser.number_of_robots);
 
+    add_waypoint_matrix(ast);
+    add_station_matrix(ast);
+    dump_waypoint_info(ast);
+    static_config.set("station_delay", STATION_DELAY);
+    static_config.set("waypoint_delay", WAYPOINT_DELAY);
+    static_config.set("uncertainty", UNCERTAINTY);
+}
+
+void robot::Orchestrator::add_waypoint_matrix(const AST &ast)
+{
     // Get distance matrix for waypoints
     std::vector<std::vector<double>> waypoint_matrix = distance_matrix{ast}.get_data();
 
+    // Convert waypoint distance matrix.
+    Json::Value jsonarray_waypoint_matrix{Json::arrayValue};
+    for (size_t i = 0; i < ast.num_waypoints(); i++) {
+        Json::Value jsonarray_waypoint_row{Json::arrayValue};
+        for (size_t j = 0; j < ast.num_waypoints(); j++) {
+            jsonarray_waypoint_row.append(waypoint_matrix.at(i).at(j));
+        }
+        jsonarray_waypoint_matrix.append(jsonarray_waypoint_row);
+    }
+    static_config.set("waypoint_distance_matrix", jsonarray_waypoint_matrix);
+}
+
+void robot::Orchestrator::add_station_matrix(const AST &ast)
+{
     // Get distance matrix for stations
     std::map<int, std::map<int, double>> apsp_distances = all_pairs_shortest_path(ast).dist;
 
-    // Flatten waypoint distance matrix.
-    Json::Value jsonarray_waypoint_matrix{Json::arrayValue};
-    size_t columns = waypoint_matrix.front().size();
-    size_t rows = waypoint_matrix.size();
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t h = 0; h < columns; h++) {
-            jsonarray_waypoint_matrix.append(waypoint_matrix[i][h]);
-        }
-    }
-    static_config.set("waypoint_distance_matrix", jsonarray_waypoint_matrix);
-
-    // Flatten shortest paths between stations
+    // Convert shortest paths between stations
     Json::Value jsonarray_apsp_distances{Json::arrayValue};
-    columns = apsp_distances.at(1).size();
-    rows = apsp_distances.size();
-    for (int i = 0; i < number_of_waypoints; i++) {
-        for (int h = 0; h < number_of_waypoints; h++) {
-            if (ast.nodes.at(i).waypointType == WaypointType::eStation &&
-                ast.nodes.at(h).waypointType == WaypointType::eStation) {
-                jsonarray_apsp_distances.append(apsp_distances.at(i).at(h));
+    for (size_t i = 0; i < ast.num_waypoints(); i++) {
+        if (ast.nodes.at(i).waypointType == WaypointType::eStation) {
+            Json::Value jsonarray_apsp_row{Json::arrayValue};
+            for (size_t j = 0; j < ast.num_waypoints(); j++) {
+                if (ast.nodes.at(j).waypointType == WaypointType::eStation) {
+                    jsonarray_apsp_row.append(apsp_distances.at(i).at(j));
+                }
             }
+            jsonarray_apsp_distances.append(jsonarray_apsp_row);
         }
     }
+    static_config.set("station_distance_matrix", jsonarray_apsp_distances);
+}
 
+void robot::Orchestrator::dump_waypoint_info(const AST &ast)
+{
     // Dump all waypoint information.
     Json::Value waypoint_list{Json::arrayValue};
     for (auto &[id, waypoint] : ast.nodes) {
         waypoint_list.append(Json::objectValue);
         auto &last = waypoint_list[waypoint_list.size() - 1];
-        last["id"] = static_cast<int>(id);
+        last["id"] = Json::Value{static_cast<int>(id)};
         last["x"] = waypoint.translation.x;
         last["y"] = waypoint.translation.z;
         last["type"] = to_string(waypoint.waypointType);
@@ -140,23 +177,18 @@ void robot::Master::load_webots_to_config()
                       [&last](int adj) { last["adjList"].append(adj); });
     }
     static_config.set("waypoints", waypoint_list);
-    static_config.set("station_distance_matrix", jsonarray_apsp_distances);
-    static_config.set("station_delay", STATION_DELAY);
-    static_config.set("waypoint_delay", WAYPOINT_DELAY);
-    static_config.set("uncertainty", UNCERTAINTY);
 }
-
-void robot::Master::request_broadcast_info()
+void robot::Orchestrator::request_broadcast_info()
 {
     broadcast_client.send("get_robot_info");
 }
 
-void robot::Master::request_controller_info()
+void robot::Orchestrator::request_controller_info()
 {
     webot_client->send("get_state");
 }
 
-void robot::Master::send_robot_info()
+void robot::Orchestrator::send_robot_info()
 {
     current_state.station_plan = station_subscriber->get();
     current_state.waypoint_plan = waypoint_subscriber->get();
@@ -165,17 +197,17 @@ void robot::Master::send_robot_info()
     broadcast_client.send("put_robot_info," + current_state.to_json().toStyledString());
 }
 
-std::string robot::Master::receive_broadcast_info()
+std::string robot::Orchestrator::receive_broadcast_info()
 {
     return broadcast_client.receive_blocking();
 }
 
-std::string robot::Master::receive_controller_info()
+std::string robot::Orchestrator::receive_controller_info()
 {
     return webot_client->receive_blocking();
 }
 
-void robot::Master::get_dynamic_state()
+void robot::Orchestrator::get_dynamic_state()
 {
     std::cerr << "getting dynamic state\n";
     request_broadcast_info();
@@ -190,23 +222,23 @@ void robot::Master::get_dynamic_state()
     dynamic_config.set(SELF_STATE, controller_state.to_json());
 }
 
-void robot::Master::update_dynamic_state()
+void robot::Orchestrator::update_dynamic_state()
 {
     get_dynamic_state();
     write_dynamic_config();
 }
 
-void robot::Master::write_static_config()
+void robot::Orchestrator::write_static_config()
 {
     static_config.write_to_file(static_conf);
 }
 
-void robot::Master::write_dynamic_config()
+void robot::Orchestrator::write_dynamic_config()
 {
     dynamic_config.write_to_file(dynamic_conf);
 }
 
-void robot::Master::set_robot_destination(int waypoint)
+void robot::Orchestrator::set_robot_destination(int waypoint)
 {
     Translation point = ast.nodes.at(waypoint).translation;
     webot_client->send("set_destination," + std::to_string(point.x) + "," +
@@ -214,7 +246,7 @@ void robot::Master::set_robot_destination(int waypoint)
     dynamic_config.set(DESTINATION, waypoint);
 }
 
-void robot::Master::main_loop()
+void robot::Orchestrator::main_loop()
 {
 
     // Bootstrap route
@@ -342,7 +374,7 @@ void robot::Master::main_loop()
     }
 }
 
-int robot::Master::get_webots_time()
+int robot::Orchestrator::get_webots_time()
 {
     auto msg = webots_clock_client->atomic_blocking_request("get_time");
     try {
@@ -353,7 +385,7 @@ int robot::Master::get_webots_time()
     }
 }
 
-int robot::Master::get_closest_waypoint(std::function<bool(Waypoint)> pred)
+int robot::Orchestrator::get_closest_waypoint(std::function<bool(Waypoint)> pred)
 {
     int best_wp = std::numeric_limits<int>::max();
     double best_dist = std::numeric_limits<double>::max();

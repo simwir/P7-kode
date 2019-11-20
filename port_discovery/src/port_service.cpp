@@ -1,3 +1,21 @@
+/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 #include <port_discovery/port_service.hpp>
 #include <tcp/connection.hpp>
 
@@ -46,9 +64,9 @@ port_discovery::Function parse_function(const std::string &function)
 
 void add_robot(int id, int port, std::map<int, int> &robot_map)
 {
+    std::scoped_lock l{robot_map_lock};
     auto search = robot_map.find(id);
     if (search == robot_map.end()) {
-        std::scoped_lock l{robot_map_lock};
         robot_map.insert(std::make_pair(id, port));
         std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
     }
@@ -61,7 +79,9 @@ void get_robot(int id, const std::map<int, int> &robot_map,
                std::shared_ptr<tcp::Connection> connection)
 {
     try {
+        std::unique_lock<std::mutex> lock{robot_map_lock};
         const std::string message = std::to_string(robot_map.at(id));
+        lock.unlock();
         connection->send(message);
     }
     catch (std::out_of_range &e) {

@@ -1,3 +1,21 @@
+/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 #include "communication/com-module.hpp"
 #include "tcp/connection.hpp"
 #include "tcp/exception.hpp"
@@ -22,8 +40,8 @@ Function ComModule::parse_function(const std::string &function)
     if (function == "get_robot_info") {
         return Function::get_robot_info;
     }
-    else if (function == "post_robot_info") {
-        return Function::post_robot_info;
+    else if (function == "put_robot_info") {
+        return Function::put_robot_info;
     }
     else {
         throw tcp::MessageException(function);
@@ -38,7 +56,7 @@ void ComModule::get_robot_info(std::shared_ptr<tcp::Connection> conn)
     conn->send(result.toStyledString());
 }
 
-void ComModule::post_robot_info(const std::string &robot_payload)
+void ComModule::put_robot_info(const std::string &robot_payload)
 {
     std::scoped_lock<std::mutex> lock(mutex);
     robot::Info info = robot::Info::from_json(robot_payload);
@@ -49,8 +67,8 @@ void ComModule::call_function(Function function, const std::string &parameters,
                               std::shared_ptr<tcp::Connection> conn)
 {
     switch (function) {
-    case Function::post_robot_info:
-        post_robot_info(parameters);
+    case Function::put_robot_info:
+        put_robot_info(parameters);
         break;
     case Function::get_robot_info:
         get_robot_info(conn);

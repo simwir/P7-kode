@@ -1,3 +1,21 @@
+/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
@@ -6,6 +24,7 @@
 
 #include "wbt-translator/apsp.hpp"
 #include "wbt-translator/distance_matrix.hpp"
+#include "wbt-translator/query_template_writer.hpp"
 #include "wbt-translator/uppaal-printer.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
@@ -22,19 +41,22 @@ void print_help(const char *const execute_location)
               << "-e --endpoints      Emit endpoint ids" << std::endl
               << "-v --vias           Emit vias ids" << std::endl
               << "-n --all-nodes      Same as -sev" << std::endl
+              << "-q --query <file>   Emit UPPAAL query file\n"
               << "-a --all            Same as -dprsewn";
 }
 
 int main(int argc, char **argv)
 {
-    const char *const shortOpts = "dprsevna";
+    const char *const shortOpts = "dprsevnaq:";
     const option longOpts[] = {
         {"dist-matrix", no_argument, nullptr, 'd'},    {"shortest-path", no_argument, nullptr, 'p'},
         {"shortest-route", no_argument, nullptr, 'r'}, {"stations", no_argument, nullptr, 's'},
         {"endpoints", no_argument, nullptr, 'e'},      {"vias", no_argument, nullptr, 'v'},
-        {"all-nodes", no_argument, nullptr, 'n'},      {"all", no_argument, nullptr, 'a'}};
+        {"all-nodes", no_argument, nullptr, 'n'},      {"all", no_argument, nullptr, 'a'},
+        {"query", required_argument, nullptr, 'q'}};
 
-    bool d, p, r, optstations, optendpoints, optvias;
+    bool d, p, r, optstations, optendpoints, optvias, optquery;
+    std::string template_path;
 
     int opt;
     while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1) {
@@ -59,6 +81,12 @@ int main(int argc, char **argv)
         case 'n':
             optstations = optendpoints = optvias = true;
             break;
+        case 'q':
+            optquery = true;
+            template_path = std::string{optarg};
+            break;
+        case 'a':
+            d = p = r = optstations = optendpoints = optvias = true;
         }
     }
 
@@ -74,7 +102,8 @@ int main(int argc, char **argv)
         std::cerr << "The file " << inputFile << " could not be opened.\n";
         exit(1);
     }
-    AST ast = Parser{infile}.parse_stream();
+    Parser parser{infile};
+    AST ast = parser.parse_stream();
 
     if (ast.nodes.size() == 0) {
         std::cerr << "Malformed world file. No waypoints found.";
@@ -109,5 +138,15 @@ int main(int argc, char **argv)
 
     if (optvias) {
         std::cout << print_waypoints_of_type(ast, WaypointType::eVia);
+    }
+
+    if (optquery) {
+        std::ifstream template_file{template_path};
+        if (!template_file.is_open()) {
+            std::cerr << "Could not open the template file: " << template_path << std::endl;
+            exit(1);
+        }
+        instantiate_query_template(parser, template_file, std::cout);
+        template_file.close();
     }
 }

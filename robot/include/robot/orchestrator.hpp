@@ -1,5 +1,24 @@
-#ifndef MASTER_HPP
-#define MASTER_HPP
+/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+#ifndef ORCHESTRATOR_HPP
+#define ORCHESTRATOR_HPP
 
 #include "config.hpp"
 #include "info.hpp"
@@ -51,9 +70,9 @@ class CannotOpenFileException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-class Master {
+class Orchestrator {
   public:
-    Master(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
+    Orchestrator(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
            std::istream &world_file);
     void load_webots_to_config();
     void get_dynamic_state();
@@ -75,6 +94,9 @@ class Master {
 
     void main_loop();
 
+    void add_waypoint_matrix(const AST &ast);
+    void add_station_matrix(const AST &ast);
+    void dump_waypoint_info(const AST &ast);
   private:
     const int id;
     Config static_config;

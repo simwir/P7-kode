@@ -16,11 +16,8 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef UPPAAL_PRINTER_HPP
-#define UPPAAL_PRINTER_HPP
+strategy realistic = loadStrategy %¤STRATEGY_VAR_LIST¤% ("waypoint_strategy.json")
 
-#include "wbt-translator/webots_parser.hpp"
-
-std::string print_waypoints_of_type(const AST &ast, const WaypointType type);
-
-#endif
+/*
+*/
+E[<=200; 1000] (max: total) under realistic
