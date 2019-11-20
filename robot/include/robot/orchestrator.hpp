@@ -21,7 +21,7 @@
 
 #include <filesystem>
 
-#include "config.hpp"
+#include "config/config.hpp"
 #include "info.hpp"
 #include "wbt-translator/webots_parser.hpp"
 #include <tcp/client.hpp>
@@ -63,8 +63,8 @@ class Orchestrator {
     void add_station_matrix(const AST &ast, int waypoint_count);
     void dump_waypoint_info(const AST &ast);
 
-    Config static_config;
-    Config dynamic_config;
+    config::Config static_config;
+    config::Config dynamic_config;
     std::unique_ptr<tcp::Client> webot_client;
     tcp::Client broadcast_client;
     Parser webots_parser;

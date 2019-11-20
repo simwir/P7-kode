@@ -18,7 +18,7 @@
  */
 #include <fstream>
 
-#include "robot/config.hpp"
+#include "config/config.hpp"
 #include "robot/info.hpp"
 #include "robot/orchestrator.hpp"
 #include "tcp/client.hpp"
