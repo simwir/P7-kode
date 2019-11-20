@@ -16,45 +16,28 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#include "robot/config_wrapper.hpp"
+#include "robot/config.hpp"
 
-#include <json/json.h>
+robot::Config config;
 
-#include <string>
-#include <vector>
+void set_config_path(char *file_path)
+{
+    config.load_from_file(file_path);
+}
 
-namespace robot {
-struct InvalidValueException : std::exception {
-    const char *what() const noexcept { return "Invalid value"; }
-};
+CONFIG_GETTER(int, number_of_stations);
+CONFIG_GETTER(int, number_of_end_stations);
+CONFIG_GETTER(int, number_of_robots);
+CONFIG_GETTER(int, number_of_waypoints);
+CONFIG_GETTER(int, waypoint_passing_time);
+CONFIG_GETTER(int, station_passing_time);
+CONFIG_GETTER(int, current_station);
+CONFIG_GETTER(int, current_waypoint);
+CONFIG_GETTER(int, destination);
+CONFIG_GETTER(double, uncertainty);
 
-class InvalidKeyException : public std::exception {
-    std::string message;
-
-  public:
-    InvalidKeyException(const std::string &key) { message = "Key not found: " + key; };
-    const char *what() const noexcept { return message.c_str(); };
-};
-
-template <typename T>
-T convert_from_json(const Json::Value &value);
-
-class Config {
-    Json::Value json;
-
-  public:
-    Config(){};
-    Config(const std::string &file_path);
-    void load_from_file(const std::string &file_path);
-    void write_to_file(const std::string &file_path);
-
-    template <typename T>
-    T get(const std::string &key);
-
-    template <typename T>
-    void set(const std::string &key, T &&value);
-};
-} // namespace robot
-
-#endif
+void station_distance_matrix(int number_of_stations,
+                             int matrix[number_of_stations][number_of_stations])
+{
+}

@@ -16,28 +16,19 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "config_wrapper.hpp"
-#include "config.hpp"
+#include "robot/config.hpp"
+#include "robot/orchestrator.hpp"
 
-robot::Config config;
-
-void set_config_path(char *file_path)
+int main(int argc, char **argv)
 {
-    config.load_from_file(file_path);
-}
+    if (argc != 2) {
+        std::cerr << "please give a path\n";
+        exit(1);
+    }
+    std::filesystem::path world_file{argv[1]};
+    std::filesystem::path out_file = "static_conf.json";
 
-CONFIG_GETTER(int, number_of_stations);
-CONFIG_GETTER(int, number_of_end_stations);
-CONFIG_GETTER(int, number_of_robots);
-CONFIG_GETTER(int, number_of_waypoints);
-CONFIG_GETTER(int, waypoint_passing_time);
-CONFIG_GETTER(int, station_passing_time);
-CONFIG_GETTER(int, current_station);
-CONFIG_GETTER(int, current_waypoint);
-CONFIG_GETTER(int, destination);
-CONFIG_GETTER(double, uncertainty);
-
-void station_distance_matrix(int number_of_stations,
-                             int matrix[number_of_stations][number_of_stations])
-{
+    robot::Orchestrator orchestrator{"localhost", "localhost", 0, std::cin};
+    orchestrator.load_webots_to_config(world_file);
+    orchestrator.write_static_config(out_file);
 }

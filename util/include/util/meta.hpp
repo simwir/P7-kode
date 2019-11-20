@@ -16,27 +16,39 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef DISTANCE_MATRIX_HPP
-#define DISTANCE_MATRIX_HPP
+#ifndef META_HPP
+#define META_HPP
 
-#include "wbt-translator/webots_parser.hpp"
-#include <cmath>
-#include <string>
-#include <vector>
+#include <type_traits>
 
-class distance_matrix {
-  public:
-    distance_matrix(const AST &ast);
+namespace meta {
 
-    std::string to_uppaal_declaration() const;
-    std::vector<std::vector<double>> get_data() { return _data; }
-
-    double &data(size_t i, size_t j) { return _data[i][j]; }
-
-  private:
-    int rows, columns;
-    std::vector<std::vector<double>> _data;
+template <typename T, typename = void>
+struct is_container : std::false_type {
 };
-double euclidean_distance(const Waypoint &p1, const Waypoint &p2);
+
+template <typename T>
+using element_type = decltype(std::begin(std::declval<T &>()));
+
+template <typename T>
+struct is_container<T, std::void_t<element_type<T>>> : std::true_type {
+};
+template <typename T>
+constexpr auto is_container_v = is_container<T>::value;
+
+template <typename T, typename = void>
+struct is_string : std::false_type {
+};
+
+template <typename T>
+struct is_string<T, std::enable_if_t<is_container<T>::value>>
+    : std::is_same<element_type<T>, char> {
+};
+
+// incomplete type to allow error printing
+template <typename Err>
+struct unsupported;
+
+} // namespace meta
 
 #endif
