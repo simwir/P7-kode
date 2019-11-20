@@ -40,6 +40,7 @@ const int MAX_ROBOTS = number_of_robots();
 const int[1, MAX_ROBOTS] CUR_ROBOT = 1;
 const int STATION_PASSING_TIME = station_passing_time();
 const double UNCERTAINTY = uncertainty();
+const int OTHER_ROBOT_MAX = MAX_ROBOTS == 1 ? 2 : MAX_ROBOTS;
 
 import "libconfig.so" {
     int[1, NUM_STATIONS] next_station();
@@ -51,7 +52,7 @@ bool visited[int[1, NUM_STATIONS]];
 broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], done[int[1, MAX_ROBOTS]];</declaration>
 	<template>
 		<name>OtherRobot</name>
-		<parameter>int[CUR_ROBOT + 1, MAX_ROBOTS] id</parameter>
+		<parameter>int[CUR_ROBOT + 1, OTHER_ROBOT_MAX] id</parameter>
 		<declaration>clock x;
 
 int[0, NUM_STATIONS] step_index = 0;
@@ -78,7 +79,7 @@ int[0, NUM_STATIONS] next_station() {
 			<committed/>
 		</location>
 		<location id="id3" x="-765" y="-246">
-			<name x="-782" y="-280">Done</name>
+			<name x="-824" y="-255">Done</name>
 		</location>
 		<location id="id4" x="-637" y="-374">
 			<name x="-620" y="-391">ToNext</name>
@@ -91,7 +92,13 @@ int[0, NUM_STATIONS] next_station() {
 		<init ref="id5"/>
 		<transition controllable="false">
 			<source ref="id5"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-850" y="-399">MAX_ROBOTS == 1</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id5"/>
 			<target ref="id4"/>
+			<label kind="guard" x="-629" y="-467">MAX_ROBOTS &gt; 1</label>
 			<label kind="assignment" x="-629" y="-450">cur_loc = next_station(),
 robot_eta = eta(id)</label>
 		</transition>

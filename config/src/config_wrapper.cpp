@@ -93,6 +93,7 @@ int32_t number_of_robots()
     try {
         // We always have at least one robot (that is ourself)
         static auto tmp = dynamic_config.getSize("robot_info_map") + 1;
+        log << "robots: " + std::to_string(tmp);
         return tmp;
     }
     catch (const std::exception &e) {
@@ -332,7 +333,7 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
     catch (const std::exception &e) {
         log << "get_waypoint_dist";
         log << e.what();
-        return -1; // -1 impies that there is no edge from -> to. 
+        return -1; // -1 impies that there is no edge from -> to.
     }
 }
 
