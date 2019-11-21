@@ -28,7 +28,7 @@ add_library(scheduling ${SOURCES})
 target_link_libraries(scheduling
     pthread
     stdc++fs
-    ${JSONCPP_ARCHIVE}
+    jsoncpp_lib
 )
 #install(FILES DESTINATION bin)
 

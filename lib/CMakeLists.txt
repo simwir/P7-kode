@@ -16,33 +16,18 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 # OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_SOURCE_DIR}/robot/include)
-
-file(GLOB SOURCES "src/*.cpp")
-list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-
-#find_package(PkgConfig REQUIRED)
-#pkg_check_modules(JSONCPP jsoncpp)
-
-#if(${JSONCPP_LIBRARY_DIRS})
-#  link_libraries(${JSONCPP_LIBRARY_DIRS})
-#  include_directories("${JSONCPP_INCLUDE_DIRS}")
-#endif(${JSONCPP_LIBRARY_DIRS})
-
-
-add_library(librobot ${SOURCES})
-target_link_libraries(librobot
-  tcp
-  stdc++fs
-  wbt-translator
-  config
-  jsoncpp_lib
-  scheduling
-)
-
-add_executable(robot src/main.cpp)
-target_link_libraries(robot
-  librobot
-)
-
-install(TARGETS robot DESTINATION bin)
+option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
+set(JSONCPP_WITH_TESTS OFF)
+option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
+set(JSONCPP_WITH_POST_BUILD_UNITTEST OFF)
+option(JSONCPP_WITH_WARNING_AS_ERROR "Force compilation to fail if a warning occurs" OFF)
+set(JSONCPP_WITH_WARNING_AS_ERROR OFF)
+option(JSONCPP_WITH_STRICT_ISO "Issue all the warnings demanded by strict ISO C and ISO C++" ON)
+set(JSONCPP_WITH_STRICT_ISO OFF)
+option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
+set(JSONCPP_WITH_PKGCONFIG_SUPPORT OFF)
+option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
+set(JSONCPP_WITH_CMAKE_PACKAGE OFF)
+option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(jsoncpp)
