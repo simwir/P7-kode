@@ -23,7 +23,7 @@
 #include <iostream>
 #include <limits>
 
-Log log{"libconfig.log"};
+Log _log{"libconfig.log"};
 
 #define CONFIG_GETTER(type, json_type, from, key, default)                                         \
     type key()                                                                                     \
@@ -35,7 +35,7 @@ Log log{"libconfig.log"};
             return from.get<json_type>(#key);                                                      \
         }                                                                                          \
         catch (const std::exception &e) {                                                          \
-            log << e.what();                                                                       \
+            _log << e.what();                                                                       \
             return default;                                                                        \
         }                                                                                          \
     }
@@ -53,7 +53,7 @@ Log log{"libconfig.log"};
             }                                                                                      \
         }                                                                                          \
         catch (const std::exception &e) {                                                          \
-            log << e.what();                                                                       \
+            _log << e.what();                                                                       \
         }                                                                                          \
     }
 
@@ -96,7 +96,7 @@ void endstation(int32_t number_of_stations, int8_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
     }
 }
 
@@ -110,7 +110,7 @@ void station_visited(int32_t number_of_stations, int8_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
     }
 }
 
@@ -122,7 +122,7 @@ int32_t get_station_dist(int32_t from, int32_t to)
         return dist.at(from - 1).at(to - 1);
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
         return std::numeric_limits<int>::max();
     }
 }
@@ -133,10 +133,10 @@ int32_t next_robot_station(int32_t robot, int32_t step)
     try {
         static auto tmp = dynamic_config.get<std::vector<std::vector<int>>>("station_schedule");
         auto robot_schedule = tmp.at(robot - 2);
-        return robot_schedule.size() > step ? robot_schedule.at(step) : 0;
+        return static_cast<int>(robot_schedule.size()) > step ? robot_schedule.at(step) : 0;
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
         return 0;
     }
 }
@@ -149,7 +149,7 @@ double eta(int32_t robot)
         return tmp.at(robot - 1);
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
         return 0;
     }
 }
@@ -166,7 +166,7 @@ void waypoint_dist(int32_t number_of_waypoints, int32_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
     }
 }
 
@@ -180,7 +180,7 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
     }
 }
 
@@ -194,7 +194,7 @@ void station_waypoint(int32_t number_of_stations, int32_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
     }
 }
 
@@ -210,6 +210,6 @@ void waypoint_schedule(int32_t number_of_stations, int32_t number_of_robots, int
         }*/
     }
     catch (const std::exception &e) {
-        log << e.what();
+        _log << e.what();
     }
 }
