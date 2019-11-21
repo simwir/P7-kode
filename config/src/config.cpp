@@ -17,14 +17,11 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "config/config.hpp"
-#include "util/log.hpp"
 
 #include <fstream>
 #include <map>
 #include <string>
 #include <vector>
-
-extern Log log;
 
 template <>
 std::pair<std::string, int>
@@ -46,7 +43,7 @@ std::vector<double> config::convert_from_json<std::vector<double>>(const Json::V
 
     std::vector<double> result;
 
-    for (auto elem : arr) {
+    for (const auto& elem : arr) {
         result.push_back(elem.asDouble());
     }
 
@@ -62,7 +59,7 @@ std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &
 
     std::vector<int> result;
 
-    for (auto elem : arr) {
+    for (const auto& elem : arr) {
         result.push_back(elem.asInt());
     }
 
@@ -79,7 +76,7 @@ config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 
     std::vector<std::vector<int>> result;
 
-    for (auto elem : arr) {
+    for (const auto& elem : arr) {
         result.push_back(config::convert_from_json<std::vector<int>>(elem));
     }
 
@@ -95,7 +92,7 @@ std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value
 
     std::vector<bool> result;
 
-    for (auto elem : arr) {
+    for (const auto& elem : arr) {
         result.push_back(elem.asBool());
     }
 

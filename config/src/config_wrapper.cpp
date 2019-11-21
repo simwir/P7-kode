@@ -289,7 +289,7 @@ int32_t next_robot_station(int32_t robot, int32_t step)
         auto robot_schedule = tmp.at(robot - 2);
 
         // 0 means that we are done
-        return robot_schedule.size() > step ? robot_schedule.at(step) : 0;
+        return static_cast<int>(robot_schedule.size()) > step ? robot_schedule.at(step) : 0;
     }
     catch (const std::exception &e) {
         _log << "next_robot_station";
@@ -425,7 +425,7 @@ int32_t get_next_action_type(int32_t robot, int32_t step)
         // Therefore, we subtract 2.
         auto robot_schedule = tmp.at(robot - 2);
 
-        return robot_schedule.size() > step ? convert_to_action(robot_schedule.at(step)) : DONE;
+        return static_cast<int>(robot_schedule.size()) > step ? convert_to_action(robot_schedule.at(step)) : DONE;
     }
     catch (const std::exception &e) {
         _log << "get_next_action_type";
@@ -443,7 +443,7 @@ int32_t get_next_action_value(int32_t robot, int32_t step)
         // Therefore, we subtract 2.
         auto robot_schedule = tmp.at(robot - 2);
 
-        return robot_schedule.size() > step ? robot_schedule.at(step).second : 0;
+        return static_cast<int>(robot_schedule.size()) > step ? robot_schedule.at(step).second : 0;
     }
     catch (const std::exception &e) {
         _log << e.what();
