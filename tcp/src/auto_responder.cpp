@@ -17,7 +17,6 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 #include "tcp/server.hpp"
 
 #include <iostream>
@@ -36,7 +35,6 @@ void usage(int code = 0)
     exit(code);
 }
 
-
 int main(int argc, char *argv[])
 {
     prog_name = argv[0];
@@ -49,7 +47,8 @@ int main(int argc, char *argv[])
     stringstream _response;
     for (int i = 2; i < argc; ++i) {
         _response << argv[i];
-        if (i < argc - 1) _response << ' ';
+        if (i < argc - 1)
+            _response << ' ';
     }
     string response = _response.str();
     if (!ss) {
@@ -60,12 +59,13 @@ int main(int argc, char *argv[])
     Server server{port};
     while (true) {
         auto conn = server.accept();
-        thread t{[response](shared_ptr<Connection> con){
+        thread t{[response](shared_ptr<Connection> con) {
                      while (true) {
                          con->receive_blocking();
                          con->send(response);
                      }
-                 }, conn};
+                 },
+                 conn};
         t.detach();
     }
 }
