@@ -16,8 +16,8 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef BROADCASTER_HPP
-#define BROADCASTER_HPP
+#ifndef COM_MODULE_HPP
+#define COM_MODULE_HPP
 
 #include "robot/info.hpp"
 #include "tcp/server.hpp"
@@ -27,7 +27,7 @@
 #include <vector>
 
 namespace communication {
-enum class Function { get_robot_info, post_robot_info };
+enum class Function { get_robot_info, put_robot_info };
 
 class UnknownFunctionException : public std::exception {
     std::string message;
@@ -55,7 +55,7 @@ class ComModule {
     Function parse_function(const std::string &function);
     void parse_message(std::shared_ptr<tcp::Connection> conn);
     void get_robot_info(std::shared_ptr<tcp::Connection> conn);
-    void post_robot_info(const std::string &robot_payload);
+    void put_robot_info(const std::string &robot_payload);
 
   private:
     tcp::Server server;
@@ -65,4 +65,4 @@ class ComModule {
 
 } // namespace communication
 
-#endif // BROADCASTER_HPP
+#endif // COM_MODULE_HPP

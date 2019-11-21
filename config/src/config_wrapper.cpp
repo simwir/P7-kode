@@ -36,7 +36,7 @@ Log _log{"libconfig.log"};
             return from.get<json_type>(#key);                                                      \
         }                                                                                          \
         catch (const std::exception &e) {                                                          \
-            _log << e.what();                                                                       \
+            _log << e.what();                                                                      \
             return default;                                                                        \
         }                                                                                          \
     }

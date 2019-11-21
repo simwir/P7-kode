@@ -40,8 +40,8 @@ Function ComModule::parse_function(const std::string &function)
     if (function == "get_robot_info") {
         return Function::get_robot_info;
     }
-    else if (function == "post_robot_info") {
-        return Function::post_robot_info;
+    else if (function == "put_robot_info") {
+        return Function::put_robot_info;
     }
     else {
         throw tcp::MessageException(function);
@@ -56,7 +56,7 @@ void ComModule::get_robot_info(std::shared_ptr<tcp::Connection> conn)
     conn->send(result.toStyledString());
 }
 
-void ComModule::post_robot_info(const std::string &robot_payload)
+void ComModule::put_robot_info(const std::string &robot_payload)
 {
     std::scoped_lock<std::mutex> lock(mutex);
     robot::Info info = robot::Info::from_json(robot_payload);
@@ -67,8 +67,8 @@ void ComModule::call_function(Function function, const std::string &parameters,
                               std::shared_ptr<tcp::Connection> conn)
 {
     switch (function) {
-    case Function::post_robot_info:
-        post_robot_info(parameters);
+    case Function::put_robot_info:
+        put_robot_info(parameters);
         break;
     case Function::get_robot_info:
         get_robot_info(conn);
