@@ -16,53 +16,58 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef COM_MODULE_HPP
-#define COM_MODULE_HPP
+#ifndef ORCHESTRATOR_HPP
+#define ORCHESTRATOR_HPP
 
-#include "robot/info.hpp"
-#include "tcp/server.hpp"
-#include "util/json.hpp"
-#include <map>
-#include <memory>
-#include <vector>
+#include <filesystem>
 
-namespace communication {
-enum class Function { get_robot_info, put_robot_info };
+#include "config/config.hpp"
+#include "info.hpp"
+#include "wbt-translator/webots_parser.hpp"
+#include <tcp/client.hpp>
 
-class UnknownFunctionException : public std::exception {
+namespace robot {
+class RecievedMessageException : public std::exception {
     std::string message;
 
   public:
-    UnknownFunctionException(const std::string &in_message) : message(in_message) {}
+    RecievedMessageException(const std::string &in_message) : message(in_message) {}
+
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-class UnknownParameterException : public std::exception {
+class CannotOpenFileException : public std::exception {
     std::string message;
 
   public:
-    UnknownParameterException(const std::string &in_message) : message(in_message) {}
+    CannotOpenFileException() : message("Cannot open file") {}
+    CannotOpenFileException(const std::string &msg) : message(msg) {}
+
     const char *what() const noexcept override { return message.c_str(); }
 };
 
-class ComModule {
+class Orchestrator {
   public:
-    ComModule(int port) : server(port) {}
+    Orchestrator(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
+                 std::istream &world_file);
+    void load_webots_to_config(const std::filesystem::path &input_file);
+    void request_broadcast_info();
+    void send_robot_info(int robot_id, const Info &robot_info);
+    std::string recv_broadcast_info();
 
-    void start_broadcasting();
-    void call_function(Function function, const std::string &parameters,
-                       std::shared_ptr<tcp::Connection> conn);
-    Function parse_function(const std::string &function);
-    void parse_message(std::shared_ptr<tcp::Connection> conn);
-    void get_robot_info(std::shared_ptr<tcp::Connection> conn);
-    void put_robot_info(const std::string &robot_payload);
+    void write_static_config(const std::filesystem::path &path);
+    void write_dynamic_config(const std::filesystem::path &path);
 
   private:
-    tcp::Server server;
+    void add_waypoint_matrix(const AST &ast, int waypoint_count);
+    void add_station_matrix(const AST &ast, int waypoint_count);
+    void dump_waypoint_info(const AST &ast);
 
-    robot::InfoMap robot_info;
+    config::Config static_config;
+    config::Config dynamic_config;
+    std::unique_ptr<tcp::Client> webot_client;
+    tcp::Client broadcast_client;
+    Parser webots_parser;
 };
-
-} // namespace communication
-
-#endif // COM_MODULE_HPP
+} // namespace robot
+#endif
