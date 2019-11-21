@@ -21,9 +21,9 @@
 #define ORCHESTRATOR_HPP
 
 #include "config/config.hpp"
+#include "robot/clock.hpp"
 #include "robot/info.hpp"
 #include "robot/subscriber.hpp"
-#include "robot/clock.hpp"
 #include "scheduling.hpp"
 #include "util/euclid.hpp"
 #include "wbt-translator/webots_parser.hpp"
