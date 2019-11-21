@@ -25,6 +25,7 @@
 *.la
 *.a
 *.lib
+!lib/**/libjsoncpp.a
 
 # Executables
 *.exe
@@ -33,7 +34,6 @@
 
 bin
 build
-lib
 share
 
 # CMake stuff

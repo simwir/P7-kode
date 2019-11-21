@@ -29,9 +29,9 @@ distance_matrix::distance_matrix(const AST &ast)
 {
     rows = columns = ast.nodes.size();
     // TODO: Handle non consecutive ids
-    for (size_t i = 0; i < rows; ++i) {
+    for (int i = 0; i < rows; ++i) {
         _data.push_back(std::vector<double>{});
-        for (size_t j = 0; j < columns; ++j) {
+        for (int j = 0; j < columns; ++j) {
             if (!ast.are_connected(i, j)) {
                 _data[_data.size() - 1].push_back(-1);
             }

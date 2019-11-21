@@ -21,23 +21,23 @@ include_directories(${PROJECT_SOURCE_DIR}/robot/include)
 file(GLOB SOURCES "src/*.cpp")
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
+#find_package(PkgConfig REQUIRED)
+#pkg_check_modules(JSONCPP jsoncpp)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP jsoncpp)
+#if(${JSONCPP_LIBRARY_DIRS})
+#  link_libraries(${JSONCPP_LIBRARY_DIRS})
+#  include_directories("${JSONCPP_INCLUDE_DIRS}")
+#endif(${JSONCPP_LIBRARY_DIRS})
 
-if(${JSONCPP_LIBRARY_DIRS})
-  link_libraries(${JSONCPP_LIBRARY_DIRS})
-  include_directories("${JSONCPP_INCLUDE_DIRS}")
-endif(${JSONCPP_LIBRARY_DIRS})
 
 add_library(librobot ${SOURCES})
 target_link_libraries(librobot
   tcp
   stdc++fs
-  config
   wbt-translator
+  config
+  ${JSONCPP_ARCHIVE}
   scheduling
-  ${JSONCPP_LIBRARIES}
 )
 
 add_executable(robot src/main.cpp)

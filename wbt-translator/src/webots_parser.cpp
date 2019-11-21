@@ -138,4 +138,5 @@ std::string to_string(WaypointType wptype)
     case WaypointType::eEndPoint:
         return "endpoint";
     }
+    return "Unknown";
 }

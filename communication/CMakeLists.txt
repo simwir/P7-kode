@@ -27,7 +27,7 @@ add_executable(com_module ${SOURCES})
 target_link_libraries(com_module
     pthread
     tcp
-    ${JSONCPP_LIBRARIES}
+    ${JSONCPP_ARCHIVE}
     librobot
 )
 install(TARGETS com_module DESTINATION bin)

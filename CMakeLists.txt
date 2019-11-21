@@ -21,7 +21,7 @@ project(p7)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall")
+set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall -Werror -m32")
 
 include(ExternalProject)
 
@@ -31,15 +31,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -g -fno-omit-frame-pointer -Wall")
-
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP jsoncpp)
-
-link_directories(${JSONCPP_LIBRARY_DIRS})
+set(JSONCPP_ARCHIVE ${PROJECT_SOURCE_DIR}/lib/jsoncpp/libjsoncpp.a)
 
 include_directories(
-    ${JSONCPP_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/lib/jsoncpp/include
     ${PROJECT_SOURCE_DIR}/tcp/include
     ${PROJECT_SOURCE_DIR}/robot/include
     ${PROJECT_SOURCE_DIR}/wbt-translator/include

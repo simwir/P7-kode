@@ -26,15 +26,19 @@
 #include <vector>
 
 namespace config {
-struct InvalidValueException : std::exception {
-    const char *what() const noexcept { return "Invalid value"; }
+class InvalidValueException : public std::exception {
+    std::string message;
+
+  public:
+    InvalidValueException(const std::string &str) : message("Invalid value: " + str){};
+    const char *what() const noexcept { return message.c_str(); }
 };
 
 class InvalidKeyException : public std::exception {
     std::string message;
 
   public:
-    InvalidKeyException(const std::string &key) { message = "Key not found: " + key; };
+    InvalidKeyException(const std::string &key) : message("Key not found: " + key){};
     const char *what() const noexcept { return message.c_str(); };
 };
 
@@ -52,6 +56,11 @@ class Config {
 
     template <typename T>
     T get(const std::string &key);
+
+    template <typename T>
+    T get(const std::string &key1, const std::string &key2);
+
+    int getSize(const std::string &key);
 
     template <typename T>
     void set(const std::string &key, T &&value)
