@@ -19,35 +19,36 @@
 #ifndef CONFIG_WRAPPER_HPP
 #define CONFIG_WRAPPER_HPP
 
-#define STATIC_CONFIG_GETTER(type, key)                                                            \
-    type key() { return static_config.get<type>(#key); }
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void set_config_path(char *file_path);
-int number_of_stations();
-int number_of_end_stations();
-int number_of_robots();
-int number_of_waypoints();
-int waypoint_passing_time();
-int station_passing_time();
-int current_station();
-int current_waypoint();
-int destination();
+int32_t number_of_stations();
+int32_t number_of_end_stations();
+int32_t number_of_robots();
+int32_t number_of_waypoints();
+int32_t waypoint_passing_time();
+int32_t station_passing_time();
+int32_t current_station();
+int32_t current_waypoint();
+int32_t destination();
 double uncertainty();
-void station_distance_matrix(int number_of_stations,
-                             int matrix[number_of_stations][number_of_stations]);
-void waypoint_distance_matrix(int number_of_waypoints,
-                              int matrix[number_of_waypoints][number_of_waypoints]);
-void other_robot_station_schedules(int number_of_robots, int number_of_stations,
-                                   int matrix[number_of_robots][number_of_stations]);
-void other_robot_waypoint_schedules(
-    int number_of_robots, int number_of_waypoints,
-    int matrix[number_of_robots]
-              [number_of_waypoints * 2]); // * 2 because we expect to visit each waypoint at most
-                                          // once and hold at most once at each waypoint.
+
+// Station schedule related
+void endstation(int32_t num_stations, int8_t *arr);      // Length = number_of_stations
+void station_visited(int32_t num_stations, int8_t *arr); // Length = number_of_stations
+int32_t get_station_dist(int32_t from, int32_t to);
+int32_t next_robot_station(int32_t robot, int32_t step);
+double eta(int32_t robot);
+
+// Waypoint schedule related
+void waypoint_dist(int32_t number_of_waypoints, int32_t *arr);   // Length = number_of_waypoints ^ 2
+void waypoint_visited(int32_t number_of_stations, int8_t *arr);  // Length = number_of_stations
+void station_waypoint(int32_t number_of_stations, int32_t *arr); // Length = number_of_stations
+void waypoint_schedule(int32_t number_of_waypoints, int32_t number_of_robots,
+                       int32_t *arr); // Length = (number_of_robots - 1) * number_of_waypoints * 4
 
 #ifdef __cplusplus
 }
