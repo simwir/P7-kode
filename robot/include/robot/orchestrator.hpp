@@ -21,8 +21,9 @@
 #define ORCHESTRATOR_HPP
 
 #include "config/config.hpp"
-#include "info.hpp"
+#include "robot/info.hpp"
 #include "robot/subscriber.hpp"
+#include "robot/clock.hpp"
 #include "scheduling.hpp"
 #include "util/euclid.hpp"
 #include "wbt-translator/webots_parser.hpp"
@@ -103,7 +104,7 @@ class Orchestrator {
     config::Config static_config;
     config::Config dynamic_config;
     std::unique_ptr<tcp::Client> robot_client;
-    std::unique_ptr<tcp::Client> clock_client;
+    std::unique_ptr<robot::Clock> clock_client;
     tcp::Client broadcast_client;
     Parser webots_parser;
     AST ast;
@@ -140,7 +141,6 @@ class Orchestrator {
 
     bool running;
 
-    int get_webots_time();
     double current_time = 0;
     double eta_start_time = 0;
     double hold_until = 0;

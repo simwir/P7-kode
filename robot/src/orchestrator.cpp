@@ -58,7 +58,7 @@ robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::stri
 
     // Connecting to the WeBots Controller
     robot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
-    clock_client = std::make_unique<tcp::Client>(clock_host, PORT_TO_WALL_CLOCK);
+    clock_client = std::make_unique<robot::WebotsClock>(clock_host, PORT_TO_WALL_CLOCK);
     current_state.id = id;
 }
 
@@ -258,7 +258,7 @@ void robot::Orchestrator::main_loop()
     running = true;
     while (running) {
         bool got_fresh_info = false;
-        current_time = get_webots_time();
+        current_time = clock_client->get_current_time();
         get_dynamic_state();
         std::cerr << "loop\n";
 
@@ -351,17 +351,6 @@ void robot::Orchestrator::main_loop()
             std::cerr << "writing dynamic config" << std::endl;
             write_dynamic_config();
         }
-    }
-}
-
-int robot::Orchestrator::get_webots_time()
-{
-    auto msg = clock_client->atomic_blocking_request("get_time");
-    try {
-        return std::stoi(msg);
-    }
-    catch (std::invalid_argument &e) {
-        throw std::logic_error{"Error: couldn't parse time from " + msg};
     }
 }
 
