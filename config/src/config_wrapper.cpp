@@ -24,7 +24,7 @@
 #include <iostream>
 #include <limits>
 
-Log log{"libconfig.log"};
+Log _log{"libconfig.log"};
 
 #define CONFIG_GETTER(type, json_type, from, key, default)                                         \
     type key()                                                                                     \
@@ -36,7 +36,7 @@ Log log{"libconfig.log"};
             return from.get<json_type>(#key);                                                      \
         }                                                                                          \
         catch (const std::exception &e) {                                                          \
-            log << e.what();                                                                       \
+            _log << e.what();                                                                       \
             return default;                                                                        \
         }                                                                                          \
     }
@@ -56,7 +56,7 @@ void load()
     dynamic_config.load_from_file("dynamic_config.json");
 
     loaded = true;
-    log << "Loaded files";
+    _log << "Loaded files";
 }
 
 int32_t number_of_stations()
@@ -67,8 +67,8 @@ int32_t number_of_stations()
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "number_of_stations";
-        log << e.what();
+        _log << "number_of_stations";
+        _log << e.what();
         return 0;
     }
 }
@@ -81,8 +81,8 @@ int32_t number_of_end_stations()
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "number_of_end_stations";
-        log << e.what();
+        _log << "number_of_end_stations";
+        _log << e.what();
         return 0;
     }
 }
@@ -93,12 +93,12 @@ int32_t number_of_robots()
     try {
         // We always have at least one robot (that is ourself)
         static auto tmp = dynamic_config.getSize("robot_info_map") + 1;
-        log << "robots: " + std::to_string(tmp);
+        _log << "robots: " + std::to_string(tmp);
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "number_of_robots";
-        log << e.what();
+        _log << "number_of_robots";
+        _log << e.what();
         return 1; // We always have at least one robot
     }
 }
@@ -112,8 +112,8 @@ int32_t number_of_waypoints()
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "number_of_waypoints";
-        log << e.what();
+        _log << "number_of_waypoints";
+        _log << e.what();
         return 0;
     }
 }
@@ -126,8 +126,8 @@ int32_t waypoint_passing_time()
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "waypoint_passing_time";
-        log << e.what();
+        _log << "waypoint_passing_time";
+        _log << e.what();
         return 0;
     }
 }
@@ -140,8 +140,8 @@ int32_t station_passing_time()
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "station_passing_time";
-        log << e.what();
+        _log << "station_passing_time";
+        _log << e.what();
         return 0;
     }
 }
@@ -177,8 +177,8 @@ int32_t next_station()
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "next_station";
-        log << e.what();
+        _log << "next_station";
+        _log << e.what();
         return 0; // 0 is not a valid station index, and thus UPPAAL wil complain (as it should for this case).
     }
 }
@@ -191,8 +191,8 @@ int32_t destination()
         return tmp;
     }
     catch (const std::exception &e) {
-        log << "destination";
-        log << e.what();
+        _log << "destination";
+        _log << e.what();
         return -1; // -1 is not a valid waypoint id, and thus UPPAAL wil complain (as it should for this case).
     }
 }
@@ -227,8 +227,8 @@ void station_visited(int32_t number_of_stations, int8_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << "station_visited";
-        log << e.what();
+        _log << "station_visited";
+        _log << e.what();
     }
 }
 
@@ -241,8 +241,8 @@ int32_t get_station_dist(int32_t from, int32_t to)
         return dist.at(from - 1).at(to - 1); // We subtract 1 because stations are 1 indexed.
     }
     catch (const std::exception &e) {
-        log << "get_station_dist";
-        log << e.what();
+        _log << "get_station_dist";
+        _log << e.what();
         return std::numeric_limits<int>::max(); // It is very unlikely that we use this path, because
     }
 }
@@ -292,8 +292,8 @@ int32_t next_robot_station(int32_t robot, int32_t step)
         return robot_schedule.size() > step ? robot_schedule.at(step) : 0;
     }
     catch (const std::exception &e) {
-        log << "next_robot_station";
-        log << e.what();
+        _log << "next_robot_station";
+        _log << e.what();
         return 0; // 0 means that we are done
     }
 }
@@ -316,8 +316,8 @@ double eta(int32_t robot)
         return tmp.at(robot - 1);
     }
     catch (const std::exception &e) {
-        log << "eta";
-        log << e.what();
+        _log << "eta";
+        _log << e.what();
         return 0;
     }
 }
@@ -331,8 +331,8 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
         return tmp.at(from).at(to);
     }
     catch (const std::exception &e) {
-        log << "get_waypoint_dist";
-        log << e.what();
+        _log << "get_waypoint_dist";
+        _log << e.what();
         return -1; // -1 impies that there is no edge from -> to.
     }
 }
@@ -367,8 +367,8 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << "waypoint_visited";
-        log << e.what();
+        _log << "waypoint_visited";
+        _log << e.what();
     }
 }
 
@@ -392,8 +392,8 @@ void station_list(int32_t number_of_stations, int32_t *arr)
         }
     }
     catch (const std::exception &e) {
-        log << "station_list";
-        log << e.what();
+        _log << "station_list";
+        _log << e.what();
     }
 }
 
@@ -428,8 +428,8 @@ int32_t get_next_action_type(int32_t robot, int32_t step)
         return robot_schedule.size() > step ? convert_to_action(robot_schedule.at(step)) : DONE;
     }
     catch (const std::exception &e) {
-        log << "get_next_action_type";
-        log << e.what();
+        _log << "get_next_action_type";
+        _log << e.what();
         return DONE;
     }
 }
@@ -446,8 +446,8 @@ int32_t get_next_action_value(int32_t robot, int32_t step)
         return robot_schedule.size() > step ? robot_schedule.at(step).second : 0;
     }
     catch (const std::exception &e) {
-        log << e.what();
-        log << "get_next_action_value";
+        _log << e.what();
+        _log << "get_next_action_value";
         return 0;
     }
 }
