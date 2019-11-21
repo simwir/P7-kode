@@ -16,45 +16,18 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 # OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.10)
-
-set(CMAKE_CXX_COMPILER clang++)
-
-project(p7)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED)
-set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall -m32")
-
-include(ExternalProject)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
-
-# set(JSONCPP_ARCHIVE ${PROJECT_SOURCE_DIR}/lib/jsoncpp/libjsoncpp.a)
-
-include_directories(
-    ${PROJECT_SOURCE_DIR}/lib/jsoncpp/include
-    ${PROJECT_SOURCE_DIR}/tcp/include
-    ${PROJECT_SOURCE_DIR}/robot/include
-    ${PROJECT_SOURCE_DIR}/wbt-translator/include
-    ${PROJECT_SOURCE_DIR}/scheduling/include
-    ${PROJECT_SOURCE_DIR}/util/include
-    ${PROJECT_SOURCE_DIR}/config/include
-)
-
-# Libraries
-add_subdirectory(lib)
-add_subdirectory(tcp)
-add_subdirectory(config)
-add_subdirectory(scheduling)
-add_subdirectory(robot)
-
-# Executables
-add_subdirectory(tests)
-add_subdirectory(port_discovery)
-add_subdirectory(communication)
-add_subdirectory(wbt-translator)
+option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
+set(JSONCPP_WITH_TESTS OFF)
+option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
+set(JSONCPP_WITH_POST_BUILD_UNITTEST OFF)
+option(JSONCPP_WITH_WARNING_AS_ERROR "Force compilation to fail if a warning occurs" OFF)
+set(JSONCPP_WITH_WARNING_AS_ERROR OFF)
+option(JSONCPP_WITH_STRICT_ISO "Issue all the warnings demanded by strict ISO C and ISO C++" ON)
+set(JSONCPP_WITH_STRICT_ISO OFF)
+option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
+set(JSONCPP_WITH_PKGCONFIG_SUPPORT OFF)
+option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
+set(JSONCPP_WITH_CMAKE_PACKAGE OFF)
+option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(jsoncpp)

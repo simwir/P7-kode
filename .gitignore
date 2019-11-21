@@ -25,7 +25,6 @@
 *.la
 *.a
 *.lib
-!lib/**/libjsoncpp.a
 
 # Executables
 *.exe
