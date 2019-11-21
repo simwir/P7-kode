@@ -20,11 +20,12 @@ include_directories(${PROJECT_SOURCE_DIR}/communication/include)
 
 file(GLOB SOURCES "src/*.cpp")
 
-add_executable(communication ${SOURCES})
-target_link_libraries(communication
+add_executable(com_module ${SOURCES})
+target_link_libraries(com_module
     pthread
     tcp
     jsoncpp_lib
     librobot
 )
-install(TARGETS communication DESTINATION bin)
+
+install(TARGETS com_module DESTINATION bin)

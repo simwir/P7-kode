@@ -16,45 +16,56 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <tcp/server.hpp>
-#include <thread>
-#include <webots/Robot.hpp>
 
-#include <cmath>
+#include "tcp/server.hpp"
+
 #include <iostream>
+#include <sstream>
+#include <thread>
 
-using namespace webots;
+using namespace std;
+using tcp::Connection;
+using tcp::Server;
 
-void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot);
-void accepter(Robot *robot);
+static string prog_name;
 
-int main(int argc, char **argv)
+void usage(int code = 0)
 {
-    Robot *robot = new Robot();
-    int time_step = (int)robot->getBasicTimeStep();
-    std::thread accept_thread{accepter, robot};
-    while (robot->step(time_step) != -1) {
-    };
-
-    delete robot;
-    return 0;
+    std::cerr << "Usage: " << prog_name << " <port> [<response>...]" << std::endl;
+    exit(code);
 }
 
-void accepter(Robot *robot)
+int main(int argc, char *argv[])
 {
-    tcp::Server server{5555};
+    prog_name = argv[0];
+    if (argc <= 2) {
+        usage(-1);
+    }
+    int port;
+    stringstream ss{argv[1]};
+    ss >> port;
+    stringstream _response;
+    for (int i = 2; i < argc; ++i) {
+        _response << argv[i];
+        if (i < argc - 1)
+            _response << ' ';
+    }
+    string response = _response.str();
+    if (!ss) {
+        std::cerr << "Couldn't parse valid port from " << argv[1];
+        usage(1);
+    }
+
+    Server server{port};
     while (true) {
         auto conn = server.accept();
-        std::thread t{connection, conn, robot};
+        thread t{[response](shared_ptr<Connection> con) {
+                     while (true) {
+                         con->receive_blocking();
+                         con->send(response);
+                     }
+                 },
+                 conn};
         t.detach();
-    }
-}
-
-void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot)
-{
-    while (true) {
-        connection->receive_blocking();
-        // Convert double seconds to long millis.
-        connection->send(std::to_string(std::lround(robot->getTime() * 1000)));
     }
 }
