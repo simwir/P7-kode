@@ -149,21 +149,37 @@ int32_t station_passing_time()
 CONFIG_GETTER(double, double, static_config, uncertainty, 0.0);
 CONFIG_GETTER(int32_t, int, dynamic_config, next_waypoint, 0);
 
+static std::vector<int> combined_stations() {
+    std::vector<int> endstations = static_config.get<std::vector<int>>("end_stations");
+    std::vector<int> stations = static_config.get<std::vector<int>>("stations");
+
+    endstations.insert(endstations.end(), stations.begin(), stations.end());
+
+    return endstations;
+}
+
+int32_t convert_to_waypoint_id(int32_t station_id) {
+    load();
+    try {
+        static auto tmp = combined_stations();
+        _log << "to: " + std::to_string(tmp.at(station_id - 1));
+        return tmp.at(station_id - 1); // Because stations are 1-indexed
+    }
+    catch (const std::exception &e) {
+        _log << "convert_to_waypoint_id";
+        _log << e.what();
+        return -1; // -1 is not a valid waypoint and thus serves as an error value
+    }
+}
+
 static int next_station_index()
 {
     int station = dynamic_config.get<int>("next_station");
-    std::vector<int> station_list = static_config.get<std::vector<int>>("stations");
-    std::vector<int>::iterator it = std::find(station_list.begin(), station_list.end(), station);
+    std::vector<int> stations = combined_stations();
+    std::vector<int>::iterator it = std::find(stations.begin(), stations.end(), station);
 
-    if (it != station_list.end()) {
-        return number_of_end_stations() + std::distance(station_list.begin(), it);
-    }
-
-    std::vector<int> endstation_list = static_config.get<std::vector<int>>("end_stations");
-    it = std::find(endstation_list.begin(), endstation_list.end(), station);
-
-    if (it != endstation_list.end()) {
-        return std::distance(endstation_list.begin(), it);
+    if (it != stations.end()) {
+        return std::distance(stations.begin(), it) + 1; // 0-indexed -> 1-indexed
     }
 
     throw config::InvalidValueException{"next_station_index"};
@@ -200,14 +216,11 @@ int32_t destination()
 static std::vector<bool> convert_visited_stations()
 {
     auto visited_stations = dynamic_config.get<std::vector<int>>("visited_stations");
-    auto endstations = static_config.get<std::vector<int>>("end_stations");
-    auto stations = static_config.get<std::vector<int>>("stations");
-
-    endstations.insert(endstations.end(), stations.begin(), stations.end());
+    auto stations = combined_stations();
 
     std::vector<bool> visited;
 
-    for (const auto &station : endstations) {
+    for (const auto &station : stations) {
         visited.push_back(
           std::find(visited_stations.begin(), visited_stations.end(), station) !=
                           visited_stations.end()
@@ -251,10 +264,7 @@ static std::vector<std::vector<int>> convert_robot_next_station()
 {
     auto station_plans =
         dynamic_config.get<std::vector<std::vector<int>>>("robot_info_map", "station_plan");
-    auto endstations = static_config.get<std::vector<int>>("end_stations");
-    auto stations = static_config.get<std::vector<int>>("stations");
-
-    endstations.insert(endstations.end(), stations.begin(), stations.end());
+    auto stations = combined_stations();
 
     std::vector<std::vector<int>> plans;
 
@@ -262,14 +272,14 @@ static std::vector<std::vector<int>> convert_robot_next_station()
         std::vector<int> plan;
 
         for (const auto &station : station_plan) {
-            auto it = std::find(endstations.begin(), endstations.end(), station);
+            auto it = std::find(stations.begin(), stations.end(), station);
 
-            if (it == endstations.end()) {
+            if (it == stations.end()) {
                 throw config::InvalidValueException{"convert_robot_next_station"};
             }
 
             // We add 1 because stations are 1 indexed
-            auto distance = std::distance(endstations.begin(), it) + 1;
+            auto distance = std::distance(stations.begin(), it) + 1;
             plan.push_back(distance);
         }
 
@@ -372,21 +382,11 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t *arr)
     }
 }
 
-static std::vector<int> get_station_list()
-{
-    auto stations = static_config.get<std::vector<int>>("stations");
-    auto endstations = static_config.get<std::vector<int>>("end_stations");
-
-    endstations.insert(endstations.end(), stations.begin(), stations.end());
-
-    return endstations;
-}
-
 void station_list(int32_t number_of_stations, int32_t *arr)
 {
     load();
     try {
-        static auto tmp = get_station_list();
+        static auto tmp = combined_stations();
         for (int i = 0; i < number_of_stations; i++) {
             arr[i] = tmp.at(i);
         }
