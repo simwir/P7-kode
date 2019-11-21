@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+#include <iterator>
+#include <cstdlib>
 
 Log _log{"libconfig.log"};
 
@@ -93,7 +95,6 @@ int32_t number_of_robots()
     try {
         // We always have at least one robot (that is ourself)
         static auto tmp = dynamic_config.getSize("robot_info_map") + 1;
-        _log << "robots: " + std::to_string(tmp);
         return tmp;
     }
     catch (const std::exception &e) {
@@ -162,6 +163,9 @@ int32_t convert_to_waypoint_id(int32_t station_id) {
     load();
     try {
         static auto tmp = combined_stations();
+        std::stringstream result;
+        std::copy(tmp.begin(), tmp.end(), std::ostream_iterator<int>(result, " "));
+        _log << result.str();
         _log << "to: " + std::to_string(tmp.at(station_id - 1));
         return tmp.at(station_id - 1); // Because stations are 1-indexed
     }
