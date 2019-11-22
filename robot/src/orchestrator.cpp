@@ -27,7 +27,8 @@
 #include "wbt-translator/webots_parser.hpp"
 
 robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Options options)
-    : id(robot_id), options(options), broadcast_client(options.com_addr, options.com_port), webots_parser(world_file)
+    : id(robot_id), options(options), broadcast_client(options.com_addr, options.com_port),
+      webots_parser(world_file)
 {
     std::string recieved_string;
 

@@ -23,8 +23,8 @@
 #include "config/config.hpp"
 #include "robot/clock.hpp"
 #include "robot/info.hpp"
-#include "robot/subscriber.hpp"
 #include "robot/options.hpp"
+#include "robot/subscriber.hpp"
 #include "scheduling.hpp"
 #include "util/euclid.hpp"
 #include "wbt-translator/webots_parser.hpp"
@@ -71,7 +71,6 @@ class CannotOpenFileException : public std::exception {
 
     const char *what() const noexcept override { return message.c_str(); }
 };
-
 
 class Orchestrator {
   public:

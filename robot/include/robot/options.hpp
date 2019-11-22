@@ -1,9 +1,9 @@
 #ifndef ROBOT_OPTIONS_HPP
 #define ROBOT_OPTIONS_HPP
 
+#include <filesystem>
 #include <getopt.h>
 #include <string>
-#include <filesystem>
 
 namespace robot {
 
@@ -23,8 +23,7 @@ struct Options {
         std::filesystem::path("station_scheduling.q.template");
     std::filesystem::path waypoint_query_template =
         std::filesystem::path("waypoint_scheduling.q.template");
-    std::filesystem::path eta_query_template =
-        std::filesystem::path("eta_query.q.template");
+    std::filesystem::path eta_query_template = std::filesystem::path("eta_query.q.template");
 };
 
 const char *const shortOpts = "t:sc:p:o:hrq";

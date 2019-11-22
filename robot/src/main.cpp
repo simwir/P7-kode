@@ -17,8 +17,8 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "config/config.hpp"
-#include "robot/orchestrator.hpp"
 #include "robot/options.hpp"
+#include "robot/orchestrator.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -27,12 +27,11 @@
 #include <optional>
 #include <utility>
 
-namespace robot{
+namespace robot {
 
 Options options;
 
 bool time_chosen = false;
-
 
 void print_help(const char *const execute_location)
 {
@@ -150,4 +149,4 @@ int main(int argc, char **argv)
     std::cerr << "starting orchestrator\n";
     orchestrator.main_loop();
 }
-}
+} // namespace robot
