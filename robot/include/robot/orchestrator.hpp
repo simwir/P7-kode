@@ -145,6 +145,9 @@ class Orchestrator {
     robot::InfoMap robot_info;
     robot::ControllerState controller_state;
 
+    scheduling::Action current_waypoint;
+    scheduling::Action next_waypoint;
+
     scheduling::StationScheduler station_scheduler;
     scheduling::WaypointScheduler waypoint_scheduler;
     scheduling::EtaExtractor eta_extractor;
@@ -153,6 +156,7 @@ class Orchestrator {
     std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
     std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
 
+    void do_next_action();
     void set_station_visited(int station);
     std::vector<int> order;
 

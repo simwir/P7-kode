@@ -60,9 +60,14 @@ int main(int argc, char *argv[])
     while (true) {
         auto conn = server.accept();
         thread t{[response](shared_ptr<Connection> con) {
-                     while (true) {
-                         con->receive_blocking();
-                         con->send(response);
+                     try {
+                         while (true) {
+                             std::cout << con->receive_blocking() << std::endl;
+                             con->send(response);
+                         }
+                     }
+                     catch (tcp::ReceiveException &e) {
+                         std::cout << "Connection lost." << std::endl;
                      }
                  },
                  conn};

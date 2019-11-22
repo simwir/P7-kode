@@ -52,10 +52,9 @@ add_subdirectory(lib)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-add_subdirectory(tcp)
 add_subdirectory(config)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fsanitize=address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 
 add_subdirectory(tcp)
 add_subdirectory(scheduling)

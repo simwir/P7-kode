@@ -74,9 +74,9 @@ std::ostream &robot_vars(std::ostream &os)
 
 std::ostream &visited_vars(std::ostream &os, size_t num_waypoints)
 {
-    for (size_t i = 1; i <= num_waypoints; ++i) {
+    for (size_t i = 0; i < num_waypoints; ++i) {
         os << "Robot.visited[" << i << "]";
-        if (i != num_waypoints)
+        if (i != num_waypoints - 1)
             os << varsep;
         os << newline;
     }
@@ -85,7 +85,7 @@ std::ostream &visited_vars(std::ostream &os, size_t num_waypoints)
 
 std::ostream &point_variables(std::ostream &os, size_t num_waypoints)
 {
-    for (size_t i = 1; i <= num_waypoints; ++i) {
+    for (size_t i = 0; i < num_waypoints; ++i) {
         os << "Waypoint(" << i << ").num_in_queue" << varsep << newline;
     }
     return os << "Robot.x" << newline;

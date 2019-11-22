@@ -192,7 +192,7 @@ void robot::Orchestrator::get_new_order()
 {
     // order_service_client->send("get_order");
     // TODO temp until better API on order generator
-    auto size = std::to_string(rand() % 8);
+    auto size = std::to_string(rand() % 5 + 2);
     order_service_client->send(size);
     auto response = order_service_client->receive_blocking();
     std::stringstream ss{response};
@@ -250,6 +250,33 @@ void robot::Orchestrator::set_robot_destination(int waypoint)
     dynamic_config.set(DESTINATION, waypoint);
 }
 
+void robot::Orchestrator::do_next_action()
+{
+    current_waypoint = waypoint_subscriber->get().front();
+    waypoint_subscriber->pop();
+    next_waypoint = waypoint_subscriber->get().front();
+    if (current_waypoint.type != scheduling::ActionType::Hold) {
+        visited_waypoints.push_back(current_waypoint.value);
+    }
+    /*switch (next_waypoint.type) {
+        using scheduling::ActionType;
+    case ActionType::Hold:
+        std::cerr << "Hold: ";
+        break;
+    case ActionType::Waypoint:
+        std::cerr << "WayP: ";
+        break;
+        }*/
+    // std::cerr << next_waypoint.value << std::endl;
+    // hold for n units in webots time
+    if (next_waypoint.type == scheduling::ActionType::Hold) {
+        hold_until = current_time + next_waypoint.value;
+    }
+    else {
+        set_robot_destination(next_waypoint.value);
+    }
+}
+
 void robot::Orchestrator::main_loop()
 {
     srand(std::time(NULL));
@@ -284,6 +311,8 @@ void robot::Orchestrator::main_loop()
     waypoint_scheduler.wait_for_result();
     std::cerr << "done scheduling waypoint\n";
     send_robot_info();
+
+    do_next_action();
 
     running = true;
     while (running) {
@@ -334,20 +363,7 @@ void robot::Orchestrator::main_loop()
                 waypoint_scheduler.wait_for_result();
             }
 
-            scheduling::Action current_waypoint = waypoint_subscriber->get().front();
-            waypoint_subscriber->pop();
-            scheduling::Action next_waypoint = waypoint_subscriber->get().front();
-            if (current_waypoint.type != scheduling::ActionType::Hold) {
-                visited_waypoints.push_back(current_waypoint.value);
-            }
-
-            // hold for n units in webots time
-            if (next_waypoint.type == scheduling::ActionType::Hold) {
-                hold_until = current_time + next_waypoint.value;
-            }
-            else {
-                set_robot_destination(next_waypoint.value);
-            }
+            do_next_action();
 
             auto is_station = [&](int id) {
                 return ast.nodes.at(id).waypointType == WaypointType::eStation;
