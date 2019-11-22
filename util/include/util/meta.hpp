@@ -20,8 +20,8 @@
 #ifndef META_HPP
 #define META_HPP
 
-#include <type_traits>
 #include <iterator>
+#include <type_traits>
 
 namespace meta {
 
