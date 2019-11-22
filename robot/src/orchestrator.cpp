@@ -26,8 +26,8 @@
 #include "wbt-translator/distance_matrix.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
-robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, NetworkInfo network_info)
-    : id(robot_id), network_info(network_info), broadcast_client(network_info.com_addr, network_info.com_port), webots_parser(world_file)
+robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Options options)
+    : id(robot_id), options(options), broadcast_client(options.com_addr, options.com_port), webots_parser(world_file)
 {
     std::string recieved_string;
 
@@ -43,7 +43,7 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Networ
     eta_extractor.add_subscriber(eta_subscriber->shared_from_this());
 
     // Connecting to the Port Discovery Service
-    tcp::Client PDSClient{network_info.pds_addr, network_info.pds_port};
+    tcp::Client PDSClient{options.pds_addr, options.pds_port};
     PDSClient.send("get_robot," + std::to_string(robot_id));
     std::string port_to_controller = PDSClient.receive_blocking();
     std::cerr << port_to_controller << std::endl;
@@ -51,8 +51,8 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Networ
     tcp::validate_port_format(port_to_controller);
 
     // Connecting to the WeBots Controller
-    robot_client = std::make_unique<tcp::Client>(network_info.robot_addr, port_to_controller);
-    clock_client = std::make_unique<robot::WebotsClock>(network_info.time_addr, network_info.time_port);
+    robot_client = std::make_unique<tcp::Client>(options.robot_addr, port_to_controller);
+    clock_client = std::make_unique<robot::WebotsClock>(options.time_addr, options.time_port);
     current_state.id = id;
 }
 
