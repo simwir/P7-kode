@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     std::cerr << "constructing orchestrator... ";
     std::ifstream world_file{world_path};
 
-    robot::Orchestrator orchestrator{robot_addr, com_addr, 1, world_file, time_addr};
+    robot::Orchestrator orchestrator{1, world_file, network_info};
     std::cerr << "starting orchestrator\n";
     orchestrator.main_loop();
 }

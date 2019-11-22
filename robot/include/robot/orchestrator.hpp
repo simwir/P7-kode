@@ -127,7 +127,7 @@ class Orchestrator {
     std::unique_ptr<tcp::Client> robot_client;
     std::unique_ptr<robot::Clock> clock_client;
     std::unique_ptr<tcp::Client> order_service_client;
-    tcp::Client communication_client;
+    tcp::Client com_module;
 
     // static state information.
     Parser webots_parser;

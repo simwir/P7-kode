@@ -27,7 +27,8 @@
 #include "wbt-translator/webots_parser.hpp"
 
 robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, NetworkInfo network_info)
-    : id(robot_id), network_info(network_info), broadcast_client(network_info.com_addr, network_info.com_port), webots_parser(world_file)
+    : id(robot_id), network_info(network_info),
+      com_module(network_info.com_addr, network_info.com_port), webots_parser(world_file)
 {
     std::string recieved_string;
 
@@ -52,7 +53,8 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Networ
 
     // Connecting to the WeBots Controller
     robot_client = std::make_unique<tcp::Client>(network_info.robot_addr, port_to_controller);
-    clock_client = std::make_unique<robot::WebotsClock>(network_info.time_addr, network_info.time_port);
+    clock_client =
+        std::make_unique<robot::WebotsClock>(network_info.time_addr, network_info.time_port);
     current_state.id = id;
 }
 
@@ -157,7 +159,7 @@ void robot::Orchestrator::dump_waypoint_info(const AST &ast)
 
 void robot::Orchestrator::request_robot_info()
 {
-    communication_client.send("get_robot_info");
+    com_module.send("get_robot_info");
 }
 
 void robot::Orchestrator::request_controller_info()
@@ -171,12 +173,12 @@ void robot::Orchestrator::send_robot_info()
     current_state.waypoint_plan = waypoint_subscriber->get();
     current_state.location = controller_state.position;
     last_update_time = current_time;
-    communication_client.send("put_robot_info," + current_state.to_json().toStyledString());
+    com_module.send("put_robot_info," + current_state.to_json().toStyledString());
 }
 
 std::string robot::Orchestrator::receive_robot_info()
 {
-    return communication_client.receive_blocking();
+    return com_module.receive_blocking();
 }
 
 void robot::Orchestrator::get_new_order()
