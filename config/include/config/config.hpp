@@ -30,19 +30,20 @@ namespace config {
 using Action = std::pair<std::string, int>;
 
 class FileNotOpenedException : public std::exception {
-      std::string message;
+    std::string message;
 
-    public:
-      FileNotOpenedException(const std::string &path) : message("Could not open file: " + path){};
-      const char *what() const noexcept { return message.c_str(); }
+  public:
+    FileNotOpenedException(const std::string &path) : message("Could not open file: " + path){};
+    const char *what() const noexcept { return message.c_str(); }
 };
 
 class ReadException : public std::exception {
-      std::string message;
+    std::string message;
 
-    public:
-      ReadException(bool fail, bool bad) : message("Invalid stream state: " + std::to_string(fail) + ", " + std::to_string(bad)){};
-      const char *what() const noexcept { return message.c_str(); }
+  public:
+    ReadException(bool fail, bool bad)
+        : message("Invalid stream state: " + std::to_string(fail) + ", " + std::to_string(bad)){};
+    const char *what() const noexcept { return message.c_str(); }
 };
 
 class InvalidValueException : public std::exception {

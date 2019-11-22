@@ -55,7 +55,7 @@ void load()
     try {
         static_config.load_from_file("static_config.json");
     }
-    catch (const std::exception& e) {
+    catch (const std::exception &e) {
         _log << "Could not load static_config.json";
         _log << e.what();
         std::cout << e.what();
@@ -64,7 +64,7 @@ void load()
     try {
         dynamic_config.load_from_file("dynamic_config.json");
     }
-    catch (const std::exception& e) {
+    catch (const std::exception &e) {
         _log << "Could not load dynamic_config.json";
         _log << e.what();
         std::cout << e.what();
@@ -78,7 +78,8 @@ int32_t number_of_stations()
 {
     load();
     try {
-        static auto num_stations = static_config.getSize("stations") + static_config.getSize("end_stations");
+        static auto num_stations =
+            static_config.getSize("stations") + static_config.getSize("end_stations");
         return num_stations;
     }
     catch (const std::exception &e) {
@@ -122,7 +123,8 @@ int32_t number_of_waypoints()
     load();
     try {
         static auto waypoints = static_config.getSize("stations") +
-                          static_config.getSize("end_stations") + static_config.getSize("vias");
+                                static_config.getSize("end_stations") +
+                                static_config.getSize("vias");
         return waypoints;
     }
     catch (const std::exception &e) {
@@ -230,7 +232,8 @@ int32_t destination()
     }
 }
 
-// Convert from vector<int> (waypoint ids) to vector<bool> that encodes if the station at index i has been visited
+// Convert from vector<int> (waypoint ids) to vector<bool> that encodes if the station at index i
+// has been visited
 static std::vector<bool> convert_visited_stations()
 {
     auto to_visit = dynamic_config.get<std::vector<int>>("stations_to_visit");
@@ -241,12 +244,12 @@ static std::vector<bool> convert_visited_stations()
 
     for (const auto &station : stations) {
         if (std::find(endstations.begin(), endstations.end(), station) != endstations.end()) {
-          visited.push_back(false);
+            visited.push_back(false);
         }
         else {
-          visited.push_back(std::find(to_visit.begin(), to_visit.end(), station) == to_visit.end());
+            visited.push_back(std::find(to_visit.begin(), to_visit.end(), station) ==
+                              to_visit.end());
         }
-
     }
 
     return visited;
@@ -372,7 +375,8 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
     }
 }
 
-// Convert vector<int> (waypoint ids) to vector<bool> that encodes if the waypoint at index i has been visited
+// Convert vector<int> (waypoint ids) to vector<bool> that encodes if the waypoint at index i has
+// been visited
 static std::vector<bool> convert_visited_waypoints()
 {
     auto visited_waypoints = dynamic_config.get<std::vector<int>>("visited_waypoints");
@@ -381,8 +385,8 @@ static std::vector<bool> convert_visited_waypoints()
     std::vector<bool> visited;
 
     for (int i = 0; i < num_waypoints; i++) {
-        visited.push_back(
-          std::find(visited_waypoints.begin(), visited_waypoints.end(), i) != visited_waypoints.end());
+        visited.push_back(std::find(visited_waypoints.begin(), visited_waypoints.end(), i) !=
+                          visited_waypoints.end());
     }
 
     return visited;

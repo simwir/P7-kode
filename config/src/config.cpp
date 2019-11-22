@@ -27,7 +27,8 @@ template <>
 std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &arr)
 {
     if (!arr.isArray()) {
-        throw config::InvalidValueException{"convert_from_json<std::vector<int>>: expected array in JSON"};
+        throw config::InvalidValueException{
+            "convert_from_json<std::vector<int>>: expected array in JSON"};
     }
 
     std::vector<int> result;
@@ -44,7 +45,8 @@ std::vector<std::vector<int>>
 config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 {
     if (!arr.isArray()) {
-        throw config::InvalidValueException{"<std::vector<std::vector<int>>>: expected array in JSON"};
+        throw config::InvalidValueException{
+            "<std::vector<std::vector<int>>>: expected array in JSON"};
     }
 
     std::vector<std::vector<int>> result;
@@ -156,8 +158,8 @@ config::Config::get<std::vector<std::vector<int>>>(const std::string &key1, cons
 }
 
 template <>
-std::vector<double>
-config::Config::get<std::vector<double>>(const std::string &key1, const std::string &key2)
+std::vector<double> config::Config::get<std::vector<double>>(const std::string &key1,
+                                                             const std::string &key2)
 {
     if (!json.isMember(key1)) {
         throw config::InvalidKeyException{key1};
