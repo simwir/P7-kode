@@ -26,8 +26,6 @@
 #include <iterator>
 #include <limits>
 
-Log _log{"libconfig.log"};
-
 #define CONFIG_GETTER(type, json_type, from, key, default)                                         \
     type key()                                                                                     \
     {                                                                                              \
@@ -43,6 +41,7 @@ Log _log{"libconfig.log"};
         }                                                                                          \
     }
 
+Log _log{"libconfig.log"};
 bool loaded = false;
 
 config::Config static_config;
@@ -416,9 +415,9 @@ int32_t convert_to_action(std::pair<std::string, int> pair)
     return DONE;
 }
 
-static std::vector<std::vector<std::pair<std::string, int>>> get_waypoint_plan()
+static std::vector<std::vector<config::Action>> get_waypoint_plan()
 {
-    static auto tmp = dynamic_config.get<std::vector<std::vector<std::pair<std::string, int>>>>(
+    static auto tmp = dynamic_config.get<std::vector<std::vector<config::Action>>>(
         "robot_info_map", "waypoint_plan");
     return tmp;
 }

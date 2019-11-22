@@ -26,6 +26,9 @@
 #include <vector>
 
 namespace config {
+
+using Action = std::pair<std::string, int>;
+
 class InvalidValueException : public std::exception {
     std::string message;
 
