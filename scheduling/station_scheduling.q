@@ -28,7 +28,7 @@ strategy plan = minE (total) [<=200] : <> Robot.Done
 
 */
 simulate 1 [<= 200] {\
-    Robot.cur_loc, Robot.dest\
+    Robot.initial_waypoint, Robot.converted_cur(), Robot.converted_dest()\
 } under plan
 
 /*

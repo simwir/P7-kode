@@ -38,6 +38,7 @@ int32_t station_passing_time();
 int32_t next_station(); // A station id
 int32_t destination();  // A waypoint id
 int32_t next_waypoint();
+int32_t convert_to_waypoint_id(int32_t station_id);
 double uncertainty();
 
 // Station schedule related

@@ -21,10 +21,9 @@
 #include "util/log.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
-
-Log _log{"libconfig.log"};
 
 #define CONFIG_GETTER(type, json_type, from, key, default)                                         \
     type key()                                                                                     \
@@ -36,11 +35,12 @@ Log _log{"libconfig.log"};
             return from.get<json_type>(#key);                                                      \
         }                                                                                          \
         catch (const std::exception &e) {                                                          \
-            _log << e.what();                                                                       \
+            _log << e.what();                                                                      \
             return default;                                                                        \
         }                                                                                          \
     }
 
+Log _log{"libconfig.log"};
 bool loaded = false;
 
 config::Config static_config;
@@ -52,8 +52,23 @@ void load()
         return;
     }
 
-    static_config.load_from_file("static_config.json");
-    dynamic_config.load_from_file("dynamic_config.json");
+    try {
+        static_config.load_from_file("static_config.json");
+    }
+    catch (const std::exception& e) {
+        _log << "Could not load static_config.json";
+        _log << e.what();
+        std::cout << e.what();
+    }
+
+    try {
+        dynamic_config.load_from_file("dynamic_config.json");
+    }
+    catch (const std::exception& e) {
+        _log << "Could not load dynamic_config.json";
+        _log << e.what();
+        std::cout << e.what();
+    }
 
     loaded = true;
     _log << "Loaded files";
@@ -93,7 +108,6 @@ int32_t number_of_robots()
     try {
         // We always have at least one robot (that is ourself)
         static auto tmp = dynamic_config.getSize("robot_info_map") + 1;
-        _log << "robots: " + std::to_string(tmp);
         return tmp;
     }
     catch (const std::exception &e) {
@@ -149,21 +163,39 @@ int32_t station_passing_time()
 CONFIG_GETTER(double, double, static_config, uncertainty, 0.0);
 CONFIG_GETTER(int32_t, int, dynamic_config, next_waypoint, 0);
 
+static std::vector<int> combined_stations()
+{
+    std::vector<int> endstations = static_config.get<std::vector<int>>("end_stations");
+    std::vector<int> stations = static_config.get<std::vector<int>>("stations");
+
+    endstations.insert(endstations.end(), stations.begin(), stations.end());
+
+    return endstations;
+}
+
+int32_t convert_to_waypoint_id(int32_t station_id)
+{
+    load();
+    try {
+        static auto tmp = combined_stations();
+        std::stringstream result;
+        return tmp.at(station_id - 1); // Because stations are 1-indexed
+    }
+    catch (const std::exception &e) {
+        _log << "convert_to_waypoint_id";
+        _log << e.what();
+        return -1; // -1 is not a valid waypoint and thus serves as an error value
+    }
+}
+
 static int next_station_index()
 {
     int station = dynamic_config.get<int>("next_station");
-    std::vector<int> station_list = static_config.get<std::vector<int>>("stations");
-    std::vector<int>::iterator it = std::find(station_list.begin(), station_list.end(), station);
+    std::vector<int> stations = combined_stations();
+    auto it = std::find(stations.begin(), stations.end(), station);
 
-    if (it != station_list.end()) {
-        return number_of_end_stations() + std::distance(station_list.begin(), it);
-    }
-
-    std::vector<int> endstation_list = static_config.get<std::vector<int>>("end_stations");
-    it = std::find(endstation_list.begin(), endstation_list.end(), station);
-
-    if (it != endstation_list.end()) {
-        return std::distance(endstation_list.begin(), it);
+    if (it != stations.end()) {
+        return std::distance(stations.begin(), it) + 1; // 0-indexed -> 1-indexed
     }
 
     throw config::InvalidValueException{"next_station_index"};
@@ -179,7 +211,8 @@ int32_t next_station()
     catch (const std::exception &e) {
         _log << "next_station";
         _log << e.what();
-        return 0; // 0 is not a valid station index, and thus UPPAAL wil complain (as it should for this case).
+        return 0; // 0 is not a valid station index, and thus UPPAAL wil complain (as it should for
+                  // this case).
     }
 }
 
@@ -193,25 +226,28 @@ int32_t destination()
     catch (const std::exception &e) {
         _log << "destination";
         _log << e.what();
-        return -1; // -1 is not a valid waypoint id, and thus UPPAAL wil complain (as it should for this case).
+        return -1; // -1 is not a valid waypoint id, and thus UPPAAL wil complain (as it should for
+                   // this case).
     }
 }
 
+// Convert from vector<int> (waypoint ids) to vector<bool> that encodes if the station at index i has been visited
 static std::vector<bool> convert_visited_stations()
 {
-    auto visited_stations = dynamic_config.get<std::vector<int>>("visited_stations");
-    auto endstations = static_config.get<std::vector<int>>("end_stations");
-    auto stations = static_config.get<std::vector<int>>("stations");
-
-    endstations.insert(endstations.end(), stations.begin(), stations.end());
+    auto to_visit = dynamic_config.get<std::vector<int>>("stations_to_visit");
+    auto stations = combined_stations();
+    std::vector<int> endstations = static_config.get<std::vector<int>>("end_stations");
 
     std::vector<bool> visited;
 
-    for (const auto &station : endstations) {
-        visited.push_back(
-          std::find(visited_stations.begin(), visited_stations.end(), station) !=
-                          visited_stations.end()
-        );
+    for (const auto &station : stations) {
+        if (std::find(endstations.begin(), endstations.end(), station) != endstations.end()) {
+          visited.push_back(false);
+        }
+        else {
+          visited.push_back(std::find(to_visit.begin(), to_visit.end(), station) == to_visit.end());
+        }
+
     }
 
     return visited;
@@ -243,18 +279,17 @@ int32_t get_station_dist(int32_t from, int32_t to)
     catch (const std::exception &e) {
         _log << "get_station_dist";
         _log << e.what();
-        return std::numeric_limits<int>::max(); // It is very unlikely that we use this path, because
+        return std::numeric_limits<int>::max(); // It is very unlikely that we use this path,
+                                                // because
     }
 }
 
+// Convert from waypoint ids to station ids
 static std::vector<std::vector<int>> convert_robot_next_station()
 {
     auto station_plans =
         dynamic_config.get<std::vector<std::vector<int>>>("robot_info_map", "station_plan");
-    auto endstations = static_config.get<std::vector<int>>("end_stations");
-    auto stations = static_config.get<std::vector<int>>("stations");
-
-    endstations.insert(endstations.end(), stations.begin(), stations.end());
+    auto stations = combined_stations();
 
     std::vector<std::vector<int>> plans;
 
@@ -262,14 +297,14 @@ static std::vector<std::vector<int>> convert_robot_next_station()
         std::vector<int> plan;
 
         for (const auto &station : station_plan) {
-            auto it = std::find(endstations.begin(), endstations.end(), station);
+            auto it = std::find(stations.begin(), stations.end(), station);
 
-            if (it == endstations.end()) {
+            if (it == stations.end()) {
                 throw config::InvalidValueException{"convert_robot_next_station"};
             }
 
             // We add 1 because stations are 1 indexed
-            auto distance = std::distance(endstations.begin(), it) + 1;
+            auto distance = std::distance(stations.begin(), it) + 1;
             plan.push_back(distance);
         }
 
@@ -298,10 +333,11 @@ int32_t next_robot_station(int32_t robot, int32_t step)
     }
 }
 
+// Get a list of etas from each robot and add eta for the current robot in front
 static std::vector<double> convert_eta()
 {
-    auto tmp = dynamic_config.get<std::vector<double>>("robot_info_map", "eta");
-    tmp.insert(tmp.begin(), dynamic_config.get<double>("eta"));
+    auto tmp = dynamic_config.get<std::vector<double>>("robot_info_map", "station_eta");
+    tmp.insert(tmp.begin(), dynamic_config.get<double>("station_eta"));
 
     return tmp;
 }
@@ -337,6 +373,7 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
     }
 }
 
+// Convert vector<int> (waypoint ids) to vector<bool> that encodes if the waypoint at index i has been visited
 static std::vector<bool> convert_visited_waypoints()
 {
     auto visited_waypoints = dynamic_config.get<std::vector<int>>("visited_waypoints");
@@ -372,21 +409,11 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t *arr)
     }
 }
 
-static std::vector<int> get_station_list()
-{
-    auto stations = static_config.get<std::vector<int>>("stations");
-    auto endstations = static_config.get<std::vector<int>>("end_stations");
-
-    endstations.insert(endstations.end(), stations.begin(), stations.end());
-
-    return endstations;
-}
-
 void station_list(int32_t number_of_stations, int32_t *arr)
 {
     load();
     try {
-        static auto tmp = get_station_list();
+        static auto tmp = combined_stations();
         for (int i = 0; i < number_of_stations; i++) {
             arr[i] = tmp.at(i);
         }
@@ -397,7 +424,8 @@ void station_list(int32_t number_of_stations, int32_t *arr)
     }
 }
 
-int32_t convert_to_action(std::pair<std::string, int> pair)
+// Action -> ActionType where an int is used to encode ActionType.
+static int32_t convert_to_action_type(std::pair<std::string, int> pair)
 {
     if (pair.first.compare("Waypoint") == 0) {
         return WAYPOINT;
@@ -409,9 +437,9 @@ int32_t convert_to_action(std::pair<std::string, int> pair)
     return DONE;
 }
 
-static std::vector<std::vector<std::pair<std::string, int>>> get_waypoint_plan()
+static std::vector<std::vector<config::Action>> get_waypoint_plan()
 {
-    static auto tmp = dynamic_config.get<std::vector<std::vector<std::pair<std::string, int>>>>(
+    static auto tmp = dynamic_config.get<std::vector<std::vector<config::Action>>>(
         "robot_info_map", "waypoint_plan");
     return tmp;
 }
@@ -425,7 +453,9 @@ int32_t get_next_action_type(int32_t robot, int32_t step)
         // Therefore, we subtract 2.
         auto robot_schedule = tmp.at(robot - 2);
 
-        return static_cast<int>(robot_schedule.size()) > step ? convert_to_action(robot_schedule.at(step)) : DONE;
+        return static_cast<int>(robot_schedule.size()) > step
+                   ? convert_to_action_type(robot_schedule.at(step))
+                   : DONE;
     }
     catch (const std::exception &e) {
         _log << "get_next_action_type";
