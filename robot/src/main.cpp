@@ -21,15 +21,121 @@
 
 #include <filesystem>
 #include <fstream>
+#include <getopt.h>
+#include <iostream>
+#include <utility>
+#include <optional>
+
+std::string time_addr = "127.0.0.1";
+std::string com_addr = "127.0.0.1";
+std::string pds_addr = "127.0.0.1";
+std::string order_addr = "127.0.0.1";
+std::string robot_addr = "127.0.0.1";
+
+std::string time_port = "5555";
+std::string com_port = "5435";
+std::string pds_port = "4444";
+std::string order_port = "7777";
+
+bool time_chosen = false;
+
+void print_help(const char *const execute_location)
+{
+    std::cerr
+        << "Usage: " << execute_location << " [options] <webots world>(.wbt) [options]\n"
+        << "-t --time-service <IP>[:<PORT>]  Set address of time service. Cannot be used with -s.\n"
+        << "-s --system-time                 Use system time as time service. Cannot be used with "
+           "-t. Not implemented.\n"
+        << "-c --com-module <IP>[:<PORT>]    Set address of the communication modulde.\n"
+        << "-p --port-service <IP>[:<PORT>]  Set address of the port discovery service.\n"
+        << "-o --order-service <IP>[:<PORT>] Set address of the order service.\n"
+        << "-r --robot <IP>                  Set the host of the robot.\n"
+        << "-h --help                        Print this help message"
+        << std::endl;
+}
+
+std::pair<std::string, std::optional<std::string>> parse_address(std::string address) {
+    auto colon = address.find(":");
+    if (colon == std::string::npos){
+        return std::pair(address, std::nullopt);
+    } else {
+        return std::pair(address.substr(0, colon), std::optional(address.substr(colon + 1)));
+    }
+}
 
 int main(int argc, char **argv)
 {
-    if (argc < 3 || argc > 4) {
-        std::cerr << "Usage:\n"
-                  << "\t" << argv[0] << " <webots world (.wbt)> <IP> [<webots closk host>]";
+    const char *const shortOpts = "t:sc:p:o:hr";
+    const option longOpts[] = {{"time-service", required_argument, nullptr, 't'},
+                               {"system-time", no_argument, nullptr, 's'},
+                               {"com-module", required_argument, nullptr, 'c'},
+                               {"port-service", required_argument, nullptr, 'p'},
+                               {"order-service", required_argument, nullptr, 'o'},
+                               {"help", no_argument, nullptr, 'h'},
+                               {"robot", required_argument, nullptr, 'r'}};
+
+    std::pair<std::string, std::optional<std::string>> address;
+    int opt;
+    while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1) {
+        switch (opt) {
+        case 't':
+            if (time_chosen) {
+                std::cerr << "Time system already set to system time." << std::endl;
+                exit(1);
+            }
+            time_chosen = true;
+            address = parse_address(std::string{optarg});
+            time_addr = address.first;
+            if (address.second) {
+                time_port = address.second.value();
+            }
+            break;
+        case 's':
+            if (time_chosen) {
+                std::cerr << "Time system already set to time address." << std::endl;
+                exit(1);
+            }
+            time_chosen = true;
+            std::cerr << "System time service not implemented." << std::endl;
+            exit(1);
+            break;
+        case 'c':
+            address = parse_address(std::string{optarg});
+            com_addr = address.first;
+            if (address.second) {
+                com_port = address.second.value();
+            }
+            break;
+        case 'p':
+            address = parse_address(std::string{optarg});
+            pds_addr = address.first;
+            if (address.second) {
+                pds_port = address.second.value();
+            }
+            break;
+        case 'o':
+            address = parse_address(std::string{optarg});
+            order_addr = address.first;
+            if (address.second) {
+                order_port = address.second.value();
+            }
+            break;
+        case 'r':
+            robot_addr = std::string{optarg};
+            break;
+        case 'h':
+            print_help(argv[0]);
+            exit(0);
+            break;
+        }
+    }
+
+    if (optind == argc) {
+        print_help(argv[0]);
         exit(1);
     }
-    std::filesystem::path world_path{argv[1]};
+
+    std::filesystem::path world_path{argv[optind]};
     if (!std::filesystem::exists(world_path)) {
         std::cerr << "Cannot find file " << world_path << std::endl;
         exit(1);
@@ -42,9 +148,7 @@ int main(int argc, char **argv)
     std::cerr << "constructing orchestrator... ";
     std::ifstream world_file{world_path};
 
-    std::string clock_host = argc == 4 ? argv[3] : "127.0.0.1";
-
-    robot::Orchestrator orchestrator{argv[2], argv[2], 1, world_file};
+    robot::Orchestrator orchestrator{robot_addr, com_addr, 1, world_file, time_addr};
     std::cerr << "starting orchestrator\n";
     orchestrator.main_loop();
 }
