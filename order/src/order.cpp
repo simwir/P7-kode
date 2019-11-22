@@ -17,55 +17,38 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "tcp/server.hpp"
-
-#include <iostream>
+#include "order/order.hpp"
 #include <sstream>
-#include <thread>
 
-using namespace std;
-using tcp::Connection;
-using tcp::Server;
-
-static string prog_name;
-
-void usage(int code = 0)
+namespace order {
+Json::Value Order::to_json() const
 {
-    std::cerr << "Usage: " << prog_name << " <port> [<response>...]" << std::endl;
-    exit(code);
+    Json::Value json{Json::arrayValue};
+
+    for (int station : stations) {
+        json.append(Json::Value{station});
+    }
+
+    return json;
 }
 
-int main(int argc, char *argv[])
+Order Order::from_json(const std::string &json)
 {
-    prog_name = argv[0];
-    if (argc <= 2) {
-        usage(-1);
-    }
-    int port;
-    stringstream ss{argv[1]};
-    ss >> port;
-    stringstream _response;
-    for (int i = 2; i < argc; ++i) {
-        _response << argv[i];
-        if (i < argc - 1)
-            _response << ' ';
-    }
-    string response = _response.str();
-    if (!ss) {
-        std::cerr << "Couldn't parse valid port from " << argv[1];
-        usage(1);
+    std::stringstream ss(json);
+    Json::Value root{Json::arrayValue};
+    ss >> root;
+
+    return Order::from_json(root);
+}
+
+Order Order::from_json(const Json::Value &json)
+{
+    std::vector<int> stations;
+
+    for (auto station : json) {
+        stations.push_back(station.asInt());
     }
 
-    Server server{port};
-    while (true) {
-        auto conn = server.accept();
-        thread t{[response](shared_ptr<Connection> con) {
-                     while (true) {
-                         con->receive_blocking();
-                         con->send(response);
-                     }
-                 },
-                 conn};
-        t.detach();
-    }
+    return Order{stations};
 }
+} // namespace order

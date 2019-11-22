@@ -17,55 +17,33 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "tcp/server.hpp"
-
+#include "order/generation_service.hpp"
 #include <iostream>
-#include <sstream>
+#include <memory>
 #include <thread>
 
-using namespace std;
-using tcp::Connection;
-using tcp::Server;
+namespace order {
+GenerationService::GenerationService(int port, Generator &generator)
+    : server(port), generator(generator){};
 
-static string prog_name;
-
-void usage(int code = 0)
+void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connection)
 {
-    std::cerr << "Usage: " << prog_name << " <port> [<response>...]" << std::endl;
-    exit(code);
+    std::string message = connection->receive_blocking();
+    Order order = generator.generate_order(std::stoi(message));
+    connection->send(order.to_json().toStyledString());
 }
 
-int main(int argc, char *argv[])
+void GenerationService::start()
 {
-    prog_name = argv[0];
-    if (argc <= 2) {
-        usage(-1);
-    }
-    int port;
-    stringstream ss{argv[1]};
-    ss >> port;
-    stringstream _response;
-    for (int i = 2; i < argc; ++i) {
-        _response << argv[i];
-        if (i < argc - 1)
-            _response << ' ';
-    }
-    string response = _response.str();
-    if (!ss) {
-        std::cerr << "Couldn't parse valid port from " << argv[1];
-        usage(1);
-    }
-
-    Server server{port};
     while (true) {
-        auto conn = server.accept();
-        thread t{[response](shared_ptr<Connection> con) {
-                     while (true) {
-                         con->receive_blocking();
-                         con->send(response);
-                     }
-                 },
-                 conn};
-        t.detach();
+        try {
+            std::shared_ptr<tcp::Connection> connection = server.accept();
+            std::thread thread{&GenerationService::parse_message, this};
+            thread.detach();
+        }
+        catch (tcp::AcceptException &error) {
+            std::cerr << error.what() << std::endl;
+        }
     }
 }
+} // namespace order

@@ -17,55 +17,34 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "tcp/server.hpp"
+#include <algorithm>
+#include <string>
+#include <vector>
 
-#include <iostream>
-#include <sstream>
-#include <thread>
-
-using namespace std;
-using tcp::Connection;
-using tcp::Server;
-
-static string prog_name;
-
-void usage(int code = 0)
+template <typename T>
+T pick_random(const std::vector<T> &choices)
 {
-    std::cerr << "Usage: " << prog_name << " <port> [<response>...]" << std::endl;
-    exit(code);
+    return choices[rand() % choices.size()];
 }
 
-int main(int argc, char *argv[])
+template <typename T>
+std::vector<T> pick_n_random(std::vector<T> choices, int n)
 {
-    prog_name = argv[0];
-    if (argc <= 2) {
-        usage(-1);
-    }
-    int port;
-    stringstream ss{argv[1]};
-    ss >> port;
-    stringstream _response;
-    for (int i = 2; i < argc; ++i) {
-        _response << argv[i];
-        if (i < argc - 1)
-            _response << ' ';
-    }
-    string response = _response.str();
-    if (!ss) {
-        std::cerr << "Couldn't parse valid port from " << argv[1];
-        usage(1);
+    if (n > choices.size()) {
+        throw std::invalid_argument("Cannot pick " + std::to_string(n) +
+                                    " elements from a vector of size " +
+                                    std::to_string(choices.size()));
     }
 
-    Server server{port};
-    while (true) {
-        auto conn = server.accept();
-        thread t{[response](shared_ptr<Connection> con) {
-                     while (true) {
-                         con->receive_blocking();
-                         con->send(response);
-                     }
-                 },
-                 conn};
-        t.detach();
+    std::vector<T> selected;
+
+    // Pick a random element, add to selected and remove from choices. Ensures
+    // no duplicates in the selected vector.
+    for (int i = 0; i < n; ++i) {
+        int element = pick_random(choices);
+        selected.push_back(element);
+        choices.erase(std::remove(choices.begin(), choices.end(), element), choices.end());
     }
+
+    return selected;
 }

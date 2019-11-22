@@ -17,55 +17,25 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "tcp/server.hpp"
+#include "order/random_generator.hpp"
+#include "util/pick_random.hpp"
 
-#include <iostream>
-#include <sstream>
-#include <thread>
+namespace order {
+RandomGenerator::RandomGenerator(std::vector<int> stations) : stations(stations){};
 
-using namespace std;
-using tcp::Connection;
-using tcp::Server;
-
-static string prog_name;
-
-void usage(int code = 0)
+Order RandomGenerator::generate_order(int size) const
 {
-    std::cerr << "Usage: " << prog_name << " <port> [<response>...]" << std::endl;
-    exit(code);
+    return Order{pick_n_random(stations, size)};
 }
 
-int main(int argc, char *argv[])
+std::vector<Order> RandomGenerator::generate_orders(std::vector<int> sizes) const
 {
-    prog_name = argv[0];
-    if (argc <= 2) {
-        usage(-1);
-    }
-    int port;
-    stringstream ss{argv[1]};
-    ss >> port;
-    stringstream _response;
-    for (int i = 2; i < argc; ++i) {
-        _response << argv[i];
-        if (i < argc - 1)
-            _response << ' ';
-    }
-    string response = _response.str();
-    if (!ss) {
-        std::cerr << "Couldn't parse valid port from " << argv[1];
-        usage(1);
+    std::vector<Order> orders;
+
+    for (int size : sizes) {
+        orders.push_back(generate_order(size));
     }
 
-    Server server{port};
-    while (true) {
-        auto conn = server.accept();
-        thread t{[response](shared_ptr<Connection> con) {
-                     while (true) {
-                         con->receive_blocking();
-                         con->send(response);
-                     }
-                 },
-                 conn};
-        t.detach();
-    }
+    return orders;
 }
+} // namespace order

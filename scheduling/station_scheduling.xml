@@ -31,6 +31,8 @@ import "libconfig.so" {
     int next_robot_station(int robot, int step);
     int get_station_dist(int from, int to);
     double eta(int robot);
+    int convert_to_waypoint_id(int station);
+    int destination();
 };
 
 const int NUM_STATIONS = number_of_stations();
@@ -143,6 +145,7 @@ dest = next_station()</label>
 int[1, NUM_STATIONS] cur_loc = next_station();
 int[1, NUM_STATIONS] dest;
 const double robot_eta = eta(CUR_ROBOT);
+int initial_waypoint;
 
 bool is_endstation(int[1, NUM_STATIONS] id) {
     return id &lt;= NUM_END_STATIONS;
@@ -185,8 +188,16 @@ bool can_visit(int[1, NUM_STATIONS] id) {
 }
 
 void set_global() {
-    //endstation(NUM_STATIONS, is_endstation);
+    initial_waypoint = destination();
     station_visited(NUM_STATIONS, visited);
+}
+
+int converted_cur() {
+    return convert_to_waypoint_id(cur_loc);
+}
+
+int converted_dest() {
+    return convert_to_waypoint_id(dest);
 }</declaration>
 		<location id="id6" x="-637" y="-246">
 			<name x="-705" y="-238">Choose</name>
@@ -358,13 +369,13 @@ system OtherRobot, Robot, Station;
 		</query>
 		<query>
 			<formula>simulate 1 [&lt;= 200] {
-    Robot.cur_loc, Robot.dest
+    Robot.initial_waypoint, Robot.converted_cur(), Robot.converted_dest()
 }</formula>
 			<comment></comment>
 		</query>
 		<query>
 			<formula>simulate 1 [&lt;= 200] {
-    Robot.cur_loc, Robot.dest
+    Robot.initial_waypoint, Robot.converted_cur(), Robot.converted_dest()
 } under plan</formula>
 			<comment></comment>
 		</query>
