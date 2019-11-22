@@ -42,6 +42,7 @@ const int MAX_ROBOTS = number_of_robots();
 const double UNCERTAINTY = uncertainty();
 const int NON_STATION_PASSING = waypoint_passing_time();
 const int STATION_PASSING = station_passing_time();
+const int OTHER_ROBOT_MAX = MAX_ROBOTS == 1 ? 2 : MAX_ROBOTS;
 
 import "libconfig.so" {
     void waypoint_visited(int num_waypoints, bool&amp; arr[int[0, NUM_WAYPOINTS - 1]]);
@@ -158,7 +159,7 @@ x &gt;= passing_time()</label>
 	</template>
 	<template>
 		<name>OtherRobot</name>
-		<parameter>int[CUR_ROBOT + 1, MAX_ROBOTS] id</parameter>
+		<parameter>int[CUR_ROBOT + 1, OTHER_ROBOT_MAX] id</parameter>
 		<declaration>typedef int[0,2] next_type_t;
 
 const next_type_t DONE = 0;
@@ -217,15 +218,21 @@ next_t next_step() {
 			<name x="-450" y="-433">Holding</name>
 			<label kind="invariant" x="-450" y="-416">x &lt;= next.value</label>
 		</location>
-		<location id="id9" x="-1028" y="-382">
-			<name x="-1038" y="-416">Start</name>
+		<location id="id9" x="-1028" y="-399">
+			<name x="-1038" y="-433">Start</name>
 			<committed/>
 		</location>
 		<init ref="id9"/>
 		<transition controllable="false">
 			<source ref="id9"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-969" y="-416">MAX_ROBOTS == 1</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id9"/>
 			<target ref="id6"/>
-			<label kind="assignment" x="-1020" y="-323">next = next_step()</label>
+			<label kind="guard" x="-1164" y="-357">MAX_ROBOTS &gt; 1</label>
+			<label kind="assignment" x="-1173" y="-340">next = next_step()</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id6"/>
