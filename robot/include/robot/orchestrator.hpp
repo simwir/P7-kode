@@ -47,9 +47,10 @@ const std::filesystem::path static_conf = "static_config.json";
 
 constexpr int UPDATE_INTERVAL_MS = 5000;
 
-constexpr int STATION_DELAY = 6;
-constexpr int WAYPOINT_DELAY = 3;
-constexpr double UNCERTAINTY = 1.1;
+// constant parameters for the UPPAAL model.
+constexpr int STATION_DELAY = 6;    // time the robots remain at each station
+constexpr int WAYPOINT_DELAY = 3;   // time the robots remain at each waypoint
+constexpr double UNCERTAINTY = 1.1; // statistical uncertainty on all times.
 
 namespace robot {
 class RecievedMessageException : public std::exception {
@@ -73,15 +74,17 @@ class CannotOpenFileException : public std::exception {
 
 class Orchestrator {
   public:
-    Orchestrator(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
+    Orchestrator(const std::string &robot_host, const std::string &com_module_host, int robot_id,
                  std::istream &world_file, const std::string &clock_host = "127.0.0.1");
     void load_webots_to_config();
     void get_dynamic_state();
     void update_dynamic_state();
 
-    void request_broadcast_info();
+    // communication module functions
     void send_robot_info();
-    std::string receive_broadcast_info();
+    // get information about other robots.
+    void request_robot_info();
+    std::string receive_robot_info();
 
     void request_controller_info();
     std::string receive_controller_info();
@@ -105,16 +108,18 @@ class Orchestrator {
     config::Config dynamic_config;
     std::unique_ptr<tcp::Client> robot_client;
     std::unique_ptr<robot::Clock> clock_client;
-    tcp::Client broadcast_client;
+    tcp::Client communication_client;
+
+    // static state information.
     Parser webots_parser;
     AST ast;
-
     std::vector<int> stations;
     std::vector<int> end_stations;
     std::vector<int> vias;
     std::vector<int> waypoints;
 
-    void broadcast_state();
+    // dynamic state information
+    void communicate_state();
     robot::Info current_state;
     robot::InfoMap robot_info;
     robot::ControllerState controller_state;
@@ -127,13 +132,7 @@ class Orchestrator {
     std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
     std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
 
-    void set_station_visited(int station)
-    {
-        if (auto it = std::find(order.begin(), order.end(), station); it != order.end()) {
-            order.erase(it);
-        }
-        visited_waypoints.push_back(station);
-    };
+    void set_station_visited(int station);
     std::vector<int> order;
 
     // visited waypoints since last station we were at.

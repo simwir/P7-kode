@@ -115,8 +115,6 @@ int main(int argc, char *argv[])
     std::cout << "main: \tStarting ETA extractor";
     eta_extractor.start();
 
-    // sleep(120);
-
     std::cout << "main: \tStopping schedulers\n";
     stationScheduler.wait_for_result();
     waypointScheduler.wait_for_result();

@@ -30,13 +30,6 @@ extern int errno;
 
 namespace scheduling {
 
-/*void StationScheduler::wait_for_schedule()
-{
-if (worker.joinable()) {
-worker.join();
-}
-}*/
-
 void StationScheduler::start_worker()
 {
     std::cerr << "StationScheduler: Starting a new station scheduling.\n";
