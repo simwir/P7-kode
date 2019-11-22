@@ -78,8 +78,8 @@ int32_t number_of_stations()
 {
     load();
     try {
-        static auto tmp = static_config.getSize("stations") + static_config.getSize("end_stations");
-        return tmp;
+        static auto num_stations = static_config.getSize("stations") + static_config.getSize("end_stations");
+        return num_stations;
     }
     catch (const std::exception &e) {
         _log << "number_of_stations";
@@ -92,8 +92,8 @@ int32_t number_of_end_stations()
 {
     load();
     try {
-        static auto tmp = static_config.getSize("end_stations");
-        return tmp;
+        static auto num_endstations = static_config.getSize("end_stations");
+        return num_endstations;
     }
     catch (const std::exception &e) {
         _log << "number_of_end_stations";
@@ -107,8 +107,8 @@ int32_t number_of_robots()
     load();
     try {
         // We always have at least one robot (that is ourself)
-        static auto tmp = dynamic_config.getSize("robot_info_map") + 1;
-        return tmp;
+        static auto num_robots = dynamic_config.getSize("robot_info_map") + 1;
+        return num_robots;
     }
     catch (const std::exception &e) {
         _log << "number_of_robots";
@@ -121,9 +121,9 @@ int32_t number_of_waypoints()
 {
     load();
     try {
-        static auto tmp = static_config.getSize("stations") +
+        static auto waypoints = static_config.getSize("stations") +
                           static_config.getSize("end_stations") + static_config.getSize("vias");
-        return tmp;
+        return waypoints;
     }
     catch (const std::exception &e) {
         _log << "number_of_waypoints";
@@ -136,8 +136,8 @@ int32_t waypoint_passing_time()
 {
     load();
     try {
-        static auto tmp = static_config.get<int>("waypoint_delay");
-        return tmp;
+        static auto waypoint_delay = static_config.get<int>("waypoint_delay");
+        return waypoint_delay;
     }
     catch (const std::exception &e) {
         _log << "waypoint_passing_time";
@@ -150,8 +150,8 @@ int32_t station_passing_time()
 {
     load();
     try {
-        static auto tmp = static_config.get<int>("station_delay");
-        return tmp;
+        static auto station_delay = static_config.get<int>("station_delay");
+        return station_delay;
     }
     catch (const std::exception &e) {
         _log << "station_passing_time";
@@ -177,9 +177,8 @@ int32_t convert_to_waypoint_id(int32_t station_id)
 {
     load();
     try {
-        static auto tmp = combined_stations();
-        std::stringstream result;
-        return tmp.at(station_id - 1); // Because stations are 1-indexed
+        static auto stations = combined_stations();
+        return stations.at(station_id - 1); // Because stations are 1-indexed
     }
     catch (const std::exception &e) {
         _log << "convert_to_waypoint_id";
@@ -205,8 +204,8 @@ int32_t next_station()
 {
     load();
     try {
-        static auto tmp = next_station_index();
-        return tmp;
+        static auto station_index = next_station_index();
+        return station_index;
     }
     catch (const std::exception &e) {
         _log << "next_station";
@@ -257,9 +256,9 @@ void station_visited(int32_t number_of_stations, int8_t *arr)
 {
     load();
     try {
-        static auto tmp = convert_visited_stations();
+        static auto is_visited = convert_visited_stations();
         for (int i = 0; i < number_of_stations; i++) {
-            arr[i] = tmp.at(i);
+            arr[i] = is_visited.at(i);
         }
     }
     catch (const std::exception &e) {
@@ -318,10 +317,10 @@ int32_t next_robot_station(int32_t robot, int32_t step)
 {
     load();
     try {
-        static auto tmp = convert_robot_next_station();
+        static auto robot_schedules = convert_robot_next_station();
         // Other robots start their index 2 but vectors start their index at 0.
         // Therefore, we substract 2.
-        auto robot_schedule = tmp.at(robot - 2);
+        auto robot_schedule = robot_schedules.at(robot - 2);
 
         // 0 means that we are done
         return static_cast<int>(robot_schedule.size()) > step ? robot_schedule.at(step) : 0;
@@ -336,20 +335,20 @@ int32_t next_robot_station(int32_t robot, int32_t step)
 // Get a list of etas from each robot and add eta for the current robot in front
 static std::vector<double> convert_eta()
 {
-    auto tmp = dynamic_config.get<std::vector<double>>("robot_info_map", "station_eta");
-    tmp.insert(tmp.begin(), dynamic_config.get<double>("station_eta"));
+    auto etas = dynamic_config.get<std::vector<double>>("robot_info_map", "station_eta");
+    etas.insert(etas.begin(), dynamic_config.get<double>("station_eta"));
 
-    return tmp;
+    return etas;
 }
 
 double eta(int32_t robot)
 {
     load();
     try {
-        static auto tmp = convert_eta();
+        static auto etas = convert_eta();
         // Robots are indexed from 1 but vectors are indexed 0.
         // Therefore, we substract 1.
-        return tmp.at(robot - 1);
+        return etas.at(robot - 1);
     }
     catch (const std::exception &e) {
         _log << "eta";
@@ -362,9 +361,9 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
 {
     load();
     try {
-        static auto tmp =
+        static auto dists =
             static_config.get<std::vector<std::vector<int>>>("waypoint_distance_matrix");
-        return tmp.at(from).at(to);
+        return dists.at(from).at(to);
     }
     catch (const std::exception &e) {
         _log << "get_waypoint_dist";
@@ -393,9 +392,9 @@ void waypoint_visited(int32_t number_of_waypoints, int8_t *arr)
 {
     load();
     try {
-        static auto tmp = convert_visited_waypoints();
+        static auto is_visited = convert_visited_waypoints();
         for (int i = 0; i < number_of_waypoints; i++) {
-            arr[i] = tmp.at(i);
+            arr[i] = is_visited.at(i);
         }
     }
     catch (const std::exception &e) {
@@ -408,9 +407,9 @@ void station_list(int32_t number_of_stations, int32_t *arr)
 {
     load();
     try {
-        static auto tmp = combined_stations();
+        static auto stations = combined_stations();
         for (int i = 0; i < number_of_stations; i++) {
-            arr[i] = tmp.at(i);
+            arr[i] = stations.at(i);
         }
     }
     catch (const std::exception &e) {
@@ -434,19 +433,19 @@ static int32_t convert_to_action_type(std::pair<std::string, int> pair)
 
 static std::vector<std::vector<config::Action>> get_waypoint_plan()
 {
-    static auto tmp = dynamic_config.get<std::vector<std::vector<config::Action>>>(
+    static auto waypoint_plans = dynamic_config.get<std::vector<std::vector<config::Action>>>(
         "robot_info_map", "waypoint_plan");
-    return tmp;
+    return waypoint_plans;
 }
 
 int32_t get_next_action_type(int32_t robot, int32_t step)
 {
     load();
     try {
-        static auto tmp = get_waypoint_plan();
+        static auto waypoint_plans = get_waypoint_plan();
         // Other robot index start at 2.
         // Therefore, we subtract 2.
-        auto robot_schedule = tmp.at(robot - 2);
+        auto robot_schedule = waypoint_plans.at(robot - 2);
 
         return static_cast<int>(robot_schedule.size()) > step
                    ? convert_to_action_type(robot_schedule.at(step))
@@ -463,10 +462,10 @@ int32_t get_next_action_value(int32_t robot, int32_t step)
 {
     load();
     try {
-        static auto tmp = get_waypoint_plan();
+        static auto waypoint_plans = get_waypoint_plan();
         // Other robot index start at 2.
         // Therefore, we subtract 2.
-        auto robot_schedule = tmp.at(robot - 2);
+        auto robot_schedule = waypoint_plans.at(robot - 2);
 
         return static_cast<int>(robot_schedule.size()) > step ? robot_schedule.at(step).second : 0;
     }
