@@ -25,15 +25,7 @@ class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
     {
         std::scoped_lock _{mutex};
         // translate UPPAAL indices to station IDs.
-        std::vector<int> translated_schedule;
-        for (auto i : schedule) {
-            std::cerr << i << ' ';
-        }
-        std::cerr << std::endl;
-        translated_schedule.resize(schedule.size());
-        std::transform(schedule.begin(), schedule.end(), translated_schedule.begin(),
-                       [&](int uppaal_idx) { return station_ids.at(uppaal_idx); });
-        reset(std::move(translated_schedule));
+        reset(schedule);
     }
 };
 
@@ -47,17 +39,7 @@ class AsyncWaypointSubscriber : public scheduling::WaypointScheduleSubscriber,
     void newSchedule(const std::vector<scheduling::Action> &schedule) override
     {
         std::scoped_lock _{mutex};
-        std::vector<scheduling::Action> _schedule;
-        _schedule.resize(schedule.size());
-        std::transform(schedule.begin(), schedule.end(), _schedule.begin(), [&](auto action) {
-            if (action.type == scheduling::ActionType::Waypoint) {
-                return scheduling::Action{action.type, waypoint_ids.at(action.value)};
-            }
-            else {
-                return action;
-            }
-        });
-        reset(_schedule);
+        reset(schedule);
     }
     const std::vector<int> waypoint_ids;
 };

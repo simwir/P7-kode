@@ -59,6 +59,7 @@ robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::stri
     // Connecting to the WeBots Controller
     robot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
     clock_client = std::make_unique<robot::WebotsClock>(clock_host, PORT_TO_WALL_CLOCK);
+    order_service_client = std::make_unique<tcp::Client>("127.0.0.1", "7777");
     current_state.id = id;
 }
 
@@ -129,7 +130,8 @@ void robot::Orchestrator::add_station_matrix(const AST &ast)
     // Convert shortest paths between stations
     Json::Value jsonarray_apsp_distances{Json::arrayValue};
     for (size_t i = 0; i < ast.num_waypoints(); i++) {
-        if (ast.nodes.at(i).waypointType == WaypointType::eStation) {
+        if (ast.nodes.at(i).waypointType == WaypointType::eStation ||
+            ast.nodes.at(i).waypointType == WaypointType::eEndPoint) {
             Json::Value jsonarray_apsp_row{Json::arrayValue};
             for (size_t j = 0; j < ast.num_waypoints(); j++) {
                 if (ast.nodes.at(j).waypointType == WaypointType::eStation) {
@@ -184,6 +186,24 @@ std::string robot::Orchestrator::receive_broadcast_info()
     return broadcast_client.receive_blocking();
 }
 
+void robot::Orchestrator::get_new_order()
+{
+    // order_service_client->send("get_order");
+    // TODO temp until better API on order generator
+    order_service_client->send(std::to_string(rand() % 8));
+    auto response = order_service_client->receive_blocking();
+    std::stringstream ss{response};
+    Json::Value val;
+    ss >> val;
+    std::vector<int> order;
+    for (const auto &station : val) {
+        order.push_back(station.asInt());
+        std::cerr << order.back() << ", ";
+    }
+    std::cerr << std::endl;
+    this->order = std::move(order);
+}
+
 std::string robot::Orchestrator::receive_controller_info()
 {
     return robot_client->receive_blocking();
@@ -229,10 +249,12 @@ void robot::Orchestrator::set_robot_destination(int waypoint)
 
 void robot::Orchestrator::main_loop()
 {
-
+    srand(std::time(NULL));
     // Bootstrap route
     get_dynamic_state();
     // set next station to our closest during the bootstrapping (before any actual schedule exists).
+    get_new_order();
+    dynamic_config.set("stations_to_visit", order);
     dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
                            return wp.waypointType == WaypointType::eStation;
                        }));

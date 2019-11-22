@@ -21,9 +21,9 @@
 #define ORCHESTRATOR_HPP
 
 #include "config/config.hpp"
+#include "robot/clock.hpp"
 #include "robot/info.hpp"
 #include "robot/subscriber.hpp"
-#include "robot/clock.hpp"
 #include "scheduling.hpp"
 #include "util/euclid.hpp"
 #include "wbt-translator/webots_parser.hpp"
@@ -88,7 +88,10 @@ class Orchestrator {
     void request_controller_info();
     std::string receive_controller_info();
 
-    std::optional<std::vector<int>> get_new_order();
+    void request_order();
+    std::vector<int> receive_order();
+
+    void get_new_order();
 
     void write_static_config();
     void write_dynamic_config();
@@ -107,6 +110,7 @@ class Orchestrator {
     config::Config dynamic_config;
     std::unique_ptr<tcp::Client> robot_client;
     std::unique_ptr<robot::Clock> clock_client;
+    std::unique_ptr<tcp::Client> order_service_client;
     tcp::Client broadcast_client;
     Parser webots_parser;
     AST ast;
