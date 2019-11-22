@@ -26,14 +26,8 @@
 #include "wbt-translator/distance_matrix.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
-#define PORT_TO_BROADCASTER "5435"
-#define PORT_TO_PDS "4444"
-#define PORT_TO_WALL_CLOCK "5555"
-
-robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::string &broadcast_host,
-                                  int robot_id, std::istream &world_file,
-                                  const std::string &clock_host)
-    : id(robot_id), broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
+robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, NetworkInfo network_info)
+    : id(robot_id), network_info(network_info), broadcast_client(network_info.com_addr, network_info.com_port), webots_parser(world_file)
 {
     std::string recieved_string;
 
@@ -49,7 +43,7 @@ robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::stri
     eta_extractor.add_subscriber(eta_subscriber->shared_from_this());
 
     // Connecting to the Port Discovery Service
-    tcp::Client PDSClient{robot_host, PORT_TO_PDS};
+    tcp::Client PDSClient{network_info.pds_addr, network_info.pds_port};
     PDSClient.send("get_robot," + std::to_string(robot_id));
     std::string port_to_controller = PDSClient.receive_blocking();
     std::cerr << port_to_controller << std::endl;
@@ -57,8 +51,8 @@ robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::stri
     tcp::validate_port_format(port_to_controller);
 
     // Connecting to the WeBots Controller
-    robot_client = std::make_unique<tcp::Client>(robot_host, port_to_controller);
-    clock_client = std::make_unique<robot::WebotsClock>(clock_host, PORT_TO_WALL_CLOCK);
+    robot_client = std::make_unique<tcp::Client>(network_info.robot_addr, port_to_controller);
+    clock_client = std::make_unique<robot::WebotsClock>(network_info.time_addr, network_info.time_port);
     current_state.id = id;
 }
 

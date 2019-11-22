@@ -23,19 +23,10 @@
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
-#include <utility>
 #include <optional>
+#include <utility>
 
-std::string time_addr = "127.0.0.1";
-std::string com_addr = "127.0.0.1";
-std::string pds_addr = "127.0.0.1";
-std::string order_addr = "127.0.0.1";
-std::string robot_addr = "127.0.0.1";
-
-std::string time_port = "5555";
-std::string com_port = "5435";
-std::string pds_port = "4444";
-std::string order_port = "7777";
+robot::NetworkInfo network_info;
 
 bool time_chosen = false;
 
@@ -50,15 +41,16 @@ void print_help(const char *const execute_location)
         << "-p --port-service <IP>[:<PORT>]  Set address of the port discovery service.\n"
         << "-o --order-service <IP>[:<PORT>] Set address of the order service.\n"
         << "-r --robot <IP>                  Set the host of the robot.\n"
-        << "-h --help                        Print this help message"
-        << std::endl;
+        << "-h --help                        Print this help message" << std::endl;
 }
 
-std::pair<std::string, std::optional<std::string>> parse_address(std::string address) {
+std::pair<std::string, std::optional<std::string>> parse_address(std::string address)
+{
     auto colon = address.find(":");
-    if (colon == std::string::npos){
+    if (colon == std::string::npos) {
         return std::pair(address, std::nullopt);
-    } else {
+    }
+    else {
         return std::pair(address.substr(0, colon), std::optional(address.substr(colon + 1)));
     }
 }
@@ -85,9 +77,9 @@ int main(int argc, char **argv)
             }
             time_chosen = true;
             address = parse_address(std::string{optarg});
-            time_addr = address.first;
+            network_info.time_addr = address.first;
             if (address.second) {
-                time_port = address.second.value();
+                network_info.time_port = address.second.value();
             }
             break;
         case 's':
@@ -101,27 +93,27 @@ int main(int argc, char **argv)
             break;
         case 'c':
             address = parse_address(std::string{optarg});
-            com_addr = address.first;
+            network_info.com_addr = address.first;
             if (address.second) {
-                com_port = address.second.value();
+                network_info.com_port = address.second.value();
             }
             break;
         case 'p':
             address = parse_address(std::string{optarg});
-            pds_addr = address.first;
+            network_info.pds_addr = address.first;
             if (address.second) {
-                pds_port = address.second.value();
+                network_info.pds_port = address.second.value();
             }
             break;
         case 'o':
             address = parse_address(std::string{optarg});
-            order_addr = address.first;
+            network_info.order_addr = address.first;
             if (address.second) {
-                order_port = address.second.value();
+                network_info.order_port = address.second.value();
             }
             break;
         case 'r':
-            robot_addr = std::string{optarg};
+            network_info.robot_addr = std::string{optarg};
             break;
         case 'h':
             print_help(argv[0]);

@@ -71,10 +71,22 @@ class CannotOpenFileException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
+struct NetworkInfo {
+    std::string time_addr = "127.0.0.1";
+    std::string com_addr = "127.0.0.1";
+    std::string pds_addr = "127.0.0.1";
+    std::string order_addr = "127.0.0.1";
+    std::string robot_addr = "127.0.0.1";
+
+    std::string time_port = "5555";
+    std::string com_port = "5435";
+    std::string pds_port = "4444";
+    std::string order_port = "7777";
+};
+
 class Orchestrator {
   public:
-    Orchestrator(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
-                 std::istream &world_file, const std::string &clock_host = "127.0.0.1");
+    Orchestrator(int robot_id, std::istream &world_file, NetworkInfo network_info);
     void load_webots_to_config();
     void get_dynamic_state();
     void update_dynamic_state();
@@ -101,6 +113,7 @@ class Orchestrator {
 
   private:
     const int id;
+    const NetworkInfo network_info;
     config::Config static_config;
     config::Config dynamic_config;
     std::unique_ptr<tcp::Client> robot_client;
