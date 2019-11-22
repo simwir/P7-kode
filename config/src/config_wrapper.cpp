@@ -315,8 +315,8 @@ int32_t next_robot_station(int32_t robot, int32_t step)
 // Get a list of etas from each robot and add eta for the current robot in front
 static std::vector<double> convert_eta()
 {
-    auto tmp = dynamic_config.get<std::vector<double>>("robot_info_map", "eta");
-    tmp.insert(tmp.begin(), dynamic_config.get<double>("eta"));
+    auto tmp = dynamic_config.get<std::vector<double>>("robot_info_map", "station_eta");
+    tmp.insert(tmp.begin(), dynamic_config.get<double>("station_eta"));
 
     return tmp;
 }
