@@ -64,7 +64,16 @@ config::Config::Config(const std::string &file_path)
 void config::Config::load_from_file(const std::string &file_path)
 {
     std::ifstream config_file{file_path};
+
+    if (!config_file.is_open()) {
+        throw config::FileNotOpenedException{file_path};
+    }
+
     config_file >> json;
+
+    if (config_file.fail()) {
+        throw config::ReadException{config_file.fail(), config_file.bad()};
+    }
 }
 
 void config::Config::write_to_file(const std::string &file_path)

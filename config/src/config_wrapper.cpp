@@ -52,8 +52,23 @@ void load()
         return;
     }
 
-    static_config.load_from_file("static_config.json");
-    dynamic_config.load_from_file("dynamic_config.json");
+    try {
+        static_config.load_from_file("static_config.json");
+    }
+    catch (const std::exception& e) {
+        _log << "Could not load static_config.json";
+        _log << e.what();
+        std::cout << e.what();
+    }
+
+    try {
+        dynamic_config.load_from_file("dynamic_config.json");
+    }
+    catch (const std::exception& e) {
+        _log << "Could not load dynamic_config.json";
+        _log << e.what();
+        std::cout << e.what();
+    }
 
     loaded = true;
     _log << "Loaded files";
