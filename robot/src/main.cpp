@@ -26,7 +26,9 @@ int main(int argc, char **argv)
 {
     if (argc < 3 || argc > 4) {
         std::cerr << "Usage:\n"
-                  << "\t" << argv[0] << " <webots world (.wbt)> <IP> [<webots closk host>]";
+                  << "\t" << argv[0] << " <webots world (.wbt)> <IP> [<webots clock host>]\n"
+                  << "IP should point to communication module / robot controller host"
+                  << std::endl;
         exit(1);
     }
     std::filesystem::path world_path{argv[1]};
