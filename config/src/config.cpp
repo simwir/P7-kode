@@ -43,7 +43,7 @@ std::vector<double> config::convert_from_json<std::vector<double>>(const Json::V
 
     std::vector<double> result;
 
-    for (const auto& elem : arr) {
+    for (const auto &elem : arr) {
         result.push_back(elem.asDouble());
     }
 
@@ -59,7 +59,7 @@ std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &
 
     std::vector<int> result;
 
-    for (const auto& elem : arr) {
+    for (const auto &elem : arr) {
         result.push_back(elem.asInt());
     }
 
@@ -76,7 +76,7 @@ config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 
     std::vector<std::vector<int>> result;
 
-    for (const auto& elem : arr) {
+    for (const auto &elem : arr) {
         result.push_back(config::convert_from_json<std::vector<int>>(elem));
     }
 
@@ -92,7 +92,7 @@ std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value
 
     std::vector<bool> result;
 
-    for (const auto& elem : arr) {
+    for (const auto &elem : arr) {
         result.push_back(elem.asBool());
     }
 

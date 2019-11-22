@@ -21,10 +21,10 @@
 #include "util/log.hpp"
 
 #include <algorithm>
-#include <iostream>
-#include <limits>
-#include <iterator>
 #include <cstdlib>
+#include <iostream>
+#include <iterator>
+#include <limits>
 
 Log _log{"libconfig.log"};
 
@@ -150,7 +150,8 @@ int32_t station_passing_time()
 CONFIG_GETTER(double, double, static_config, uncertainty, 0.0);
 CONFIG_GETTER(int32_t, int, dynamic_config, next_waypoint, 0);
 
-static std::vector<int> combined_stations() {
+static std::vector<int> combined_stations()
+{
     std::vector<int> endstations = static_config.get<std::vector<int>>("end_stations");
     std::vector<int> stations = static_config.get<std::vector<int>>("stations");
 
@@ -159,7 +160,8 @@ static std::vector<int> combined_stations() {
     return endstations;
 }
 
-int32_t convert_to_waypoint_id(int32_t station_id) {
+int32_t convert_to_waypoint_id(int32_t station_id)
+{
     load();
     try {
         static auto tmp = combined_stations();
@@ -199,7 +201,8 @@ int32_t next_station()
     catch (const std::exception &e) {
         _log << "next_station";
         _log << e.what();
-        return 0; // 0 is not a valid station index, and thus UPPAAL wil complain (as it should for this case).
+        return 0; // 0 is not a valid station index, and thus UPPAAL wil complain (as it should for
+                  // this case).
     }
 }
 
@@ -213,7 +216,8 @@ int32_t destination()
     catch (const std::exception &e) {
         _log << "destination";
         _log << e.what();
-        return -1; // -1 is not a valid waypoint id, and thus UPPAAL wil complain (as it should for this case).
+        return -1; // -1 is not a valid waypoint id, and thus UPPAAL wil complain (as it should for
+                   // this case).
     }
 }
 
@@ -225,10 +229,8 @@ static std::vector<bool> convert_visited_stations()
     std::vector<bool> visited;
 
     for (const auto &station : stations) {
-        visited.push_back(
-          std::find(visited_stations.begin(), visited_stations.end(), station) !=
-                          visited_stations.end()
-        );
+        visited.push_back(std::find(visited_stations.begin(), visited_stations.end(), station) !=
+                          visited_stations.end());
     }
 
     return visited;
@@ -260,7 +262,8 @@ int32_t get_station_dist(int32_t from, int32_t to)
     catch (const std::exception &e) {
         _log << "get_station_dist";
         _log << e.what();
-        return std::numeric_limits<int>::max(); // It is very unlikely that we use this path, because
+        return std::numeric_limits<int>::max(); // It is very unlikely that we use this path,
+                                                // because
     }
 }
 
@@ -429,7 +432,9 @@ int32_t get_next_action_type(int32_t robot, int32_t step)
         // Therefore, we subtract 2.
         auto robot_schedule = tmp.at(robot - 2);
 
-        return static_cast<int>(robot_schedule.size()) > step ? convert_to_action(robot_schedule.at(step)) : DONE;
+        return static_cast<int>(robot_schedule.size()) > step
+                   ? convert_to_action(robot_schedule.at(step))
+                   : DONE;
     }
     catch (const std::exception &e) {
         _log << "get_next_action_type";
