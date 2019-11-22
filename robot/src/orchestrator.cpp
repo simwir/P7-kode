@@ -26,14 +26,15 @@
 #include "wbt-translator/distance_matrix.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
-#define PORT_TO_BROADCASTER "5435"
+#define PORT_TO_COM_MODULE "5435"
 #define PORT_TO_PDS "4444"
 #define PORT_TO_WALL_CLOCK "5555"
 
-robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::string &broadcast_host,
+robot::Orchestrator::Orchestrator(const std::string &robot_host, const std::string &com_module_host,
                                   int robot_id, std::istream &world_file,
                                   const std::string &clock_host)
-    : id(robot_id), broadcast_client(broadcast_host, PORT_TO_BROADCASTER), webots_parser(world_file)
+    : id(robot_id), communication_client(com_module_host, PORT_TO_COM_MODULE),
+      webots_parser(world_file)
 {
     std::string recieved_string;
 
@@ -162,9 +163,9 @@ void robot::Orchestrator::dump_waypoint_info(const AST &ast)
     static_config.set("waypoints", waypoint_list);
 }
 
-void robot::Orchestrator::request_broadcast_info()
+void robot::Orchestrator::request_robot_info()
 {
-    broadcast_client.send("get_robot_info");
+    communication_client.send("get_robot_info");
 }
 
 void robot::Orchestrator::request_controller_info()
@@ -178,12 +179,12 @@ void robot::Orchestrator::send_robot_info()
     current_state.waypoint_plan = waypoint_subscriber->get();
     current_state.location = controller_state.position;
     last_update_time = current_time;
-    broadcast_client.send("put_robot_info," + current_state.to_json().toStyledString());
+    communication_client.send("put_robot_info," + current_state.to_json().toStyledString());
 }
 
-std::string robot::Orchestrator::receive_broadcast_info()
+std::string robot::Orchestrator::receive_robot_info()
 {
-    return broadcast_client.receive_blocking();
+    return communication_client.receive_blocking();
 }
 
 void robot::Orchestrator::get_new_order()
@@ -212,9 +213,9 @@ std::string robot::Orchestrator::receive_controller_info()
 void robot::Orchestrator::get_dynamic_state()
 {
     std::cerr << "getting dynamic state\n";
-    request_broadcast_info();
+    request_robot_info();
     request_controller_info();
-    auto broadcast_info = receive_broadcast_info();
+    auto broadcast_info = receive_robot_info();
     auto _controller_state = receive_controller_info();
     robot_info = robot::InfoMap::from_json(broadcast_info);
     controller_state = robot::ControllerState::parse(_controller_state);
@@ -252,7 +253,8 @@ void robot::Orchestrator::main_loop()
     srand(std::time(NULL));
     // Bootstrap route
     get_dynamic_state();
-    // set next station to our closest during the bootstrapping (before any actual schedule exists).
+    // set next station to our closest station during the bootstrapping (before any actual schedule
+    // exists).
     get_new_order();
     dynamic_config.set("stations_to_visit", order);
     dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
@@ -317,7 +319,7 @@ void robot::Orchestrator::main_loop()
         }
 
         // if at waypoint
-        //    then tell robot of next waypoint;
+        //    then tell robot about next waypoint;
         //         abort waypoint scheduling; start new one
         if (controller_state.is_stopped && current_time > hold_until) {
             got_fresh_info = true;
@@ -392,4 +394,12 @@ int robot::Orchestrator::get_closest_waypoint(std::function<bool(Waypoint)> pred
         }
     }
     return best_wp;
+}
+
+void robot::Orchestrator::set_station_visited(int station)
+{
+    if (auto it = std::find(order.begin(), order.end(), station); it != order.end()) {
+        order.erase(it);
+    }
+    visited_waypoints.push_back(station);
 }

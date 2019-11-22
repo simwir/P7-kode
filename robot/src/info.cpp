@@ -66,9 +66,6 @@ Json::Value robot::ControllerState::to_json() const
     return val;
 }
 
-} // namespace robot
-
-namespace robot {
 Json::Value Info::to_json() const
 {
     Json::Value json;
