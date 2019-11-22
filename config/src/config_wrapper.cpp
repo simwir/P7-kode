@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
-#include <iterator>
 #include <limits>
 
 #define CONFIG_GETTER(type, json_type, from, key, default)                                         \
@@ -165,9 +164,6 @@ int32_t convert_to_waypoint_id(int32_t station_id)
     try {
         static auto tmp = combined_stations();
         std::stringstream result;
-        std::copy(tmp.begin(), tmp.end(), std::ostream_iterator<int>(result, " "));
-        _log << result.str();
-        _log << "to: " + std::to_string(tmp.at(station_id - 1));
         return tmp.at(station_id - 1); // Because stations are 1-indexed
     }
     catch (const std::exception &e) {
@@ -181,7 +177,7 @@ static int next_station_index()
 {
     int station = dynamic_config.get<int>("next_station");
     std::vector<int> stations = combined_stations();
-    std::vector<int>::iterator it = std::find(stations.begin(), stations.end(), station);
+    auto it = std::find(stations.begin(), stations.end(), station);
 
     if (it != stations.end()) {
         return std::distance(stations.begin(), it) + 1; // 0-indexed -> 1-indexed
@@ -220,6 +216,7 @@ int32_t destination()
     }
 }
 
+// Convert from vector<int> (waypoint ids) to vector<bool> that encodes if the station at index i has been visited
 static std::vector<bool> convert_visited_stations()
 {
     auto visited_stations = dynamic_config.get<std::vector<int>>("visited_stations");
@@ -266,6 +263,7 @@ int32_t get_station_dist(int32_t from, int32_t to)
     }
 }
 
+// Convert from waypoint ids to station ids
 static std::vector<std::vector<int>> convert_robot_next_station()
 {
     auto station_plans =
@@ -314,6 +312,7 @@ int32_t next_robot_station(int32_t robot, int32_t step)
     }
 }
 
+// Get a list of etas from each robot and add eta for the current robot in front
 static std::vector<double> convert_eta()
 {
     auto tmp = dynamic_config.get<std::vector<double>>("robot_info_map", "eta");
@@ -353,6 +352,7 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
     }
 }
 
+// Convert vector<int> (waypoint ids) to vector<bool> that encodes if the waypoint at index i has been visited
 static std::vector<bool> convert_visited_waypoints()
 {
     auto visited_waypoints = dynamic_config.get<std::vector<int>>("visited_waypoints");
@@ -403,7 +403,8 @@ void station_list(int32_t number_of_stations, int32_t *arr)
     }
 }
 
-int32_t convert_to_action(std::pair<std::string, int> pair)
+// Action -> ActionType where an int is used to encode ActionType.
+static int32_t convert_to_action_type(std::pair<std::string, int> pair)
 {
     if (pair.first.compare("Waypoint") == 0) {
         return WAYPOINT;
@@ -432,7 +433,7 @@ int32_t get_next_action_type(int32_t robot, int32_t step)
         auto robot_schedule = tmp.at(robot - 2);
 
         return static_cast<int>(robot_schedule.size()) > step
-                   ? convert_to_action(robot_schedule.at(step))
+                   ? convert_to_action_type(robot_schedule.at(step))
                    : DONE;
     }
     catch (const std::exception &e) {
