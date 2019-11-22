@@ -234,14 +234,20 @@ int32_t destination()
 // Convert from vector<int> (waypoint ids) to vector<bool> that encodes if the station at index i has been visited
 static std::vector<bool> convert_visited_stations()
 {
-    auto visited_stations = dynamic_config.get<std::vector<int>>("visited_stations");
+    auto to_visit = dynamic_config.get<std::vector<int>>("stations_to_visit");
     auto stations = combined_stations();
+    std::vector<int> endstations = static_config.get<std::vector<int>>("end_stations");
 
     std::vector<bool> visited;
 
     for (const auto &station : stations) {
-        visited.push_back(std::find(visited_stations.begin(), visited_stations.end(), station) !=
-                          visited_stations.end());
+        if (std::find(endstations.begin(), endstations.end(), station) != endstations.end()) {
+          visited.push_back(false);
+        }
+        else {
+          visited.push_back(std::find(to_visit.begin(), to_visit.end(), station) == to_visit.end());
+        }
+
     }
 
     return visited;
