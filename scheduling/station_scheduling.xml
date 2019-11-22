@@ -266,7 +266,7 @@ visited[cur_loc] = true</label>
 	<template>
 		<name>Station</name>
 		<parameter>int[1, NUM_STATIONS] station_id</parameter>
-		<declaration>const int MAX_QUEUE = 10;
+		<declaration>const int MAX_QUEUE = MAX_ROBOTS;
 
 clock proc;
 

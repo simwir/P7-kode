@@ -377,18 +377,13 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
 static std::vector<bool> convert_visited_waypoints()
 {
     auto visited_waypoints = dynamic_config.get<std::vector<int>>("visited_waypoints");
-    auto endstations = static_config.get<std::vector<int>>("end_stations");
-    auto stations = static_config.get<std::vector<int>>("stations");
-    auto vias = static_config.get<std::vector<int>>("vias");
-
-    endstations.insert(endstations.end(), stations.begin(), stations.end());
-    endstations.insert(endstations.end(), vias.begin(), vias.end());
+    auto num_waypoints = number_of_waypoints();
 
     std::vector<bool> visited;
 
-    for (const auto &waypoint : endstations) {
-        visited.push_back(std::find(visited_waypoints.begin(), visited_waypoints.end(), waypoint) !=
-                          visited_waypoints.end());
+    for (int i = 0; i < num_waypoints; i++) {
+        visited.push_back(
+          std::find(visited_waypoints.begin(), visited_waypoints.end(), i) != visited_waypoints.end());
     }
 
     return visited;
