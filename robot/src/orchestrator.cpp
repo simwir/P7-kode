@@ -236,6 +236,7 @@ void robot::Orchestrator::main_loop()
     dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
                            return wp.waypointType == WaypointType::eStation;
                        }));
+    dynamic_config.set(STATION_ETA, 0);
     write_dynamic_config();
     std::cerr << "scheduling station\n";
     station_scheduler.start();
@@ -290,7 +291,7 @@ void robot::Orchestrator::main_loop()
             double time_delta = current_time - eta_start_time;
             double current_eta = eta_subscriber->get() - time_delta;
             current_state.eta = current_eta;
-            dynamic_config.set("station_eta", current_eta);
+            dynamic_config.set(STATION_ETA, current_eta);
         }
 
         // if at waypoint

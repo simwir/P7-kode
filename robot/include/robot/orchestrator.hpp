@@ -40,6 +40,8 @@ const std::filesystem::path static_conf = "static_config.json";
 #define NEXT_STATION "next_station"
 #define ROBOT_INFO_MAP "robot_info_map"
 #define SELF_STATE "self_state"
+#define STATION_ETA "station_eta"
+#define VISITED_STATIONS "visited_stations"
 
 #define STATIONS "stations"
 #define END_STATIONS "end_stations"

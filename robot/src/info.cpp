@@ -79,7 +79,7 @@ Json::Value Info::to_json() const
     json["location"]["y"] = location.y;
     json["station_plan"] = Json::Value{Json::arrayValue};
 
-    for (const int &station : station_plan) {
+    for (int station : station_plan) {
         json["station_plan"].append(Json::Value{station});
     }
 
@@ -114,7 +114,7 @@ std::vector<int> get_field_as<std::vector<int>>(const Json::Value &json, const s
     }
 
     for (auto itr = json[field].begin(); itr != json[field].end(); itr++) {
-        vector.push_back(itr.key().asInt());
+        vector.push_back(itr->asInt());
     }
     return vector;
 }
