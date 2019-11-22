@@ -30,6 +30,11 @@ robot::NetworkInfo network_info;
 
 bool time_chosen = false;
 
+std::filesystem::path station_query_template =
+    std::filesystem::path("station_scheduling.q.template");
+std::filesystem::path waypoint_query_template =
+    std::filesystem::path("waypoint_scheduling.q.template");
+
 void print_help(const char *const execute_location)
 {
     std::cerr
@@ -41,6 +46,8 @@ void print_help(const char *const execute_location)
         << "-p --port-service <IP>[:<PORT>]  Set address of the port discovery service.\n"
         << "-o --order-service <IP>[:<PORT>] Set address of the order service.\n"
         << "-r --robot <IP>                  Set the host of the robot.\n"
+        << "-q --station-query-file PATH     Path to the station query file template.\n"
+        << "-w --waypoint-query-file PATH    Path to the waypoint query file template.\n"
         << "-h --help                        Print this help message" << std::endl;
 }
 
@@ -57,14 +64,16 @@ std::pair<std::string, std::optional<std::string>> parse_address(std::string add
 
 int main(int argc, char **argv)
 {
-    const char *const shortOpts = "t:sc:p:o:hr";
+    const char *const shortOpts = "t:sc:p:o:hrq";
     const option longOpts[] = {{"time-service", required_argument, nullptr, 't'},
                                {"system-time", no_argument, nullptr, 's'},
                                {"com-module", required_argument, nullptr, 'c'},
                                {"port-service", required_argument, nullptr, 'p'},
                                {"order-service", required_argument, nullptr, 'o'},
                                {"help", no_argument, nullptr, 'h'},
-                               {"robot", required_argument, nullptr, 'r'}};
+                               {"robot", required_argument, nullptr, 'r'},
+                               {"station-query-file", required_argument, nullptr, 'q'},
+                               {"waypoint-query-file", required_argument, nullptr, 'w'}};
 
     std::pair<std::string, std::optional<std::string>> address;
     int opt;
@@ -114,6 +123,12 @@ int main(int argc, char **argv)
             break;
         case 'r':
             network_info.robot_addr = std::string{optarg};
+            break;
+        case 'q':
+            station_query_template = std::filesystem::path{optarg};
+            break;
+        case 'w':
+            waypoint_query_template = std::filesystem::path{optarg};
             break;
         case 'h':
             print_help(argv[0]);
