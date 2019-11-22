@@ -42,6 +42,7 @@ const std::filesystem::path static_conf = "static_config.json";
 #define SELF_STATE "self_state"
 #define STATION_ETA "station_eta"
 #define VISITED_STATIONS "visited_stations"
+#define VISITED_WAYPOINTS "visited_waypoints"
 
 #define STATIONS "stations"
 #define END_STATIONS "end_stations"
@@ -110,6 +111,7 @@ class Orchestrator {
 
     void write_static_config();
     void write_dynamic_config();
+    void create_query_file();
 
     void set_robot_destination(int);
 

@@ -24,6 +24,7 @@
 #include "tcp/client.hpp"
 #include "wbt-translator/apsp.hpp"
 #include "wbt-translator/distance_matrix.hpp"
+#include "wbt-translator/query_template_writer.hpp"
 #include "wbt-translator/webots_parser.hpp"
 
 robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, NetworkInfo network_info)
@@ -55,6 +56,8 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Networ
     robot_client = std::make_unique<tcp::Client>(network_info.robot_addr, port_to_controller);
     clock_client =
         std::make_unique<robot::WebotsClock>(network_info.time_addr, network_info.time_port);
+    order_service_client =
+        std::make_unique<tcp::Client>(network_info.order_addr, network_info.order_port);
     current_state.id = id;
 }
 
@@ -122,14 +125,18 @@ void robot::Orchestrator::add_station_matrix(const AST &ast)
     // Get distance matrix for stations
     std::map<int, std::map<int, double>> apsp_distances = all_pairs_shortest_path(ast).dist;
 
+    auto is_station = [](Waypoint wp) {
+        return wp.waypointType == WaypointType::eStation ||
+               wp.waypointType == WaypointType::eEndPoint;
+    };
+
     // Convert shortest paths between stations
     Json::Value jsonarray_apsp_distances{Json::arrayValue};
     for (size_t i = 0; i < ast.num_waypoints(); i++) {
-        if (ast.nodes.at(i).waypointType == WaypointType::eStation ||
-            ast.nodes.at(i).waypointType == WaypointType::eEndPoint) {
+        if (is_station(ast.nodes.at(i))) {
             Json::Value jsonarray_apsp_row{Json::arrayValue};
             for (size_t j = 0; j < ast.num_waypoints(); j++) {
-                if (ast.nodes.at(j).waypointType == WaypointType::eStation) {
+                if (is_station(ast.nodes.at(j))) {
                     jsonarray_apsp_row.append(apsp_distances.at(i).at(j));
                 }
             }
@@ -185,7 +192,8 @@ void robot::Orchestrator::get_new_order()
 {
     // order_service_client->send("get_order");
     // TODO temp until better API on order generator
-    order_service_client->send(std::to_string(rand() % 8));
+    auto size = std::to_string(rand() % 8);
+    order_service_client->send(size);
     auto response = order_service_client->receive_blocking();
     std::stringstream ss{response};
     Json::Value val;
@@ -266,6 +274,9 @@ void robot::Orchestrator::main_loop()
 
     dynamic_config.set(DESTINATION, station_subscriber->read().at(0));
     dynamic_config.set(NEXT_WAYPOINT, get_closest_waypoint([](auto) { return true; }));
+    dynamic_config.set(VISITED_WAYPOINTS, std::vector<int>{});
+
+    create_query_file();
     write_dynamic_config();
     std::cerr << "scheduling waypoint\n";
     waypoint_scheduler.start();
@@ -396,4 +407,19 @@ void robot::Orchestrator::set_station_visited(int station)
         order.erase(it);
     }
     visited_waypoints.push_back(station);
+}
+
+const std::filesystem::path wp_template_path =
+    "../../wbt-translator/templates/waypoint_scheduling.q.template";
+const std::filesystem::path eta_template_path =
+    "../../wbt-translator/templates/waypoint_scheduling.q.template";
+const std::filesystem::path wp_output_path = "waypoint_scheduling.q";
+const std::filesystem::path eta_output_path = "get_eta.q";
+
+void robot::Orchestrator::create_query_file()
+{
+    instantiate_query_template(robot_info.size(), waypoints.size(), wp_template_path,
+                               wp_output_path);
+    instantiate_query_template(robot_info.size(), waypoints.size(), eta_template_path,
+                               eta_output_path);
 }

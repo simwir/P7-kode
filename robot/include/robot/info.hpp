@@ -85,6 +85,7 @@ class InfoMap {
     const Info &operator[](int index) const;
     static InfoMap from_json(const std::string &json);
     static InfoMap from_json(const Json::Value &json);
+    size_t size() const noexcept { return robot_info.size(); }
 
   private:
     std::map<int, Info> robot_info;
