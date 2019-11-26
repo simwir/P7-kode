@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     std::cout << "main: \tStarting station scheduler\n";
     stationScheduler.start();
 
-    // Stations
+    // Waypoints
     scheduling::WaypointScheduler waypointScheduler;
     auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
