@@ -12,12 +12,12 @@ addons:
     packages:
       - clang-8
       - clang-format-8
-      - libjsoncpp-dev
-      - g++-8
+      - g++-8-multilib
+      - g++-multilib
 
 before_install:
     - export CC=clang-8
-    - export CXX=clang++-8    
+    - export CXX=clang++-8
 
 jobs:
   include:

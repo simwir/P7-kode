@@ -26,7 +26,7 @@
 template <>
 std::vector<double> config::convert_from_json<std::vector<double>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
@@ -42,7 +42,7 @@ std::vector<double> config::convert_from_json<std::vector<double>>(const Json::V
 template <>
 std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
@@ -59,7 +59,7 @@ template <>
 std::vector<std::vector<int>>
 config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
@@ -75,7 +75,7 @@ config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 template <>
 std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value &arr)
 {
-    if (arr.type() != Json::ValueType::arrayValue) {
+    if (!arr.isArray()) {
         throw config::InvalidValueException{};
     }
 
@@ -184,14 +184,15 @@ config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
         throw config::InvalidKeyException{key};
     }
 
-    if (json[key].type() != Json::ValueType::objectValue) {
+    if (!json[key].isObject()) {
         throw config::InvalidValueException{};
     }
 
     std::map<int, std::vector<int>> result;
+    Json::Value obj_map = json[key];
 
-    for (auto itr = json[key].begin(); itr != json[key].end(); itr++) {
-        std::vector<int> value = config::convert_from_json<std::vector<int>>(json[key][itr.name()]);
+    for (Json::Value::const_iterator itr = obj_map.begin(); itr != obj_map.end(); itr++) {
+        std::vector<int> value = config::convert_from_json<std::vector<int>>(*itr);
         result.insert({itr.key().asInt(), value});
     }
 

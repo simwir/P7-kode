@@ -17,11 +17,14 @@
 # OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 cmake_minimum_required(VERSION 3.10)
+
+set(CMAKE_CXX_COMPILER clang++)
+
 project(p7)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall")
+set(CMAKE_CXX_STANDARD_REQUIRED)
+set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall -m32")
 
 include(ExternalProject)
 
@@ -31,16 +34,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(EXT_LIBRARY_INSTALL_PATH ${PROJECT_SOURCE_DIR}/build)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
-
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP jsoncpp)
-
-#link_directories(${JSONCPP_LIBRARY_DIRS})
-link_directories(lib)
+# set(JSONCPP_ARCHIVE ${PROJECT_SOURCE_DIR}/lib/jsoncpp/libjsoncpp.a)
 
 include_directories(
-    ${JSONCPP_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/lib/jsoncpp/include
     ${PROJECT_SOURCE_DIR}/tcp/include
     ${PROJECT_SOURCE_DIR}/robot/include
     ${PROJECT_SOURCE_DIR}/wbt-translator/include
@@ -51,6 +48,7 @@ include_directories(
 )
 
 # Libraries
+add_subdirectory(lib)
 add_subdirectory(tcp)
 add_subdirectory(config)
 add_subdirectory(scheduling)

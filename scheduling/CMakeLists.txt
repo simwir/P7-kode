@@ -18,9 +18,6 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP jsoncpp)
-
 # set {SOURCES,PROJECT_LINK_LIBS} to expanded wildcards
 file(GLOB SOURCES "src/*.cpp")
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
@@ -31,7 +28,7 @@ add_library(scheduling ${SOURCES})
 target_link_libraries(scheduling
     pthread
     stdc++fs
-    ${JSONCPP_LIBRARIES}
+    jsoncpp_lib
 )
 #install(FILES DESTINATION bin)
 
@@ -44,8 +41,5 @@ configure_file(get_eta.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/get_eta.q COPYONLY)
 add_executable(test_scheduler src/main.cpp)
 target_link_libraries(test_scheduler
     scheduling
-    pthread
-    stdc++fs
-    ${JSONCPP_LIBRARIES}
 )
 install(TARGETS test_scheduler DESTINATION bin)
