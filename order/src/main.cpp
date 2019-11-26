@@ -20,21 +20,88 @@
 #include "order/generation_service.hpp"
 #include "order/order.hpp"
 #include "order/random_generator.hpp"
+#include "util/split.hpp"
+#include <getopt.h>
 #include <iostream>
 #include <vector>
 
 using namespace order;
 
-int main(int argc, char *argv[])
+void print_help()
+{
+    std::cout
+        << "--stations \"s1, s2, ..., sn\"  Sets the available stations\n"
+           "--random <seed>                 Uses a random order generator with an optional seed\n"
+           "--min <size>                    Minimum order size (used with random generator)\n"
+           "--max <size>                    Maxmum order size (used with random generator)\n";
+    exit(1);
+}
+
+std::vector<int> parse_stations_argument(const std::string &argument)
 {
     std::vector<int> stations;
 
-    for (int i = 1; i < argc; ++i) {
-        stations.push_back(atoi(argv[i]));
+    for (std::string station : split(argument, ' ')) {
+        stations.push_back(stoi(station));
     }
 
-    RandomGenerator generator = RandomGenerator{stations};
-    GenerationService service = GenerationService{5555, generator};
+    return stations;
+}
+
+int main(int argc, char *argv[])
+{
+    const option options[] = {{"stations", required_argument, 0, 's'},
+                              {"random", optional_argument, 0, 'r'},
+                              {"min", required_argument, 0, 'n'},
+                              {"max", required_argument, 0, 'm'}};
+
+    const std::string short_options{"s:n:m:r"};
+
+    int argument_index = 0;
+    int min_size;
+    int max_size;
+    unsigned seed;
+    std::vector<int> stations;
+    std::string generator_type;
+
+    while (true) {
+        int argument = getopt_long(argc, argv, short_options.c_str(), options, &argument_index);
+
+        if (argument == -1) {
+            break;
+        }
+
+        switch (argument) {
+        case 'r':
+            generator_type = "random";
+            seed = atoi(optarg);
+            break;
+        case 's':
+            stations = parse_stations_argument(optarg);
+            break;
+        case 'n':
+            min_size = atoi(optarg);
+            break;
+        case 'm':
+            max_size = atoi(optarg);
+            break;
+        default:
+            print_help();
+            break;
+        }
+    }
+
+    Generator *generator;
+
+    if (generator_type == "random") {
+        generator = new RandomGenerator(stations, min_size, max_size, seed);
+    }
+    else {
+        std::cerr << "Generator type not set";
+        exit(1);
+    }
+
+    GenerationService service = GenerationService{5555, *generator};
     service.start();
 
     return 0;

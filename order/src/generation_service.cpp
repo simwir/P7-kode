@@ -28,9 +28,8 @@ GenerationService::GenerationService(int port, Generator &generator)
 
 void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connection)
 {
-    std::string message = connection->receive_blocking();
-    Order order = generator.generate_order(std::stoi(message));
-    connection->send(order.to_json().toStyledString());
+    connection->receive_blocking();
+    connection->send(generator.generate_order().to_json().toStyledString());
 }
 
 void GenerationService::start()

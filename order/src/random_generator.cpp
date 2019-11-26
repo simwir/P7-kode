@@ -21,19 +21,25 @@
 #include "util/pick_random.hpp"
 
 namespace order {
-RandomGenerator::RandomGenerator(std::vector<int> stations) : stations(stations){};
-
-Order RandomGenerator::generate_order(int size) const
+RandomGenerator::RandomGenerator(std::vector<int> stations, int min_size, int max_size,
+                                 unsigned seed)
+    : stations(stations), min_size(min_size), max_size(max_size)
 {
-    return Order{pick_n_random(stations, size)};
+    srand(seed);
+};
+
+Order RandomGenerator::generate_order() const
+{
+    int n = min_size + (rand() % (max_size - min_size + 1));
+    return Order{pick_n_random(stations, n)};
 }
 
-std::vector<Order> RandomGenerator::generate_orders(std::vector<int> sizes) const
+std::vector<Order> RandomGenerator::generate_n_orders(int n) const
 {
     std::vector<Order> orders;
 
-    for (int size : sizes) {
-        orders.push_back(generate_order(size));
+    for (int i = 0; i < n; i++) {
+        orders.push_back(generate_order());
     }
 
     return orders;
