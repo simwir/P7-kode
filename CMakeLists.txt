@@ -47,6 +47,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/scheduling/include
     ${PROJECT_SOURCE_DIR}/util/include
     ${PROJECT_SOURCE_DIR}/config/include
+    ${PROJECT_SOURCE_DIR}/order/include
 )
 
 # Libraries
@@ -54,6 +55,7 @@ add_subdirectory(tcp)
 add_subdirectory(config)
 add_subdirectory(scheduling)
 add_subdirectory(robot)
+add_subdirectory(order)
 
 # Executables
 add_subdirectory(tests)

@@ -37,7 +37,7 @@ void GenerationService::start()
     while (true) {
         try {
             std::shared_ptr<tcp::Connection> connection = server.accept();
-            std::thread thread{&GenerationService::parse_message, this};
+            std::thread thread{&GenerationService::parse_message, this, connection};
             thread.detach();
         }
         catch (tcp::AcceptException &error) {

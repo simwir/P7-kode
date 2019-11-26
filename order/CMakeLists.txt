@@ -20,10 +20,14 @@ include_directories(${PROJECT_SOURCE_DIR}/order/include)
 
 file (GLOB SOURCES "src/*.cpp")
 
-add_executable(order ${SOURCES})
-target_link_libraries(order
+add_library(order ${SOURCES})
+
+add_executable(order_generation_service ${SOURCES})
+target_link_libraries(order_generation_service
   jsoncpp
   pthread
   tcp
 )
-install(TARGETS order DESTINATION bin)
+target_link_libraries(order
+  jsoncpp
+)
