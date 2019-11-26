@@ -17,6 +17,7 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "config/config.hpp"
+#include "robot/options.hpp"
 #include "robot/orchestrator.hpp"
 
 #include <filesystem>
@@ -26,7 +27,9 @@
 #include <optional>
 #include <utility>
 
-robot::NetworkInfo network_info;
+namespace robot {
+
+Options options;
 
 bool time_chosen = false;
 
@@ -41,6 +44,9 @@ void print_help(const char *const execute_location)
         << "-p --port-service <IP>[:<PORT>]  Set address of the port discovery service.\n"
         << "-o --order-service <IP>[:<PORT>] Set address of the order service.\n"
         << "-r --robot <IP>                  Set the host of the robot.\n"
+        << "-q --station-query-file PATH     Path to the station query file template.\n"
+        << "-w --waypoint-query-file PATH    Path to the waypoint query file template.\n"
+        << "-e --eta-query-file PATH         Path to the eta query file template.\n"
         << "-h --help                        Print this help message" << std::endl;
 }
 
@@ -57,15 +63,6 @@ std::pair<std::string, std::optional<std::string>> parse_address(std::string add
 
 int main(int argc, char **argv)
 {
-    const char *const shortOpts = "t:sc:p:o:hr";
-    const option longOpts[] = {{"time-service", required_argument, nullptr, 't'},
-                               {"system-time", no_argument, nullptr, 's'},
-                               {"com-module", required_argument, nullptr, 'c'},
-                               {"port-service", required_argument, nullptr, 'p'},
-                               {"order-service", required_argument, nullptr, 'o'},
-                               {"help", no_argument, nullptr, 'h'},
-                               {"robot", required_argument, nullptr, 'r'}};
-
     std::pair<std::string, std::optional<std::string>> address;
     int opt;
     while ((opt = getopt_long(argc, argv, shortOpts, longOpts, nullptr)) != -1) {
@@ -77,9 +74,9 @@ int main(int argc, char **argv)
             }
             time_chosen = true;
             address = parse_address(std::string{optarg});
-            network_info.time_addr = address.first;
+            options.time_addr = address.first;
             if (address.second) {
-                network_info.time_port = address.second.value();
+                options.time_port = address.second.value();
             }
             break;
         case 's':
@@ -93,28 +90,36 @@ int main(int argc, char **argv)
             break;
         case 'c':
             address = parse_address(std::string{optarg});
-            network_info.com_addr = address.first;
+            options.com_addr = address.first;
             if (address.second) {
-                network_info.com_port = address.second.value();
+                options.com_port = address.second.value();
             }
             break;
         case 'p':
             address = parse_address(std::string{optarg});
-            network_info.pds_addr = address.first;
+            options.pds_addr = address.first;
             if (address.second) {
-                network_info.pds_port = address.second.value();
+                options.pds_port = address.second.value();
             }
             break;
         case 'o':
             address = parse_address(std::string{optarg});
-            network_info.order_addr = address.first;
+            options.order_addr = address.first;
             if (address.second) {
-                network_info.order_port = address.second.value();
+                options.order_port = address.second.value();
             }
             break;
         case 'r':
-            network_info.robot_addr = std::string{optarg};
+            options.robot_addr = std::string{optarg};
             break;
+        case 'q':
+            options.station_query_template = std::filesystem::path{optarg};
+            break;
+        case 'w':
+            options.waypoint_query_template = std::filesystem::path{optarg};
+            break;
+        case 'e':
+            options.eta_query_template = std::filesystem::path{optarg};
         case 'h':
             print_help(argv[0]);
             exit(0);
@@ -140,7 +145,8 @@ int main(int argc, char **argv)
     std::cerr << "constructing orchestrator... ";
     std::ifstream world_file{world_path};
 
-    robot::Orchestrator orchestrator{1, world_file, network_info};
+    robot::Orchestrator orchestrator{1, world_file, options};
     std::cerr << "starting orchestrator\n";
     orchestrator.main_loop();
 }
+} // namespace robot
