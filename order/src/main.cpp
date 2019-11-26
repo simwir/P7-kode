@@ -18,7 +18,6 @@
  */
 
 #include "order/generation_service.hpp"
-#include "order/order.hpp"
 #include "order/random_generator.hpp"
 #include "util/split.hpp"
 #include <getopt.h>
@@ -42,7 +41,12 @@ std::vector<int> parse_stations_argument(const std::string &argument)
     std::vector<int> stations;
 
     for (std::string station : split(argument, ' ')) {
-        stations.push_back(stoi(station));
+        try {
+            stations.push_back(stoi(station));
+        }
+        catch (std::invalid_argument &) {
+            std::cerr << "Station could not be converted to integer: " << station << std::endl;
+        }
     }
 
     return stations;
