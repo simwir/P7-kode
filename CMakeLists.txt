@@ -56,8 +56,8 @@ add_subdirectory(config)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 
-add_subdirectory(tcp)
 add_subdirectory(scheduling)
+add_subdirectory(tcp)
 add_subdirectory(robot)
 
 # Executables

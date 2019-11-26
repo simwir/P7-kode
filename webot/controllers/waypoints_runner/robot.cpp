@@ -72,6 +72,7 @@ int getRobotId(webots::Supervisor *robot)
 
 RobotController::RobotController(webots::Supervisor *robot)
     : time_step((int)robot->getBasicTimeStep()), robot(robot),
+      server(std::to_string(getRobotId(robot))),
       dfollowed(std::numeric_limits<double>::max())
 {
     left_motor = robot->getMotor("left wheel motor");
@@ -131,27 +132,29 @@ void RobotController::update_sensor_values()
 void RobotController::communicate()
 {
     using namespace webots_server;
-    for (Message message : server.get_messages()) {
-        switch (message.type) {
-        case MessageType::get_state: {
-            auto response = std::to_string(position.x) + "," + std::to_string(position.y) + "," +
-                            (is_stopped ? "stopped" : "running");
-            server.send_message({response, MessageType::get_state});
-            break;
+    auto msg = server.get_message();
+    if (!msg)
+        return;
+    auto message = *msg;
+    switch (message.type) {
+    case MessageType::get_state: {
+        auto response = std::to_string(position.x) + "," + std::to_string(position.y) + "," +
+                        (is_stopped ? "holding" : "running");
+        server.send_message({response, MessageType::get_state});
+        break;
+    }
+    case MessageType::set_destination: {
+        size_t split_pos = message.payload.find(",");
+        if (split_pos == std::string::npos) {
+            server.send_message({message.payload, MessageType::not_understood});
+            return;
         }
-        case MessageType::set_destination: {
-            size_t split_pos = message.payload.find(",");
-            if (split_pos == std::string::npos) {
-                server.send_message({message.payload, MessageType::not_understood});
-                continue;
-            }
-            destination = {std::stod(message.payload.substr(0, split_pos)),
-                           std::stod(message.payload.substr(split_pos + 1))};
-            break;
-        }
-        default:
-            break;
-        }
+        goal = {std::stod(message.payload.substr(0, split_pos)),
+                       std::stod(message.payload.substr(split_pos + 1))};
+        break;
+    }
+    default:
+        break;
     }
 }
 

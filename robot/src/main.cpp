@@ -27,8 +27,7 @@
 #include <optional>
 #include <utility>
 
-namespace robot {
-
+using namespace robot;
 Options options;
 
 bool time_chosen = false;
@@ -149,4 +148,3 @@ int main(int argc, char **argv)
     std::cerr << "starting orchestrator\n";
     orchestrator.main_loop();
 }
-} // namespace robot

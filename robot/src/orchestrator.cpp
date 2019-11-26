@@ -28,7 +28,7 @@
 #include "wbt-translator/webots_parser.hpp"
 
 robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Options options)
-    : id(robot_id), options(options), broadcast_client(options.com_addr, options.com_port),
+    : id(robot_id), options(options), com_module(options.com_addr, options.com_port),
       webots_parser(world_file)
 {
     std::string recieved_string;
@@ -195,6 +195,7 @@ void robot::Orchestrator::get_new_order()
     auto size = std::to_string(rand() % 5 + 2);
     order_service_client->send(size);
     auto response = order_service_client->receive_blocking();
+    order_rec_time = clock_client->get_current_time();
     std::stringstream ss{response};
     Json::Value val;
     ss >> val;

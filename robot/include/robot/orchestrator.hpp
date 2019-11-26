@@ -147,6 +147,7 @@ class Orchestrator {
     void do_next_action();
     void set_station_visited(int station);
     std::vector<int> order;
+    int order_rec_time;
 
     // visited waypoints since last station we were at.
     std::vector<int> visited_waypoints;
