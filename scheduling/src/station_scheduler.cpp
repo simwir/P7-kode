@@ -42,6 +42,11 @@ void StationScheduler::start_worker()
         std::vector<int> schedule = convertResult(values);
 
         std::cerr << "StationScheduler: Emitting..." << std::endl;
+        std::cerr << "StationScheduler: Schedule is: ";
+        for (auto i : schedule) {
+            std::cerr << i << ' ';
+        }
+        std::cerr << std::endl;
         notify_subscribers(schedule);
     };
     std::cerr << "StationScheduler: Executing..." << std::endl;

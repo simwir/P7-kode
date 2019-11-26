@@ -74,6 +74,11 @@ void scheduling::WaypointScheduler::start_worker()
         std::vector<scheduling::Action> schedule = convertResult(values);
 
         std::cerr << "WaypointScheduler: Emitting..." << std::endl;
+        std::cerr << "WaypointScheduler: Schedule is ";
+        for (auto i : schedule) {
+            std::cerr << i << " ";
+        }
+        std::cerr << std::endl;
         notify_subscribers(schedule);
     });
 }
@@ -148,4 +153,9 @@ void scheduling::WaypointScheduler::notify_subscribers(
             sub->newSchedule(schedule);
         }
     }
+}
+
+std::ostream &scheduling::operator<<(std::ostream &os, const scheduling::Action &action)
+{
+    return os << (action.type == scheduling::ActionType::Hold ? "hold" : "wayp") << ' ' << action.value;
 }
