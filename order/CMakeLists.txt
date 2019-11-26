@@ -18,12 +18,13 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/order/include)
 
-file (GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp")
 
 add_library(order ${SOURCES})
 
 add_executable(order_generation_service ${SOURCES})
 target_link_libraries(order_generation_service
+  order
   jsoncpp
   pthread
   tcp
