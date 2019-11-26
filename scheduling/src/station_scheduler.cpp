@@ -61,8 +61,8 @@ std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExp
     // Convert queues to schedules
     std::vector<int> schedule;
 
-    dest.pop();
     TimeValuePair last_dest = dest.front();
+    dest.pop();
 
     while (!dest.empty()) {
         // Find next waypoint
