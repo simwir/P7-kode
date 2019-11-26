@@ -315,7 +315,7 @@ void set_global() {
 		</location>
 		<location id="id11" x="-399" y="-399">
 			<name x="-501" y="-442">BetweenWaypoints</name>
-			<label kind="invariant" x="-901" y="-408">x &lt;= get_waypoint_dist(cur_waypoint, dest_waypoint) * UNCERTAINTY</label>
+			<label kind="invariant" x="-918" y="-408">x &lt;= get_waypoint_dist(cur_waypoint, dest_waypoint) * UNCERTAINTY</label>
 		</location>
 		<location id="id12" x="-398" y="-246">
 			<name x="-467" y="-272">Choose</name>

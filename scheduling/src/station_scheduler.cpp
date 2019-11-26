@@ -56,17 +56,13 @@ void StationScheduler::start_worker()
 std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
 {
     // Convert into queues
-    std::queue<TimeValuePair> cur = parser.findFirstRunAsQueue(values, "Robot.initial_waypoint");
     std::queue<TimeValuePair> dest = parser.findFirstRunAsQueue(values, "Robot.converted_dest()");
 
     // Convert queues to schedules
     std::vector<int> schedule;
 
-    cur.pop();
-    schedule.push_back(cur.front().value);
-
-    TimeValuePair last_dest = dest.front();
     dest.pop();
+    TimeValuePair last_dest = dest.front();
 
     while (!dest.empty()) {
         // Find next waypoint
