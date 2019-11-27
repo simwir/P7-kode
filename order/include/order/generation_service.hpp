@@ -34,6 +34,7 @@ class GenerationService {
   public:
     GenerationService(int port, std::shared_ptr<Generator> generator);
     void start();
+    int get_port();
 };
 } // namespace order
 

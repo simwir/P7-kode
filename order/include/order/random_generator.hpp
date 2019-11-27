@@ -29,9 +29,19 @@ class RandomGenerator : public Generator {
     std::vector<int> stations;
     int min_size;
     int max_size;
+    int seed;
 
   public:
-    RandomGenerator(std::vector<int> stations, int min_size, int max_size, unsigned seed = time(0));
+    RandomGenerator(std::vector<int> stations)
+        : RandomGenerator(stations, time(0), 0, stations.size()){};
+    RandomGenerator(std::vector<int> stations, unsigned seed)
+        : RandomGenerator(stations, seed, 0, stations.size()){};
+    RandomGenerator(std::vector<int> stations, unsigned seed, unsigned min_size)
+        : RandomGenerator(stations, seed, min_size, stations.size()){};
+    RandomGenerator(std::vector<int> stations, unsigned seed, unsigned min_size, unsigned max_size);
+    int get_seed() const;
+    int get_min_size() const;
+    int get_max_size() const;
     Order generate_order() const;
     std::vector<Order> generate_n_orders(int n) const;
 };

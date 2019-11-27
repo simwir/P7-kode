@@ -26,10 +26,19 @@ namespace order {
 GenerationService::GenerationService(int port, std::shared_ptr<Generator> generator)
     : server(port), generator(generator){};
 
+int GenerationService::get_port()
+{
+    return server.get_port();
+}
+
 void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connection)
 {
-    connection->receive_blocking();
-    connection->send(generator->generate_order().to_json().toStyledString());
+    std::string message = connection->receive_blocking();
+
+    if (message == "get_order") {
+        Order order = generator->generate_order();
+        connection->send(order.to_json().toStyledString());
+    }
 }
 
 void GenerationService::start()

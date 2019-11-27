@@ -22,6 +22,7 @@
 #include "util/split.hpp"
 #include <getopt.h>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 using namespace order;
@@ -29,10 +30,11 @@ using namespace order;
 void print_help()
 {
     std::cout
-        << "--stations \"s1, s2, ..., sn\"  Sets the available stations\n"
-           "--random <seed>                 Uses a random order generator with an optional seed\n"
-           "--min <size>                    Minimum order size (used with random generator)\n"
-           "--max <size>                    Maxmum order size (used with random generator)\n";
+        << "--stations=\"s1 s2 ... sn\"       Sets the available stations\n"
+           "--random=<seed>                 Uses a random order generator with an optional seed\n"
+           "--min=<size>                    Minimum order size (used with random generator)\n"
+           "--max=<size>                    Maxmum order size (used with random generator)\n"
+           "--port=<port>                   Sets the port of the server\n";
     exit(1);
 }
 
@@ -54,14 +56,22 @@ std::vector<int> parse_stations_argument(const std::string &argument)
 
 int main(int argc, char *argv[])
 {
+    if (argc == 1) {
+        print_help();
+    }
+
     const option options[] = {{"stations", required_argument, 0, 's'},
                               {"random", optional_argument, 0, 'r'},
                               {"min", required_argument, 0, 'n'},
-                              {"max", required_argument, 0, 'm'}};
+                              {"max", required_argument, 0, 'm'},
+                              {"help", no_argument, 0, 'h'},
+                              {"port", required_argument, 0, 'p'},
+                              {0, 0, 0, 0}};
 
-    const std::string short_options{"s:n:m:r"};
+    const std::string short_options{"s:n:m:r:h"};
 
     int argument_index = 0;
+    int port = 0;
     int min_size;
     int max_size;
     unsigned seed;
@@ -78,7 +88,9 @@ int main(int argc, char *argv[])
         switch (argument) {
         case 'r':
             generator_type = "random";
-            seed = atoi(optarg);
+            if (optarg) {
+                seed = atoi(optarg);
+            }
             break;
         case 's':
             stations = parse_stations_argument(optarg);
@@ -89,6 +101,10 @@ int main(int argc, char *argv[])
         case 'm':
             max_size = atoi(optarg);
             break;
+        case 'p':
+            port = atoi(optarg);
+            break;
+        case 'h':
         default:
             print_help();
             break;
@@ -98,14 +114,37 @@ int main(int argc, char *argv[])
     std::shared_ptr<Generator> generator;
 
     if (generator_type == "random") {
-        generator = std::make_shared<RandomGenerator>(stations, min_size, max_size, seed);
+        if (!seed && !min_size && !max_size) {
+            generator = std::make_shared<RandomGenerator>(stations);
+        }
+        else if (!min_size && !max_size) {
+            generator = std::make_shared<RandomGenerator>(stations, seed);
+        }
+        else if (!max_size) {
+            generator = std::make_shared<RandomGenerator>(stations, seed, min_size);
+        }
+        else {
+            generator = std::make_shared<RandomGenerator>(stations, seed, min_size, max_size);
+        }
+
+        std::cout << "Using RandomGenerator with seed: "
+                  << std::static_pointer_cast<RandomGenerator>(generator)->get_seed()
+                  << ", min_size: "
+                  << std::static_pointer_cast<RandomGenerator>(generator)->get_min_size()
+                  << ", max_size: "
+                  << std::static_pointer_cast<RandomGenerator>(generator)->get_max_size()
+                  << std::endl;
     }
+    // TODO: Handle other generators.
     else {
-        std::cerr << "Generator type not set";
+        std::cerr << "Generator type not set" << std::endl;
         exit(1);
     }
 
     GenerationService service = GenerationService{5555, generator};
+
+    std::cout << "Starting on port " << service.get_port() << std::endl;
+
     service.start();
 
     return 0;
