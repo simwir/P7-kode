@@ -60,13 +60,10 @@ int main(int argc, char *argv[])
         print_help();
     }
 
-    const option options[] = {{"stations", required_argument, 0, 's'},
-                              {"random", optional_argument, 0, 'r'},
-                              {"min", required_argument, 0, 'n'},
-                              {"max", required_argument, 0, 'm'},
-                              {"help", no_argument, 0, 'h'},
-                              {"port", required_argument, 0, 'p'},
-                              {0, 0, 0, 0}};
+    const option options[] = {
+        {"stations", required_argument, 0, 's'}, {"random", optional_argument, 0, 'r'},
+        {"min", required_argument, 0, 'n'},      {"max", required_argument, 0, 'm'},
+        {"help", no_argument, 0, 'h'},           {"port", required_argument, 0, 'p'}};
 
     const std::string short_options{"s:n:m:r:h"};
 
