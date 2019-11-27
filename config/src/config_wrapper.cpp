@@ -270,13 +270,32 @@ void station_visited(int32_t number_of_stations, int8_t *arr)
     }
 }
 
+std::vector<int> station_id_to_dist_index_conversion() {
+  std::vector<int> stations = combined_stations();
+  std::vector<int> sort_stations = stations;
+  std::sort(sort_stations.begin(), sort_stations.end());
+
+  for (size_t i = 0; i < stations.size(); i++) {
+    auto it = std::find(sort_stations.begin(), sort_stations.end(), stations[i]);
+
+    if (it == sort_stations.end()) {
+      throw config::InvalidValueException{"station_id_to_dist_index_conversion"};
+    }
+
+    stations[i] = std::distance(sort_stations.begin(), it);
+  }
+
+  return stations;
+}
+
 int32_t get_station_dist(int32_t from, int32_t to)
 {
     load();
     try {
         static auto dist =
             static_config.get<std::vector<std::vector<int>>>("station_distance_matrix");
-        return dist.at(from - 1).at(to - 1); // We subtract 1 because stations are 1 indexed.
+        static auto conversion = station_id_to_dist_index_conversion();
+        return dist.at(conversion[from - 1]).at(conversion[to - 1]); // We subtract 1 because stations are 1 indexed.
     }
     catch (const std::exception &e) {
         _log << "get_station_dist";
