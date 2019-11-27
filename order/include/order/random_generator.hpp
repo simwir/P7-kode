@@ -26,10 +26,10 @@
 
 namespace order {
 class RandomGenerator : public Generator {
-    std::vector<int> stations;
-    int min_size;
-    int max_size;
-    int seed;
+    const std::vector<int> stations;
+    const int min_size;
+    const int max_size;
+    const int seed;
 
   public:
     RandomGenerator(std::vector<int> stations) : RandomGenerator(stations, time(0)){};
