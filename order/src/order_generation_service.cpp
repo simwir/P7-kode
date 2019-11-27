@@ -95,17 +95,17 @@ int main(int argc, char *argv[])
         }
     }
 
-    Generator *generator;
+    std::shared_ptr<Generator> generator;
 
     if (generator_type == "random") {
-        generator = new RandomGenerator(stations, min_size, max_size, seed);
+        generator = std::make_shared<RandomGenerator>(stations, min_size, max_size, seed);
     }
     else {
         std::cerr << "Generator type not set";
         exit(1);
     }
 
-    GenerationService service = GenerationService{5555, *generator};
+    GenerationService service = GenerationService{5555, generator};
     service.start();
 
     return 0;

@@ -19,16 +19,16 @@
 include_directories(${PROJECT_SOURCE_DIR}/order/include)
 
 file(GLOB SOURCES "src/*.cpp")
+list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/order_generation_service.cpp)
 
 add_library(order ${SOURCES})
-
-add_executable(order_generation_service ${SOURCES})
-target_link_libraries(order_generation_service
-  order
+target_link_libraries(order
   jsoncpp
   pthread
   tcp
 )
-target_link_libraries(order
-  jsoncpp
+
+add_executable(order_generation_service src/order_generation_service.cpp)
+target_link_libraries(order_generation_service
+  order
 )

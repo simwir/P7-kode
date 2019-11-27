@@ -28,11 +28,11 @@
 namespace order {
 class GenerationService {
     tcp::Server server;
-    Generator &generator;
+    std::shared_ptr<Generator> generator;
     void parse_message(std::shared_ptr<tcp::Connection> connection);
 
   public:
-    GenerationService(int port, Generator &generator);
+    GenerationService(int port, std::shared_ptr<Generator> generator);
     void start();
 };
 } // namespace order
