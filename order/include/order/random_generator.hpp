@@ -21,16 +21,28 @@
 #define ORDER_RANDOM_GENERATOR
 
 #include "order/generator.hpp"
+#include <ctime>
 #include <vector>
 
 namespace order {
 class RandomGenerator : public Generator {
-    std::vector<int> stations;
+    const std::vector<int> stations;
+    const int min_size;
+    const int max_size;
+    const int seed;
 
   public:
-    RandomGenerator(std::vector<int> stations);
-    Order generate_order(int size) const;
-    std::vector<Order> generate_orders(std::vector<int> sizes) const;
+    RandomGenerator(std::vector<int> stations) : RandomGenerator(stations, time(0)){};
+    RandomGenerator(std::vector<int> stations, unsigned seed)
+        : RandomGenerator(stations, seed, 0){};
+    RandomGenerator(std::vector<int> stations, unsigned seed, unsigned min_size)
+        : RandomGenerator(stations, seed, min_size, stations.size()){};
+    RandomGenerator(std::vector<int> stations, unsigned seed, unsigned min_size, unsigned max_size);
+    int get_seed() const;
+    int get_min_size() const;
+    int get_max_size() const;
+    Order generate_order() const;
+    std::vector<Order> generate_n_orders(int n) const;
 };
 } // namespace order
 

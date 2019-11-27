@@ -17,25 +17,26 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "order/generation_service.hpp"
-#include "order/order.hpp"
-#include "order/random_generator.hpp"
-#include <iostream>
+#ifndef UTIL_SPLIT_HPP
+#define UTIL_SPLIT_HPP
+
+#include <string>
 #include <vector>
 
-using namespace order;
-
-int main(int argc, char *argv[])
+std::vector<std::string> split(const std::string &input, char delimiter)
 {
-    std::vector<int> stations;
+    std::vector<std::string> result;
+    size_t current, previous = 0;
+    current = input.find(delimiter);
 
-    for (int i = 1; i < argc; ++i) {
-        stations.push_back(atoi(argv[i]));
+    while (current != std::string::npos) {
+        result.push_back(input.substr(previous, current - previous));
+        previous = current + 1;
+        current = input.find(delimiter, previous);
     }
+    result.push_back(input.substr(previous, std::string::npos));
 
-    RandomGenerator generator = RandomGenerator{stations};
-    GenerationService service = GenerationService{7777, generator};
-    service.start();
-
-    return 0;
+    return result;
 }
+
+#endif

@@ -60,10 +60,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 add_subdirectory(scheduling)
 add_subdirectory(tcp)
 add_subdirectory(robot)
+add_subdirectory(order)
 
 # Executables
 add_subdirectory(tests)
 add_subdirectory(port_discovery)
 add_subdirectory(communication)
 add_subdirectory(wbt-translator)
-add_subdirectory(order)

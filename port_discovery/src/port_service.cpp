@@ -18,6 +18,7 @@
  */
 #include <port_discovery/port_service.hpp>
 #include <tcp/connection.hpp>
+#include <util/split.hpp>
 
 #include <assert.h>
 #include <iostream>
@@ -29,22 +30,6 @@
 #include <vector>
 
 std::mutex robot_map_lock;
-
-std::vector<std::string> split(const std::string &input, char delimiter)
-{
-    std::vector<std::string> result;
-    size_t current, previous = 0;
-    current = input.find(delimiter);
-
-    while (current != std::string::npos) {
-        result.push_back(input.substr(previous, current - previous));
-        previous = current + 1;
-        current = input.find(delimiter, previous);
-    }
-    result.push_back(input.substr(previous, std::string::npos));
-
-    return result;
-}
 
 port_discovery::Function parse_function(const std::string &function)
 {

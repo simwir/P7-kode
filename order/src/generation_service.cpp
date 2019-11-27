@@ -23,14 +23,22 @@
 #include <thread>
 
 namespace order {
-GenerationService::GenerationService(int port, Generator &generator)
+GenerationService::GenerationService(int port, std::shared_ptr<Generator> generator)
     : server(port), generator(generator){};
+
+int GenerationService::get_port()
+{
+    return server.get_port();
+}
 
 void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connection)
 {
     std::string message = connection->receive_blocking();
-    Order order = generator.generate_order(std::stoi(message));
-    connection->send(order.to_json().toStyledString());
+
+    if (message == "get_order") {
+        Order order = generator->generate_order();
+        connection->send(order.to_json().toStyledString());
+    }
 }
 
 void GenerationService::start()
