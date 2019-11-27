@@ -101,144 +101,144 @@ SolidBox {
   size 0.5 0.5 0.5
 }
 DEF Station_0 Station {
-  translation -1.92 0.05 -1.95
+  translation -1.92 0.2 -1.95
   adjList "27,28,1"
   id 0
 }
 DEF Station_1 Station {
-  translation -0.8 0.05 -1.94
+  translation -0.8 0.2 -1.94
   name "Endpoint(2)"
   adjList "28,29,30,0,2"
   id 1
 }
 DEF Station_2 Station {
-  translation 0.01 0.05 -1.97
+  translation 0.01 0.2 -1.97
   name "Endpoint(3)"
   adjList "30,31,1"
   id 2
 }
 DEF Station_3 Station {
-  translation 0.36 0.05 -1.48
+  translation 0.36 0.2 -1.48
   name "Endpoint(4)"
   adjList "31,32,34"
   id 3
 }
 DEF Station_4 Station {
-  translation 0.66 0.05 -1.95
+  translation 0.66 0.2 -1.95
   name "Endpoint(5)"
   adjList "34,35"
   id 4
 }
 DEF Station_5 Station {
-  translation -2.45 0.05 -1.4
+  translation -2.45 0.2 -1.4
   name "Endpoint(7)"
   adjList "27,61"
   id 5
 }
 DEF Station_6 Station {
-  translation -1.06 0.05 -0.91
+  translation -1.06 0.2 -0.91
   name "Endpoint(8)"
   adjList "59,28,57"
   id 6
 }
 DEF Station_7 Station {
-  translation -0.39 0.05 -0.9
+  translation -0.39 0.2 -0.9
   name "Endpoint(9)"
   adjList "31,33"
   id 7
 }
 DEF Station_8 Station {
-  translation 1.3199999999999998 0.049999999999999996 -1.1099999999999999
+  translation 1.3199999999999998 0.2 -1.1099999999999999
   name "Endpoint(10)"
   adjList "36,37,38,39"
   id 8
 }
 DEF Station_9 Station {
-  translation -2.43 0.05 -0.51
+  translation -2.43 0.2 -0.51
   name "Endpoint(11)"
   adjList "61,60"
   id 9
 }
 DEF Station_10 Station {
-  translation -1.92 0.05 -0.23
+  translation -1.92 0.2 -0.23
   name "Endpoint(12)"
   adjList "58,60,62"
   id 10
 }
 DEF Station_11 Station {
-  translation -0.76 0.08 -0.57
+  translation -0.76 0.2 -0.57
   name "Endpoint(13)"
   adjList "55,57"
   id 11
 }
 DEF Station_12 Station {
-  translation 0.61 0.05 0.12
+  translation 0.61 0.2 0.12
   name "Endpoint(14)"
   adjList "52,53,54"
   id 12
 }
 DEF Station_13 Station {
-  translation 1.64 0.05 -0.33
+  translation 1.64 0.2 -0.33
   name "Endpoint(15)"
   adjList "40,41,42,43"
   id 13
 }
 DEF Station_14 Station {
-  translation -2.43 0.05 0.13
+  translation -2.43 0.2 0.13
   name "Endpoint(16)"
   adjList "62,63,25"
   id 14
 }
 DEF Station_15 Station {
-  translation -1.21 0.05 0.2
+  translation -1.21 0.2 0.2
   name "Endpoint(17)"
   adjList "62,58,57,56"
   id 15
 }
 DEF Station_16 Station {
-  translation 0.29 0.05 0.41
+  translation 0.29 0.2 0.41
   name "Endpoint(18)"
   adjList "54,51,47"
   id 16
 }
 DEF Station_17 Station {
-  translation 0.93 0.05 0.42
+  translation 0.93 0.2 0.42
   name "Endpoint(20)"
   adjList "43,52"
   id 17
 }
 DEF Station_18 Station {
-  translation -1.62 0.05 1.91
+  translation -1.62 0.2 1.91
   name "Endpoint(23)"
   adjList "64"
   id 20
 }
 DEF Station_19 Station {
-  translation -1.29 0.05 1.41
+  translation -1.29 0.2 1.41
   name "Endpoint(24)"
   adjList "64,63,49,48"
   id 19
 }
 DEF Station_20 Station {
-  translation -0.94 0.05 1.92
+  translation -0.94 0.2 1.92
   name "Endpoint(25)"
   adjList "47,48,22"
   id 20
 }
 DEF Station_21 Station {
-  translation 0.62 0.05 0.8
+  translation 0.62 0.2 0.8
   name "Endpoint(26)"
   adjList "47,46"
   id 21
 }
 DEF Station_22 Station {
-  translation 0.06 0.05 1.91
+  translation 0.06 0.2 1.91
   name "Endpoint(27)"
   adjList "20,47,46,45,23"
   id 22
 }
 DEF Station_23 Station {
-  translation 1.16 0.05 1.91
+  translation 1.16 0.2 1.91
   name "Endpoint(28)"
   adjList "22,45"
   id 23
