@@ -65,10 +65,10 @@ int main(int argc, char *argv[])
         {"min", required_argument, 0, 'n'},      {"max", required_argument, 0, 'm'},
         {"help", no_argument, 0, 'h'},           {"port", required_argument, 0, 'p'}};
 
-    const std::string short_options{"s:n:m:r:h"};
+    const std::string short_options{"s:n:m:r::p:h"};
 
     int argument_index = 0;
-    int port = 0;
+    int port = 5555;
     int min_size;
     int max_size;
     unsigned seed;
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    GenerationService service = GenerationService{5555, generator};
+    GenerationService service = GenerationService{port, generator};
 
     std::cout << "Starting on port " << service.get_port() << std::endl;
 
