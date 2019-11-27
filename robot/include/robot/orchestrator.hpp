@@ -20,9 +20,9 @@
 #ifndef ORCHESTRATOR_HPP
 #define ORCHESTRATOR_HPP
 
+#include "communication/info.hpp"
 #include "config/config.hpp"
 #include "robot/clock.hpp"
-#include "communication/info.hpp"
 #include "robot/options.hpp"
 #include "robot/subscriber.hpp"
 #include "scheduling.hpp"
@@ -36,7 +36,6 @@
 const std::filesystem::path dynamic_conf = "dynamic_config.json";
 const std::filesystem::path static_conf = "static_config.json";
 
-#define DESTINATION "destination"
 #define NEXT_WAYPOINT "next_waypoint"
 #define NEXT_STATION "next_station"
 #define ROBOT_INFO_MAP "robot_info_map"
@@ -133,8 +132,10 @@ class Orchestrator {
     robot::InfoMap robot_info;
     robot::ControllerState controller_state;
 
+    std::optional<scheduling::Action> get_next_waypoint();
     scheduling::Action current_waypoint;
     scheduling::Action next_waypoint;
+    int next_station;
 
     scheduling::StationScheduler station_scheduler;
     scheduling::WaypointScheduler waypoint_scheduler;

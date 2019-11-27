@@ -28,6 +28,13 @@ class Scheduler {
         start_worker();
     }
 
+    void maybe_start()
+    {
+        if (!executor.running()) {
+            start();
+        }
+    }
+
     void abort()
     {
         if (!executor.abort())

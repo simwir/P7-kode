@@ -249,10 +249,9 @@ void robot::Orchestrator::write_dynamic_config()
 
 void robot::Orchestrator::set_robot_destination(int waypoint)
 {
-    TRACE(std::cout << "Orchestrator: Sending robot to waypoint " << waypoint << std::endl);
     Translation point = ast.nodes.at(waypoint).translation;
-    TRACE(std::cout << "Orchestrator: at coordinates (" << point.x << "," << point.z << ")"
-                    << std::endl);
+    TRACE(std::cout << "Orchestrator: Sending robot to waypoint " << waypoint << " at coordinates ("
+                    << point.x << "," << point.z << ")" << std::endl);
     robot_client->send("set_destination," + std::to_string(point.x) + "," +
                        std::to_string(point.z));
     dynamic_config.set(NEXT_WAYPOINT, waypoint);
@@ -272,7 +271,6 @@ void robot::Orchestrator::do_next_action()
     else {
         waypoint_scheduler.maybe_start();
         waypoint_scheduler.wait_for_result();
-        next_action = waypoint_subscriber->get().front();
     }
 
     assert(current_waypoint.type == scheduling::ActionType::Waypoint);
@@ -374,12 +372,11 @@ void robot::Orchestrator::main_loop()
 
             auto _next = get_next_waypoint();
             if (!_next.has_value() || _next->value != next_waypoint.value) {
-                // prepend next waypoint to schedule since scheduling from next waypoint does not
-                // include it.
                 auto old = waypoint_subscriber->get();
                 old.insert(old.begin(), next_waypoint);
-                waypoint_subscriber->reset(old);
+                waypoint_subscriber->get().reset(old);
             }
+
         }
 
         // if new eta report ready
@@ -410,11 +407,6 @@ void robot::Orchestrator::main_loop()
                 return act.type == scheduling::ActionType::Waypoint &&
                        ast.nodes.at(act.value).waypointType == WaypointType::eStation;
             };
-            auto is_end_station = [&](scheduling::Action act) {
-                return act.type == scheduling::ActionType::Waypoint &&
-                       ast.nodes.at(act.value).waypointType == WaypointType::eEndPoint;
-            };
-
             // if committed to station dest or at station
             //    then reschedule stations
             if (is_station(next_waypoint) /* || is_station(current_waypoint)*/) {
@@ -428,7 +420,7 @@ void robot::Orchestrator::main_loop()
                                 << std::endl);
                 TRACE(std::cerr << "Orchestrator: from " << current_waypoint.value << std::endl);
                 set_station_visited(next_waypoint.value);
-                if (order.empty() && is_end_station(next_waypoint)) {
+                if (order.empty()) {
                     get_new_order();
                 }
 
