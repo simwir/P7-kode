@@ -69,6 +69,9 @@ int main(int argc, char *argv[])
                      catch (tcp::ReceiveException &e) {
                          std::cout << "Connection lost." << std::endl;
                      }
+                     catch (tcp::ConnectionClosedException &e) {
+                         std::cout << "Connection closed." << std::endl;
+                     }
                  },
                  conn};
         t.detach();
