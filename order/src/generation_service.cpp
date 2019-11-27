@@ -44,6 +44,10 @@ void GenerationService::start()
         catch (tcp::AcceptException &error) {
             std::cerr << error.what() << std::endl;
         }
+        catch (tcp::ConnectionClosedException &_) {
+            std::cout << "Connection closed." << std::endl;
+            break;
+        }
     }
 }
 } // namespace order
