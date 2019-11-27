@@ -18,7 +18,7 @@ RectangleArena {
   floorTileSize 0.2 0.2
 }
 Elisa3 {
-  translation -0.270445 -9.853e-06 0.0800296
+  translation -0.788809 -9.999999999999999e-06 1.134261
   rotation 7.5511099997413215e-06 -0.999999999965743 3.3904399998838536e-06 0.662722
   controller "waypoints_runner"
   supervisor TRUE

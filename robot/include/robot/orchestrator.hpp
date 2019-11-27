@@ -22,7 +22,7 @@
 
 #include "config/config.hpp"
 #include "robot/clock.hpp"
-#include "robot/info.hpp"
+#include "communication/info.hpp"
 #include "robot/options.hpp"
 #include "robot/subscriber.hpp"
 #include "scheduling.hpp"

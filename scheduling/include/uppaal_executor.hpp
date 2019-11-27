@@ -26,6 +26,7 @@
 #include <optional>
 #include <string>
 #include <thread>
+#include <atomic>
 
 namespace scheduling {
 
@@ -93,9 +94,15 @@ class UppaalExecutor {
     }
 
     std::thread worker;
+    bool worker_active = false;
     std::mutex pid_lock;
     std::optional<int> child_pid;
 };
 
+struct Holds {
+    bool &b;
+    Holds(bool &b) : b(b) { b = true; }
+    ~Holds() { b = false; }
+};
 } // namespace scheduling
 #endif // UPPAAL_EXECUTOR_HPP

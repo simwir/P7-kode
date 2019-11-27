@@ -64,7 +64,7 @@ int getRobotId(webots::Supervisor *robot)
 {
     auto self = robot->getSelf();
     if (self == nullptr) {
-        std::cerr << "robot->getSelf() returned 0. Please restart webots";
+        // std::cerr << "robot->getSelf() returned 0. Please restart webots";
         exit(1);
     }
     return self->getField("id")->getSFInt32();
@@ -72,8 +72,7 @@ int getRobotId(webots::Supervisor *robot)
 
 RobotController::RobotController(webots::Supervisor *robot)
     : time_step((int)robot->getBasicTimeStep()), robot(robot),
-      server(std::to_string(getRobotId(robot))),
-      dfollowed(std::numeric_limits<double>::max())
+      server(std::to_string(getRobotId(robot))), dfollowed(std::numeric_limits<double>::max())
 {
     left_motor = robot->getMotor("left wheel motor");
     right_motor = robot->getMotor("right wheel motor");
@@ -150,7 +149,7 @@ void RobotController::communicate()
             return;
         }
         goal = {std::stod(message.payload.substr(0, split_pos)),
-                       std::stod(message.payload.substr(split_pos + 1))};
+                std::stod(message.payload.substr(split_pos + 1))};
         break;
     }
     default:
@@ -198,7 +197,8 @@ Phase RobotController::motion2goal()
     int lidar_value_index = angle2index(angle2goal);
     std::optional<double> range2goal = lidar_range_values[lidar_value_index];
     if ((!range2goal.has_value() || cur_dist2goal < range2goal.value()) && clear()) {
-        std::cerr << "Towards goal: " << angle2goal << ", " << !range2goal.has_value() << std::endl;
+        // std::cerr << "Towards goal: " << angle2goal << ", " << !range2goal.has_value() <<
+        // std::endl;
         go_towards_angle(angle2goal);
 
         return Phase::Motion2Goal;
@@ -221,7 +221,7 @@ Phase RobotController::motion2goal()
     }
 
     if (geo::euclidean_dist(best_point, goal) > prev_dist2goal) {
-        std::cerr << "Changing phase to boundary following" << std::endl;
+        // std::cerr << "Changing phase to boundary following" << std::endl;
         dfollowed = std::numeric_limits<double>::max();
         update_dfollowed();
         return Phase::BoundaryFollowing;
@@ -236,8 +236,9 @@ Phase RobotController::motion2goal()
 void RobotController::go_to_discontinuity(geo::GlobalPoint point, DiscontinuityDirection dir)
 {
     geo::Angle angle = get_angle_to_point(point);
-    std::cerr << "Towards discontinuity: " << angle << ", " << (dir == DiscontinuityDirection::Left)
-              << std::endl;
+    // std::cerr << "Towards discontinuity: " << angle << ", " << (dir ==
+    // DiscontinuityDirection::Left)
+    //<< std::endl;
 
     const double dist = geo::euclidean_dist(position, point);
     const double rectified_remaining_dist = (1 - std::min(1.0, dist));
@@ -270,7 +271,7 @@ bool RobotController::clear()
 Phase RobotController::boundary_following()
 {
     if (dreach() + 0.05 < dfollowed) {
-        std::cerr << "Changing phase to motion to goal" << std::endl;
+        // std::cerr << "Changing phase to motion to goal" << std::endl;
         return Phase::Motion2Goal;
     }
 
@@ -373,20 +374,20 @@ void RobotController::go_towards_angle(const geo::Angle &angle)
     geo::Angle abs = geo::abs_angle(angle);
 
     if (angle.theta > PI / 10) {
-        std::cerr << "Turning left" << std::endl;
+        // std::cerr << "Turning left" << std::endl;
         do_left_turn();
     }
     else if (angle.theta < -PI / 10) {
-        std::cerr << "Turning right" << std::endl;
+        // std::cerr << "Turning right" << std::endl;
         do_right_turn();
     }
     else if (abs.theta < 0.5 * (PI / 180)) { // If we are off by less than 0.5 degrees, we will not
                                              // perform any correction
-        std::cerr << "Going straight ahead" << std::endl;
+        // std::cerr << "Going straight ahead" << std::endl;
         go_straight_ahead();
     }
     else {
-        std::cerr << "Going straight with adjustment" << std::endl;
+        // std::cerr << "Going straight with adjustment" << std::endl;
         go_adjusted_straight(angle);
     }
 }

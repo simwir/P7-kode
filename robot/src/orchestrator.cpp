@@ -19,13 +19,20 @@
 #include <fstream>
 
 #include "config/config.hpp"
-#include "robot/info.hpp"
+#include "communication/info.hpp"
 #include "robot/orchestrator.hpp"
 #include "tcp/client.hpp"
 #include "wbt-translator/apsp.hpp"
 #include "wbt-translator/distance_matrix.hpp"
 #include "wbt-translator/query_template_writer.hpp"
 #include "wbt-translator/webots_parser.hpp"
+
+#define TRACEME
+#ifdef TRACEME
+#define TRACE(a) (a)
+#else
+#define TRACE(a)
+#endif
 
 robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Options options)
     : id(robot_id), options(options), com_module(options.com_addr, options.com_port),
@@ -54,10 +61,8 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Option
 
     // Connecting to the WeBots Controller
     robot_client = std::make_unique<tcp::Client>(options.robot_addr, port_to_controller);
-    clock_client =
-        std::make_unique<robot::WebotsClock>(options.time_addr, options.time_port);
-    order_service_client =
-        std::make_unique<tcp::Client>(options.order_addr, options.order_port);
+    clock_client = std::make_unique<robot::WebotsClock>(options.time_addr, options.time_port);
+    order_service_client = std::make_unique<tcp::Client>(options.order_addr, options.order_port);
     current_state.id = id;
 }
 
@@ -215,7 +220,7 @@ std::string robot::Orchestrator::receive_controller_info()
 
 void robot::Orchestrator::get_dynamic_state()
 {
-    std::cerr << "getting dynamic state\n";
+    // std::cerr << "getting dynamic state\n";
     request_robot_info();
     request_controller_info();
     auto broadcast_info = receive_robot_info();
@@ -292,25 +297,25 @@ void robot::Orchestrator::main_loop()
                        }));
     dynamic_config.set(STATION_ETA, 0);
     write_dynamic_config();
-    std::cerr << "scheduling station\n";
+    TRACE(std::cerr << "scheduling station\n");
     station_scheduler.start();
-    std::cerr << "started scheduling station\n";
+    TRACE(std::cerr << "started scheduling station\n");
     station_scheduler.wait_for_result();
-    std::cerr << "done scheduling station\n";
+    TRACE(std::cerr << "done scheduling station\n");
 
     get_dynamic_state();
 
-    dynamic_config.set(DESTINATION, station_subscriber->read().at(0));
+    dynamic_config.set(NEXT_STATION, station_subscriber->read().at(0));
     dynamic_config.set(NEXT_WAYPOINT, get_closest_waypoint([](auto) { return true; }));
     dynamic_config.set(VISITED_WAYPOINTS, std::vector<int>{});
 
     create_query_file();
     write_dynamic_config();
-    std::cerr << "scheduling waypoint\n";
+    TRACE(std::cerr << "scheduling waypoint\n");
     waypoint_scheduler.start();
-    std::cerr << "started scheduling waypoint\n";
+    TRACE(std::cerr << "started scheduling waypoint\n");
     waypoint_scheduler.wait_for_result();
-    std::cerr << "done scheduling waypoint\n";
+    TRACE(std::cerr << "done scheduling waypoint\n");
     send_robot_info();
 
     do_next_action();
@@ -320,7 +325,7 @@ void robot::Orchestrator::main_loop()
         bool got_fresh_info = false;
         current_time = clock_client->get_current_time();
         get_dynamic_state();
-        std::cerr << "loop\n";
+        // std::cerr << "loop\n";
 
         // if station schedule invalidated or new station schedule
         //    then reschedule waypoints
@@ -348,7 +353,7 @@ void robot::Orchestrator::main_loop()
         if (eta_subscriber->is_dirty()) {
             got_fresh_info = true;
             double time_delta = current_time - eta_start_time;
-            double current_eta = eta_subscriber->get() - time_delta;
+            double current_eta = eta_subscriber->read() - time_delta;
             current_state.eta = current_eta;
             dynamic_config.set(STATION_ETA, current_eta);
         }
@@ -360,7 +365,7 @@ void robot::Orchestrator::main_loop()
             got_fresh_info = true;
 
             if (waypoint_subscriber->get().empty()) {
-                std::cerr << "NOTE: waiting for waypoint result" << std::endl;
+                TRACE(std::cerr << "NOTE: waiting for waypoint result" << std::endl);
                 waypoint_scheduler.wait_for_result();
             }
 
@@ -377,7 +382,11 @@ void robot::Orchestrator::main_loop()
                 visited_waypoints.clear();
 
                 // setup input for station scheduling.
+                TRACE(std::cerr << "visited station " << next_waypoint.value);
                 set_station_visited(next_waypoint.value);
+                if (order.empty()) {
+                    get_new_order();
+                }
 
                 dynamic_config.set("stations_to_visit", order);
                 write_dynamic_config();
@@ -395,7 +404,7 @@ void robot::Orchestrator::main_loop()
             // TODO Maybe update ETA based on time elapsed since last update.
             // Not an immediately trivial change since ETAs might become negative.
             send_robot_info();
-            std::cerr << "writing dynamic config" << std::endl;
+            TRACE(std::cerr << "writing dynamic config" << std::endl);
             write_dynamic_config();
         }
     }

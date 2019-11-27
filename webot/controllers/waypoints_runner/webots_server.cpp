@@ -65,6 +65,7 @@ std::optional<Message> webots_server::Server::get_message()
     }
     else {
         std::string type = message.substr(0, split_pos);
+        std::cout << message << std::endl;
         if (type == "set_destination") {
             message_type = MessageType::set_destination;
         }

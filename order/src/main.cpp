@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     }
 
     RandomGenerator generator = RandomGenerator{stations};
-    GenerationService service = GenerationService{5555, generator};
+    GenerationService service = GenerationService{7777, generator};
     service.start();
 
     return 0;

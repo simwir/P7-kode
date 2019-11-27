@@ -71,9 +71,18 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
         // Wait for completion
         std::cout << "Waiting for completion..." << std::endl;
+        if (worker_active) {
+            abort();
+        }
+        else {
+            wait_for_result();
+        }
         worker = std::thread([&, parent_read = fd[PARENT_READ], callback]() -> void {
             int status;
             int pid;
+            std::cerr << std::boolalpha << worker_active << '\n';
+            Holds _{worker_active};
+            std::cerr << std::boolalpha << worker_active << '\n';
 
             std::unique_lock get_pid{pid_lock};
             if (!child_pid.has_value()) {
@@ -84,7 +93,9 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
             }
             get_pid.unlock();
 
+            std::cerr << "Executor: waiting on PID " << pid << std::endl;
             int res = waitpid(pid, &status, NO_FLAGS);
+            std::cerr << "Executor: done waiting on PID\n";
             if (res == -1) {
                 std::cerr << "ERROR: waitpid failed with errno " << errno << std::endl;
                 if (errno == ECHILD) {
@@ -142,6 +153,7 @@ bool scheduling::UppaalExecutor::abort()
             // ESRCH = process not found. Treat this as a success.
             if (errno == ESRCH) {
                 child_pid = std::nullopt;
+                wait_for_result();
                 return true;
             }
             else {
@@ -151,6 +163,9 @@ bool scheduling::UppaalExecutor::abort()
             }
         }
     }
-    // success
-    return true;
+    else {
+        // success
+        wait_for_result();
+        return true;
+    }
 }
