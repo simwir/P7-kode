@@ -52,21 +52,15 @@ template <class... MutexTypes>
 struct _scoped_lock : std::scoped_lock<MutexTypes...> {
     explicit _scoped_lock(MutexTypes &... m) : std::scoped_lock<MutexTypes...>(m...)
     {
-        std::cerr << "_scoped_lock: acquiring lock" << std::endl;
+        std::cerr << "acquiring lock" << std::endl;
     }
-    ~_scoped_lock() { std::cerr << "_scoped_lock: releasing lock" << std::endl; }
+    ~_scoped_lock() { std::cerr << "releasing lock" << std::endl; }
 };
 
 template <class... Ms>
 _scoped_lock(Ms...)->_scoped_lock<Ms...>;
 
-// shhhhhh
-#undef TRACEME
-#ifdef TRACEME
-#define ScopedLock _scoped_lock
-#else
-#define ScopedLock std::scoped_lock
-#endif
+    using ScopedLock = _scoped_lock;
 
 class UppaalExecutor {
   public:
@@ -88,8 +82,6 @@ class UppaalExecutor {
 
     void join() { worker.join(); }
 
-    bool running() const { return joinable() && worker_active; }
-
     void wait_for_result()
     {
         if (joinable()) {
@@ -103,18 +95,21 @@ class UppaalExecutor {
 
     void reset_pid(std::optional<int> val = std::nullopt)
     {
-        ScopedLock _{pid_lock};
+        TRACE(std::cerr << "reset_pid(): acquiring lock...\n");
+        std::scoped_lock _{pid_lock};
+        TRACE(std::cerr << "reset_pid(): got lock...\n");
         child_pid = val;
+        TRACE(std::cerr << "reset_pid(): releasing lock...\n");
     }
     bool has_pid()
     {
-        ScopedLock _{pid_lock};
+        std::scoped_lock _{pid_lock};
         return child_pid.has_value();
     }
 
     int get_pid()
     {
-        ScopedLock _{pid_lock};
+        std::scoped_lock _{pid_lock};
         return *child_pid;
     }
 

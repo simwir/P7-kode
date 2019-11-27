@@ -38,7 +38,11 @@ class Pollable {
     Pollable() = default;
     Pollable(T &&value) : value(value), dirty(false) {}
 
-    bool is_dirty() const { return dirty; }
+    bool is_dirty() const
+    {
+        std::scoped_lock lock{mutex};
+        return dirty;
+    }
 
     void reset(T &&value)
     {

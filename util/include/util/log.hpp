@@ -12,7 +12,7 @@ class Log {
   public:
     Log(std::filesystem::path path) : log(path, std::ofstream::out | std::ofstream::app) {}
 
-    Log& operator<<(const std::string &val)
+    Log &operator<<(const std::string &val)
     {
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         char *timestamp = std::ctime(&now);

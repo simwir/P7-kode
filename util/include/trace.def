@@ -1,0 +1,6 @@
+
+#ifdef TRACEME
+#define TRACE(a) (a)
+#else
+#define TRACE(a)
+#endif

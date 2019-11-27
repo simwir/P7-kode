@@ -157,5 +157,6 @@ void scheduling::WaypointScheduler::notify_subscribers(
 
 std::ostream &scheduling::operator<<(std::ostream &os, const scheduling::Action &action)
 {
-    return os << (action.type == scheduling::ActionType::Hold ? "hold" : "wayp") << ' ' << action.value;
+    return os << (action.type == scheduling::ActionType::Hold ? "hold" : "wayp") << ' '
+              << action.value;
 }
