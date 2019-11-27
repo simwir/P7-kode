@@ -304,7 +304,7 @@ bool visited[int[0, NUM_WAYPOINTS - 1]];
 const int[0, NUM_WAYPOINTS - 1] dest = destination();
 
 int[0, NUM_WAYPOINTS - 1] cur_waypoint = next_waypoint();
-int[0, NUM_WAYPOINTS - 1] dest_waypoint;
+int[-1, NUM_WAYPOINTS - 1] dest_waypoint;
 
 void set_global() {
     waypoint_visited(NUM_WAYPOINTS, visited);
@@ -359,7 +359,8 @@ void set_global() {
 			<source ref="id14"/>
 			<target ref="id12"/>
 			<label kind="assignment" x="-654" y="-238">set_global(),
-visited[cur_waypoint] = true</label>
+visited[cur_waypoint] = true,
+dest_waypoint = -1</label>
 		</transition>
 		<transition controllable="false">
 			<source ref="id12"/>
