@@ -26,6 +26,7 @@
 namespace order {
 class Generator {
   public:
+    virtual ~Generator() = default;
     virtual Order generate_order() const = 0;
     virtual std::vector<Order> generate_n_orders(int n) const = 0;
 };
