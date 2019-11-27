@@ -85,9 +85,6 @@ int main(int argc, char *argv[])
         query_path = working_path / bin_loc / "waypoint_scheduling.q";
     }
 
-    scheduling::StationScheduler scheduler{model_path, query_path};
-    auto logSubscriber = std::make_shared<LogStationScheduleSubscriber>();
-
     // Stations
     scheduling::StationScheduler stationScheduler;
     auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
@@ -108,19 +105,19 @@ int main(int argc, char *argv[])
     std::cout << "main: \tStarting waypoint scheduler\n";
     waypointScheduler.start();
 
-    scheduling::EtaExtractor eta_extractor;
-    auto eta_logger = std::make_shared<LogEtaSubscriber>();
-    eta_extractor.add_subscriber(eta_logger->shared_from_this());
+    scheduling::EtaExtractor etaExtractor;
+    auto etaLogger = std::make_shared<LogEtaSubscriber>();
+    etaExtractor.add_subscriber(etaLogger->shared_from_this());
 
     std::cout << "main: \tStarting ETA extractor";
-    eta_extractor.start();
+    etaExtractor.start();
 
-    //sleep(120);
+    // sleep(120);
 
     std::cout << "main: \tStopping schedulers\n";
     stationScheduler.wait_for_result();
     waypointScheduler.wait_for_result();
-    eta_extractor.wait_for_result();
+    etaExtractor.wait_for_result();
 
     std::cout << "main: \treturning from main" << std::endl;
     return 0;

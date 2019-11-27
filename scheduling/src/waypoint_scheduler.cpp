@@ -68,17 +68,18 @@ void scheduling::WaypointScheduler::start_worker()
     std::cerr << "WaypointScheduler: Executing..." << std::endl;
     executor.execute([&](const std::string &result) {
         std::cerr << "WaypointScheduler: Parsing..." << std::endl;
-        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
+        std::vector<scheduling::SimulationExpression> values =
+            parser.parse(result, 2); // We parse the result of the second formula
 
         std::cerr << "WaypointScheduler: Composing..." << std::endl;
-        std::vector<scheduling::Action> schedule = convertResult(values);
+        std::vector<scheduling::Action> schedule = convert_result(values);
 
         std::cerr << "WaypointScheduler: Emitting..." << std::endl;
         notify_subscribers(schedule);
     });
 }
 
-std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
+std::vector<scheduling::Action> scheduling::WaypointScheduler::convert_result(
     const std::vector<scheduling::SimulationExpression> &values)
 {
     // Convert into queues

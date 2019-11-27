@@ -43,10 +43,11 @@ void StationScheduler::start_worker()
 
     auto callback = [&](const std::string &result) {
         std::cerr << "StationScheduler: Parsing..." << std::endl;
-        std::vector<SimulationExpression> values = parser.parse(result, 2);
+        std::vector<SimulationExpression> values =
+            parser.parse(result, 2); // We parse the result of the second formula
 
         std::cerr << "StationScheduler: Composing..." << std::endl;
-        std::vector<int> schedule = convertResult(values);
+        std::vector<int> schedule = convert_result(values);
 
         std::cerr << "StationScheduler: Emitting..." << std::endl;
         notify_subscribers(schedule);
@@ -55,7 +56,7 @@ void StationScheduler::start_worker()
     executor.execute(callback);
 }
 
-std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
+std::vector<int> StationScheduler::convert_result(const std::vector<SimulationExpression> &values)
 {
     // Convert into queues
     std::queue<TimeValuePair> cur = parser.findFirstRunAsQueue(values, "Robot.cur_loc");

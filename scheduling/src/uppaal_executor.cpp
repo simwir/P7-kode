@@ -18,11 +18,11 @@
  */
 // POSIX includes
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 // Other includes
 #include <iostream>
@@ -73,11 +73,12 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
         // Wait for completion
         std::cout << "Waiting for completion...\n";
-        worker = std::thread([&, parent_read=fd[PARENT_READ], callback]() -> void {
+        worker = std::thread([&, parent_read = fd[PARENT_READ], callback]() -> void {
             int status;
             int res = waitpid(pid, &status, NO_FLAGS);
             if (res == -1) {
-                std::cerr << errno << std::endl;
+                std::cerr << "An error " << errno << " occured while waiting for process " << pid
+                          << std::endl;
             }
             child_pid = std::nullopt;
             std::cout << "Scheduling complete with status " << status << ".\n";
