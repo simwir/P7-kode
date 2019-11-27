@@ -103,6 +103,10 @@ void ComModule::parse_message(std::shared_ptr<tcp::Connection> conn)
             std::cerr << "ReceiveException" << e.what() << std::endl;
             break;
         }
+        catch (tcp::ConnectionClosedException &e) {
+            std::cerr << "Connection closed." << std::endl;
+            break;
+        }
     }
 }
 

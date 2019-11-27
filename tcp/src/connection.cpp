@@ -44,6 +44,8 @@ ssize_t tcp::Connection::send(const std::string &message, int flags)
 
     ssize_t bytes = ::send(fd, prepped_message.c_str(), prepped_message.length(), flags);
 
+    std::cout << "Sending: " << message << std::endl;
+
     if (bytes == -1) {
         throw tcp::SendException(message);
     }
@@ -97,6 +99,7 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
 
     auto message = parse_message();
     if (message) {
+        std::cout << "Recieved: " << message.value() << std::endl;
         return message;
     }
 
@@ -115,12 +118,17 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
             else {
                 throw tcp::ReceiveException(errno);
             }
+        } else if (bytes == 0) {
+            //Connection closed.
+            throw tcp::ConnectionClosedException();
         }
 
         obuffer.append(buffer, bytes);
         message = parse_message();
         // repeat if received message was incomplete.
     } while (!message);
+
+    std::cout << "Recieved: " << message.value() << std::endl;
 
     return message;
 }
