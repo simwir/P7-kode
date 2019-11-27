@@ -34,7 +34,7 @@ Json::Value Order::to_json() const
 
 Order Order::from_json(const std::string &json)
 {
-    std::stringstream ss(json);
+    std::stringstream ss{json};
     Json::Value root{Json::arrayValue};
     ss >> root;
 
