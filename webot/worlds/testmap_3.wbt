@@ -244,19 +244,19 @@ DEF Station_23 Station {
   id 23
 }
 DEF Endpoint_24 Endpoint {
-  translation 1.83 0.07 -1.95
+  translation 1.83 0.2 -1.95
   name "Endpoint(1)"
   adjList "35,36"
   id 24
 }
 DEF Endpoint_25 Endpoint {
-  translation -2.43 0.07 1.1
+  translation -2.43 0.2 1.1
   name "Endpoint(19)"
   adjList "14,63,64"
   id 25
 }
 DEF Endpoint_26 Endpoint {
-  translation 1.54 0.07 1.42
+  translation 1.54 0.2 1.42
   name "Endpoint(22)"
   adjList "42,44,45"
   id 26
