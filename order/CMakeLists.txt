@@ -23,7 +23,7 @@ list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/order_generation_servic
 
 add_library(order ${SOURCES})
 target_link_libraries(order
-  jsoncpp
+  jsoncpp_lib
   pthread
   tcp
 )
