@@ -115,7 +115,8 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
 
     while (!dest_waypoint.empty() && !cur_waypoint.empty()) {
         // Find next waypoint
-        while (!dest_waypoint.empty() && dest_waypoint.front().value == last_dest.value) {
+        while (!dest_waypoint.empty() && (dest_waypoint.front().value == last_dest.value ||
+                                          dest_waypoint.front().value == -1)) {
             dest_waypoint.pop();
         }
 
