@@ -109,14 +109,14 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
     std::vector<scheduling::Action> schedule;
     cur_waypoint.pop();
     scheduling::TimeValuePair last_cur = cur_waypoint.front();
+    dest_waypoint.pop();
     scheduling::TimeValuePair last_dest = dest_waypoint.front();
     dest_waypoint.pop();
     hold.pop();
 
     while (!dest_waypoint.empty() && !cur_waypoint.empty()) {
         // Find next waypoint
-        while (!dest_waypoint.empty() && (dest_waypoint.front().value == last_dest.value ||
-                                          dest_waypoint.front().value == -1)) {
+        while (!dest_waypoint.empty() && dest_waypoint.front().value == last_dest.value) {
             dest_waypoint.pop();
         }
 
