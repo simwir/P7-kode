@@ -27,6 +27,8 @@
 #include <tcp/exception.hpp>
 #include <tcp/server.hpp>
 
+extern int errno;
+
 tcp::Server::Server(int in_port, int backlog)
 {
     sockaddr_in server_address;
@@ -80,7 +82,7 @@ std::shared_ptr<tcp::Connection> tcp::Server::accept()
 void tcp::Server::close()
 {
     if (!open || ::close(socket_fd) == -1) {
-        throw tcp::CloseException();
+        throw tcp::CloseException{errno};
     }
 
     for (auto connection : clients) {
@@ -98,4 +100,4 @@ int tcp::Server::get_port()
 tcp::Server::~Server()
 {
     close();
-};
+}

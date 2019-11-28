@@ -30,6 +30,13 @@
 
 constexpr int BUFFER_SIZE = 256;
 
+//#define TRACEME
+#ifdef TRACEME
+#define TRACE(a) (a)
+#else
+#define TRACE(a)
+#endif
+
 ssize_t tcp::Connection::send(const std::string &message, int flags)
 {
     if (!ready) {
@@ -44,7 +51,7 @@ ssize_t tcp::Connection::send(const std::string &message, int flags)
 
     ssize_t bytes = ::send(fd, prepped_message.c_str(), prepped_message.length(), flags);
 
-    std::cout << "Sending: " << message << std::endl;
+    TRACE(std::cout << "Sending: " << message << std::endl);
 
     if (bytes == -1) {
         throw tcp::SendException(message);
@@ -99,7 +106,7 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
 
     auto message = parse_message();
     if (message) {
-        std::cout << "Recieved: " << message.value() << std::endl;
+        TRACE(std::cout << "Recieved: " << message.value() << std::endl);
         return message;
     }
 
@@ -128,7 +135,7 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
         // repeat if received message was incomplete.
     } while (!message);
 
-    std::cout << "Recieved: " << message.value() << std::endl;
+    TRACE(std::cout << "Recieved: " << message.value() << std::endl);
 
     return message;
 }
@@ -151,7 +158,7 @@ void tcp::Connection::close()
     }
 
     if (::close(fd) == -1) {
-        throw tcp::CloseException();
+        throw tcp::CloseException(errno);
     };
 
     open = false;
