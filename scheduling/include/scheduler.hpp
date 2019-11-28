@@ -30,10 +30,12 @@ class Scheduler {
 
     void maybe_start()
     {
-        if (!executor.running()) {
+        if (!running()) {
             start();
         }
     }
+
+    bool running() const { return executor.running(); }
 
     void abort()
     {

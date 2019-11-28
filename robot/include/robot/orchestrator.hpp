@@ -161,7 +161,12 @@ class Orchestrator {
 
     int last_update_time;
 
-    int get_closest_waypoint(std::function<bool(Waypoint)> pred);
+    std::pair<int, double> get_closest_waypoint(std::function<bool(Waypoint)> pred);
+    std::pair<int, double> get_closest_waypoint()
+    {
+        return get_closest_waypoint([](auto &&) { return true; });
+    }
+    void prepend_next_waypoint_to_schedule();
 };
 } // namespace robot
 #endif

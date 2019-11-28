@@ -58,7 +58,7 @@ broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], done[int[1, MAX_RO
 		<declaration>clock x;
 
 int[0, NUM_STATIONS] step_index = 0;
-int[1, NUM_STATIONS] cur_loc;
+int[0, NUM_STATIONS] cur_loc;
 int[0, NUM_STATIONS] dest;
 double robot_eta = 0.0;
 
