@@ -281,14 +281,19 @@ void robot::Orchestrator::do_next_action()
         next_action = waypoint_subscriber->get().front();
     }
     else {
+        // When there's nothing left of the order and we are near an end station:
+        // Get a new order and bootstrap new schedules for this order.
         if (order.empty() && waypoint_subscriber->get().empty() && is_end_station(next_waypoint)) {
             get_new_order();
+
             clear_visited_waypoints();
             write_dynamic_config();
             station_scheduler.start();
             station_scheduler.wait_for_result();
+
             next_station = station_subscriber->read().at(0);
             dynamic_config.set(NEXT_STATION, next_station);
+            // fallthrough to waypoint scheduling afterward.
             write_dynamic_config();
         }
 
@@ -349,9 +354,9 @@ void robot::Orchestrator::main_loop()
     get_new_order();
     dynamic_config.set("stations_to_visit", order);
     dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
-                                         return wp.waypointType == WaypointType::eStation ||
-                                                wp.waypointType == WaypointType::eEndPoint;
-                                     }).first);
+                           return wp.waypointType == WaypointType::eStation ||
+                                  wp.waypointType == WaypointType::eEndPoint;
+                       }));
     dynamic_config.set(STATION_ETA, 0);
     write_dynamic_config();
     TRACE(std::cerr << "Orchestrator: scheduling station\n");
@@ -363,7 +368,7 @@ void robot::Orchestrator::main_loop()
     get_dynamic_state();
 
     dynamic_config.set(NEXT_STATION, station_subscriber->read().at(0));
-    current_waypoint = {scheduling::ActionType::Waypoint, get_closest_waypoint().first};
+    current_waypoint = {scheduling::ActionType::Waypoint, get_closest_waypoint()};
     next_waypoint = current_waypoint;
     dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
     dynamic_config.set(VISITED_WAYPOINTS, std::vector<int>{});
@@ -386,6 +391,8 @@ void robot::Orchestrator::main_loop()
     running = true;
     while (running) {
         bool got_fresh_info = false;
+        //TODO optimize?
+        create_query_file();
         current_time = clock_client->get_current_time();
         get_dynamic_state();
 
@@ -424,7 +431,6 @@ void robot::Orchestrator::main_loop()
             dynamic_config.set(STATION_ETA, current_eta);
         }
 
-        constexpr double WAYPOINT_DIST_THRESHOLD = 0.01;
         // if at waypoint
         //    then tell robot about next waypoint;
         //         abort waypoint scheduling; start new one
@@ -436,7 +442,7 @@ void robot::Orchestrator::main_loop()
                 waypoint_scheduler.wait_for_result();
             }
 
-            auto [wp, dist] = get_closest_waypoint();
+            int wp = get_closest_waypoint();
             if (wp != next_waypoint.value) {
                 set_robot_destination(next_waypoint.value);
             }
@@ -446,7 +452,7 @@ void robot::Orchestrator::main_loop()
 
                 // if committed to station dest or at station
                 //    then reschedule stations
-                if (is_station(next_waypoint) /* || is_station(current_waypoint)*/) {
+                if (is_station(next_waypoint)) {
                     // previous waypoint scheduling is obsolete since we're at/going to a station
                     waypoint_scheduler.abort();
                     clear_visited_waypoints();
@@ -470,9 +476,9 @@ void robot::Orchestrator::main_loop()
                                          "since schedule is somehow empty"
                                       << std::endl;
                             dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
-                                                                 return wp.waypointType ==
-                                                                        WaypointType::eEndPoint;
-                                                             }).first);
+                                                   return wp.waypointType ==
+                                                          WaypointType::eEndPoint;
+                                               }));
                         }
                         else {
                             dynamic_config.set(NEXT_STATION, station_subscriber->get().front());
@@ -502,7 +508,7 @@ void robot::Orchestrator::main_loop()
     }
 }
 
-std::pair<int, double> robot::Orchestrator::get_closest_waypoint(std::function<bool(Waypoint)> pred)
+int robot::Orchestrator::get_closest_waypoint(std::function<bool(Waypoint)> pred)
 {
     int best_wp = std::numeric_limits<int>::max();
     double best_dist = std::numeric_limits<double>::max();
@@ -516,12 +522,8 @@ std::pair<int, double> robot::Orchestrator::get_closest_waypoint(std::function<b
             }
         }
     }
-    // std::cout << "best wp :" << best_wp << "\tlocation: " << current_state.location.x << " "
-    //           << current_state.location.y;
-    // std::cout << "\nposition" << controller_state.position.x << " " <<
-    // controller_state.position.y
-    //           << std::endl;
-    return std::make_pair(best_wp, best_dist);
+
+    return best_wp;
 }
 
 void robot::Orchestrator::set_station_visited(int station)
