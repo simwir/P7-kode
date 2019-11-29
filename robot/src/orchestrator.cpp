@@ -204,11 +204,15 @@ void robot::Orchestrator::get_new_order()
     Json::Value val;
     ss >> val;
     std::vector<int> order;
-    for (const auto &station : val) {
-        order.push_back(station.asInt());
-        std::cerr << order.back() << ", ";
-    }
-    std::cerr << std::endl;
+    TRACE({
+        std::cerr << "Orchestrator: order is ";
+        for (const auto &station : val) {
+            order.push_back(station.asInt());
+            std::cerr << order.back() << ", ";
+        }
+    });
+    TRACE(std::cerr << std::endl);
+    dynamic_config.set("stations_to_visit", order);
     this->order = std::move(order);
 }
 
@@ -277,6 +281,16 @@ void robot::Orchestrator::do_next_action()
         next_action = waypoint_subscriber->get().front();
     }
     else {
+        if (order.empty() && waypoint_subscriber->get().empty()) {
+            get_new_order();
+            clear_visited_waypoints();
+            station_scheduler.start();
+            station_scheduler.wait_for_result();
+            next_station = station_subscriber->read().at(0);
+            dynamic_config.set(NEXT_STATION, next_station);
+            write_dynamic_config();
+        }
+
         if (station_scheduler.running()) {
             station_scheduler.wait_for_result();
         }
@@ -440,7 +454,7 @@ void robot::Orchestrator::main_loop()
                 if (is_station(next_waypoint) /* || is_station(current_waypoint)*/) {
                     // previous waypoint scheduling is obsolete since we're at/going to a station
                     waypoint_scheduler.abort();
-                    visited_waypoints.clear();
+                    clear_visited_waypoints();
 
                     // setup input for station scheduling.
                     TRACE(std::cerr << "Orchestrator: visited waypoint " << next_waypoint.value
@@ -449,7 +463,6 @@ void robot::Orchestrator::main_loop()
                                     << std::endl);
                     set_station_visited(next_waypoint.value);
                     if (order.empty() && is_end_station(next_waypoint)) {
-                        get_new_order();
                     }
                     if (!order.empty()) {
                         dynamic_config.set("stations_to_visit", order);
@@ -473,7 +486,7 @@ void robot::Orchestrator::main_loop()
                     }
                 }
                 else {
-                    dynamic_config.set("visited_waypoints", visited_waypoints);
+                    dynamic_config.set(VISITED_WAYPOINTS, visited_waypoints);
 
                     write_dynamic_config();
                     waypoint_scheduler.start();
@@ -522,6 +535,19 @@ void robot::Orchestrator::set_station_visited(int station)
         station_subscriber->pop();
     }
     visited_waypoints.push_back(station);
+}
+
+void robot::Orchestrator::clear_visited_waypoints() {
+    visited_waypoints.clear();
+    dynamic_config.set(VISITED_WAYPOINTS, visited_waypoints);
+}
+
+void robot::Orchestrator::create_new_station_schedule() {
+    if (!station_scheduler.running()) {
+        station_scheduler.start();
+    }
+    station_scheduler.wait_for_result();
+    
 }
 
 const std::filesystem::path wp_template_path =

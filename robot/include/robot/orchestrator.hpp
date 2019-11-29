@@ -167,6 +167,11 @@ class Orchestrator {
         return get_closest_waypoint([](auto &&) { return true; });
     }
     void prepend_next_waypoint_to_schedule();
+
+    void clear_visited_waypoints();
+
+    void create_new_station_schedule();
+
 };
 } // namespace robot
 #endif
