@@ -61,7 +61,6 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Option
     // Connecting to the WeBots Controller
     robot_client = std::make_unique<tcp::Client>(options.robot_addr, port_to_controller);
     clock_client = std::make_unique<robot::WebotsClock>(options.time_addr, options.time_port);
-    order_service_client = std::make_unique<tcp::Client>(options.order_addr, options.order_port);
     current_state.id = id;
 }
 
@@ -196,9 +195,10 @@ void robot::Orchestrator::get_new_order()
 {
     // order_service_client->send("get_order");
     // TODO temp until better API on order generator
-    auto size = std::to_string(rand() % 5 + 2);
-    order_service_client->send(size);
-    auto response = order_service_client->receive_blocking();
+
+    tcp::Client order_service_client{options.order_addr, options.order_port};
+    order_service_client.send("get_order");
+    auto response = order_service_client.receive_blocking();
     order_rec_time = clock_client->get_current_time();
     std::stringstream ss{response};
     Json::Value val;
@@ -213,7 +213,7 @@ void robot::Orchestrator::get_new_order()
     });
     TRACE(std::cerr << std::endl);
     dynamic_config.set("stations_to_visit", order);
-    this->order = std::move(order);
+    this->order = order;
 }
 
 std::string robot::Orchestrator::receive_controller_info()
@@ -281,9 +281,10 @@ void robot::Orchestrator::do_next_action()
         next_action = waypoint_subscriber->get().front();
     }
     else {
-        if (order.empty() && waypoint_subscriber->get().empty()) {
+        if (order.empty() && waypoint_subscriber->get().empty() && is_end_station(next_waypoint)) {
             get_new_order();
             clear_visited_waypoints();
+            write_dynamic_config();
             station_scheduler.start();
             station_scheduler.wait_for_result();
             next_station = station_subscriber->read().at(0);
@@ -293,6 +294,9 @@ void robot::Orchestrator::do_next_action()
 
         if (station_scheduler.running()) {
             station_scheduler.wait_for_result();
+            next_station = station_subscriber->read().at(0);
+            dynamic_config.set(NEXT_STATION, next_station);
+            write_dynamic_config();
         }
 
         waypoint_scheduler.maybe_start();
@@ -440,15 +444,6 @@ void robot::Orchestrator::main_loop()
                 TRACE(std::cerr << "Orchestrator: expected at waypoint.\n");
                 do_next_action();
 
-                auto is_station = [&](scheduling::Action act) {
-                    return act.type == scheduling::ActionType::Waypoint &&
-                           ast.nodes.at(act.value).waypointType == WaypointType::eStation;
-                };
-                auto is_end_station = [&](scheduling::Action act) {
-                    return act.type == scheduling::ActionType::Waypoint &&
-                           ast.nodes.at(act.value).waypointType == WaypointType::eEndPoint;
-                };
-
                 // if committed to station dest or at station
                 //    then reschedule stations
                 if (is_station(next_waypoint) /* || is_station(current_waypoint)*/) {
@@ -498,8 +493,11 @@ void robot::Orchestrator::main_loop()
             // TODO Maybe update ETA based on time elapsed since last update.
             // Not an immediately trivial change since ETAs might become negative.
             send_robot_info();
-            TRACE(std::cerr << "Orchestrator: writing dynamic config" << std::endl);
-            write_dynamic_config();
+            if (!(station_scheduler.running() || waypoint_scheduler.running() ||
+                  eta_extractor.running())) {
+                TRACE(std::cerr << "Orchestrator: writing dynamic config" << std::endl);
+                write_dynamic_config();
+            }
         }
     }
 }
@@ -537,17 +535,18 @@ void robot::Orchestrator::set_station_visited(int station)
     visited_waypoints.push_back(station);
 }
 
-void robot::Orchestrator::clear_visited_waypoints() {
+void robot::Orchestrator::clear_visited_waypoints()
+{
     visited_waypoints.clear();
     dynamic_config.set(VISITED_WAYPOINTS, visited_waypoints);
 }
 
-void robot::Orchestrator::create_new_station_schedule() {
+void robot::Orchestrator::create_new_station_schedule()
+{
     if (!station_scheduler.running()) {
         station_scheduler.start();
     }
     station_scheduler.wait_for_result();
-    
 }
 
 const std::filesystem::path wp_template_path =
