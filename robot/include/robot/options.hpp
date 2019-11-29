@@ -44,7 +44,7 @@ struct Options {
     std::filesystem::path eta_query_template = std::filesystem::path("eta_query.q.template");
 };
 
-const char *const shortOpts = "t:sc:p:o:hrq";
+const char *const shortOpts = "t:sc:p:o:hr:q";
 const option longOpts[] = {{"time-service", required_argument, nullptr, 't'},
                            {"system-time", no_argument, nullptr, 's'},
                            {"com-module", required_argument, nullptr, 'c'},
