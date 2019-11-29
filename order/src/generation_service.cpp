@@ -39,6 +39,10 @@ void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connectio
         Order order = generator->generate_order();
         connection->send(order.to_json().toStyledString());
     }
+    else {
+        std::cerr << "Message not understood: " << message;
+        connection->send("Message not understood: " + message);
+    }
 }
 
 void GenerationService::start()
