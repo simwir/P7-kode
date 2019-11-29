@@ -35,7 +35,7 @@ bool time_chosen = false;
 void print_help(const char *const execute_location)
 {
     std::cerr
-        << "Usage: " << execute_location << " [options] <webots world>(.wbt) [options]\n"
+        << "Usage: " << execute_location << " [options] <robot id> <webots world>(.wbt) [options]\n"
         << "-t --time-service <IP>[:<PORT>]  Set address of time service. Cannot be used with -s.\n"
         << "-s --system-time                 Use system time as time service. Cannot be used with "
            "-t. Not implemented.\n"
@@ -131,7 +131,9 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    std::filesystem::path world_path{argv[optind]};
+    int robot_id = std::stoi(argv[optind]);
+
+    std::filesystem::path world_path{argv[optind + 1]};
     if (!std::filesystem::exists(world_path)) {
         std::cerr << "Cannot find file " << world_path << std::endl;
         exit(1);
@@ -144,7 +146,7 @@ int main(int argc, char **argv)
     std::cerr << "constructing orchestrator... ";
     std::ifstream world_file{world_path};
 
-    robot::Orchestrator orchestrator{1, world_file, options};
+    robot::Orchestrator orchestrator{robot_id, world_file, options};
     std::cerr << "starting orchestrator\n";
     orchestrator.main_loop();
 }

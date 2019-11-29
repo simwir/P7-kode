@@ -24,7 +24,6 @@ class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
     void newSchedule(const std::vector<int> &schedule) override
     {
         std::scoped_lock _{mutex};
-        // translate UPPAAL indices to station IDs.
         reset(schedule);
     }
 };

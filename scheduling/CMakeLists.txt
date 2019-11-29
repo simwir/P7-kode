@@ -34,7 +34,6 @@ target_link_libraries(scheduling
 #install(FILES DESTINATION bin)
 
 configure_file(waypoint_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/waypoint_scheduling.xml COPYONLY)
-configure_file(waypoint_scheduling.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/waypoint_scheduling.q COPYONLY)
 configure_file(station_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_scheduling.xml COPYONLY)
 configure_file(station_scheduling.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_scheduling.q COPYONLY)
 configure_file(station_timing.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_timing.q COPYONLY)

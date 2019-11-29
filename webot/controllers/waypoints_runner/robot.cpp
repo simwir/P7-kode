@@ -148,8 +148,8 @@ void RobotController::communicate()
             server.send_message({message.payload, MessageType::not_understood});
             return;
         }
-        goal = {std::stod(message.payload.substr(0, split_pos)),
-                std::stod(message.payload.substr(split_pos + 1))};
+        set_goal({std::stod(message.payload.substr(0, split_pos)),
+                  std::stod(message.payload.substr(split_pos + 1))});
         break;
     }
     default:
@@ -159,8 +159,8 @@ void RobotController::communicate()
 
 void RobotController::run_simulation()
 {
-    set_goal(geo::GlobalPoint{-0.68, 0.79});
     while (robot->step(time_step) != -1) {
+        update_sensor_values();
         communicate();
         if (first_iteration) {
             first_iteration = false;
@@ -172,10 +172,9 @@ void RobotController::run_simulation()
             continue;
         }
 
-        update_sensor_values();
-
         if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
             stop();
+            has_goal = false;
             continue;
         }
 
