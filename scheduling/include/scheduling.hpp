@@ -16,41 +16,12 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef STATION_SCHEDULER_HPP
-#define STATION_SCHEDULER_HPP
 
-#include "scheduler.hpp"
-#include "uppaal_executor.hpp"
-#include "uppaal_simulation_parser.hpp"
-#include <memory>
-#include <queue>
-#include <thread>
-#include <vector>
+#ifndef SCHEDULING_SCHEDULING_HPP
+#define SCHEDULING_SCHEDULING_HPP
 
-namespace scheduling {
+#include "eta_extractor.hpp"
+#include "station_scheduler.hpp"
+#include "waypoint_scheduler.hpp"
 
-class StationScheduleSubscriber : public std::enable_shared_from_this<StationScheduleSubscriber> {
-  public:
-    virtual void newSchedule(const std::vector<int> &schedule) = 0;
-    virtual ~StationScheduleSubscriber() {}
-};
-
-class StationScheduler : public Scheduler<StationScheduleSubscriber, std::vector<int>> {
-  public:
-    StationScheduler() : Scheduler("station_scheduling.xml", "station_scheduling.q") {}
-    StationScheduler(const std::filesystem::path &model_path,
-                     const std::filesystem::path &query_path)
-        : Scheduler(model_path, query_path)
-    {
-    }
-
-  private:
-    void run();
-    void start_worker() override;
-    void notify_subscribers(const std::vector<int> &) override;
-    std::vector<int> convert_result(const std::vector<SimulationExpression> &values);
-    UppaalSimulationParser parser;
-};
-} // namespace scheduling
-
-#endif // STATION_SCHEDULER_HPP
+#endif
