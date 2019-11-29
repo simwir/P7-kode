@@ -32,7 +32,7 @@ constexpr int max_robots = 20;
 
 const std::filesystem::path dynamic_conf = "dynamic_config.json";
 const std::filesystem::path static_conf = "static_config.json";
-const std::filesystem::path world_path = "world_large.wbt";
+const std::filesystem::path world_path = "testmap_1.wbt";
 
 #define NEXT_WAYPOINT "next_waypoint"
 #define NEXT_STATION "next_station"
@@ -183,8 +183,10 @@ void station_iteration(int number_of_robots, std::ofstream& output, scheduling::
     std::remove(station_copy.begin(), station_copy.end(), next_station);
     std::random_shuffle(station_copy.begin(), station_copy.end());
 
-    std::uniform_int_distribution<int> remaining_distribution(1, station_copy.size() - 1);
-    station_copy.resize(remaining_distribution(generator));
+    std::poisson_distribution<int> remaining_distribution(station_copy.size() * 0.2);
+    int new_size = station_copy.size() - 1 - remaining_distribution(generator);
+    int recified_new_size = std::max(new_size, 1);
+    station_copy.resize(recified_new_size);
 
     // Write dynamic
     dynamic_config.set(ROBOT_INFO_MAP, robot::InfoMap{infos}.to_json());
@@ -217,12 +219,12 @@ void station_iteration(int number_of_robots, std::ofstream& output, scheduling::
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
 
-    output << number_of_robots << "," << elapsed.count() << "," << naive_expectation << "," << smart_expectation << std::endl;
+    output << number_of_robots << "," << recified_new_size << "," << elapsed.count() << "," << naive_expectation << "," << smart_expectation << std::endl;
 }
 
 void test_station_scheduling() {
     std::ofstream result{world_path.string() + "_station_result.csv"};
-    result << "number_of_robots,scheduling_time_seconds,naive_expectation,smart_expectation" << std::endl;
+    result << "number_of_robots,number_to_visit,scheduling_time_seconds,naive_expectation,smart_expectation" << std::endl;
 
     scheduling::UppaalExecutor executor{"station_scheduling.xml", "station_timing.q"};
 
