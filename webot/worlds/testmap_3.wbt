@@ -211,7 +211,7 @@ DEF Station_18 Station {
   translation -1.62 0.2 1.91
   name "Endpoint(23)"
   adjList "64"
-  id 20
+  id 18
 }
 DEF Station_19 Station {
   translation -1.29 0.2 1.41
