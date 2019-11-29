@@ -48,7 +48,7 @@ const std::filesystem::path static_conf = "static_config.json";
 #define END_STATIONS "end_stations"
 #define VIAS "vias"
 
-constexpr int UPDATE_INTERVAL_MS = 5000;
+constexpr int UPDATE_INTERVAL_MS = 1000;
 
 // constant parameters for the UPPAAL model.
 constexpr int STATION_DELAY = 6;    // time the robots remain at each station
@@ -115,7 +115,6 @@ class Orchestrator {
     config::Config dynamic_config;
     std::unique_ptr<tcp::Client> robot_client;
     std::unique_ptr<robot::Clock> clock_client;
-    std::unique_ptr<tcp::Client> order_service_client;
     tcp::Client com_module;
 
     // static state information.
@@ -172,6 +171,25 @@ class Orchestrator {
 
     void create_new_station_schedule();
 
+    bool is_station(scheduling::Action act)
+    {
+        return act.type == scheduling::ActionType::Waypoint && is_station(act.value);
+    }
+
+    bool is_end_station(scheduling::Action act)
+    {
+        return act.type == scheduling::ActionType::Waypoint && is_end_station(act.value);
+    }
+
+    bool is_end_station(int waypoint_id)
+    {
+        return ast.nodes.at(waypoint_id).waypointType == WaypointType::eEndPoint;
+    }
+
+    bool is_station(int waypoint_id)
+    {
+        return ast.nodes.at(waypoint_id).waypointType == WaypointType::eStation;
+    }
 };
 } // namespace robot
 #endif
