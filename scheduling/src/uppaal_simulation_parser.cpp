@@ -18,6 +18,7 @@
  */
 #include <algorithm>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <uppaal_simulation_parser.hpp>
 
@@ -86,133 +87,36 @@ scheduling::SimulationExpression scheduling::UppaalSimulationParser::parseValue(
     // Read run
     std::getline(ss, line);
 
-    while (line.size() > 0 && line.at(0) == '[') {
-        // Find all (t, n) pairs
-        int state = 0;
-        std::stringstream time;
-        std::stringstream value;
-        std::stringstream run_number;
+    std::string time;
+    std::string value;
+
+    // Matches full row of simulation results on the form: [run_number]: (time,value)
+    // (time,value)... group 1 == run_number, group 2 == all time-value pairs.
+    static const std::regex line_pattern{R"(\[(\d+)\]:((?: \(-?\d+(?:\.\d+)?,-?\d+\))*))"};
+    // matches single (time,value) pair.
+    // group 1 == time, group 2 == value.
+    static const std::regex pair_pattern{R"( \((-?\d+(?:\.\d+)?),(-?\d+)\))"};
+
+    std::smatch line_match;
+    std::smatch pair_match;
+    while (std::regex_match(line, line_match, line_pattern)) {
         std::vector<scheduling::TimeValuePair> values;
+        int run_number = std::stoi(line_match[1]);
+        std::string pairs = line_match[2];
 
-        // Regex for this (ignore whitespace) \[\d+\]: ( \( \d+(\.\d+)? , \d+ \) )*
-        for (char &c : line) {
-            if (isspace(c)) {
-                continue;
-            }
-
-            switch (state) {
-            case 0:
-                if (c != '[') {
-                    throw SimulationParseException("State 0 missing [");
-                }
-                state = 1;
-                break;
-            case 1:
-                if (!isdigit(c)) {
-                    throw SimulationParseException("State 1 missing digit");
-                }
-                run_number << c;
-                state = 2;
-                break;
-            case 2:
-                if (isdigit(c)) {
-                    run_number << c;
-                }
-                else if (c == ']') {
-                    state = 3;
-                }
-                else {
-                    throw SimulationParseException("State 2 missing digit or ]");
-                }
-                break;
-            case 3:
-                if (c != ':') {
-                    throw SimulationParseException("State 3 missing :");
-                }
-                state = 4;
-                break;
-            case 4:
-                if (c != '(') {
-                    throw SimulationParseException("State 4 missing (");
-                }
-                state = 5;
-                break;
-            case 5:
-                if (!isdigit(c)) {
-                    throw SimulationParseException("State 5 missing digit");
-                }
-                time << c;
-                state = 6;
-                break;
-            case 6:
-                if (isdigit(c)) {
-                    time << c;
-                }
-                else if (c == '.') {
-                    time << c;
-                    state = 7;
-                }
-                else if (c == ',') {
-                    state = 9;
-                }
-                else {
-                    throw SimulationParseException("State 6 missing digit, . or ,");
-                }
-                break;
-            case 7:
-                if (!isdigit(c)) {
-                    throw SimulationParseException("State 7 missing digit");
-                }
-                time << c;
-                state = 8;
-                break;
-            case 8:
-                if (isdigit(c)) {
-                    time << c;
-                }
-                else if (c == ',') {
-                    state = 9;
-                }
-                else {
-                    throw SimulationParseException("State 8 missing digit or ,");
-                }
-                break;
-            case 9:
-                if (!isdigit(c)) {
-                    throw SimulationParseException("State 9 missing digit");
-                }
-                value << c;
-                state = 10;
-                break;
-            case 10:
-                if (isdigit(c)) {
-                    value << c;
-                }
-                else if (c == ')') {
-                    double time_double = std::stod(time.str());
-                    int value_int = std::stoi(value.str());
-                    // Clear string streams
-                    time.str(std::string());
-                    value.str(std::string());
-
-                    values.push_back(scheduling::TimeValuePair{time_double, value_int});
-
-                    state = 4;
-                }
-                else {
-                    throw SimulationParseException("State 10 missing digit or )");
-                }
-                break;
-            }
+        // parse the list of value pairs
+        while (std::regex_search(pairs, pair_match, pair_pattern)) {
+            double time = std::stod(pair_match[1]);
+            int value = std::stoi(pair_match[2]);
+            values.push_back(TimeValuePair{time, value});
+            pairs = pair_match.suffix();
         }
 
-        runs.push_back(scheduling::SimulationTrace{std::stoi(run_number.str()), values});
-
+        runs.push_back(SimulationTrace{run_number, values});
         if (ss.eof()) {
             break;
         }
 
-        // Read next run
         std::getline(ss, line);
     }
 

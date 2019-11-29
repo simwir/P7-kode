@@ -16,56 +16,58 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef WAYPOINT_SCHEDULER_HPP
-#define WAYPOINT_SCHEDULER_HPP
 
-#include "scheduler.hpp"
+#ifndef SCHEDULING_SCHEDULER_HPP
+#define SCHEDULING_SCHEDULER_HPP
+
 #include "uppaal_executor.hpp"
-#include "uppaal_simulation_parser.hpp"
-#include "util/json.hpp"
+
+#include <filesystem>
 #include <memory>
-#include <queue>
+#include <thread>
 #include <vector>
 
 namespace scheduling {
 
-enum class ActionType { Hold, Waypoint };
+template <class Subscriber, class Notification>
+class Scheduler {
+    static_assert(std::is_base_of<std::enable_shared_from_this<Subscriber>, Subscriber>::value,
+                  "subscriber type must enable shared from this.");
 
-struct Action {
-    ActionType type;
-    int value;
-
-    Json::Value to_json() const;
-    static Action from_json(const std::string &json);
-    static Action from_json(const Json::Value &json);
-};
-
-class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {
   public:
-    virtual void newSchedule(const std::vector<Action> &schedule) = 0;
-    virtual ~WaypointScheduleSubscriber() = default;
-};
-
-class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vector<Action>> {
-  public:
-    WaypointScheduler() : Scheduler("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
-    WaypointScheduler(const std::filesystem::path &model_path,
-                      const std::filesystem::path &query_path)
-        : Scheduler(model_path, query_path)
+    Scheduler(const char *model_path, const char *query_path) : executor(model_path, query_path) {}
+    Scheduler(const std::filesystem::path &model_path, const std::filesystem::path &query_path)
+        : executor(model_path, query_path)
     {
     }
 
-  private:
-    void start_worker() override;
+    void start()
+    {
+        abort();
+        start_worker();
+    }
 
-    void run();
-    std::vector<scheduling::Action>
-    convert_result(const std::vector<scheduling::SimulationExpression> &values);
-    void notify_subscribers(const std::vector<Action> &) override;
+    void abort()
+    {
+        if (!executor.abort())
+            throw AbortException{"Could not abort"};
+    }
 
-    UppaalSimulationParser parser;
+    void wait_for_result() { executor.wait_for_result(); }
+
+    void add_subscriber(std::shared_ptr<Subscriber> subscriber)
+    {
+        subscribers.push_back(subscriber->weak_from_this());
+    }
+
+  protected:
+    virtual void start_worker() = 0;
+    std::vector<std::weak_ptr<Subscriber>> subscribers;
+    UppaalExecutor executor;
+    virtual void notify_subscribers(const Notification &) = 0;
+    virtual ~Scheduler() = default;
 };
 
 } // namespace scheduling
 
-#endif // WAYPOINT_SCHEDULER_HPP
+#endif

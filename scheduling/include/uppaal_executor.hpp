@@ -20,11 +20,20 @@
 #define UPPAAL_EXECUTOR_HPP
 
 #include <filesystem>
+#include <functional>
 #include <iostream>
+#include <optional>
 #include <string>
+#include <thread>
 
 namespace scheduling {
 
+struct AbortException : public std::exception {
+    std::string message;
+    AbortException(const std::string &msg) : message(msg) {}
+
+    const char *what() const noexcept override { return message.c_str(); }
+};
 class SchedulingException : public std::exception {
     std::string message;
 
@@ -45,11 +54,28 @@ class UppaalExecutor {
         : model_path(model_path), query_path(query_path)
     {
     }
-    std::string execute();
+    void execute(std::function<void(const std::string &)> callback);
+
+    // return true if aborted successfully or there was nothing to abort.
+    bool abort();
+
+    bool joinable() const { return worker.joinable(); }
+
+    void join() { worker.join(); }
+
+    void wait_for_result()
+    {
+        if (joinable()) {
+            join();
+        }
+    }
 
   private:
     const std::filesystem::path model_path;
     const std::filesystem::path query_path;
+
+    std::thread worker;
+    std::optional<int> child_pid;
 };
 
 } // namespace scheduling
