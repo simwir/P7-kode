@@ -5,6 +5,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <util/file_lock.hpp>
 
 const std::regex template_par{TEMPL_START + R"_(.*)_" + TEMPL_END};
 const std::regex strat_var_placeholder(TEMPL_START + R"(STRATEGY_VAR_LIST)" + TEMPL_END);
@@ -36,6 +37,7 @@ bool instantiate_query_template(size_t num_robots, size_t num_waypoints,
                                 const std::filesystem::path &template_path,
                                 const std::filesystem::path &output_path)
 {
+    FileLock lock{output_path};
     std::ifstream in_file{template_path};
     std::ofstream out_file{output_path};
     return instantiate_query_template(num_robots, num_waypoints, in_file, out_file);

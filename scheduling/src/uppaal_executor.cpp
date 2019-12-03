@@ -27,6 +27,8 @@
 // Other includes
 #include <iostream>
 #include <sstream>
+
+#include "util/file_lock.hpp"
 #include <uppaal_executor.hpp>
 
 #define TRACEME
@@ -58,6 +60,7 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
         const char *command = "verifyta";
 
+        FileLock _{query_path};
         int ret = execlp(command, command, model_path.c_str(), query_path.c_str(), nullptr);
 
         if (ret == -1) {

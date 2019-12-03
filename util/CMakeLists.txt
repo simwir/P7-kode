@@ -16,22 +16,11 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 # OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_SOURCE_DIR}/wbt-translator/include)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
+# set {SOURCES,PROJECT_LINK_LIBS} to expanded wildcards
 file(GLOB SOURCES "src/*.cpp")
-list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/wbt-translator.cpp)
 
-add_library(wbt-translator ${SOURCES})
+add_library(util ${SOURCES})
+target_link_libraries(util)
 
-add_executable(webots-parser src/wbt-translator.cpp)
-
-target_link_libraries(
-    wbt-translator
-    util
-)
-
-target_link_libraries(webots-parser
-    wbt-translator
-)
-
-install(TARGETS webots-parser DESTINATION bin)
