@@ -40,7 +40,8 @@
         }                                                                                          \
     }
 
-Log _log{"libconfig.log"};
+//Log _log{"libconfig.log"};
+NullLog _log{};
 bool loaded = false;
 
 config::Config static_config;
