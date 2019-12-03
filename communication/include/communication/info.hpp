@@ -87,6 +87,8 @@ class InfoMap {
     static InfoMap from_json(const Json::Value &json);
     size_t size() const noexcept { return robot_info.size(); }
 
+    bool try_erase(int id);
+
   private:
     std::map<int, Info> robot_info;
 };
