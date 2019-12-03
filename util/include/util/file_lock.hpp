@@ -3,7 +3,7 @@
 
 #include <filesystem>
 
-const std::filesystem::path _suffix = "#.lock";
+const std::filesystem::path _suffix = ".lock";
 
 enum class lock_mode { shared, exclusive };
 
