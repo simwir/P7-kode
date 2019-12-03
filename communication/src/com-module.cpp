@@ -58,6 +58,7 @@ void ComModule::get_robot_info(std::shared_ptr<tcp::Connection> conn)
 
 void ComModule::put_robot_info(const std::string &robot_payload)
 {
+    std::cout << "Updating robot info: " << robot_payload << std::endl;
     std::scoped_lock<std::mutex> lock(mutex);
     robot::Info info = robot::Info::from_json(robot_payload);
     robot_info[info.id] = info;
