@@ -230,6 +230,10 @@ void robot::Orchestrator::get_dynamic_state()
     auto _controller_state = receive_controller_info();
     robot_info = robot::InfoMap::from_json(broadcast_info);
     controller_state = robot::ControllerState::parse(_controller_state);
+    robot_info.try_erase(this->id);
+    if (robot_info.size() != last_num_robots) {
+        create_query_file();
+    }
 
     dynamic_config.set(ROBOT_INFO_MAP, robot_info.to_json());
     dynamic_config.set(SELF_STATE, controller_state.to_json());
@@ -335,7 +339,7 @@ void robot::Orchestrator::do_next_action()
 
 std::optional<scheduling::Action> robot::Orchestrator::get_next_waypoint()
 {
-    for (int i = 0; i < waypoint_subscriber->get().size(); ++i) {
+    for (size_t i = 0; i < waypoint_subscriber->get().size(); ++i) {
         if (auto wp = waypoint_subscriber->get().at(i);
             wp.type == scheduling::ActionType::Waypoint) {
             return wp;
@@ -405,6 +409,7 @@ void robot::Orchestrator::main_loop()
 
             next_station = station_subscriber->read().at(0);
             dynamic_config.set(NEXT_STATION, next_station);
+            write_dynamic_config();
             waypoint_scheduler.start();
         }
 

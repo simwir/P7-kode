@@ -129,6 +129,7 @@ class Orchestrator {
     void communicate_state();
     robot::Info current_state;
     robot::InfoMap robot_info;
+    size_t last_num_robots = 0;
     robot::ControllerState controller_state;
 
     std::optional<scheduling::Action> get_next_waypoint();

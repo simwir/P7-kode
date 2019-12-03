@@ -225,4 +225,14 @@ InfoMap InfoMap::from_json(const Json::Value &json)
 
     return InfoMap{infos};
 }
+
+bool InfoMap::try_erase(int id)
+{
+    if (auto it = robot_info.find(id); it != robot_info.end()) {
+        robot_info.erase(it);
+        return true;
+    }
+    return false;
+}
+
 } // namespace robot
