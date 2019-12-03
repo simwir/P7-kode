@@ -37,6 +37,7 @@ void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connectio
 
     if (message == "get_order") {
         Order order = generator->generate_order();
+        std::cout << "Giving order: " << order.to_json().toStyledString() << std::endl;
         connection->send(order.to_json().toStyledString());
     }
 }
