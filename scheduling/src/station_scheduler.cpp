@@ -59,14 +59,10 @@ void StationScheduler::start_worker()
 std::vector<int> StationScheduler::convert_result(const std::vector<SimulationExpression> &values)
 {
     // Convert into queues
-    std::queue<TimeValuePair> cur = parser.findFirstRunAsQueue(values, "Robot.cur_loc");
-    std::queue<TimeValuePair> dest = parser.findFirstRunAsQueue(values, "Robot.dest");
+    std::queue<TimeValuePair> dest = parser.findFirstRunAsQueue(values, "Robot.converted_dest()");
 
     // Convert queues to schedules
     std::vector<int> schedule;
-
-    cur.pop();
-    schedule.push_back(cur.front().value);
 
     TimeValuePair last_dest = dest.front();
     dest.pop();

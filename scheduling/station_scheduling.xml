@@ -26,12 +26,13 @@ import "libconfig.so" {
     int number_of_stations();
     int number_of_end_stations();
     int number_of_robots();
-    int current_station();
     int station_passing_time();
     double uncertainty();
     int next_robot_station(int robot, int step);
     int get_station_dist(int from, int to);
     double eta(int robot);
+    int convert_to_waypoint_id(int station);
+    int destination();
 };
 
 const int NUM_STATIONS = number_of_stations();
@@ -41,19 +42,19 @@ const int MAX_ROBOTS = number_of_robots();
 const int[1, MAX_ROBOTS] CUR_ROBOT = 1;
 const int STATION_PASSING_TIME = station_passing_time();
 const double UNCERTAINTY = uncertainty();
+const int OTHER_ROBOT_MAX = MAX_ROBOTS == 1 ? 2 : MAX_ROBOTS;
 
 import "libconfig.so" {
-    void endstation(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
+    int[1, NUM_STATIONS] next_station();
     void station_visited(int num_stations, bool&amp; arr[int[1, NUM_STATIONS]]);
 };
 
-bool is_endstation[int[1, NUM_STATIONS]];
 bool visited[int[1, NUM_STATIONS]];
 
 broadcast chan arr[int[1, NUM_STATIONS]][int[1, MAX_ROBOTS]], done[int[1, MAX_ROBOTS]];</declaration>
 	<template>
 		<name>OtherRobot</name>
-		<parameter>int[CUR_ROBOT + 1, MAX_ROBOTS] id</parameter>
+		<parameter>int[CUR_ROBOT + 1, OTHER_ROBOT_MAX] id</parameter>
 		<declaration>clock x;
 
 int[0, NUM_STATIONS] step_index = 0;
@@ -80,7 +81,7 @@ int[0, NUM_STATIONS] next_station() {
 			<committed/>
 		</location>
 		<location id="id3" x="-765" y="-246">
-			<name x="-782" y="-280">Done</name>
+			<name x="-824" y="-255">Done</name>
 		</location>
 		<location id="id4" x="-637" y="-374">
 			<name x="-620" y="-391">ToNext</name>
@@ -93,7 +94,13 @@ int[0, NUM_STATIONS] next_station() {
 		<init ref="id5"/>
 		<transition controllable="false">
 			<source ref="id5"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-850" y="-399">MAX_ROBOTS == 1</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id5"/>
 			<target ref="id4"/>
+			<label kind="guard" x="-629" y="-467">MAX_ROBOTS &gt; 1</label>
 			<label kind="assignment" x="-629" y="-450">cur_loc = next_station(),
 robot_eta = eta(id)</label>
 		</transition>
@@ -135,13 +142,18 @@ dest = next_station()</label>
 		<name>Robot</name>
 		<declaration>clock x;
 
-int[1, NUM_STATIONS] cur_loc = current_station();
+int[1, NUM_STATIONS] cur_loc = next_station();
 int[1, NUM_STATIONS] dest;
 const double robot_eta = eta(CUR_ROBOT);
+int initial_station;
+
+bool is_endstation(int[1, NUM_STATIONS] id) {
+    return id &lt;= NUM_END_STATIONS;
+}
 
 bool all_nonend() {
     for (id : int[1, NUM_STATIONS]) {
-        if (!is_endstation[id] &amp;&amp; !visited[id]) {
+        if (!is_endstation(id) &amp;&amp; !visited[id]) {
             return false;
         }
     }
@@ -151,7 +163,7 @@ bool all_nonend() {
 
 bool endstation_visited() {
     for (id : int[1, NUM_STATIONS]) {
-        if (is_endstation[id] &amp;&amp; visited[id]) {
+        if (is_endstation(id) &amp;&amp; visited[id]) {
             return true;
         }
     }
@@ -168,7 +180,7 @@ bool can_visit(int[1, NUM_STATIONS] id) {
         return false;
     }
 
-    if (is_endstation[id]) {
+    if (is_endstation(id)) {
         return !visited[id] &amp;&amp; all_nonend();
     }
 
@@ -176,8 +188,16 @@ bool can_visit(int[1, NUM_STATIONS] id) {
 }
 
 void set_global() {
-    endstation(NUM_STATIONS, is_endstation);
+    initial_station = destination();
     station_visited(NUM_STATIONS, visited);
+}
+
+int converted_cur() {
+    return convert_to_waypoint_id(cur_loc);
+}
+
+int converted_dest() {
+    return convert_to_waypoint_id(dest);
 }</declaration>
 		<location id="id6" x="-637" y="-246">
 			<name x="-705" y="-238">Choose</name>
@@ -246,7 +266,7 @@ visited[cur_loc] = true</label>
 	<template>
 		<name>Station</name>
 		<parameter>int[1, NUM_STATIONS] station_id</parameter>
-		<declaration>const int MAX_QUEUE = 10;
+		<declaration>const int MAX_QUEUE = MAX_ROBOTS;
 
 clock proc;
 
@@ -349,13 +369,13 @@ system OtherRobot, Robot, Station;
 		</query>
 		<query>
 			<formula>simulate 1 [&lt;= 200] {
-    Robot.cur_loc, Robot.dest
+    Robot.initial_station, Robot.converted_cur(), Robot.converted_dest()
 }</formula>
 			<comment></comment>
 		</query>
 		<query>
 			<formula>simulate 1 [&lt;= 200] {
-    Robot.cur_loc, Robot.dest
+    Robot.initial_station, Robot.converted_cur(), Robot.converted_dest()
 } under plan</formula>
 			<comment></comment>
 		</query>

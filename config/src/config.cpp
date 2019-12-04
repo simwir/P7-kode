@@ -24,31 +24,16 @@
 #include <vector>
 
 template <>
-std::vector<double> config::convert_from_json<std::vector<double>>(const Json::Value &arr)
-{
-    if (!arr.isArray()) {
-        throw config::InvalidValueException{};
-    }
-
-    std::vector<double> result;
-
-    for (auto elem : arr) {
-        result.push_back(elem.asDouble());
-    }
-
-    return result;
-}
-
-template <>
 std::vector<int> config::convert_from_json<std::vector<int>>(const Json::Value &arr)
 {
     if (!arr.isArray()) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{
+            "convert_from_json<std::vector<int>>: expected array in JSON"};
     }
 
     std::vector<int> result;
 
-    for (auto elem : arr) {
+    for (const auto &elem : arr) {
         result.push_back(elem.asInt());
     }
 
@@ -60,29 +45,14 @@ std::vector<std::vector<int>>
 config::convert_from_json<std::vector<std::vector<int>>>(const Json::Value &arr)
 {
     if (!arr.isArray()) {
-        throw config::InvalidValueException{};
+        throw config::InvalidValueException{
+            "<std::vector<std::vector<int>>>: expected array in JSON"};
     }
 
     std::vector<std::vector<int>> result;
 
-    for (auto elem : arr) {
+    for (const auto &elem : arr) {
         result.push_back(config::convert_from_json<std::vector<int>>(elem));
-    }
-
-    return result;
-}
-
-template <>
-std::vector<bool> config::convert_from_json<std::vector<bool>>(const Json::Value &arr)
-{
-    if (!arr.isArray()) {
-        throw config::InvalidValueException{};
-    }
-
-    std::vector<bool> result;
-
-    for (auto elem : arr) {
-        result.push_back(elem.asBool());
     }
 
     return result;
@@ -96,7 +66,16 @@ config::Config::Config(const std::string &file_path)
 void config::Config::load_from_file(const std::string &file_path)
 {
     std::ifstream config_file{file_path};
+
+    if (!config_file.is_open()) {
+        throw config::FileNotOpenedException{file_path};
+    }
+
     config_file >> json;
+
+    if (config_file.fail()) {
+        throw config::ReadException{config_file.fail(), config_file.bad()};
+    }
 }
 
 void config::Config::write_to_file(const std::string &file_path)
@@ -113,16 +92,6 @@ int config::Config::get<int>(const std::string &key)
     };
 
     return json[key].asInt();
-}
-
-template <>
-std::string config::Config::get<std::string>(const std::string &key)
-{
-    if (!json.isMember(key)) {
-        throw config::InvalidKeyException{key};
-    };
-
-    return json[key].asString();
 }
 
 template <>
@@ -157,44 +126,104 @@ config::Config::get<std::vector<std::vector<int>>>(const std::string &key)
 }
 
 template <>
-std::vector<bool> config::Config::get<std::vector<bool>>(const std::string &key)
+std::vector<std::vector<int>>
+config::Config::get<std::vector<std::vector<int>>>(const std::string &key1, const std::string &key2)
 {
-    if (!json.isMember(key)) {
-        throw config::InvalidKeyException{key};
+    if (!json.isMember(key1)) {
+        throw config::InvalidKeyException{key1};
     }
 
-    return config::convert_from_json<std::vector<bool>>(json[key]);
-}
+    std::vector<std::vector<int>> result;
+    for (const auto &level1 : json[key1]) {
+        if (!level1.isObject()) {
+            throw config::InvalidValueException{"get<std::vector<std::vector<int>>> level1"};
+        }
 
-template <>
-std::vector<double> config::Config::get<std::vector<double>>(const std::string &key)
-{
-    if (!json.isMember(key)) {
-        throw config::InvalidKeyException{key};
-    }
+        if (!level1.isMember(key2)) {
+            throw config::InvalidKeyException{key2};
+        }
 
-    return config::convert_from_json<std::vector<double>>(json[key]);
-}
+        if (!level1[key2].isObject() && !level1[key2].isArray()) {
+            throw config::InvalidValueException{"get<std::vector<std::vector<int>>> level2"};
+        }
 
-template <>
-std::map<int, std::vector<int>>
-config::Config::get<std::map<int, std::vector<int>>>(const std::string &key)
-{
-    if (!json.isMember(key)) {
-        throw config::InvalidKeyException{key};
-    }
-
-    if (!json[key].isObject()) {
-        throw config::InvalidValueException{};
-    }
-
-    std::map<int, std::vector<int>> result;
-    Json::Value obj_map = json[key];
-
-    for (Json::Value::const_iterator itr = obj_map.begin(); itr != obj_map.end(); itr++) {
-        std::vector<int> value = config::convert_from_json<std::vector<int>>(*itr);
-        result.insert({itr.key().asInt(), value});
+        std::vector<int> row;
+        for (const auto &elem : level1[key2]) {
+            row.push_back(elem.asInt());
+        }
+        result.push_back(row);
     }
 
     return result;
+}
+
+template <>
+std::vector<double> config::Config::get<std::vector<double>>(const std::string &key1,
+                                                             const std::string &key2)
+{
+    if (!json.isMember(key1)) {
+        throw config::InvalidKeyException{key1};
+    }
+
+    std::vector<double> result;
+    for (const auto &level1 : json[key1]) {
+        if (!level1.isObject()) {
+            throw config::InvalidValueException{"get<std::vector<double>>"};
+        }
+
+        if (!level1.isMember(key2)) {
+            throw config::InvalidKeyException{key2};
+        }
+        result.push_back(level1[key2].asDouble());
+    }
+
+    return result;
+}
+
+template <>
+std::vector<std::vector<config::Action>>
+config::Config::get<std::vector<std::vector<config::Action>>>(const std::string &key1,
+                                                              const std::string &key2)
+{
+    if (!json.isMember(key1)) {
+        throw config::InvalidKeyException{key1};
+    }
+
+    std::vector<std::vector<std::pair<std::string, int>>> result;
+    for (const auto &level1 : json[key1]) {
+        if (!level1.isObject()) {
+            throw config::InvalidValueException{
+                "get<std::vector<std::vector<config::Action>>> level1"};
+        }
+
+        if (!level1.isMember(key2)) {
+            throw config::InvalidKeyException{key2};
+        }
+
+        if (!level1[key2].isObject() && !level1[key2].isArray()) {
+            throw config::InvalidValueException{
+                "get<std::vector<std::vector<config::Action>>> level2"};
+        }
+
+        std::vector<std::pair<std::string, int>> row;
+        for (const auto &elem : level1[key2]) {
+            row.push_back(std::make_pair(elem["type"].asString(), elem["value"].asInt()));
+        }
+        result.push_back(row);
+    }
+
+    return result;
+}
+
+int config::Config::getSize(const std::string &key)
+{
+    if (!json.isMember(key)) {
+        throw config::InvalidKeyException{key};
+    }
+
+    if (auto &val = json[key]; val.isArray() || val.isObject()) {
+        return val.size();
+    }
+
+    throw config::InvalidValueException{"getSize " + key};
 }
