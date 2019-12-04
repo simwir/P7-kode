@@ -348,6 +348,12 @@ std::optional<scheduling::Action> robot::Orchestrator::get_next_waypoint()
     return std::nullopt;
 }
 
+void robot::Orchestrator::start_eta_calculation()
+{
+    eta_start_time = current_time;
+    eta_extractor.start();
+}
+
 void robot::Orchestrator::main_loop()
 {
     srand(std::time(NULL));
@@ -391,11 +397,13 @@ void robot::Orchestrator::main_loop()
     prepend_next_waypoint_to_schedule();
     waypoint_subscriber->read();
     do_next_action();
+    current_time = clock_client->get_current_time();
+    start_eta_calculation();
 
     running = true;
     while (running) {
         bool got_fresh_info = false;
-        //TODO optimize?
+        // TODO optimize?
         create_query_file();
         current_time = clock_client->get_current_time();
         get_dynamic_state();
@@ -416,7 +424,7 @@ void robot::Orchestrator::main_loop()
         if (waypoint_subscriber->is_dirty()) {
             got_fresh_info = true;
             current_state.waypoint_plan = waypoint_subscriber->read();
-            eta_extractor.start();
+            start_eta_calculation();
 
             auto _next = get_next_waypoint();
             if (!_next.has_value() || _next->value != next_waypoint.value) {
@@ -431,9 +439,16 @@ void robot::Orchestrator::main_loop()
         if (eta_subscriber->is_dirty()) {
             got_fresh_info = true;
             double time_delta = current_time - eta_start_time;
-            double current_eta = eta_subscriber->read() - time_delta;
+            double current_eta = eta_subscriber->read() - (time_delta / 1000.0);
+            auto dist = dist_to_next_waypoint();
+            TRACE(std::cerr << "dist: " << dist << '\t');
+            current_eta += dist;
+            TRACE(std::cerr << "time_delta: " << time_delta << "\tcurrent_eta: " << current_eta
+                            << '\n');
+            TRACE(std::cerr << "time_delta = " << current_time << " - " << eta_start_time
+                            << std::endl);
+            TRACE(std::cerr << "eta value: " << eta_subscriber->get() << std::endl);
             current_state.eta = current_eta;
-            dynamic_config.set(STATION_ETA, current_eta);
         }
 
         // if at waypoint
@@ -500,9 +515,15 @@ void robot::Orchestrator::main_loop()
             }
         }
         // send update if there are new things to report
-        if (got_fresh_info || current_time - last_update_time >= UPDATE_INTERVAL_MS) {
+        double time_elapsed = current_time - last_update_time;
+        if (got_fresh_info || time_elapsed >= UPDATE_INTERVAL_MS) {
             // TODO Maybe update ETA based on time elapsed since last update.
             // Not an immediately trivial change since ETAs might become negative.
+            if (current_state.eta.has_value()) {
+                TRACE(std::cerr << "Updating ETA: before: " << *current_state.eta);
+                current_state.eta = std::max(0.0, current_state.eta.value() - time_elapsed / 1000);
+                TRACE(std::cerr << "\tafter: " << *current_state.eta << std::endl);
+            }
             send_robot_info();
             if (!(station_scheduler.running() || waypoint_scheduler.running() ||
                   eta_extractor.running())) {
@@ -558,8 +579,7 @@ void robot::Orchestrator::create_new_station_schedule()
 
 const std::filesystem::path wp_template_path =
     "../../wbt-translator/templates/waypoint_scheduling.q.template";
-const std::filesystem::path eta_template_path =
-    "../../wbt-translator/templates/waypoint_scheduling.q.template";
+const std::filesystem::path eta_template_path = "../../wbt-translator/templates/get_eta.q.template";
 const std::filesystem::path wp_output_path = "waypoint_scheduling.q";
 const std::filesystem::path eta_output_path = "get_eta.q";
 
@@ -569,4 +589,10 @@ void robot::Orchestrator::create_query_file()
                                wp_output_path);
     instantiate_query_template(robot_info.size(), waypoints.size(), eta_template_path,
                                eta_output_path);
+}
+
+double robot::Orchestrator::dist_to_next_waypoint()
+{
+    auto &[x, _, y] = ast.nodes.at(next_waypoint.value).translation;
+    return euclidean_distance(current_state.location, Point{x, y}) / MEASURED_ROBOT_SPEED;
 }

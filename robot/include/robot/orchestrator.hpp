@@ -140,6 +140,7 @@ class Orchestrator {
     scheduling::StationScheduler station_scheduler;
     scheduling::WaypointScheduler waypoint_scheduler;
     scheduling::EtaExtractor eta_extractor;
+    void start_eta_calculation();
 
     std::shared_ptr<AsyncStationSubscriber> station_subscriber;
     std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
@@ -191,6 +192,8 @@ class Orchestrator {
     {
         return ast.nodes.at(waypoint_id).waypointType == WaypointType::eStation;
     }
+
+    double dist_to_next_waypoint();
 };
 } // namespace robot
 #endif
