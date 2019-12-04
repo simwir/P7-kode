@@ -105,7 +105,8 @@ class Orchestrator {
     void main_loop();
 
     void add_waypoint_matrix(const AST &ast);
-    void add_station_matrix(const AST &ast);
+    void add_next_waypoint_matrix(const AST &ast, const apsp_result& result);
+    void add_station_matrix(const AST &ast, const apsp_result& result);
     void dump_waypoint_info(const AST &ast);
 
   private:

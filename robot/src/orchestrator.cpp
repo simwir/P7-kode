@@ -99,7 +99,9 @@ void robot::Orchestrator::load_webots_to_config()
     // static_config.set("number_of_robots", webots_parser.number_of_robots);
 
     add_waypoint_matrix(ast);
-    add_station_matrix(ast);
+    apsp_result result = all_pairs_shortest_path(ast);
+    add_next_waypoint_matrix(ast, result);
+    add_station_matrix(ast, result);
     dump_waypoint_info(ast);
     static_config.set("station_delay", STATION_DELAY);
     static_config.set("waypoint_delay", WAYPOINT_DELAY);
@@ -123,10 +125,10 @@ void robot::Orchestrator::add_waypoint_matrix(const AST &ast)
     static_config.set("waypoint_distance_matrix", jsonarray_waypoint_matrix);
 }
 
-void robot::Orchestrator::add_station_matrix(const AST &ast)
+void robot::Orchestrator::add_station_matrix(const AST &ast, const apsp_result& result)
 {
     // Get distance matrix for stations
-    std::map<int, std::map<int, double>> apsp_distances = all_pairs_shortest_path(ast).dist;
+    std::map<int, std::map<int, double>> apsp_distances = result.dist;
 
     auto is_station = [](Waypoint wp) {
         return wp.waypointType == WaypointType::eStation ||
@@ -147,6 +149,23 @@ void robot::Orchestrator::add_station_matrix(const AST &ast)
         }
     }
     static_config.set("station_distance_matrix", jsonarray_apsp_distances);
+}
+
+void robot::Orchestrator::add_next_waypoint_matrix(const AST &ast, const apsp_result& result)
+{
+    // Get next waypoint matrix
+    std::map<int, std::map<int, int>> apsp_next = result.next;
+
+    // Convert next waypoint matrix
+    Json::Value jsonarray_apsp_next{Json::arrayValue};
+    for (size_t i = 0; i < ast.num_waypoints(); i++) {
+        Json::Value jsonarray_apsp_row{Json::arrayValue};
+        for (size_t j = 0; j < ast.num_waypoints(); j++) {
+            jsonarray_apsp_row.append(apsp_next.at(i).at(j));
+        }
+        jsonarray_apsp_next.append(jsonarray_apsp_row);
+    }
+    static_config.set("next_waypoint_matrix", jsonarray_apsp_next);
 }
 
 void robot::Orchestrator::dump_waypoint_info(const AST &ast)
