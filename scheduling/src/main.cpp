@@ -86,27 +86,27 @@ int main(int argc, char *argv[])
     }
 
     scheduling::StationScheduler scheduler{model_path, query_path};
-    auto logSubscriber = std::make_shared<LogStationScheduleSubscriber>();
+    auto log_subscriber = std::make_shared<LogStationScheduleSubscriber>();
 
     // Stations
-    scheduling::StationScheduler stationScheduler;
-    auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
+    scheduling::StationScheduler station_scheduler;
+    auto log_station_subscriber = std::make_shared<LogStationScheduleSubscriber>();
 
     std::cout << "main: \tAdding station subscriber\n";
-    stationScheduler.add_subscriber(logStationSubscriber->shared_from_this());
+    station_scheduler.add_subscriber(log_station_subscriber->shared_from_this());
 
     std::cout << "main: \tStarting station scheduler\n";
-    stationScheduler.start();
+    station_scheduler.start();
 
     // Stations
-    scheduling::WaypointScheduler waypointScheduler;
-    auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
+    scheduling::WaypointScheduler waypoint_scheduler;
+    auto log_waypoint_subscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
     std::cout << "main: \tAdding waypoint subscriber\n";
-    waypointScheduler.add_subscriber(logWaypointSubscriber->shared_from_this());
+    waypoint_scheduler.add_subscriber(log_waypoint_subscriber->shared_from_this());
 
     std::cout << "main: \tStarting waypoint scheduler\n";
-    waypointScheduler.start();
+    waypoint_scheduler.start();
 
     scheduling::EtaExtractor eta_extractor;
     auto eta_logger = std::make_shared<LogEtaSubscriber>();
@@ -116,8 +116,8 @@ int main(int argc, char *argv[])
     eta_extractor.start();
 
     std::cout << "main: \tStopping schedulers\n";
-    stationScheduler.wait_for_result();
-    waypointScheduler.wait_for_result();
+    station_scheduler.wait_for_result();
+    waypoint_scheduler.wait_for_result();
     eta_extractor.wait_for_result();
 
     std::cout << "main: \treturning from main" << std::endl;
