@@ -571,9 +571,7 @@ void robot::Orchestrator::clear_visited_waypoints()
 
 void robot::Orchestrator::create_new_station_schedule()
 {
-    if (!station_scheduler.running()) {
-        station_scheduler.start();
-    }
+    station_scheduler.maybe_start();
     station_scheduler.wait_for_result();
 }
 
