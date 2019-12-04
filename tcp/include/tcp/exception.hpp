@@ -25,7 +25,7 @@ namespace tcp {
 struct CloseException : std::exception {
     const char *what() const noexcept { return message.c_str(); }
     std::string message;
-    CloseException(int _errno) :message( "Could not close. Errno: " + std::to_string(_errno)) {}
+    CloseException(int _errno) : message("Could not close. Errno: " + std::to_string(_errno)) {}
 };
 
 class MessageException : public std::exception {
