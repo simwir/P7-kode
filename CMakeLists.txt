@@ -49,6 +49,9 @@ include_directories(
 
 # Libraries
 add_subdirectory(lib)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
 add_subdirectory(tcp)
 add_subdirectory(config)
 add_subdirectory(scheduling)

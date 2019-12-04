@@ -1,0 +1,575 @@
+#VRML_SIM R2019b utf8
+WorldInfo {
+  contactProperties [
+    ContactProperties {
+    }
+  ]
+}
+Viewpoint {
+  orientation 1 0 0 4.71238898038469
+  position 0.00012037086577374785 10.6198635066416 1.0409862682667015e-06
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 5 4
+  floorTileSize 0.2 0.2
+}
+Elisa3 {
+  hidden translation_5 0 0.0045 -0.02
+  hidden translation_6 0 0.0045 0.02
+  translation -0.2704450218431608 -1.251043361483184e-05 0.08002958480011363
+  rotation -0.01826738189293381 -0.9984222364928551 0.05309746166610188 0.6636940034926275
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.04 0
+          rotationStep 0.261799
+          fieldOfView 6.28328
+          numberOfLayers 1
+          maxRange 0.5
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 1
+}
+OilBarrel {
+  translation 1.3599999999999999 0.19999999999999998 -0.35
+  height 0.4
+  radius 0.2
+}
+OilBarrel {
+  translation -1.24 0.19999999999999998 0.49
+  name "oil barrel(2)"
+  height 0.4
+  radius 0.2
+}
+OilBarrel {
+  translation 1.29 0.19999999999999998 -1.38
+  name "oil barrel(1)"
+  height 0.4
+  radius 0.2
+}
+SolidBox {
+  translation -1.28 0.24 1.75
+  size 0.5 0.5 0.5
+}
+SolidBox {
+  translation 0.32999999999999996 0.24 -1.8099999999999998
+  name "box(4)"
+  size 0.5 0.5 0.5
+}
+SolidBox {
+  translation -0.71 0.24 -0.89
+  name "box(5)"
+  size 0.5 0.5 0.5
+}
+SolidBox {
+  translation 0.61 0.24 0.45999999999999996
+  name "box(6)"
+  size 0.5 0.5 0.5
+}
+SolidBox {
+  translation -2.25 0.24 -0.19999999999999998
+  name "box(3)"
+  size 0.5 0.5 0.5
+}
+SolidBox {
+  translation 1.5 0.24 1.75
+  name "box(2)"
+  size 0.5 0.5 0.5
+}
+SolidBox {
+  translation -2.25 0.24 -1.74
+  name "box(1)"
+  size 0.5 0.5 0.5
+}
+DEF Station_0 Station {
+  translation -1.92 0.2 -1.95
+  adjList "27,28,1"
+  id 0
+}
+DEF Station_1 Station {
+  translation -0.8 0.2 -1.94
+  name "Endpoint(2)"
+  adjList "28,29,30,0,2"
+  id 1
+}
+DEF Station_2 Station {
+  translation 0.01 0.2 -1.97
+  name "Endpoint(3)"
+  adjList "30,31,1"
+  id 2
+}
+DEF Station_3 Station {
+  translation 0.36 0.2 -1.48
+  name "Endpoint(4)"
+  adjList "31,32,34"
+  id 3
+}
+DEF Station_4 Station {
+  translation 0.66 0.2 -1.95
+  name "Endpoint(5)"
+  adjList "34,35"
+  id 4
+}
+DEF Station_5 Station {
+  translation -2.45 0.2 -1.4
+  name "Endpoint(7)"
+  adjList "27,61"
+  id 5
+}
+DEF Station_6 Station {
+  translation -1.06 0.2 -0.91
+  name "Endpoint(8)"
+  adjList "59,28,57"
+  id 6
+}
+DEF Station_7 Station {
+  translation -0.39 0.2 -0.9
+  name "Endpoint(9)"
+  adjList "31,33"
+  id 7
+}
+DEF Station_8 Station {
+  translation 1.3199999999999998 0.2 -1.1099999999999999
+  name "Endpoint(10)"
+  adjList "36,37,38,39"
+  id 8
+}
+DEF Station_9 Station {
+  translation -2.43 0.2 -0.51
+  name "Endpoint(11)"
+  adjList "61,60"
+  id 9
+}
+DEF Station_10 Station {
+  translation -1.92 0.2 -0.23
+  name "Endpoint(12)"
+  adjList "58,60,62"
+  id 10
+}
+DEF Station_11 Station {
+  translation -0.76 0.2 -0.57
+  name "Endpoint(13)"
+  adjList "55,57"
+  id 11
+}
+DEF Station_12 Station {
+  translation 0.61 0.2 0.12
+  name "Endpoint(14)"
+  adjList "52,53,54"
+  id 12
+}
+DEF Station_13 Station {
+  translation 1.64 0.2 -0.33
+  name "Endpoint(15)"
+  adjList "40,41,42,43"
+  id 13
+}
+DEF Station_14 Station {
+  translation -2.43 0.2 0.13
+  name "Endpoint(16)"
+  adjList "62,63,25"
+  id 14
+}
+DEF Station_15 Station {
+  translation -1.21 0.2 0.2
+  name "Endpoint(17)"
+  adjList "62,58,57,56"
+  id 15
+}
+DEF Station_16 Station {
+  translation 0.29 0.2 0.41
+  name "Endpoint(18)"
+  adjList "54,51,47"
+  id 16
+}
+DEF Station_17 Station {
+  translation 0.93 0.2 0.42
+  name "Endpoint(20)"
+  adjList "43,52"
+  id 17
+}
+DEF Station_18 Station {
+  translation -1.62 0.2 1.91
+  name "Endpoint(23)"
+  adjList "64"
+  id 18
+}
+DEF Station_19 Station {
+  translation -1.29 0.2 1.41
+  name "Endpoint(24)"
+  adjList "64,63,49,48"
+  id 19
+}
+DEF Station_20 Station {
+  translation -0.94 0.2 1.92
+  name "Endpoint(25)"
+  adjList "47,48,22"
+  id 20
+}
+DEF Station_21 Station {
+  translation 0.62 0.2 0.8
+  name "Endpoint(26)"
+  adjList "47,46"
+  id 21
+}
+DEF Station_22 Station {
+  translation 0.06 0.2 1.91
+  name "Endpoint(27)"
+  adjList "20,47,46,45,23"
+  id 22
+}
+DEF Station_23 Station {
+  translation 1.16 0.2 1.91
+  name "Endpoint(28)"
+  adjList "22,45"
+  id 23
+}
+DEF Endpoint_24 Endpoint {
+  translation 1.83 0.2 -1.95
+  name "Endpoint(1)"
+  adjList "35,36"
+  id 24
+}
+DEF Endpoint_25 Endpoint {
+  translation -2.43 0.2 1.1
+  name "Endpoint(19)"
+  adjList "14,63,64"
+  id 25
+}
+DEF Endpoint_26 Endpoint {
+  translation 1.54 0.2 1.42
+  name "Endpoint(22)"
+  adjList "42,44,45"
+  id 26
+}
+DEF Waypoint_27 Waypoint {
+  id 27
+  adjList "61,60,59,28,0,5"
+  translation -1.85 0.1 -1.38
+  boxColor 0 1 0
+  name "waypoint(11)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_28 Waypoint {
+  id 28
+  adjList "0,27,1,59,6,29"
+  translation -1.3399999999999999 0.09999999999999999 -1.3699999999999999
+  boxColor 0 1 0
+  name "waypoint(1)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_29 Waypoint {
+  id 29
+  adjList "1,28,30,31"
+  translation -0.7899999999999999 0.09999999999999999 -1.5899999999999999
+  boxColor 0 1 0
+  name "waypoint(2)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_30 Waypoint {
+  id 30
+  adjList "1,2,29,31"
+  translation -0.11 0.1 -1.58
+  boxColor 0 1 0
+  name "waypoint(3)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_31 Waypoint {
+  id 31
+  adjList "29,30,2,3,33,32,7"
+  translation -0.03 0.1 -1.18
+  boxColor 0 1 0
+  name "waypoint(4)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_32 Waypoint {
+  id 32
+  adjList "33,34,37,53,65,3,31"
+  translation 0.35 0.09999999999999999 -1.17
+  boxColor 0 1 0
+  name "waypoint(5)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_33 Waypoint {
+  id 33
+  adjList "55,65,32,31,7"
+  translation -0.02 0.1 -0.88
+  boxColor 0 1 0
+  name "waypoint(6)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_34 Waypoint {
+  id 34
+  adjList "3,4,35,32,37"
+  translation 0.82 0.1 -1.45
+  boxColor 0 1 0
+  name "waypoint(7)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_35 Waypoint {
+  id 35
+  adjList "4,34,24,36"
+  translation 1.29 0.09999999999999999 -1.88
+  boxColor 0 1 0
+  name "waypoint(8)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_36 Waypoint {
+  id 36
+  adjList "24,35,8,39"
+  translation 1.82 0.1 -1.51
+  boxColor 0 1 0
+  name "waypoint(9)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_37 Waypoint {
+  id 37
+  adjList "32,34,8,38,52,53"
+  translation 0.89 0.09999999999999999 -0.7799999999999999
+  boxColor 0 1 0
+  name "waypoint(10)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_38 Waypoint {
+  id 38
+  adjList "37,8,39,40,52"
+  translation 1.27 0.09999999999999999 -0.7999999999999999
+  boxColor 0 1 0
+  name "waypoint(12)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_39 Waypoint {
+  id 39
+  adjList "8,36,40,38"
+  translation 1.87 0.1 -1.04
+  boxColor 0 1 0
+  name "waypoint(13)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_40 Waypoint {
+  id 40
+  adjList "38,39,13,41"
+  translation 1.85 0.1 -0.65
+  boxColor 0 1 0
+  name "waypoint(14)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_41 Waypoint {
+  id 41
+  adjList "13,40,42"
+  translation 1.94 0.09999999999999999 -0.3
+  boxColor 0 1 0
+  name "waypoint(15)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_42 Waypoint {
+  id 42
+  adjList "43,13,41,26,44"
+  translation 1.95 0.09999999999999999 0.26999999999999996
+  boxColor 0 1 0
+  name "waypoint(16)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_43 Waypoint {
+  id 43
+  adjList "17,13,42,44,45,46,52"
+  translation 1.32 0.1 0.43
+  boxColor 0 1 0
+  name "waypoint(17)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_44 Waypoint {
+  id 44
+  adjList "26,45,43,42"
+  translation 1.5499999999999998 0.09999999999999999 1.05
+  boxColor 0 1 0
+  name "waypoint(18)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_45 Waypoint {
+  id 45
+  adjList "23,22,46,43,44,26"
+  translation 0.98 0.09999999999999999 1.21
+  boxColor 0 1 0
+  name "waypoint(19)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_46 Waypoint {
+  id 46
+  adjList "45,43,22,47,21"
+  translation 0.63 0.1 1.14
+  boxColor 0 1 0
+  name "waypoint(20)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_47 Waypoint {
+  id 47
+  adjList "22,20,48,50,51,16,21,46"
+  translation 0.049999999999999996 0.09999999999999999 1.3699999999999999
+  boxColor 0 1 0
+  name "waypoint(21)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_48 Waypoint {
+  id 48
+  adjList "20,19,49,50,47"
+  translation -0.64 0.1 1.28
+  boxColor 0 1 0
+  name "waypoint(22)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_49 Waypoint {
+  id 49
+  adjList "19,63,62,50,48,56"
+  translation -1.28 0.1 1.05
+  boxColor 0 1 0
+  name "waypoint(23)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_50 Waypoint {
+  id 50
+  adjList "49,56,51,47,48"
+  translation -0.63 0.09999999999999999 0.72
+  boxColor 0 1 0
+  name "waypoint(24)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_51 Waypoint {
+  id 51
+  adjList "47,50,56,54,16"
+  translation -0.19 0.1 0.39
+  boxColor 0 1 0
+  name "waypoint(25)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_52 Waypoint {
+  id 52
+  adjList "43,17,12,53,37,38"
+  translation 0.9099999999999999 0.09999999999999999 -0.18
+  boxColor 0 1 0
+  name "waypoint(26)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_53 Waypoint {
+  id 53
+  adjList "52,12,54,65,37,32"
+  translation 0.6 0.1 -0.26
+  boxColor 0 1 0
+  name "waypoint(27)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_54 Waypoint {
+  id 54
+  adjList "16,51,56,55,65,53,12"
+  translation 0.06999999999999999 0.09999999999999999 -0.06
+  boxColor 0 1 0
+  name "waypoint(28)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_55 Waypoint {
+  id 55
+  adjList "56,57,11,33,65,54"
+  translation -0.76 0.09999999999999999 -0.19999999999999998
+  boxColor 0 1 0
+  name "waypoint(29)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_56 Waypoint {
+  id 56
+  adjList "15,57,55,54,51,50,49"
+  translation -0.77 0.1 0.24
+  boxColor 0 1 0
+  name "waypoint(30)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_57 Waypoint {
+  id 57
+  adjList "56,15,58,6,11,55,59"
+  translation -1.21 0.09999999999999999 -0.12
+  boxColor 0 1 0
+  name "waypoint(31)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_58 Waypoint {
+  id 58
+  adjList "57,15,62,10,60,59"
+  translation -1.5899999999999999 0.09999999999999999 -0.22
+  boxColor 0 1 0
+  name "waypoint(32)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_59 Waypoint {
+  id 59
+  adjList "6,57,58,60,27,28"
+  translation -1.49 0.09999999999999999 -0.89
+  boxColor 0 1 0
+  name "waypoint(33)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_60 Waypoint {
+  id 60
+  adjList "58,10,9,61,27,59"
+  translation -1.78 0.09999999999999999 -0.64
+  boxColor 0 1 0
+  name "waypoint(34)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_61 Waypoint {
+  id 61
+  adjList "60,9,5,27"
+  translation -2.4299999999999997 0.09999999999999999 -0.96
+  boxColor 0 1 0
+  name "waypoint(35)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_62 Waypoint {
+  id 62
+  adjList "10,58,15,49,63,14"
+  translation -1.7899999999999998 0.09999999999999999 0.32999999999999996
+  boxColor 0 1 0
+  name "waypoint(36)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_63 Waypoint {
+  id 63
+  adjList "49,19,64,25,14"
+  translation -2.05 0.1 1.11
+  boxColor 0 1 0
+  name "waypoint(37)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_64 Waypoint {
+  id 64
+  adjList "18,25,63,19"
+  translation -1.97 0.1 1.53
+  boxColor 0 1 0
+  name "waypoint(38)"
+  size 0.05 0.05 0.05
+}
+DEF Waypoint_65 Waypoint {
+  id 65
+  adjList "53,54,55,33,32"
+  translation 0.07 0.1 -0.46
+  boxColor 0 1 0
+  name "waypoint(39)"
+  size 0.05 0.05 0.05
+}

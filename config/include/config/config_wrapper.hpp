@@ -25,30 +25,34 @@
 extern "C" {
 #endif
 
+#define DONE 0
+#define HOLD 1
+#define WAYPOINT 2
+
 int32_t number_of_stations();
 int32_t number_of_end_stations();
 int32_t number_of_robots();
 int32_t number_of_waypoints();
 int32_t waypoint_passing_time();
 int32_t station_passing_time();
-int32_t current_station();
-int32_t current_waypoint();
-int32_t destination();
+int32_t next_station(); // A station id
+int32_t destination();  // A waypoint id
+int32_t next_waypoint();
+int32_t convert_to_waypoint_id(int32_t station_id);
 double uncertainty();
 
 // Station schedule related
-void endstation(int32_t num_stations, int8_t *arr);      // Length = number_of_stations
 void station_visited(int32_t num_stations, int8_t *arr); // Length = number_of_stations
 int32_t get_station_dist(int32_t from, int32_t to);
 int32_t next_robot_station(int32_t robot, int32_t step);
 double eta(int32_t robot);
 
 // Waypoint schedule related
-void waypoint_dist(int32_t number_of_waypoints, int32_t *arr);   // Length = number_of_waypoints ^ 2
-void waypoint_visited(int32_t number_of_stations, int8_t *arr);  // Length = number_of_stations
-void station_waypoint(int32_t number_of_stations, int32_t *arr); // Length = number_of_stations
-void waypoint_schedule(int32_t number_of_waypoints, int32_t number_of_robots,
-                       int32_t *arr); // Length = (number_of_robots - 1) * number_of_waypoints * 4
+int32_t get_waypoint_dist(int32_t from, int32_t to);
+void waypoint_visited(int32_t number_of_stations, int8_t *arr); // Length = number_of_stations
+void station_list(int32_t number_of_stations, int32_t *arr);    // Length = number_of_stations
+int32_t get_next_action_type(int32_t robot, int32_t step);
+int32_t get_next_action_value(int32_t robot, int32_t step);
 
 #ifdef __cplusplus
 }
