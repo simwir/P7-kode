@@ -119,6 +119,7 @@ int main(int argc, char **argv)
             break;
         case 'e':
             options.eta_query_template = std::filesystem::path{optarg};
+            break;
         case 'h':
             print_help(argv[0]);
             exit(0);
