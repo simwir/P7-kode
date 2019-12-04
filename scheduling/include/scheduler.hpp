@@ -16,6 +16,7 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #ifndef SCHEDULING_SCHEDULER_HPP
 #define SCHEDULING_SCHEDULER_HPP
 
@@ -58,7 +59,7 @@ class Scheduler {
     void abort()
     {
         if (!executor.abort())
-            throw AbortException{""};
+            throw AbortException{"Could not abort"};
     }
 
     void wait_for_result() { executor.wait_for_result(); }

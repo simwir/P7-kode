@@ -48,7 +48,7 @@ class StationScheduler : public Scheduler<StationScheduleSubscriber, std::vector
     void run();
     void start_worker() override;
     void notify_subscribers(const std::vector<int> &) override;
-    std::vector<int> convertResult(const std::vector<SimulationExpression> &values);
+    std::vector<int> convert_result(const std::vector<SimulationExpression> &values);
     UppaalSimulationParser parser;
 };
 } // namespace scheduling

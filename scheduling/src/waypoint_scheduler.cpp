@@ -26,6 +26,9 @@
 
 #include <waypoint_scheduler.hpp>
 
+#define TRACEME
+#include "trace.def"
+
 extern int errno;
 
 Json::Value scheduling::Action::to_json() const
@@ -69,22 +72,24 @@ void scheduling::WaypointScheduler::start_worker()
     std::cerr << "WaypointScheduler: Executing..." << std::endl;
     executor.execute([&](const std::string &result) {
         std::cerr << "WaypointScheduler: Parsing..." << std::endl;
+        // The second formula contains the simulated trace.
         std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
 
         std::cerr << "WaypointScheduler: Composing..." << std::endl;
-        std::vector<scheduling::Action> schedule = convertResult(values);
+        std::vector<scheduling::Action> schedule = convert_result(values);
 
+        TRACE({
+            std::cerr << "WaypointScheduler: Schedule is ";
+            for (auto i : schedule) {
+                std::cerr << i << " ";
+            }
+        });
         std::cerr << "WaypointScheduler: Emitting..." << std::endl;
-        std::cerr << "WaypointScheduler: Schedule is ";
-        for (auto i : schedule) {
-            std::cerr << i << " ";
-        }
-        std::cerr << std::endl;
         notify_subscribers(schedule);
     });
 }
 
-std::vector<scheduling::Action> scheduling::WaypointScheduler::convertResult(
+std::vector<scheduling::Action> scheduling::WaypointScheduler::convert_result(
     const std::vector<scheduling::SimulationExpression> &values)
 {
     // Convert into queues

@@ -40,6 +40,10 @@ void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connectio
         std::cout << "Giving order: " << order.to_json().toStyledString() << std::endl;
         connection->send(order.to_json().toStyledString());
     }
+    else {
+        std::cerr << "Message not understood: " << message;
+        connection->send("Message not understood: " + message);
+    }
 }
 
 void GenerationService::start()

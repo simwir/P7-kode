@@ -178,4 +178,6 @@ bool scheduling::UppaalExecutor::abort()
         wait_for_result();
         return true;
     }
+    // success
+    return true;
 }

@@ -26,9 +26,19 @@
 
 #include "station_scheduler.hpp"
 
+#define TRACEME
+#include "trace.def"
+
 extern int errno;
 
 namespace scheduling {
+
+/*void StationScheduler::wait_for_schedule()
+{
+if (worker.joinable()) {
+worker.join();
+}
+}*/
 
 void StationScheduler::start_worker()
 {
@@ -36,24 +46,26 @@ void StationScheduler::start_worker()
 
     auto callback = [&](const std::string &result) {
         std::cerr << "StationScheduler: Parsing..." << std::endl;
+        // The second formula contains the simulated trace to be used as schedule.
         std::vector<SimulationExpression> values = parser.parse(result, 2);
 
         std::cerr << "StationScheduler: Composing..." << std::endl;
-        std::vector<int> schedule = convertResult(values);
+        std::vector<int> schedule = convert_result(values);
 
+        TRACE({
+            std::cerr << "StationScheduler: Schedule is: ";
+            for (auto i : schedule) {
+                std::cerr << i << ' ';
+            }
+        });
         std::cerr << "StationScheduler: Emitting..." << std::endl;
-        std::cerr << "StationScheduler: Schedule is: ";
-        for (auto i : schedule) {
-            std::cerr << i << ' ';
-        }
-        std::cerr << std::endl;
         notify_subscribers(schedule);
     };
     std::cerr << "StationScheduler: Executing..." << std::endl;
     executor.execute(callback);
 }
 
-std::vector<int> StationScheduler::convertResult(const std::vector<SimulationExpression> &values)
+std::vector<int> StationScheduler::convert_result(const std::vector<SimulationExpression> &values)
 {
     // Convert into queues
     std::queue<TimeValuePair> dest = parser.findFirstRunAsQueue(values, "Robot.converted_dest()");
