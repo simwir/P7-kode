@@ -16,18 +16,19 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 # OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_SOURCE_DIR}/config/include)
+include_directories(${PROJECT_SOURCE_DIR}/order/include)
 
 file(GLOB SOURCES "src/*.cpp")
+list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/order_generation_service.cpp)
 
-add_library(config SHARED ${SOURCES})
-
-target_link_libraries(config
+add_library(order ${SOURCES})
+target_link_libraries(order
   jsoncpp_lib
+  pthread
+  tcp
 )
-target_compile_options(config PRIVATE -Werror)
 
-#set_target_properties(config PROPERTIES COMPILE_FLAGS "-fpic")
-set_target_properties(config PROPERTIES LINK_FLAGS "-rdynamic")
-
-install(TARGETS config DESTINATION bin)
+add_executable(order_generation_service src/order_generation_service.cpp)
+target_link_libraries(order_generation_service
+  order
+)
