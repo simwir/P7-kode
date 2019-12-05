@@ -34,11 +34,11 @@ robot::ControllerState ControllerState::parse(const std::string &s)
     char sink;
     ss >> x >> sink;
     if (!ss || sink != ',') {
-        throw robot::InfoParseError("could not parse controller state from " + s);
+       throw robot::InfoParseError{"could not parse controller state from " + s};
     }
     ss >> y >> sink;
     if (!ss || sink != ',') {
-        throw robot::InfoParseError("could not parse controller state from " + s);
+        throw robot::InfoParseError{"could not parse controller state from " + s};
     }
     ss >> state;
     if (state == "holding") {
@@ -48,7 +48,7 @@ robot::ControllerState ControllerState::parse(const std::string &s)
         return robot::ControllerState{x, y, false};
     }
     else {
-        throw robot::InfoParseError("invalid value for state: " + state);
+        throw robot::InfoParseError{"invalid value for state: " + state};
     }
 }
 robot::ControllerState robot::ControllerState::from_json(const Json::Value &json)
