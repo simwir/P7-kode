@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         {"help", no_argument, 0, 'h'},           {"port", required_argument, 0, 'p'},
         {"count", required_argument, 0, 'c'}};
 
-    const std::string short_options{"s:n:m:r::p:h"};
+    const std::string short_options{"s:n:m:r::p:c:h"};
 
     int argument_index = 0;
     int port = 7777;
