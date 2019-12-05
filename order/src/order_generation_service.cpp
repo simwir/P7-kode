@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     const std::string short_options{"s:n:m:r::p:h"};
 
     int argument_index = 0;
-    int port = 5555;
+    int port = 7777;
     int min_size;
     int max_size;
     unsigned seed;

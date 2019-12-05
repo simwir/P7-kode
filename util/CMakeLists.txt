@@ -22,5 +22,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 file(GLOB SOURCES "src/*.cpp")
 
 add_library(util ${SOURCES})
-target_link_libraries(util)
+target_link_libraries(util
+  stdc++fs
+)
 
