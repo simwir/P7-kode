@@ -32,14 +32,13 @@ constexpr int max_robots = 20;
 
 const std::filesystem::path dynamic_conf = "dynamic_config.json";
 const std::filesystem::path static_conf = "static_config.json";
-const std::filesystem::path world_path = "testmap_1.wbt";
+const std::filesystem::path world_path = "testmap_3.wbt";
 
 #define NEXT_WAYPOINT "next_waypoint"
 #define NEXT_STATION "next_station"
 #define ROBOT_INFO_MAP "robot_info_map"
 #define SELF_STATE "self_state"
 #define STATION_ETA "station_eta"
-#define VISITED_STATIONS "visited_stations"
 #define VISITED_WAYPOINTS "visited_waypoints"
 #define STATIONS_TO_VISIT "stations_to_visit"
 
@@ -60,7 +59,7 @@ AST get_ast() {
     return webots_parser.parse_stream();
 }
 
-void add_waypoint_matrix(const AST &ast)
+std::vector<std::vector<double>> add_waypoint_matrix(const AST &ast)
 {
     // Get distance matrix for waypoints
     std::vector<std::vector<double>> waypoint_matrix = distance_matrix{ast}.get_data();
@@ -75,6 +74,8 @@ void add_waypoint_matrix(const AST &ast)
         jsonarray_waypoint_matrix.append(jsonarray_waypoint_row);
     }
     static_config.set("waypoint_distance_matrix", jsonarray_waypoint_matrix);
+
+    return waypoint_matrix;
 }
 
 void add_station_matrix(const AST &ast)
@@ -103,7 +104,7 @@ void add_station_matrix(const AST &ast)
     static_config.set("station_distance_matrix", jsonarray_apsp_distances);
 }
 
-void load_webots_to_config(const AST& ast)
+std::vector<std::vector<double>> load_webots_to_config(const AST& ast)
 {
     if (ast.nodes.size() == 0) {
         throw MalformedWorldFileError{"No waypoints found"};
@@ -132,14 +133,16 @@ void load_webots_to_config(const AST& ast)
     static_config.set(END_STATIONS, end_stations);
     static_config.set(VIAS, vias);
 
-    add_waypoint_matrix(ast);
+    auto matrix = add_waypoint_matrix(ast);
     add_station_matrix(ast);
     static_config.set("station_delay", STATION_DELAY);
     static_config.set("waypoint_delay", WAYPOINT_DELAY);
     static_config.set("uncertainty", UNCERTAINTY);
+
+    return matrix;
 }
 
-std::string extractFormula(const std::string& result, int formula_number) {
+std::string extract_formula(const std::string& result, int formula_number) {
     const size_t startIndex = result.find("Verifying formula " + std::to_string(formula_number));
     const size_t stopIndex =
         result.find("Verifying formula " +
@@ -158,14 +161,14 @@ void station_iteration(int number_of_robots, std::ofstream& output, scheduling::
 
     // Next station
     std::uniform_int_distribution<int> station_distribution(0, stations.size() - 1);
-    int next_station = station_distribution(generator);
+    int next_station = stations.at(station_distribution(generator));
 
     // Robot info map
     std::vector<robot::Info> infos;
     for (int i = 0; i < number_of_robots; i++) {
         std::vector<int> station_copy = stations;
         std::random_shuffle(station_copy.begin(), station_copy.end());
-        station_copy.resize(station_distribution(generator));
+        station_copy.resize(std::max(1, station_distribution(generator)));
         double eta = eta_distribution(generator);
         robot::Info info{i, {0,0},
             station_copy,
@@ -202,12 +205,12 @@ void station_iteration(int number_of_robots, std::ofstream& output, scheduling::
         std::regex eta_response{R"(.+= ([\d\.]+))"};
         std::smatch eta_value;
 
-        std::string naive_formula = extractFormula(result, 2);
+        std::string naive_formula = extract_formula(result, 2);
         if (std::regex_search(naive_formula, eta_value, eta_response)) {
             naive_expectation = std::stod(eta_value[1]);
         }
 
-        std::string smart_formula = extractFormula(result, 3);
+        std::string smart_formula = extract_formula(result, 3);
         if (std::regex_search(smart_formula, eta_value, eta_response)) {
             smart_expectation = std::stod(eta_value[1]);
         }
@@ -228,7 +231,7 @@ void test_station_scheduling() {
 
     scheduling::UppaalExecutor executor{"station_scheduling.xml", "station_timing.q"};
 
-    for (int number_of_robots = 0; number_of_robots <= max_robots; number_of_robots += 20) {
+    for (int number_of_robots = 0; number_of_robots <= max_robots; number_of_robots += 2) {
         for (int i = 0; i < iterations; i++) {
             std::cout << "Running station timing (" << world_path << ", " << number_of_robots << ", " << i << ")" << std::endl;
             station_iteration(number_of_robots, result, executor);
@@ -236,34 +239,131 @@ void test_station_scheduling() {
     }
 }
 
-void waypoint_iteration(int number_of_robots, std::ofstream& output) {
+void waypoint_iteration(const std::vector<std::vector<double>>& matrix, int number_of_robots, std::ofstream& output, scheduling::UppaalExecutor& executor) {
     // Next station
     std::uniform_int_distribution<int> station_distribution(0, stations.size() - 1);
-    int next_station = station_distribution(generator);
+    int next_station = stations.at(station_distribution(generator));
 
     // Next waypoint
     std::uniform_int_distribution<int> via_distribution(0, vias.size() - 1);
-    int next_waypoint = via_distribution(generator);
+    int next_waypoint = vias.at(via_distribution(generator));
 
     // Robot info map
+    std::poisson_distribution<int> action_distribution(0.8 * waypoints.size());
+    std::uniform_int_distribution<int> waypoints_distribution(0, waypoints.size() - 1);
+    std::exponential_distribution<double> hold_distribution(3);
+
+    std::vector<robot::Info> infos;
+    for (int i = 0; i < number_of_robots; i++) {
+        int number_of_actions = std::max(1, action_distribution(generator));
+        std::vector<scheduling::Action> schedule;
+
+        int latest_waypoint = waypoints_distribution(generator);
+        schedule.push_back(scheduling::Action{
+            scheduling::ActionType::Waypoint,
+            latest_waypoint
+        });
+        bool was_hold = false;
+
+        for (int j = 0; j < number_of_actions; j++) {
+            std::vector<int> valid_waypoints;
+            for (int k = 0; k < static_cast<int>(waypoints.size()); k++) {
+                if (matrix.at(latest_waypoint).at(k) > 0 && k != latest_waypoint) {
+                    valid_waypoints.push_back(k);
+                }
+            }
+
+            if (!was_hold) {
+                valid_waypoints.push_back(latest_waypoint);
+            }
+
+            std::random_shuffle(valid_waypoints.begin(), valid_waypoints.end());
+
+            if (valid_waypoints.at(0) == latest_waypoint) {
+                schedule.push_back(scheduling::Action{
+                    scheduling::ActionType::Hold,
+                    static_cast<int>(hold_distribution(generator))
+                });
+                was_hold = true;
+            }
+            else {
+                schedule.push_back(scheduling::Action{
+                    scheduling::ActionType::Waypoint,
+                    valid_waypoints.at(0)
+                });
+                was_hold = false;
+                latest_waypoint = valid_waypoints.at(0);
+            }
+        }
+
+        robot::Info info{i, {0,0},
+            std::vector<int>{},
+            schedule, 0};
+
+        infos.push_back(info);
+    }
 
     // visited waypoints
+    std::vector<int> vias_copy = vias;
+    std::remove(vias_copy.begin(), vias_copy.end(), next_waypoint);
+    std::random_shuffle(vias_copy.begin(), vias_copy.end());
 
-    // Generate query file
+    std::uniform_int_distribution<int> remaining_distribution(0, vias_copy.size() - 1);
+    int num_visited = remaining_distribution(generator);
+    vias_copy.resize(num_visited);
+
+   // Write dynamic
+   dynamic_config.set(ROBOT_INFO_MAP, robot::InfoMap{infos}.to_json());
+   dynamic_config.set(NEXT_STATION, next_station);
+   dynamic_config.set(NEXT_WAYPOINT, next_waypoint);
+   dynamic_config.set(VISITED_WAYPOINTS, vias_copy);
+   dynamic_config.write_to_file(dynamic_conf);
 
     // Run
+    double naive_expectation = 0;
+    double smart_expectation = 0;
+    auto callback = [&naive_expectation, &smart_expectation](const std::string &result) {
+        std::regex eta_response{R"(.+= ([\d\.]+))"};
+        std::smatch eta_value;
 
-    // Extract expectation for naive and smart strategy
+        std::string naive_formula = extract_formula(result, 2);
+        if (std::regex_search(naive_formula, eta_value, eta_response)) {
+            naive_expectation = std::stod(eta_value[1]);
+        }
+
+        std::string smart_formula = extract_formula(result, 3);
+        if (std::regex_search(smart_formula, eta_value, eta_response)) {
+            smart_expectation = std::stod(eta_value[1]);
+        }
+    };
+
+    auto start = std::chrono::high_resolution_clock::now();
+    executor.execute(callback);
+    executor.wait_for_result();
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+
+    output << number_of_robots << "," << num_visited << "," << elapsed.count() << "," << naive_expectation << "," << smart_expectation << std::endl;
 }
 
-void test_waypoint_scheduling() {
-    std::ofstream result{world_path.string() + "_waypoint_result.csv"};
-    result << "number_of_robots,scheduling_time_seconds,naive_expectation,smart_expectation" << std::endl;
+const std::filesystem::path wp_template_path =
+    "../../wbt-translator/templates/waypoint_timing.q.template";
+const std::filesystem::path wp_output_path = "waypoint_timing.q";
 
-    for (int number_of_robots = 0; number_of_robots <= max_robots; number_of_robots += 20) {
+void test_waypoint_scheduling(const std::vector<std::vector<double>>& matrix) {
+    std::ofstream result{world_path.string() + "_waypoint_result.csv"};
+    result << "number_of_robots,number_of_visited_waypoints,scheduling_time_seconds,naive_expectation,smart_expectation" << std::endl;
+
+    scheduling::UppaalExecutor executor{"waypoint_scheduling.xml", "waypoint_timing.q"};
+
+    for (int number_of_robots = 0; number_of_robots <= max_robots; number_of_robots += 2) {
+        // Generate query file
+        instantiate_query_template(number_of_robots + 1, waypoints.size(), wp_template_path,
+                                   wp_output_path);
+
         for (int i = 0; i < iterations; i++) {
             std::cout << "Running waypoint timing (" << world_path << ", " << number_of_robots << ", " << i << ")" << std::endl;
-            waypoint_iteration(number_of_robots, result);
+            waypoint_iteration(matrix, number_of_robots, result, executor);
         }
     }
 }
@@ -272,7 +372,7 @@ int main(int argc, char **argv) {
     std::srand(unsigned(std::time(0)));
 
     AST ast = get_ast();
-    load_webots_to_config(ast);
+    auto matrix = load_webots_to_config(ast);
 
     static_config.write_to_file(static_conf);
 
@@ -280,6 +380,6 @@ int main(int argc, char **argv) {
         test_station_scheduling();
     }
     else if (std::strcmp(argv[1], "waypoint") == 0) {
-        test_waypoint_scheduling();
+        test_waypoint_scheduling(matrix);
     }
 }
