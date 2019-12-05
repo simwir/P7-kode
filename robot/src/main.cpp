@@ -42,11 +42,13 @@ void print_help(const char *const execute_location)
         << "-c --com-module <IP>[:<PORT>]    Set address of the communication modulde.\n"
         << "-p --port-service <IP>[:<PORT>]  Set address of the port discovery service.\n"
         << "-o --order-service <IP>[:<PORT>] Set address of the order service.\n"
+        << "-a --single-ip <IP>[:<PORT>]     Set address of all modules and services.\n"  
         << "-r --robot <IP>                  Set the host of the robot.\n"
         << "-q --station-query-file PATH     Path to the station query file template.\n"
         << "-w --waypoint-query-file PATH    Path to the waypoint query file template.\n"
         << "-e --eta-query-file PATH         Path to the eta query file template.\n"
-        << "-h --help                        Print this help message" << std::endl;
+        << "-h --help                        Print this help message"
+        << std::endl;
 }
 
 std::pair<std::string, std::optional<std::string>> parse_address(std::string address)
@@ -108,6 +110,17 @@ int main(int argc, char **argv)
                 options.order_port = address.second.value();
             }
             break;
+        case 'a':
+            if (time_chosen) {
+                std::cerr << "Time system already set to system time." << std::endl;
+                exit(1);
+            }
+            time_chosen = true;
+            address = parse_address(std::string{optarg})
+            options.time_addr = options.com_addr = options.pds_addr = options.order_addr options.robot_addr = address.first;
+            if (address.second) {
+                options.time_port = options.com_port = options.pds_port = options.order_port = address.second.value();
+            }
         case 'r':
             options.robot_addr = std::string{optarg};
             break;
