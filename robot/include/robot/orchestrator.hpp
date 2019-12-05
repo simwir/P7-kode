@@ -28,6 +28,7 @@
 #include "scheduling.hpp"
 #include "util/euclid.hpp"
 #include "wbt-translator/webots_parser.hpp"
+#include "wbt-translator/apsp.hpp"
 #include <tcp/client.hpp>
 
 #include <filesystem>
