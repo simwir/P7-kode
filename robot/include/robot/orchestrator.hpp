@@ -31,6 +31,7 @@
 #include <tcp/client.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <optional>
 
 const std::filesystem::path dynamic_conf = "dynamic_config.json";
@@ -47,6 +48,11 @@ const std::filesystem::path static_conf = "static_config.json";
 #define STATIONS "stations"
 #define END_STATIONS "end_stations"
 #define VIAS "vias"
+
+#define ORDER_LOG_DELIM ";"
+#define ORDER_LOG_HEADER                                                                           \
+    "receive time" ORDER_LOG_DELIM "completion time" ORDER_LOG_DELIM                               \
+    "completion duration" ORDER_LOG_DELIM "stations in order"
 
 constexpr int UPDATE_INTERVAL_MS = 1000;
 
@@ -146,10 +152,24 @@ class Orchestrator {
     std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
     std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
 
+    void dump_order(const std::vector<int> &order, std::ostream &os)
+    {
+        auto it = order.begin(), e = order.end();
+        while (it != e) {
+            os << *it++;
+            if (it != e) {
+                os << ",";
+            }
+        }
+    }
+
     void do_next_action();
     void set_station_visited(int station);
     std::vector<int> order;
-    int order_rec_time;
+    std::vector<int> last_order;
+    int order_begun_time = -1;
+    bool ending_last_order = false;
+    std::ofstream order_log;
 
     // visited waypoints since last station we were at.
     std::vector<int> visited_waypoints;

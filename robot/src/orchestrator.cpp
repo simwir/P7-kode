@@ -28,9 +28,9 @@
 #include "wbt-translator/webots_parser.hpp"
 
 #include <cassert>
+#include <chrono>
 
 #define TRACEME
-
 #include "trace.def"
 
 robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Options options)
@@ -62,6 +62,14 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Option
     robot_client = std::make_unique<tcp::Client>(options.robot_addr, port_to_controller);
     clock_client = std::make_unique<robot::WebotsClock>(options.time_addr, options.time_port);
     current_state.id = id;
+
+    std::stringstream filename{};
+    auto now = std::chrono::system_clock::now();
+    std::time_t ctime = std::chrono::system_clock::to_time_t(now);
+    std::tm localtime = *std::localtime(&ctime);
+    filename << "order_log__" << std::put_time(&localtime, "%c");
+    order_log = std::ofstream{filename.str()};
+    order_log << ORDER_LOG_HEADER << std::endl;
 }
 
 void robot::Orchestrator::load_webots_to_config()
@@ -199,7 +207,9 @@ void robot::Orchestrator::get_new_order()
     tcp::Client order_service_client{options.order_addr, options.order_port};
     order_service_client.send("get_order");
     auto response = order_service_client.receive_blocking();
-    order_rec_time = clock_client->get_current_time();
+
+    ending_last_order = true;
+
     std::stringstream ss{response};
     Json::Value val;
     ss >> val;
@@ -299,6 +309,19 @@ void robot::Orchestrator::do_next_action()
             dynamic_config.set(NEXT_STATION, next_station);
             // fallthrough to waypoint scheduling afterward.
             write_dynamic_config();
+
+            // check for if we reached the end station while doing station calculation.
+            get_dynamic_state();
+            int wp = get_closest_waypoint();
+            if (controller_state.is_stopped && is_end_station(wp)) {
+                order_log << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
+                          << current_time - order_begun_time << ORDER_LOG_DELIM;
+                dump_order(last_order, order_log);
+                order_log << std::endl;
+                last_order = order;
+                ending_last_order = false;
+                order_begun_time = clock_client->get_current_time();
+            }
         }
 
         if (station_scheduler.running()) {
@@ -361,7 +384,12 @@ void robot::Orchestrator::main_loop()
     get_dynamic_state();
     // set next station to our closest station during the bootstrapping (before any actual schedule
     // exists).
+    current_time = clock_client->get_current_time();
     get_new_order();
+    order_begun_time = current_time;
+    last_order = order;
+    ending_last_order = false;
+
     dynamic_config.set("stations_to_visit", order);
     dynamic_config.set(NEXT_STATION, get_closest_waypoint([](auto wp) {
                            return wp.waypointType == WaypointType::eStation ||
@@ -483,7 +511,19 @@ void robot::Orchestrator::main_loop()
                     TRACE(std::cerr << "Orchestrator: from " << current_waypoint.value
                                     << std::endl);
                     set_station_visited(next_waypoint.value);
-                    if (order.empty() && is_end_station(next_waypoint)) {
+
+                    // not likely to hit this.
+                    // if we are done with an order and we are at an end station, log this
+                    // information.
+                    if (is_end_station(wp) && ending_last_order) {
+                        order_log << order_begun_time << ORDER_LOG_DELIM << current_time
+                                  << ORDER_LOG_DELIM << current_time - order_begun_time
+                                  << ORDER_LOG_DELIM << std::endl;
+                        dump_order(last_order, order_log);
+                        order_log << std::endl;
+                        last_order = order;
+                        ending_last_order = false;
+                        order_begun_time = clock_client->get_current_time();
                     }
                     if (!order.empty()) {
                         dynamic_config.set("stations_to_visit", order);
@@ -520,9 +560,9 @@ void robot::Orchestrator::main_loop()
             // TODO Maybe update ETA based on time elapsed since last update.
             // Not an immediately trivial change since ETAs might become negative.
             if (current_state.eta.has_value()) {
-                TRACE(std::cerr << "Updating ETA: before: " << *current_state.eta);
+                // TRACE(std::cerr << "Updating ETA: before: " << *current_state.eta);
                 current_state.eta = std::max(0.0, current_state.eta.value() - time_elapsed / 1000);
-                TRACE(std::cerr << "\tafter: " << *current_state.eta << std::endl);
+                // TRACE(std::cerr << "\tafter: " << *current_state.eta << std::endl);
             }
             send_robot_info();
             if (!(station_scheduler.running() || waypoint_scheduler.running() ||
