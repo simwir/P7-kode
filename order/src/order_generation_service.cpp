@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     int port = 7777;
     int min_size;
     int max_size;
-    int count;
+    int count = 0;
     unsigned seed;
     std::vector<int> stations;
     std::string generator_type;
