@@ -34,7 +34,8 @@ void print_help()
            "--random=<seed>                 Uses a random order generator with an optional seed\n"
            "--min=<size>                    Minimum order size (used with random generator)\n"
            "--max=<size>                    Maxmum order size (used with random generator)\n"
-           "--port=<port>                   Sets the port of the server\n";
+           "--port=<port>                   Sets the port of the server\n"
+           "--count=<count>                 Sets the maximum number of orders to be generated\n";
     exit(1);
 }
 
@@ -63,7 +64,8 @@ int main(int argc, char *argv[])
     const option options[] = {
         {"stations", required_argument, 0, 's'}, {"random", optional_argument, 0, 'r'},
         {"min", required_argument, 0, 'n'},      {"max", required_argument, 0, 'm'},
-        {"help", no_argument, 0, 'h'},           {"port", required_argument, 0, 'p'}};
+        {"help", no_argument, 0, 'h'},           {"port", required_argument, 0, 'p'},
+        {"count", required_argument, 0, 'c'}};
 
     const std::string short_options{"s:n:m:r::p:h"};
 
@@ -71,6 +73,7 @@ int main(int argc, char *argv[])
     int port = 7777;
     int min_size;
     int max_size;
+    int count;
     unsigned seed;
     std::vector<int> stations;
     std::string generator_type;
@@ -100,6 +103,9 @@ int main(int argc, char *argv[])
             break;
         case 'p':
             port = atoi(optarg);
+            break;
+        case 'c':
+            count = atoi(optarg);
             break;
         case 'h':
         default:
@@ -132,13 +138,13 @@ int main(int argc, char *argv[])
                   << std::static_pointer_cast<RandomGenerator>(generator)->get_max_size()
                   << std::endl;
     }
-    // TODO: Handle other generators.
     else {
         std::cerr << "Generator type not set" << std::endl;
         exit(1);
     }
 
-    GenerationService service = GenerationService{port, generator};
+    GenerationService service =
+        !count ? GenerationService{port, generator} : GenerationService{port, generator, count};
 
     std::cout << "Starting on port " << service.get_port() << std::endl;
 
