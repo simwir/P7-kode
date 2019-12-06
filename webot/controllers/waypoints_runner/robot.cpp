@@ -89,6 +89,7 @@ RobotController::RobotController(webots::Supervisor *robot)
 
     lidar = {robot->getLidar("lidar")};
     lidar.enable(time_step);
+    robot->getLidar("lidar")->enablePointCloud();
     lidar_resolution = lidar.get_resolution();
     lidar_max_range = lidar.get_max_range();
     lidar_min_range = lidar.get_min_range();
