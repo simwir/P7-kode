@@ -451,6 +451,8 @@ void robot::Orchestrator::main_loop()
     send_robot_info();
 
     prepend_waypoint_to_schedule(next_waypoint);
+    prepend_waypoint_to_schedule(next_waypoint);
+
     next_waypoint = get_next_waypoint().value();
     dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
     waypoint_subscriber->read();
