@@ -167,17 +167,6 @@ class Orchestrator {
         }
     }
 
-    void dump_order(const std::vector<int> &order, std::ostream &os)
-    {
-        auto it = order.begin(), e = order.end();
-        while (it != e) {
-            os << *it++;
-            if (it != e) {
-                os << ",";
-            }
-        }
-    }
-
     // actions and order information
     void do_next_action();
     void set_station_visited(int station);
