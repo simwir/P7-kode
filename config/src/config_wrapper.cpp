@@ -401,8 +401,7 @@ int32_t get_waypoint_next(int32_t from, int32_t to)
 {
     load();
     try {
-        static auto next =
-            static_config.get<std::vector<std::vector<int>>>("next_waypoint_matrix");
+        static auto next = static_config.get<std::vector<std::vector<int>>>("next_waypoint_matrix");
         return next.at(from).at(to);
     }
     catch (const std::exception &e) {
