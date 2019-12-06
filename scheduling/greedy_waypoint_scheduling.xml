@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>/*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
+ *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
+ *
+ *Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ *associated documentation files (the "Software"), to deal in the Software without restriction,
+ *including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ *sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ *furnished to do so, subject to the following conditions:
+ *
+ *The above copyright notice and this permission notice shall be included in all copies or
+ *substantial portions of the Software.
+ *
+ *THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ *NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+hybrid clock total;
+
+import "libconfig.so" {
+    int number_of_stations();
+    int number_of_waypoints();
+    int waypoint_passing_time();
+    int station_passing_time();
+    int next_waypoint();
+    int destination();
+    double uncertainty();
+    int get_waypoint_dist(int from, int to);
+    int get_waypoint_next(int from, int to);
+};
+
+const int NUM_STATIONS = number_of_stations();
+const int NUM_WAYPOINTS = number_of_waypoints();
+const double UNCERTAINTY = uncertainty();
+const int NON_STATION_PASSING = waypoint_passing_time();
+const int STATION_PASSING = station_passing_time();
+
+import "libconfig.so" {
+    void waypoint_visited(int num_waypoints, bool&amp; arr[int[0, NUM_WAYPOINTS - 1]]);
+    void station_list(int num_stations, int[0, NUM_WAYPOINTS - 1]&amp; arr[int[1, NUM_STATIONS]]);
+};
+
+int[0, NUM_WAYPOINTS - 1] station_waypoint[int[1, NUM_STATIONS]];
+
+broadcast chan go, queue[int[0, NUM_WAYPOINTS - 1]];</declaration>
+	<template>
+		<name>Waypoint</name>
+		<parameter>int[0, NUM_WAYPOINTS - 1] id</parameter>
+		<declaration>clock x;
+
+int passing_time() {
+    for (station_id : int[1, NUM_STATIONS]) {
+        if (station_waypoint[station_id] == id) {
+            return STATION_PASSING;
+        }
+    }
+
+    return NON_STATION_PASSING;
+}</declaration>
+		<location id="id0" x="-263" y="-34">
+			<name x="-306" y="-25">Idle</name>
+		</location>
+		<location id="id1" x="-93" y="42">
+			<name x="-76" y="34">Queued</name>
+			<label kind="invariant" x="-76" y="51">x &lt;= passing_time() * UNCERTAINTY</label>
+		</location>
+		<init ref="id0"/>
+		<transition controllable="false">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-272" y="51">queue[id]?</label>
+			<label kind="assignment" x="-272" y="68">x = 0</label>
+			<nail x="-263" y="42"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-204" y="-76">x &gt;= passing_time()</label>
+			<label kind="synchronisation" x="-204" y="-59">go!</label>
+			<nail x="-93" y="-34"/>
+			<nail x="-110" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Robot</name>
+		<declaration>clock x;
+
+bool visited[int[0, NUM_WAYPOINTS - 1]];
+
+const int[0, NUM_WAYPOINTS - 1] dest = destination();
+
+int[0, NUM_WAYPOINTS - 1] cur_waypoint = next_waypoint();
+int[-1, NUM_WAYPOINTS - 1] dest_waypoint;
+
+void set_global() {
+    waypoint_visited(NUM_WAYPOINTS, visited);
+    station_list(NUM_STATIONS, station_waypoint);
+}</declaration>
+		<location id="id2" x="-25" y="-246">
+			<name x="-51" y="-221">Waiting</name>
+		</location>
+		<location id="id3" x="-399" y="-399">
+			<name x="-501" y="-442">BetweenWaypoints</name>
+			<label kind="invariant" x="-918" y="-408">x &lt;= get_waypoint_dist(cur_waypoint, dest_waypoint) * UNCERTAINTY</label>
+		</location>
+		<location id="id4" x="-398" y="-246">
+			<name x="-467" y="-272">Choose</name>
+			<committed/>
+		</location>
+		<location id="id5" x="-399" y="-102">
+			<name x="-374" y="-110">Done</name>
+			<label kind="invariant" x="-374" y="-93">total' == 0</label>
+		</location>
+		<location id="id6" x="-680" y="-246">
+			<name x="-714" y="-280">Start</name>
+			<committed/>
+		</location>
+		<location id="id7" x="-25" y="-399">
+			<name x="-59" y="-433">QueueUp</name>
+			<committed/>
+		</location>
+		<location id="id8" x="161" y="-399">
+			<name x="178" y="-416">Holding</name>
+		</location>
+		<init ref="id6"/>
+		<transition controllable="false">
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<nail x="161" y="-357"/>
+			<nail x="17" y="-357"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="guard" x="51" y="-416">false</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id7"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-17" y="-306">queue[dest_waypoint]!</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id6"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="-654" y="-238">set_global(),
+visited[cur_waypoint] = true,
+dest_waypoint = -1</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-391" y="-204">dest == cur_waypoint</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id2"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-221" y="-272">go?</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id3"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-331" y="-459">x &gt;= get_waypoint_dist(cur_waypoint, dest_waypoint)</label>
+			<label kind="assignment" x="-331" y="-442">cur_waypoint = dest_waypoint,
+visited[cur_waypoint] = true, x = 0</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="select" x="-391" y="-365">id : int[0, NUM_WAYPOINTS - 1]</label>
+			<label kind="guard" x="-391" y="-348">get_waypoint_next(cur_waypoint, dest) == id &amp;&amp;
+dest != cur_waypoint</label>
+			<label kind="assignment" x="-391" y="-314">dest_waypoint = id,
+x = 0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+// List one or more processes to be composed into a system.
+system Waypoint, Robot;</system>
+	<queries>
+		<query>
+			<formula>strategy omnipotent = minE (total) [&lt;=500] {
+	Robot.location,
+	Robot.visited[0],
+	Robot.visited[1],
+	Robot.visited[2],
+	Robot.visited[3],
+	Robot.visited[4],
+	Robot.visited[5],
+	Robot.visited[6],
+	Robot.visited[7],
+	Robot.visited[8],
+	Robot.visited[9],
+	Robot.visited[10],
+	Robot.visited[11],
+	Robot.visited[12],
+	Robot.visited[13],
+	Robot.visited[14],
+	Robot.visited[15],
+	Robot.visited[16],
+	Robot.visited[17],
+	Robot.visited[18],
+	Robot.visited[19],
+	Robot.visited[20],
+	Robot.visited[21],
+	Robot.visited[22],
+	Robot.visited[23],
+	Robot.visited[24],
+	Robot.visited[25],
+	Robot.visited[26],
+	Robot.visited[27],
+	Robot.dest,
+	Robot.cur_waypoint,
+	Robot.dest_waypoint
+} -&gt; {
+	Waypoint(0).num_in_queue,
+	Waypoint(1).num_in_queue,
+	Waypoint(2).num_in_queue,
+	Waypoint(3).num_in_queue,
+	Waypoint(4).num_in_queue,
+	Waypoint(5).num_in_queue,
+	Waypoint(6).num_in_queue,
+	Waypoint(7).num_in_queue,
+	Waypoint(8).num_in_queue,
+	Waypoint(9).num_in_queue,
+	Waypoint(10).num_in_queue,
+	Waypoint(11).num_in_queue,
+	Waypoint(12).num_in_queue,
+	Waypoint(13).num_in_queue,
+	Waypoint(14).num_in_queue,
+	Waypoint(15).num_in_queue,
+	Waypoint(16).num_in_queue,
+	Waypoint(17).num_in_queue,
+	Waypoint(18).num_in_queue,
+	Waypoint(19).num_in_queue,
+	Waypoint(20).num_in_queue,
+	Waypoint(21).num_in_queue,
+	Waypoint(22).num_in_queue,
+	Waypoint(23).num_in_queue,
+	Waypoint(24).num_in_queue,
+	Waypoint(25).num_in_queue,
+	Waypoint(26).num_in_queue,
+	Waypoint(27).num_in_queue,
+	Robot.x
+} : &lt;&gt; Robot.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy realistic = minE (total) [&lt;=500] {
+	Robot.location,
+	Robot.visited[0],
+	Robot.visited[1],
+	Robot.visited[2],
+	Robot.visited[3],
+	Robot.visited[4],
+	Robot.visited[5],
+	Robot.visited[6],
+	Robot.visited[7],
+	Robot.visited[8],
+	Robot.visited[9],
+	Robot.visited[10],
+	Robot.visited[11],
+	Robot.visited[12],
+	Robot.visited[13],
+	Robot.visited[14],
+	Robot.visited[15],
+	Robot.visited[16],
+	Robot.visited[17],
+	Robot.visited[18],
+	Robot.visited[19],
+	Robot.visited[20],
+	Robot.visited[21],
+	Robot.visited[22],
+	Robot.visited[23],
+	Robot.visited[24],
+	Robot.visited[25],
+	Robot.visited[26],
+	Robot.visited[27],
+	Robot.dest,
+	Robot.cur_waypoint,
+	Robot.dest_waypoint
+} -&gt; {
+	Waypoint(0).num_in_queue,
+	Waypoint(1).num_in_queue,
+	Waypoint(2).num_in_queue,
+	Waypoint(3).num_in_queue,
+	Waypoint(4).num_in_queue,
+	Waypoint(5).num_in_queue,
+	Waypoint(6).num_in_queue,
+	Waypoint(7).num_in_queue,
+	Waypoint(8).num_in_queue,
+	Waypoint(9).num_in_queue,
+	Waypoint(10).num_in_queue,
+	Waypoint(11).num_in_queue,
+	Waypoint(12).num_in_queue,
+	Waypoint(13).num_in_queue,
+	Waypoint(14).num_in_queue,
+	Waypoint(15).num_in_queue,
+	Waypoint(16).num_in_queue,
+	Waypoint(17).num_in_queue,
+	Waypoint(18).num_in_queue,
+	Waypoint(19).num_in_queue,
+	Waypoint(20).num_in_queue,
+	Waypoint(21).num_in_queue,
+	Waypoint(22).num_in_queue,
+	Waypoint(23).num_in_queue,
+	Waypoint(24).num_in_queue,
+	Waypoint(25).num_in_queue,
+	Waypoint(26).num_in_queue,
+	Waypoint(27).num_in_queue,
+	Robot.x
+} : &lt;&gt; Robot.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under omnipotent</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; Robot.Done) under realistic</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 100] {
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding * 2 + NUM_WAYPOINTS + 2
+}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 100] {
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding * 2 + NUM_WAYPOINTS + 2
+} under omnipotent</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 100] {
+    Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding * 2 + NUM_WAYPOINTS + 2
+} under realistic</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total) under omnipotent</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: total) under realistic</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>saveStrategy("test3.json", realistic)</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
