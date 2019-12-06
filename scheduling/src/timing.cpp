@@ -32,7 +32,7 @@ constexpr int max_robots = 20;
 
 const std::filesystem::path dynamic_conf = "dynamic_config.json";
 const std::filesystem::path static_conf = "static_config.json";
-const std::filesystem::path world_path = "testmap_3.wbt";
+const std::filesystem::path world_path = "testmap_1.wbt";
 
 #define NEXT_WAYPOINT "next_waypoint"
 #define NEXT_STATION "next_station"
