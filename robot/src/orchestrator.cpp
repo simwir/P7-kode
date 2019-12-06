@@ -207,6 +207,9 @@ void robot::Orchestrator::get_new_order()
     tcp::Client order_service_client{options.order_addr, options.order_port};
     order_service_client.send("get_order");
     auto response = order_service_client.receive_blocking();
+    if (response == "no_order") {
+        final_order = true;
+    }
 
     ending_last_order = true;
 
@@ -313,14 +316,21 @@ void robot::Orchestrator::do_next_action()
             // check for if we reached the end station while doing station calculation.
             get_dynamic_state();
             int wp = get_closest_waypoint();
-            if (controller_state.is_stopped && is_end_station(wp)) {
+            if (controller_state.is_stopped && is_end_station(wp) && ending_last_order) {
                 order_log << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
                           << current_time - order_begun_time << ORDER_LOG_DELIM;
                 dump_order(last_order, order_log);
-                order_log << std::endl;
-                last_order = order;
-                ending_last_order = false;
-                order_begun_time = clock_client->get_current_time();
+                if (final_order) {
+                    robot_client->send("done");
+                    std::cout << "Orchestrator: DONE with all orders.\n";
+                    order_log.close();
+                }
+                else {
+                    order_log << std::endl;
+                    last_order = order;
+                    ending_last_order = false;
+                    order_begun_time = clock_client->get_current_time();
+                }
             }
         }
 

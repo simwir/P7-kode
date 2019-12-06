@@ -169,6 +169,7 @@ class Orchestrator {
     std::vector<int> last_order;
     int order_begun_time = -1;
     bool ending_last_order = false;
+    bool final_order = false;
     std::ofstream order_log;
 
     // visited waypoints since last station we were at.

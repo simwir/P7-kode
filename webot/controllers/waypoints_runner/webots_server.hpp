@@ -28,7 +28,7 @@
 
 namespace webots_server {
 
-enum class MessageType { get_state, set_destination, not_understood };
+enum class MessageType { get_state, set_destination, done, not_understood };
 
 struct Message {
     std::string payload;

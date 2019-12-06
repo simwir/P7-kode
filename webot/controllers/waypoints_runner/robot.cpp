@@ -152,6 +152,9 @@ void RobotController::communicate()
                   std::stod(message.payload.substr(split_pos + 1))});
         break;
     }
+    case MessageType::done: {
+        set_goal({100,100});
+    }
     default:
         break;
     }
