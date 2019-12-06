@@ -101,7 +101,7 @@ class Orchestrator {
     void request_order();
     std::vector<int> receive_order();
 
-    void get_new_order();
+    std::optional<std::vector<int>> get_new_order();
 
     void write_static_config();
     void write_dynamic_config();
@@ -168,7 +168,7 @@ class Orchestrator {
     }
 
     // actions and order information
-    void do_next_action();
+    bool do_next_action();
     void set_station_visited(int station);
     std::vector<int> order;
     std::vector<int> last_order;
@@ -176,6 +176,7 @@ class Orchestrator {
     bool ending_last_order = false;
     bool final_order = false;
     std::ofstream order_log;
+    void log_order_completion();
 
     // visited waypoints since last station we were at.
     std::vector<int> visited_waypoints;

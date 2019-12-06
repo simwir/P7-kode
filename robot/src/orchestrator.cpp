@@ -219,7 +219,7 @@ std::string robot::Orchestrator::receive_robot_info()
     return com_module.receive_blocking();
 }
 
-void robot::Orchestrator::get_new_order()
+std::optional<std::vector<int>> robot::Orchestrator::get_new_order()
 {
     // order_service_client->send("get_order");
     // TODO temp until better API on order generator
@@ -228,13 +228,14 @@ void robot::Orchestrator::get_new_order()
     order_service_client.send("get_order");
     auto response = order_service_client.receive_blocking();
     if (response == "no_orders") {
-        final_order = true;
+        return std::nullopt;
     }
 
     ending_last_order = true;
 
     std::stringstream ss{response};
     Json::Value val;
+    TRACE(std::cerr << "Raw order response: " << response << std::endl);
     ss >> val;
     std::vector<int> order;
     TRACE({
@@ -246,7 +247,7 @@ void robot::Orchestrator::get_new_order()
     });
     TRACE(std::cerr << std::endl);
     dynamic_config.set("stations_to_visit", order);
-    this->order = order;
+    return order;
 }
 
 std::string robot::Orchestrator::receive_controller_info()
@@ -306,7 +307,7 @@ void robot::Orchestrator::set_robot_destination(int waypoint)
     dynamic_config.set(NEXT_WAYPOINT, waypoint);
 }
 
-void robot::Orchestrator::do_next_action()
+bool robot::Orchestrator::do_next_action()
 {
     assert(!waypoint_subscriber->get().empty());
     // current_waypoint = waypoint_subscriber->get().front();
@@ -321,7 +322,13 @@ void robot::Orchestrator::do_next_action()
         // When there's nothing left of the order and we are near an end station:
         // Get a new order and bootstrap new schedules for this order.
         if (order.empty() && waypoint_subscriber->get().empty() && is_end_station(next_waypoint)) {
-            get_new_order();
+            auto _order = get_new_order();
+            if (_order.has_value()) {
+                order = _order.value();
+            }
+            else {
+                return false;
+            }
 
             clear_visited_waypoints();
             write_dynamic_config();
@@ -337,20 +344,11 @@ void robot::Orchestrator::do_next_action()
             get_dynamic_state();
             int wp = get_closest_waypoint();
             if (controller_state.is_stopped && is_end_station(wp) && ending_last_order) {
-                order_log << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
-                          << current_time - order_begun_time << ORDER_LOG_DELIM;
-                dump_order(last_order, order_log);
-                if (final_order) {
-                    robot_client->send("done");
-                    std::cout << "Orchestrator: DONE with all orders.\n";
-                    order_log.close();
-                }
-                else {
-                    order_log << std::endl;
-                    last_order = order;
-                    ending_last_order = false;
-                    order_begun_time = clock_client->get_current_time();
-                }
+                log_order_completion();
+                order_log << std::endl;
+                last_order = order;
+                ending_last_order = false;
+                order_begun_time = clock_client->get_current_time();
             }
         }
 
@@ -388,6 +386,7 @@ void robot::Orchestrator::do_next_action()
         }
     });
     TRACE(std::cerr << std::endl);
+    return true;
 }
 
 std::optional<scheduling::Action> robot::Orchestrator::get_next_waypoint()
@@ -415,7 +414,14 @@ void robot::Orchestrator::main_loop()
     // set next station to our closest station during the bootstrapping (before any actual schedule
     // exists).
     current_time = clock_client->get_current_time();
-    get_new_order();
+    auto _order = get_new_order();
+    if (_order.has_value()) {
+        order = std::move(_order.value());
+    }
+    else {
+        std::cout << "No orders available, cannot start generator" << std::endl;
+        exit(1);
+    }
     order_begun_time = current_time;
     last_order = order;
     ending_last_order = false;
@@ -456,7 +462,7 @@ void robot::Orchestrator::main_loop()
     next_waypoint = get_next_waypoint().value();
     dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
     waypoint_subscriber->read();
-    do_next_action();
+    assert(do_next_action());
     current_time = clock_client->get_current_time();
     start_eta_calculation();
 
@@ -528,7 +534,9 @@ void robot::Orchestrator::main_loop()
             }
             else {
                 TRACE(std::cerr << "Orchestrator: expected at waypoint.\n");
-                do_next_action();
+                if (!do_next_action()) {
+                    break;
+                }
 
                 // if committed to station dest or at station
                 //    then reschedule stations
@@ -604,6 +612,16 @@ void robot::Orchestrator::main_loop()
             }
         }
     }
+
+    robot::ControllerState state;
+    do {
+        request_robot_info();
+        state = robot::ControllerState::parse(receive_robot_info());
+    } while (!state.is_stopped);
+
+    robot_client->send("done");
+    std::cout << "Orchestrator: DONE with all orders.\n";
+    order_log.close();
 }
 
 int robot::Orchestrator::get_closest_waypoint(std::function<bool(Waypoint)> pred)
@@ -666,4 +684,11 @@ double robot::Orchestrator::dist_to_next_waypoint()
     auto &[x, _, y] = ast.nodes.at(next_waypoint.value).translation;
     return euclidean_distance(current_state.location, communication::Point{x, y}) /
            MEASURED_ROBOT_SPEED;
+}
+
+void robot::Orchestrator::log_order_completion()
+{
+    order_log << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
+              << current_time - order_begun_time << ORDER_LOG_DELIM;
+    dump_order(last_order, order_log);
 }
