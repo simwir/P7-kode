@@ -621,7 +621,7 @@ void robot::Orchestrator::main_loop()
 
     robot_client->send("done");
     std::cout << "Orchestrator: DONE with all orders.\n";
-    order_log.close();
+    log_order_completion();
 }
 
 int robot::Orchestrator::get_closest_waypoint(std::function<bool(Waypoint)> pred)
