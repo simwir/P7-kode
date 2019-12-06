@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     }
 
     GenerationService service =
-        !count ? GenerationService{port, generator} : GenerationService{port, generator, count};
+        count == 0 ? GenerationService{port, generator} : GenerationService{port, generator, count};
 
     std::cout << "Starting on port " << service.get_port() << std::endl;
 

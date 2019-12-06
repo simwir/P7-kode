@@ -42,7 +42,6 @@ void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connectio
 
         if (max_order_count > -1 && order_count >= max_order_count) {
             connection->send("no_orders");
-            lock.unlock();
             return;
         }
 
