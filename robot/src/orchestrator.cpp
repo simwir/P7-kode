@@ -29,6 +29,7 @@
 
 #include <cassert>
 #include <chrono>
+#include <iomanip>
 
 #define TRACEME
 #include "trace.def"
