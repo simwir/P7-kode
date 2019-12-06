@@ -44,7 +44,7 @@ std::ostream &operator<<(std::ostream &os, const Action &action);
 
 class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {
   public:
-    virtual void newSchedule(const std::vector<Action> &schedule) = 0;
+    virtual void new_schedule(const std::vector<Action> &schedule) = 0;
     virtual ~WaypointScheduleSubscriber() = default;
 };
 

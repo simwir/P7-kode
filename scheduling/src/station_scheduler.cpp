@@ -98,7 +98,7 @@ void StationScheduler::notify_subscribers(const std::vector<int> &schedule)
 {
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {
-            sub->newSchedule(schedule);
+            sub->new_schedule(schedule);
         }
     }
 }

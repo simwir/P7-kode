@@ -61,6 +61,8 @@ template <class... Ms>
 _scoped_lock(Ms...)->_scoped_lock<Ms...>;
 
 // shhhhhh
+// apparently deduction guides are not legal for using statement, so use macros to get equivalent
+// effect.
 #undef TRACEME
 #ifdef TRACEME
 #define ScopedLock _scoped_lock

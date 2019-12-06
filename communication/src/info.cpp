@@ -26,7 +26,7 @@
 #include <vector>
 
 namespace robot {
-robot::ControllerState ControllerState::parse(const std::string &s)
+ControllerState ControllerState::parse(const std::string &s)
 {
     std::stringstream ss{s};
     double x, y;
@@ -34,30 +34,29 @@ robot::ControllerState ControllerState::parse(const std::string &s)
     char sink;
     ss >> x >> sink;
     if (!ss || sink != ',') {
-       throw robot::InfoParseError{"could not parse controller state from " + s};
+        throw InfoParseError{"could not parse controller state from " + s};
     }
     ss >> y >> sink;
     if (!ss || sink != ',') {
-        throw robot::InfoParseError{"could not parse controller state from " + s};
+        throw InfoParseError{"could not parse controller state from " + s};
     }
     ss >> state;
     if (state == "holding") {
-        return robot::ControllerState{x, y, true};
+        return ControllerState{x, y, true};
     }
     else if (state == "running") {
-        return robot::ControllerState{x, y, false};
+        return ControllerState{x, y, false};
     }
     else {
-        throw robot::InfoParseError{"invalid value for state: " + state};
+        throw InfoParseError{"invalid value for state: " + state};
     }
 }
-robot::ControllerState robot::ControllerState::from_json(const Json::Value &json)
+ControllerState ControllerState::from_json(const Json::Value &json)
 {
-    return robot::ControllerState{json["x"].asDouble(), json["y"].asDouble(),
-                                  json["stopped"].asBool()};
+    return ControllerState{json["x"].asDouble(), json["y"].asDouble(), json["stopped"].asBool()};
 }
 
-Json::Value robot::ControllerState::to_json() const
+Json::Value ControllerState::to_json() const
 {
     Json::Value val{Json::objectValue};
     val["x"] = position.x;
@@ -65,7 +64,9 @@ Json::Value robot::ControllerState::to_json() const
     val["stopped"] = is_stopped;
     return val;
 }
+} // namespace robot
 
+namespace communication {
 Json::Value Info::to_json() const
 {
     Json::Value json;
@@ -138,9 +139,9 @@ get_field_as<std::vector<scheduling::Action>>(const Json::Value &json, const std
 }
 
 template <>
-robot::Point get_field_as<robot::Point>(const Json::Value &json, const std::string &field)
+Point get_field_as<Point>(const Json::Value &json, const std::string &field)
 {
-    return robot::Point{json[field]["x"].asDouble(), json[field]["y"].asDouble()};
+    return Point{json[field]["x"].asDouble(), json[field]["y"].asDouble()};
 }
 
 template <>
@@ -171,12 +172,12 @@ Info Info::from_json(const Json::Value &json)
     }
 
     int id = get_field_as<int>(json, "id");
-    auto location = get_field_as<robot::Point>(json, "location");
+    auto location = get_field_as<Point>(json, "location");
     auto station_plan = get_field_as<std::vector<int>>(json, "station_plan");
     auto waypoint_plan = get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
     auto eta = get_field_as<std::optional<double>>(json, "station_eta");
 
-    return robot::Info{id, location, station_plan, waypoint_plan, eta};
+    return Info{id, location, station_plan, waypoint_plan, eta};
 }
 
 InfoMap::InfoMap(const std::vector<Info> &infos)
@@ -235,4 +236,4 @@ bool InfoMap::try_erase(int id)
     return false;
 }
 
-} // namespace robot
+} // namespace communication

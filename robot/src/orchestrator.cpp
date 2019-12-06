@@ -228,7 +228,7 @@ void robot::Orchestrator::get_dynamic_state()
     request_controller_info();
     auto broadcast_info = receive_robot_info();
     auto _controller_state = receive_controller_info();
-    robot_info = robot::InfoMap::from_json(broadcast_info);
+    robot_info = communication::InfoMap::from_json(broadcast_info);
     controller_state = robot::ControllerState::parse(_controller_state);
     robot_info.try_erase(this->id);
     if (robot_info.size() != last_num_robots) {
@@ -541,7 +541,7 @@ int robot::Orchestrator::get_closest_waypoint(std::function<bool(Waypoint)> pred
     for (auto &[id, wp] : ast.nodes) {
         if (pred(wp)) {
             auto &[x, _, y] = wp.translation;
-            auto dist = euclidean_distance(Point{x, y}, controller_state.position);
+            auto dist = euclidean_distance(communication::Point{x, y}, controller_state.position);
             if (dist < best_dist) {
                 best_dist = dist;
                 best_wp = id;
@@ -592,5 +592,6 @@ void robot::Orchestrator::create_query_file()
 double robot::Orchestrator::dist_to_next_waypoint()
 {
     auto &[x, _, y] = ast.nodes.at(next_waypoint.value).translation;
-    return euclidean_distance(current_state.location, Point{x, y}) / MEASURED_ROBOT_SPEED;
+    return euclidean_distance(current_state.location, communication::Point{x, y}) /
+           MEASURED_ROBOT_SPEED;
 }

@@ -39,7 +39,7 @@ class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
   private:
     const std::vector<int> station_ids;
 
-    void newSchedule(const std::vector<int> &schedule) override
+    void new_schedule(const std::vector<int> &schedule) override
     {
         std::scoped_lock _{mutex};
         reset(schedule);
@@ -53,7 +53,7 @@ class AsyncWaypointSubscriber : public scheduling::WaypointScheduleSubscriber,
 
   private:
     std::mutex mutex;
-    void newSchedule(const std::vector<scheduling::Action> &schedule) override
+    void new_schedule(const std::vector<scheduling::Action> &schedule) override
     {
         std::scoped_lock _{mutex};
         reset(schedule);

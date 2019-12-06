@@ -158,7 +158,7 @@ void scheduling::WaypointScheduler::notify_subscribers(
 {
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {
-            sub->newSchedule(schedule);
+            sub->new_schedule(schedule);
         }
     }
 }

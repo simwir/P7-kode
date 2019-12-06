@@ -7,7 +7,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation 1 0 0 4.71238898038469
-  position 0.0002448707952233075 6.2573624305534645 2.272301533312027e-06
+  position 0.337197514467544 5.062680108077012 0.11641245649722101
 }
 TexturedBackground {
 }
@@ -17,35 +17,98 @@ RectangleArena {
   floorSize 2.5 2.5
   floorTileSize 0.2 0.2
 }
-Elisa3 {  
-  translation -0.270445 -9.853e-06 0.0800296  
-  rotation 7.5511099997413215e-06 -0.999999999965743 3.3904399998838536e-06 0.662722  
-  controller "waypoints_runner" 
-  supervisor TRUE 
-  extensionSlot [ 
-    Group { 
-      children [  
-        Lidar { 
-          translation 0 0.04 0  
-          rotationStep 0.261799 
-          fieldOfView 6.28328 
-          numberOfLayers 1  
-          maxRange 0.5  
-        } 
-        GPS { 
-          translation 0.02 0.03 0 
-          name "gps1" 
-          rotationStep 0.261799 
-        } 
-        GPS { 
-          translation -0.02 0.03 0  
-          name "gps2" 
-          rotationStep 0.261799 
-        } 
-      ] 
-    } 
-  ] 
-  id 1  
+Elisa3 {
+  translation 0.46744399999999997 -9.999999999999999e-06 1.196715
+  rotation -1.999999999992e-06 0.9999999999960001 1.999999999992e-06 -2.7571173071795863
+  name "Elisa-3(2)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.04 0
+          rotationStep 0.261799
+          fieldOfView 6.28328
+          numberOfLayers 1
+          maxRange 0.5
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 1
+}
+Elisa3 {
+  translation 0.687524 -9.999999999999999e-06 1.140256
+  rotation -1.999999999992e-06 0.9999999999960001 1.999999999992e-06 -2.7571173071795863
+  name "Elisa-3(1)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.04 0
+          rotationStep 0.261799
+          fieldOfView 6.28328
+          numberOfLayers 1
+          maxRange 0.5
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 2
+}
+Elisa3 {
+  translation 0.723758 -9.999999999999999e-06 1.082666
+  rotation -1.999999999992e-06 0.9999999999960001 1.999999999992e-06 -2.7571173071795863
+  name "Elisa-3(3)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.04 0
+          rotationStep 0.261799
+          fieldOfView 6.28328
+          numberOfLayers 1
+          maxRange 0.5
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 3
 }
 OilBarrel {
   translation -0.44999999999999996 0.19999999999999998 0.49

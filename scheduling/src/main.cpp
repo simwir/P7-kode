@@ -28,7 +28,7 @@
 #include "waypoint_scheduler.hpp"
 
 class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber {
-    void newSchedule(const std::vector<scheduling::Action> &schedule) override
+    void new_schedule(const std::vector<scheduling::Action> &schedule) override
     {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new waypoint schedule at " << std::asctime(std::localtime(&result));
@@ -50,7 +50,7 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
 };
 
 class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber {
-    void newSchedule(const std::vector<int> &schedule) override
+    void new_schedule(const std::vector<int> &schedule) override
     {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new station schedule at " << std::asctime(std::localtime(&result));

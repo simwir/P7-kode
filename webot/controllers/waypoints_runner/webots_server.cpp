@@ -24,7 +24,7 @@
 #include "webots_server.hpp"
 
 const std::string PDS_PORT = "4444";
-const std::string PDS_ADDR = "172.22.0.151";
+const std::string PDS_ADDR = "127.0.0.1";
 
 using namespace webots_server;
 
