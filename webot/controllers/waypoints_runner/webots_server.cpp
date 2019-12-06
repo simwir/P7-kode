@@ -57,6 +57,9 @@ std::optional<Message> webots_server::Server::get_message()
         if (message == "get_state") {
             message_type = MessageType::get_state;
         }
+        else if (message == "done") {
+            message_type = MessageType::done;
+        }
         else {
             send_message(Message{message, MessageType::not_understood});
             std::cerr << "Recieved message not understood: " << message << std::endl;

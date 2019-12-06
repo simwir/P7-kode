@@ -397,6 +397,21 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
     }
 }
 
+int32_t get_waypoint_next(int32_t from, int32_t to)
+{
+    load();
+    try {
+        static auto next =
+            static_config.get<std::vector<std::vector<int>>>("next_waypoint_matrix");
+        return next.at(from).at(to);
+    }
+    catch (const std::exception &e) {
+        _log << "next_waypoint_matrix";
+        _log << e.what();
+        return -1; // -1 impies that there is no path from -> to.
+    }
+}
+
 // Convert vector<int> (waypoint ids) to vector<bool> that encodes if the waypoint at index i has
 // been visited
 static std::vector<bool> convert_visited_waypoints()
