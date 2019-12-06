@@ -34,7 +34,7 @@ robot::ControllerState ControllerState::parse(const std::string &s)
     char sink;
     ss >> x >> sink;
     if (!ss || sink != ',') {
-       throw robot::InfoParseError{"could not parse controller state from " + s};
+        throw robot::InfoParseError{"could not parse controller state from " + s};
     }
     ss >> y >> sink;
     if (!ss || sink != ',') {
