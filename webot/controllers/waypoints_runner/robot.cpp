@@ -235,7 +235,7 @@ Phase RobotController::motion2goal()
         // std::cerr << "Changing phase to boundary following" << std::endl;
         dfollowed = std::numeric_limits<double>::max();
         update_dfollowed();
-        return Phase::BoundaryFollowing;
+        return Phase::Motion2Discontinuity;
     }
     else {
         go_to_discontinuity(best_point, dir);
@@ -415,6 +415,7 @@ void RobotController::go_straight_ahead()
 {
     left_motor->setVelocity(6);
     right_motor->setVelocity(6);
+    is_stopped = false;
     set_leds(Direction::Straight);
 }
 
