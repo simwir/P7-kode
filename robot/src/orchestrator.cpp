@@ -134,7 +134,7 @@ void robot::Orchestrator::add_waypoint_matrix(const AST &ast)
     static_config.set("waypoint_distance_matrix", jsonarray_waypoint_matrix);
 }
 
-void robot::Orchestrator::add_station_matrix(const AST &ast, const apsp_result& result)
+void robot::Orchestrator::add_station_matrix(const AST &ast, const apsp_result &result)
 {
     // Get distance matrix for stations
     std::map<int, std::map<int, double>> apsp_distances = result.dist;
@@ -160,7 +160,7 @@ void robot::Orchestrator::add_station_matrix(const AST &ast, const apsp_result& 
     static_config.set("station_distance_matrix", jsonarray_apsp_distances);
 }
 
-void robot::Orchestrator::add_next_waypoint_matrix(const AST &ast, const apsp_result& result)
+void robot::Orchestrator::add_next_waypoint_matrix(const AST &ast, const apsp_result &result)
 {
     // Get next waypoint matrix
     std::map<int, std::map<int, int>> apsp_next = result.next;

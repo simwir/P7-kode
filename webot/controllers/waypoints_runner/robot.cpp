@@ -89,6 +89,7 @@ RobotController::RobotController(webots::Supervisor *robot)
 
     lidar = {robot->getLidar("lidar")};
     lidar.enable(time_step);
+    robot->getLidar("lidar")->enablePointCloud();
     lidar_resolution = lidar.get_resolution();
     lidar_max_range = lidar.get_max_range();
     lidar_min_range = lidar.get_min_range();
@@ -118,13 +119,13 @@ void RobotController::update_sensor_values()
     for (int i = 0; i < lidar_resolution; ++i) {
         const int index =
             lidar_resolution - 1 - (i - quarter + lidar_resolution) % lidar_resolution;
-            
+
         std::vector<float> dists;
-        
+
         for (int j = 0; j < lidar_num_layers; j++) {
-          dists.push_back(range_image[j * lidar_resolution + i]);
+            dists.push_back(range_image[j * lidar_resolution + i]);
         }
-        
+
         std::vector<float>::iterator result = std::min_element(dists.begin(), dists.end());
 
         float dist = *result;
@@ -161,7 +162,7 @@ void RobotController::communicate()
         break;
     }
     case MessageType::done: {
-        set_goal({100,100});
+        set_goal({100, 100});
     }
     default:
         break;

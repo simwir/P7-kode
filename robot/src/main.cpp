@@ -116,7 +116,7 @@ int main(int argc, char **argv)
                           << std::endl;
             }
             else {
-                options.time_addr = std::string { optarg };
+                options.time_addr = std::string{optarg};
             }
             time_chosen = true;
             options.com_addr = options.pds_addr = options.order_addr = options.robot_addr =
