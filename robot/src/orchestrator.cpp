@@ -288,10 +288,10 @@ void robot::Orchestrator::write_dynamic_config()
     dynamic_config.write_to_file(dynamic_conf);
 }
 
-void robot::Orchestrator::prepend_next_waypoint_to_schedule()
+void robot::Orchestrator::prepend_waypoint_to_schedule(scheduling::Action act)
 {
     auto old = waypoint_subscriber->get();
-    old.insert(old.begin(), next_waypoint);
+    old.insert(old.begin(), act);
     waypoint_subscriber->reset(old);
 }
 
@@ -450,9 +450,9 @@ void robot::Orchestrator::main_loop()
     TRACE(std::cerr << "Orchestrator: done scheduling waypoint\n");
     send_robot_info();
 
+    prepend_waypoint_to_schedule(next_waypoint);
     next_waypoint = get_next_waypoint().value();
     dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
-    prepend_next_waypoint_to_schedule();
     waypoint_subscriber->read();
     do_next_action();
     current_time = clock_client->get_current_time();
@@ -488,7 +488,7 @@ void robot::Orchestrator::main_loop()
             if (!_next.has_value() || _next->value != next_waypoint.value) {
                 // prepend next waypoint to schedule since scheduling from next waypoint does not
                 // include it.
-                prepend_next_waypoint_to_schedule();
+                prepend_waypoint_to_schedule(next_waypoint);
             }
         }
 
@@ -597,7 +597,7 @@ void robot::Orchestrator::main_loop()
             send_robot_info();
             if (!(station_scheduler.running() || waypoint_scheduler.running() ||
                   eta_extractor.running())) {
-                TRACE(std::cerr << "Orchestrator: writing dynamic config" << std::endl);
+                // TRACE(std::cerr << "Orchestrator: writing dynamic config" << std::endl);
                 write_dynamic_config();
             }
         }

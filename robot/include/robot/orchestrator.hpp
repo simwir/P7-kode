@@ -193,7 +193,7 @@ class Orchestrator {
     {
         return get_closest_waypoint([](auto &&) { return true; });
     }
-    void prepend_next_waypoint_to_schedule();
+    void prepend_waypoint_to_schedule(scheduling::Action act);
 
     void clear_visited_waypoints();
 
