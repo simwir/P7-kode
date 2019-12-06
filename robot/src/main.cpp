@@ -116,7 +116,6 @@ int main(int argc, char **argv)
                 exit(1);
             }
             time_chosen = true;
-            address = parse_address(std::string{optarg})
             options.time_addr = options.com_addr = options.pds_addr = options.order_addr = options.robot_addr = std::string{optarg};
         case 'r':
             options.robot_addr = std::string{optarg};
