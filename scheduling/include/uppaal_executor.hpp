@@ -99,6 +99,8 @@ class UppaalExecutor {
         }
     }
 
+    ~UppaalExecutor();
+
   private:
     const std::filesystem::path model_path;
     const std::filesystem::path query_path;

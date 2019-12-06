@@ -181,3 +181,7 @@ bool scheduling::UppaalExecutor::abort()
     // success
     return true;
 }
+
+scheduling::UppaalExecutor::~UppaalExecutor() {
+    abort();
+}
