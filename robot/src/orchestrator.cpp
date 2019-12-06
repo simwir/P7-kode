@@ -688,6 +688,9 @@ double robot::Orchestrator::dist_to_next_waypoint()
 
 void robot::Orchestrator::log_order_completion()
 {
+    TRACE(std::cerr << "Dumping order " << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
+          << current_time - order_begun_time << ORDER_LOG_DELIM << std::endl);
+    TRACE(dump_order(last_order, std::cerr));
     order_log << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
               << current_time - order_begun_time << ORDER_LOG_DELIM;
     dump_order(last_order, order_log);
