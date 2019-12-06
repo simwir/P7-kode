@@ -184,4 +184,5 @@ bool scheduling::UppaalExecutor::abort()
 
 scheduling::UppaalExecutor::~UppaalExecutor() {
     abort();
+    join();
 }
