@@ -615,8 +615,8 @@ void robot::Orchestrator::main_loop()
 
     robot::ControllerState state;
     do {
-        request_robot_info();
-        state = robot::ControllerState::parse(receive_robot_info());
+        request_controller_info();
+        state = robot::ControllerState::parse(receive_controller_info());
     } while (!state.is_stopped);
 
     robot_client->send("done");
