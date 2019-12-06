@@ -207,7 +207,7 @@ void robot::Orchestrator::get_new_order()
     tcp::Client order_service_client{options.order_addr, options.order_port};
     order_service_client.send("get_order");
     auto response = order_service_client.receive_blocking();
-    if (response == "no_order") {
+    if (response == "no_orders") {
         final_order = true;
     }
 
