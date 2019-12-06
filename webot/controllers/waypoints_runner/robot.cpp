@@ -118,8 +118,16 @@ void RobotController::update_sensor_values()
     for (int i = 0; i < lidar_resolution; ++i) {
         const int index =
             lidar_resolution - 1 - (i - quarter + lidar_resolution) % lidar_resolution;
+            
+        std::vector<float> dists;
+        
+        for (int j = 0; j < lidar_num_layers; j++) {
+          dists.push_back(range_image[j * lidar_resolution + i]);
+        }
+        
+        std::vector<float>::iterator result = std::min_element(dists.begin(), dists.end());
 
-        float dist = range_image[i];
+        float dist = *result;
         auto nextval = 1.01 * lidar_min_range <= dist && dist <= 0.99 * lidar_max_range
                            ? std::make_optional(dist)
                            : std::nullopt;

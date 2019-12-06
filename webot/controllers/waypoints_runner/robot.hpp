@@ -97,7 +97,7 @@ class RobotController {
     int lidar_resolution;
     double lidar_max_range;
     double lidar_min_range;
-    int lidar_num_layers = 1;
+    int lidar_num_layers = 10;
     double lidar_fov;
     double range_threshold;
     size_t lidar_num_points() { return lidar_resolution * lidar_num_layers; }
