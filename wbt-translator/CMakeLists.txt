@@ -20,10 +20,12 @@ include_directories(${PROJECT_SOURCE_DIR}/wbt-translator/include)
 
 file(GLOB SOURCES "src/*.cpp")
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/wbt-translator.cpp)
+list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/tikz-dumper.cpp)
 
 add_library(wbt-translator ${SOURCES})
 
 add_executable(webots-parser src/wbt-translator.cpp)
+add_executable(tikz-dumper src/tikz-dumper.cpp)
 
 target_link_libraries(
     wbt-translator
@@ -32,6 +34,10 @@ target_link_libraries(
 
 target_link_libraries(webots-parser
     wbt-translator
+)
+
+target_link_libraries(tikz-dumper
+  wbt-translator
 )
 
 install(TARGETS webots-parser DESTINATION bin)
