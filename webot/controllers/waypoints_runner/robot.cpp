@@ -172,29 +172,35 @@ void RobotController::communicate()
 void RobotController::run_simulation()
 {
     while (robot->step(time_step) != -1) {
-        update_sensor_values();
-        communicate();
-        if (first_iteration) {
-            first_iteration = false;
-            continue;
-        }
+        try{
+            update_sensor_values();
+            communicate();
+            if (first_iteration) {
+                first_iteration = false;
+                continue;
+            }
 
-        if (!has_goal) {
-            stop();
-            continue;
-        }
+            if (!has_goal) {
+                stop();
+                continue;
+            }
 
-        if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
-            stop();
-            has_goal = false;
-            continue;
-        }
+            if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
+                stop();
+                has_goal = false;
+                continue;
+            }
 
-        if (phase == Phase::BoundaryFollowing) {
-            phase = boundary_following();
+            if (phase == Phase::BoundaryFollowing) {
+                phase = boundary_following();
+            }
+            else {
+                phase = motion2goal();
+            }
         }
-        else {
-            phase = motion2goal();
+        catch(tcp::ConnectionClosedException &e){ 
+            std::cerr << "Connection closed." << std::endl;
+            break;
         }
     }
 }
