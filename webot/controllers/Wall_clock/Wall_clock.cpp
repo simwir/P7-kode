@@ -62,10 +62,8 @@ void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot)
     }
     catch(tcp::ConnectionClosedException &e){ 
         std::cerr << "Connection closed." << std::endl;
-        break;
     }
     catch(tcp::CloseException &e){ 
         std::cerr << "Connection closed." << std::endl;
-        break;
     }
 }

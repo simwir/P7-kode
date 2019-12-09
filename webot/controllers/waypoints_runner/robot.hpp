@@ -108,6 +108,7 @@ class RobotController {
 
     bool is_stopped = true;
     bool has_goal = false;
+    bool communicating = true;
     geo::GlobalPoint goal;
 
     int angle2index(const geo::Angle &angle) const
