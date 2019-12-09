@@ -504,16 +504,16 @@ void robot::Orchestrator::main_loop()
         //    then broadcast it minus time elapsed
         if (eta_subscriber->is_dirty()) {
             got_fresh_info = true;
-            double time_delta = current_time - eta_start_time;
+            int time_delta = current_time - eta_start_time;
             double current_eta = eta_subscriber->read() - (time_delta / 1000.0);
             auto dist = dist_to_next_waypoint();
             TRACE(std::cerr << "dist: " << dist << '\t');
             current_eta += dist;
+            TRACE(std::cerr << "uppaal ETA: " << eta_subscriber->get() << std::endl);
             TRACE(std::cerr << "time_delta: " << time_delta << "\tcurrent_eta: " << current_eta
                             << '\n');
             TRACE(std::cerr << "time_delta = " << current_time << " - " << eta_start_time
                             << std::endl);
-            TRACE(std::cerr << "eta value: " << eta_subscriber->get() << std::endl);
             current_state.eta = current_eta;
         }
 
@@ -688,8 +688,9 @@ double robot::Orchestrator::dist_to_next_waypoint()
 
 void robot::Orchestrator::log_order_completion()
 {
-    TRACE(std::cerr << "Dumping order " << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
-          << current_time - order_begun_time << ORDER_LOG_DELIM << std::endl);
+    TRACE(std::cerr << "Dumping order " << order_begun_time << ORDER_LOG_DELIM << current_time
+                    << ORDER_LOG_DELIM << current_time - order_begun_time << ORDER_LOG_DELIM
+                    << std::endl);
     TRACE(dump_order(last_order, std::cerr));
     order_log << order_begun_time << ORDER_LOG_DELIM << current_time << ORDER_LOG_DELIM
               << current_time - order_begun_time << ORDER_LOG_DELIM;

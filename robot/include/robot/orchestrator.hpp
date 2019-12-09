@@ -183,9 +183,9 @@ class Orchestrator {
 
     bool running;
 
-    double current_time = 0;
-    double eta_start_time = 0;
-    double hold_until = 0;
+    int current_time = 0;
+    int eta_start_time = 0;
+    int hold_until = 0;
 
     int last_update_time;
 
