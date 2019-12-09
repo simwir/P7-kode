@@ -19,6 +19,7 @@
 #include "robot.hpp"
 #include "geo/geo.hpp"
 #include "tcp/server.hpp"
+#include "tcp/exception.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -199,6 +200,10 @@ void RobotController::run_simulation()
             }
         }
         catch(tcp::ConnectionClosedException &e){ 
+            std::cerr << "Connection closed." << std::endl;
+            break;
+        }
+        catch(tcp::CloseException &e){ 
             std::cerr << "Connection closed." << std::endl;
             break;
         }

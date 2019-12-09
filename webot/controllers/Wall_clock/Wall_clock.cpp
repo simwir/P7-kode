@@ -19,6 +19,7 @@
 #include <tcp/server.hpp>
 #include <thread>
 #include <webots/Robot.hpp>
+#include "tcp/exception.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -52,9 +53,19 @@ void accepter(Robot *robot)
 
 void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot)
 {
-    while (true) {
-        connection->receive_blocking();
-        // Convert double seconds to long millis.
-        connection->send(std::to_string(std::lround(robot->getTime() * 1000)));
+    try{
+        while (true) {
+            connection->receive_blocking();
+            // Convert double seconds to long millis.
+            connection->send(std::to_string(std::lround(robot->getTime() * 1000)));
+        }
+    }
+    catch(tcp::ConnectionClosedException &e){ 
+        std::cerr << "Connection closed." << std::endl;
+        break;
+    }
+    catch(tcp::CloseException &e){ 
+        std::cerr << "Connection closed." << std::endl;
+        break;
     }
 }
