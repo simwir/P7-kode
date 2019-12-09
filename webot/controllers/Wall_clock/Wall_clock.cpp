@@ -16,10 +16,10 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include "tcp/exception.hpp"
 #include <tcp/server.hpp>
 #include <thread>
 #include <webots/Robot.hpp>
-#include "tcp/exception.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -53,17 +53,17 @@ void accepter(Robot *robot)
 
 void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot)
 {
-    try{
+    try {
         while (true) {
             connection->receive_blocking();
             // Convert double seconds to long millis.
             connection->send(std::to_string(std::lround(robot->getTime() * 1000)));
         }
     }
-    catch(tcp::ConnectionClosedException &e){ 
+    catch (tcp::ConnectionClosedException &e) {
         std::cerr << "Connection closed." << std::endl;
     }
-    catch(tcp::CloseException &e){ 
+    catch (tcp::CloseException &e) {
         std::cerr << "Connection closed." << std::endl;
     }
 }

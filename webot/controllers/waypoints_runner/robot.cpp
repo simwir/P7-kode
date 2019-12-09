@@ -18,8 +18,8 @@
  */
 #include "robot.hpp"
 #include "geo/geo.hpp"
-#include "tcp/server.hpp"
 #include "tcp/exception.hpp"
+#include "tcp/server.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -176,7 +176,7 @@ void RobotController::communicate()
 void RobotController::run_simulation()
 {
     while (robot->step(time_step) != -1) {
-        try{
+        try {
             update_sensor_values();
             communicate();
             if (first_iteration) {
@@ -202,12 +202,12 @@ void RobotController::run_simulation()
                 phase = motion2goal();
             }
         }
-        catch(tcp::ConnectionClosedException &e){ 
+        catch (tcp::ConnectionClosedException &e) {
             std::cerr << "Connection closed." << std::endl;
             set_goal(geo::GlobalPoint{100, 100});
             communicating = false;
         }
-        catch(tcp::CloseException &e){ 
+        catch (tcp::CloseException &e) {
             std::cerr << "Connection closed." << std::endl;
             set_goal(geo::GlobalPoint{100, 100});
             communicating = false;
