@@ -68,7 +68,7 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Option
     auto now = std::chrono::system_clock::now();
     std::time_t ctime = std::chrono::system_clock::to_time_t(now);
     std::tm localtime = *std::localtime(&ctime);
-    filename << "order_log__" << std::put_time(&localtime, "%c");
+    filename << "order_log__" << std::put_time(&localtime, "%c") << "_robot-" << id;
     order_log = std::ofstream{filename.str()};
     order_log << ORDER_LOG_HEADER << std::endl;
 }
