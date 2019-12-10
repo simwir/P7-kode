@@ -140,6 +140,9 @@ void RobotController::update_sensor_values()
 
 void RobotController::communicate()
 {
+    if (!communicating)
+        return;
+
     using namespace webots_server;
     auto msg = server.get_message();
     if (!msg)
@@ -201,11 +204,13 @@ void RobotController::run_simulation()
         }
         catch (tcp::ConnectionClosedException &e) {
             std::cerr << "Connection closed." << std::endl;
-            break;
+            set_goal(geo::GlobalPoint{100, 100});
+            communicating = false;
         }
         catch (tcp::CloseException &e) {
             std::cerr << "Connection closed." << std::endl;
-            break;
+            set_goal(geo::GlobalPoint{100, 100});
+            communicating = false;
         }
     }
 }
