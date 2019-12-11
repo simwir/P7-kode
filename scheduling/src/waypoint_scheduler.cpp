@@ -73,7 +73,7 @@ void scheduling::WaypointScheduler::start_worker()
     executor.execute([&](const std::string &result) {
         std::cerr << "WaypointScheduler: Parsing..." << std::endl;
         // The second formula contains the simulated trace.
-        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
+        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 1);
 
         std::cerr << "WaypointScheduler: Composing..." << std::endl;
         std::vector<scheduling::Action> schedule = convert_result(values);

@@ -50,7 +50,7 @@ class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointS
 
 class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vector<Action>> {
   public:
-    WaypointScheduler() : Scheduler("waypoint_scheduling.xml", "waypoint_scheduling.q") {}
+    WaypointScheduler() : Scheduler("greedy_waypoint_scheduling.xml", "greedy_waypoint_scheduling.q") {}
     WaypointScheduler(const std::filesystem::path &model_path,
                       const std::filesystem::path &query_path)
         : Scheduler(model_path, query_path)

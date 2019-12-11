@@ -37,7 +37,7 @@ class StationScheduleSubscriber : public std::enable_shared_from_this<StationSch
 
 class StationScheduler : public Scheduler<StationScheduleSubscriber, std::vector<int>> {
   public:
-    StationScheduler() : Scheduler("station_scheduling.xml", "station_scheduling.q") {}
+    StationScheduler() : Scheduler("greedy_station_scheduling.xml", "greedy_station_scheduling.q") {}
     StationScheduler(const std::filesystem::path &model_path,
                      const std::filesystem::path &query_path)
         : Scheduler(model_path, query_path)

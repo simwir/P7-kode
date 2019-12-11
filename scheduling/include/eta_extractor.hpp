@@ -55,8 +55,8 @@ class EtaExtractor : public Scheduler<EtaSubscriber, double> {
     void start_worker() override;
 
     // TODO WIP while PR #22 is not yet merged.
-    constexpr static auto *default_model_path = "waypoint_scheduling.xml";
-    constexpr static auto *default_query_path = "get_eta.q";
+    constexpr static auto *default_model_path = "greedy_waypoint_scheduling.xml";
+    constexpr static auto *default_query_path = "greedy_get_eta.q";
     constexpr static auto *default_strat_path = "waypoint_strategy.json";
     const std::filesystem::path model_file = std::filesystem::path{default_model_path};
     const std::filesystem::path query_file = std::filesystem::path{default_query_path};

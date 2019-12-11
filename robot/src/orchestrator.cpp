@@ -673,6 +673,8 @@ const std::filesystem::path eta_output_path = "get_eta.q";
 
 void robot::Orchestrator::create_query_file()
 {
+    return;
+
     instantiate_query_template(robot_info.size(), waypoints.size(), wp_template_path,
                                wp_output_path);
     instantiate_query_template(robot_info.size(), waypoints.size(), eta_template_path,

@@ -47,7 +47,7 @@ void StationScheduler::start_worker()
     auto callback = [&](const std::string &result) {
         std::cerr << "StationScheduler: Parsing..." << std::endl;
         // The second formula contains the simulated trace to be used as schedule.
-        std::vector<SimulationExpression> values = parser.parse(result, 2);
+        std::vector<SimulationExpression> values = parser.parse(result, 1);
 
         std::cerr << "StationScheduler: Composing..." << std::endl;
         std::vector<int> schedule = convert_result(values);
