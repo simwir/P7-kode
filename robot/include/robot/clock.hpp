@@ -21,6 +21,10 @@
 
 #include "tcp/client.hpp"
 #include <string>
+#include <iostream>
+
+#define TRACEME
+#include "trace.def"
 
 namespace robot {
 class Clock {
@@ -36,8 +40,13 @@ class WebotsClock : public Clock {
 
     int get_current_time() override;
 
-    void stop_clock() { webots_client.send("stop_time"); };
-    void start_clock() { webots_client.send("start_time"); };
+    void stop_clock() {
+        TRACE(std::cout << "========stopping time=========" << std::endl);
+        webots_client.send("stop_time");
+    };
+    void start_clock() {
+        TRACE(std::cout << "========starting time=========" << std::endl);
+        webots_client.send("start_time"); };
 
   private:
     tcp::Client webots_client;
