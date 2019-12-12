@@ -38,7 +38,18 @@ int main(int argc, char **argv)
     Supervisor *robot = new Supervisor();
     int time_step = (int)robot->getBasicTimeStep();
     std::thread accept_thread{accepter, robot};
-    while (robot->step(stop_semaphore == 0 ? time_step : 0) != -1) {
+    while (true) {
+        std::scoped_lock _{stop_mutex};
+        if (stop_semaphore == 0) {
+            if (robot->step(time_step) == -1) {
+                break;
+            }
+        }
+        else {
+            if (robot->step(0) == -1) {
+                break;
+            }
+        }
     };
 
     delete robot;
