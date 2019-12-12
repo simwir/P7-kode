@@ -82,6 +82,20 @@ class CannotOpenFileException : public std::exception {
     const char *what() const noexcept override { return message.c_str(); }
 };
 
+struct StopWebotsClock {
+    std::shared_ptr<robot::Clock> c;
+    StopWebotsClock(std::shared_ptr<robot::Clock> c) : c(c)
+    {
+        if (robot::WebotsClock *wbclock = dynamic_cast<robot::WebotsClock *>(c.get()))
+            wbclock->stop_clock();
+    }
+    ~StopWebotsClock()
+    {
+        if (robot::WebotsClock *wbclock = dynamic_cast<robot::WebotsClock *>(c.get()))
+            wbclock->start_clock();
+    };
+};
+
 class Orchestrator {
   public:
     Orchestrator(int robot_id, std::istream &world_file, Options options);
@@ -123,7 +137,7 @@ class Orchestrator {
     config::Config static_config;
     config::Config dynamic_config;
     std::unique_ptr<tcp::Client> robot_client;
-    std::unique_ptr<robot::Clock> clock_client;
+    std::shared_ptr<robot::Clock> clock_client;
     tcp::Client com_module;
 
     // static state information.

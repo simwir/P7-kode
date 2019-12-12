@@ -61,7 +61,7 @@ robot::Orchestrator::Orchestrator(int robot_id, std::istream &world_file, Option
 
     // Connecting to the WeBots Controller
     robot_client = std::make_unique<tcp::Client>(options.robot_addr, port_to_controller);
-    clock_client = std::make_unique<robot::WebotsClock>(options.time_addr, options.time_port);
+    clock_client = std::make_shared<robot::WebotsClock>(options.time_addr, options.time_port);
     current_state.id = id;
 
     std::stringstream filename{};
@@ -333,7 +333,10 @@ bool robot::Orchestrator::do_next_action()
             clear_visited_waypoints();
             write_dynamic_config();
             station_scheduler.start();
-            station_scheduler.wait_for_result();
+            {
+                StopWebotsClock _{clock_client};
+                station_scheduler.wait_for_result();
+            }
 
             next_station = station_subscriber->read().at(0);
             dynamic_config.set(NEXT_STATION, next_station);
@@ -353,14 +356,20 @@ bool robot::Orchestrator::do_next_action()
         }
 
         if (station_scheduler.running()) {
-            station_scheduler.wait_for_result();
+            {
+                StopWebotsClock _{clock_client};
+                station_scheduler.wait_for_result();
+            }
             next_station = station_subscriber->read().at(0);
             dynamic_config.set(NEXT_STATION, next_station);
             write_dynamic_config();
         }
 
         waypoint_scheduler.maybe_start();
-        waypoint_scheduler.wait_for_result();
+        {
+            StopWebotsClock _{clock_client};
+            waypoint_scheduler.wait_for_result();
+        }
         next_action = waypoint_subscriber->get().front();
     }
 
@@ -436,35 +445,38 @@ void robot::Orchestrator::main_loop()
     TRACE(std::cerr << "Orchestrator: scheduling station\n");
     station_scheduler.start();
     TRACE(std::cerr << "Orchestrator: started scheduling station\n");
-    station_scheduler.wait_for_result();
-    TRACE(std::cerr << "Orchestrator: done scheduling station\n");
+    {
+        StopWebotsClock _{clock_client};
+        station_scheduler.wait_for_result();
+        TRACE(std::cerr << "Orchestrator: done scheduling station\n");
 
-    get_dynamic_state();
+        get_dynamic_state();
 
-    dynamic_config.set(NEXT_STATION, station_subscriber->read().at(0));
-    current_waypoint = {scheduling::ActionType::Waypoint, get_closest_waypoint()};
-    next_waypoint = current_waypoint;
-    dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
-    dynamic_config.set(VISITED_WAYPOINTS, std::vector<int>{});
+        dynamic_config.set(NEXT_STATION, station_subscriber->read().at(0));
+        current_waypoint = {scheduling::ActionType::Waypoint, get_closest_waypoint()};
+        next_waypoint = current_waypoint;
+        dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
+        dynamic_config.set(VISITED_WAYPOINTS, std::vector<int>{});
 
-    create_query_file();
-    write_dynamic_config();
-    TRACE(std::cerr << "Orchestrator: scheduling waypoint\n");
-    waypoint_scheduler.start();
-    TRACE(std::cerr << "Orchestrator: started scheduling waypoint\n");
-    waypoint_scheduler.wait_for_result();
-    TRACE(std::cerr << "Orchestrator: done scheduling waypoint\n");
-    send_robot_info();
+        create_query_file();
+        write_dynamic_config();
+        TRACE(std::cerr << "Orchestrator: scheduling waypoint\n");
+        waypoint_scheduler.start();
+        TRACE(std::cerr << "Orchestrator: started scheduling waypoint\n");
+        waypoint_scheduler.wait_for_result();
+        TRACE(std::cerr << "Orchestrator: done scheduling waypoint\n");
+        send_robot_info();
 
-    prepend_waypoint_to_schedule(next_waypoint);
-    prepend_waypoint_to_schedule(next_waypoint);
+        prepend_waypoint_to_schedule(next_waypoint);
+        prepend_waypoint_to_schedule(next_waypoint);
 
-    next_waypoint = get_next_waypoint().value();
-    dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
-    waypoint_subscriber->read();
-    assert(do_next_action());
-    current_time = clock_client->get_current_time();
-    start_eta_calculation();
+        next_waypoint = get_next_waypoint().value();
+        dynamic_config.set(NEXT_WAYPOINT, next_waypoint.value);
+        waypoint_subscriber->read();
+        assert(do_next_action());
+        current_time = clock_client->get_current_time();
+        start_eta_calculation();
+    }
 
     running = true;
     while (running) {
@@ -525,7 +537,10 @@ void robot::Orchestrator::main_loop()
             // dist <= WAYPOINT_DIST_THRESHOLD
             if (waypoint_subscriber->get().empty()) {
                 TRACE(std::cerr << "Orchestrator: waiting for waypoint result" << std::endl);
-                waypoint_scheduler.wait_for_result();
+                {
+                    StopWebotsClock _{clock_client};
+                    waypoint_scheduler.wait_for_result();
+                }
             }
 
             int wp = get_closest_waypoint();

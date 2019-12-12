@@ -36,6 +36,9 @@ class WebotsClock : public Clock {
 
     int get_current_time() override;
 
+    void stop_clock() { webots_client.send("stop_time"); };
+    void start_clock() { webots_client.send("start_time"); };
+
   private:
     tcp::Client webots_client;
 };
