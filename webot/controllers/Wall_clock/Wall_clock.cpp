@@ -67,12 +67,15 @@ void connection(std::shared_ptr<tcp::Connection> connection, Supervisor *robot)
             else if (message == "stop_time") {
                 std::scoped_lock _{stop_mutex};
                 stop_semaphore++;
+                std::cout << "Pausing" << std::endl;
                 robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_PAUSE);
             }
             else if (message == "start_time") {
                 std::scoped_lock _{stop_mutex};
                 stop_semaphore--;
+                std::cout << "Start request" << std::endl;
                 if (stop_semaphore == 0) {
+                    std::cout << "Unpausing" << std::endl;
                     robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_REAL_TIME);
                 }
             }
