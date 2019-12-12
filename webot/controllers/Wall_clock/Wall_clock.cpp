@@ -20,18 +20,22 @@
 #include <tcp/server.hpp>
 #include <thread>
 #include <webots/Robot.hpp>
+#include <webots/Supervisor.hpp>
 
 #include <cmath>
 #include <iostream>
+#include <mutex>
 
 using namespace webots;
 
-void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot);
-void accepter(Robot *robot);
+void connection(std::shared_ptr<tcp::Connection> connection, Supervisor *robot);
+void accepter(Supervisor *robot);
+int stop_semaphore = 0;
+std::mutex stop_mutex;
 
 int main(int argc, char **argv)
 {
-    Robot *robot = new Robot();
+    Supervisor *robot = new Supervisor();
     int time_step = (int)robot->getBasicTimeStep();
     std::thread accept_thread{accepter, robot};
     while (robot->step(time_step) != -1) {
@@ -41,7 +45,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void accepter(Robot *robot)
+void accepter(Supervisor *robot)
 {
     tcp::Server server{5555};
     while (true) {
@@ -51,13 +55,27 @@ void accepter(Robot *robot)
     }
 }
 
-void connection(std::shared_ptr<tcp::Connection> connection, Robot *robot)
+void connection(std::shared_ptr<tcp::Connection> connection, Supervisor *robot)
 {
     try {
         while (true) {
-            connection->receive_blocking();
+            auto message = connection->receive_blocking();
             // Convert double seconds to long millis.
-            connection->send(std::to_string(std::lround(robot->getTime() * 1000)));
+            if (message == "get_time") {
+                connection->send(std::to_string(std::lround(robot->getTime() * 1000)));
+            }
+            else if (message == "stop_time") {
+                std::scoped_lock _{stop_mutex};
+                stop_semaphore++;
+                robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_PAUSE);
+            }
+            else if (message == "start_time") {
+                std::scoped_lock _{stop_mutex};
+                stop_semaphore--;
+                if (stop_semaphore == 0) {
+                    robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_REAL_TIME);
+                }
+            }
         }
     }
     catch (tcp::ConnectionClosedException &e) {
