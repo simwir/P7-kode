@@ -1,0 +1,5 @@
+receive time;completion time;completion duration;stations in order
+64;192032;191968;3,4,5,8
+192128;451904;259776;6,3,2,7
+452000;748256;296256;2,1,7,3
+748352;1100000;351648;8,5,2,1,6
