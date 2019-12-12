@@ -20,8 +20,8 @@
 #define ORCHESTRATOR_CLOCK_HPP
 
 #include "tcp/client.hpp"
-#include <string>
 #include <iostream>
+#include <string>
 
 #define TRACEME
 #include "trace.def"
@@ -40,13 +40,16 @@ class WebotsClock : public Clock {
 
     int get_current_time() override;
 
-    void stop_clock() {
+    void stop_clock()
+    {
         TRACE(std::cout << "========stopping time=========" << std::endl);
         webots_client.send("stop_time");
     };
-    void start_clock() {
+    void start_clock()
+    {
         TRACE(std::cout << "========starting time=========" << std::endl);
-        webots_client.send("start_time"); };
+        webots_client.send("start_time");
+    };
 
   private:
     tcp::Client webots_client;

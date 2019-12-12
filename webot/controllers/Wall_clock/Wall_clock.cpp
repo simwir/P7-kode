@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     Supervisor *robot = new Supervisor();
     int time_step = (int)robot->getBasicTimeStep();
     std::thread accept_thread{accepter, robot};
-    while (robot->step(time_step) != -1) {
+    while (robot->step(stop_semaphore == 0 ? time_step : 0) != -1) {
     };
 
     delete robot;
@@ -77,9 +77,9 @@ void connection(std::shared_ptr<tcp::Connection> connection, Supervisor *robot)
                 if (stop_semaphore == 0) {
                     std::cout << "Unpausing" << std::endl;
                     robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_REAL_TIME);
-                    robot->step(time_step);
                 }
             }
+            robot->step(0);
         }
     }
     catch (tcp::ConnectionClosedException &e) {
