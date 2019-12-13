@@ -48,8 +48,8 @@ int main(int argc, char **argv)
             sem_val = stop_semaphore;
         }
         if (sem_val <= 0) {
+            std::scoped_lock _{stop_mutex};
             if (is_paused) {
-                std::scoped_lock _{stop_mutex};
                 robot->simulationSetMode(mode);
                 is_paused = false;
             }
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
             if (!is_paused) {
                 std::scoped_lock _{stop_mutex};
                 mode = robot->simulationGetMode();
-                robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_PAUSE);
+                robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_REAL_TIME);
                 is_paused = true;
             }
             robot->step(0);
