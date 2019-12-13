@@ -38,17 +38,33 @@ int main(int argc, char **argv)
     Supervisor *robot = new Supervisor();
     int time_step = (int)robot->getBasicTimeStep();
     std::thread accept_thread{accepter, robot};
+    Supervisor::SimulationMode mode = Supervisor::SimulationMode::SIMULATION_MODE_REAL_TIME;
+    bool is_paused = false;
+
     while (true) {
-        std::scoped_lock _{stop_mutex};
-        if (stop_semaphore == 0) {
+        int sem_val;
+        {
+            std::scoped_lock _{stop_mutex};
+            sem_val = stop_semaphore;
+        }
+        if (sem_val <= 0) {
+            if (is_paused) {
+                std::scoped_lock _{stop_mutex};
+                robot->simulationSetMode(mode);
+                is_paused = false;
+            }
             if (robot->step(time_step) == -1) {
                 break;
             }
         }
         else {
-            if (robot->step(0) == -1) {
-                break;
+            if (!is_paused) {
+                std::scoped_lock _{stop_mutex};
+                mode = robot->simulationGetMode();
+                robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_PAUSE);
+                is_paused = true;
             }
+            robot->step(0);
         }
     };
 
@@ -79,18 +95,12 @@ void connection(std::shared_ptr<tcp::Connection> connection, Supervisor *robot)
                 std::scoped_lock _{stop_mutex};
                 stop_semaphore++;
                 std::cout << "Pausing" << std::endl;
-                robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_PAUSE);
             }
             else if (message == "start_time") {
                 std::scoped_lock _{stop_mutex};
                 stop_semaphore--;
                 std::cout << "Start request" << std::endl;
-                if (stop_semaphore == 0) {
-                    std::cout << "Unpausing" << std::endl;
-                    robot->simulationSetMode(Supervisor::SimulationMode::SIMULATION_MODE_REAL_TIME);
-                }
             }
-            robot->step(0);
         }
     }
     catch (tcp::ConnectionClosedException &e) {
