@@ -145,3 +145,9 @@ ax.set_title("average completion times by order group")
 plt.legend(["Communication", "No communication", "Greedy"], loc="lower right")
 
 plt.savefig("act_bars.pdf", format="pdf")
+
+print(stats.ttest_ind(get_tcts(com_data)[1], get_tcts(greedy_data)[1]))
+print(stats.ttest_ind(get_tcts(com_data)[1], get_tcts(nocom_data)[1]))
+print(stats.ttest_ind(get_tcts(nocom_data)[1], get_tcts(greedy_data)[1]))
+
+
