@@ -92,7 +92,7 @@ plt.boxplot([
     pd.concat(nocom_data.values())["completion duration"],
     pd.concat(greedy_data.values())["completion duration"]
 ],
-            labels=["intelligent", "no comms", "greedy"])
+            labels=["Intelligent", "Not communicating", "Greedy"])
 plt.ylim(bottom=0)
 plt.savefig("boxplot.pdf", format="pdf", bbox_inches='tight')
 
