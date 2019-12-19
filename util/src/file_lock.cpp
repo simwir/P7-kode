@@ -16,36 +16,33 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef TCP_HPP
-#define TCP_HPP
+#include "util/file_lock.hpp"
 
-#include <tcp/server.hpp>
+#include <cassert>
+#include <cstdio>
+#include <fstream>
+#include <sys/file.h>
+#include <unistd.h>
 
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
+bool is_locked(std::filesystem::path path)
+{
+    return std::filesystem::exists(path += _suffix);
+}
 
-namespace webots_server {
+FileLock::FileLock(const std::filesystem::path &path, lock_mode mode) : held_path(path)
+{
+    held_path += _suffix;
+    fd = open(held_path.c_str(), O_CREAT | O_RDONLY, S_IRWXU);
+    if (fd == -1) {
+        throw CouldNotLockFile{"Error opening file. Errno: " + std::to_string(errno)};
+    }
+    if (flock(fd, mode == lock_mode::exclusive ? LOCK_EX : LOCK_SH) != 0) {
+        throw CouldNotLockFile{"Could not lock file. Errno: " + std::to_string(errno) +
+                               " fd: " + std::to_string(fd)};
+    }
+}
 
-enum class MessageType { get_state, set_destination, done, not_understood };
-
-struct Message {
-    std::string payload;
-    MessageType type;
-};
-
-class Server {
-  public:
-    Server(std::string id);
-    ~Server();
-    std::optional<Message> get_message();
-    void send_message(const Message &);
-
-  private:
-    tcp::Server server;
-    std::string robot_id;
-    std::shared_ptr<tcp::Connection> client;
-};
-} // namespace webots_server
-#endif
+FileLock::~FileLock()
+{
+    close(fd);
+}

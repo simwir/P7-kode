@@ -47,6 +47,11 @@ scheduling::UppaalSimulationParser::parse(const std::string &result, int formula
         result.find("Verifying formula " +
                     std::to_string(formula_number + 1)); // Equal to std::string::npos if not found.
 
+    if (startIndex == std::string::npos) {
+        throw SimulationParseException{"Could not find formula " + std::to_string(formula_number) +
+                                       " in output " + result};
+    }
+
     std::string formula;
     if (stopIndex == std::string::npos) {
         formula = result.substr(startIndex);

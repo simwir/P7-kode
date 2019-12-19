@@ -42,6 +42,7 @@ void print_help(const char *const execute_location)
         << "-c --com-module <IP>[:<PORT>]    Set address of the communication modulde.\n"
         << "-p --port-service <IP>[:<PORT>]  Set address of the port discovery service.\n"
         << "-o --order-service <IP>[:<PORT>] Set address of the order service.\n"
+        << "-a --single-ip <IP>              Set address of all modules and services.\n"
         << "-r --robot <IP>                  Set the host of the robot.\n"
         << "-q --station-query-file PATH     Path to the station query file template.\n"
         << "-w --waypoint-query-file PATH    Path to the waypoint query file template.\n"
@@ -108,6 +109,18 @@ int main(int argc, char **argv)
                 options.order_port = address.second.value();
             }
             break;
+        case 'a':
+            if (time_chosen) {
+                std::cerr << "Time system already set to system time, time system will not be set "
+                             "to remote server."
+                          << std::endl;
+            }
+            else {
+                options.time_addr = std::string{optarg};
+            }
+            time_chosen = true;
+            options.com_addr = options.pds_addr = options.order_addr = options.robot_addr =
+                std::string{optarg};
         case 'r':
             options.robot_addr = std::string{optarg};
             break;
@@ -119,6 +132,7 @@ int main(int argc, char **argv)
             break;
         case 'e':
             options.eta_query_template = std::filesystem::path{optarg};
+            break;
         case 'h':
             print_help(argv[0]);
             exit(0);

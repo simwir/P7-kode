@@ -20,4 +20,4 @@ strategy realistic = loadStrategy %¤STRATEGY_VAR_LIST¤% ("waypoint_strategy.js
 
 /*
 */
-E[<=200; 1000] (max: total) under realistic
+E[<=1000; 1000] (max: total) under realistic

@@ -26,11 +26,10 @@ int main(int argc, char **argv)
 {
     RobotController controller{new webots::Supervisor()};
     try {
-    controller.run_simulation();
-
+        controller.run_simulation();
     }
     catch (...) {
-      std::cerr << "Exception caught!" << std::endl;
+        std::cerr << "Exception caught!" << std::endl;
     }
     return 0;
 }

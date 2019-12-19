@@ -18,6 +18,7 @@
  */
 #include "robot.hpp"
 #include "geo/geo.hpp"
+#include "tcp/exception.hpp"
 #include "tcp/server.hpp"
 
 #include <algorithm>
@@ -89,6 +90,7 @@ RobotController::RobotController(webots::Supervisor *robot)
 
     lidar = {robot->getLidar("lidar")};
     lidar.enable(time_step);
+    robot->getLidar("lidar")->enablePointCloud();
     lidar_resolution = lidar.get_resolution();
     lidar_max_range = lidar.get_max_range();
     lidar_min_range = lidar.get_min_range();
@@ -119,7 +121,15 @@ void RobotController::update_sensor_values()
         const int index =
             lidar_resolution - 1 - (i - quarter + lidar_resolution) % lidar_resolution;
 
-        float dist = range_image[i];
+        std::vector<float> dists;
+
+        for (int j = 0; j < lidar_num_layers; j++) {
+            dists.push_back(range_image[j * lidar_resolution + i]);
+        }
+
+        std::vector<float>::iterator result = std::min_element(dists.begin(), dists.end());
+
+        float dist = *result;
         auto nextval = 1.01 * lidar_min_range <= dist && dist <= 0.99 * lidar_max_range
                            ? std::make_optional(dist)
                            : std::nullopt;
@@ -130,6 +140,9 @@ void RobotController::update_sensor_values()
 
 void RobotController::communicate()
 {
+    if (!communicating)
+        return;
+
     using namespace webots_server;
     auto msg = server.get_message();
     if (!msg)
@@ -152,6 +165,9 @@ void RobotController::communicate()
                   std::stod(message.payload.substr(split_pos + 1))});
         break;
     }
+    case MessageType::done: {
+        set_goal({100, 100});
+    }
     default:
         break;
     }
@@ -160,29 +176,41 @@ void RobotController::communicate()
 void RobotController::run_simulation()
 {
     while (robot->step(time_step) != -1) {
-        update_sensor_values();
-        communicate();
-        if (first_iteration) {
-            first_iteration = false;
-            continue;
-        }
+        try {
+            update_sensor_values();
+            communicate();
+            if (first_iteration) {
+                first_iteration = false;
+                continue;
+            }
 
-        if (!has_goal) {
-            stop();
-            continue;
-        }
+            if (!has_goal) {
+                stop();
+                continue;
+            }
 
-        if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
-            stop();
-            has_goal = false;
-            continue;
-        }
+            if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
+                stop();
+                has_goal = false;
+                continue;
+            }
 
-        if (phase == Phase::BoundaryFollowing) {
-            phase = boundary_following();
+            if (phase == Phase::BoundaryFollowing) {
+                phase = boundary_following();
+            }
+            else {
+                phase = motion2goal();
+            }
         }
-        else {
-            phase = motion2goal();
+        catch (tcp::ConnectionClosedException &e) {
+            std::cerr << "Connection closed." << std::endl;
+            set_goal(geo::GlobalPoint{100, 100});
+            communicating = false;
+        }
+        catch (tcp::CloseException &e) {
+            std::cerr << "Connection closed." << std::endl;
+            set_goal(geo::GlobalPoint{100, 100});
+            communicating = false;
         }
     }
 }
@@ -223,7 +251,7 @@ Phase RobotController::motion2goal()
         // std::cerr << "Changing phase to boundary following" << std::endl;
         dfollowed = std::numeric_limits<double>::max();
         update_dfollowed();
-        return Phase::BoundaryFollowing;
+        return Phase::Motion2Discontinuity;
     }
     else {
         go_to_discontinuity(best_point, dir);
@@ -403,6 +431,7 @@ void RobotController::go_straight_ahead()
 {
     left_motor->setVelocity(6);
     right_motor->setVelocity(6);
+    is_stopped = false;
     set_leds(Direction::Straight);
 }
 

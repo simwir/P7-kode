@@ -44,7 +44,7 @@ std::ostream &operator<<(std::ostream &os, const Action &action);
 
 class WaypointScheduleSubscriber : public std::enable_shared_from_this<WaypointScheduleSubscriber> {
   public:
-    virtual void newSchedule(const std::vector<Action> &schedule) = 0;
+    virtual void new_schedule(const std::vector<Action> &schedule) = 0;
     virtual ~WaypointScheduleSubscriber() = default;
 };
 
@@ -62,7 +62,7 @@ class WaypointScheduler : public Scheduler<WaypointScheduleSubscriber, std::vect
 
     void run();
     std::vector<scheduling::Action>
-    convertResult(const std::vector<scheduling::SimulationExpression> &values);
+    convert_result(const std::vector<scheduling::SimulationExpression> &values);
     void notify_subscribers(const std::vector<Action> &) override;
 
     UppaalSimulationParser parser;

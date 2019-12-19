@@ -27,10 +27,12 @@
 #include "robot/subscriber.hpp"
 #include "scheduling.hpp"
 #include "util/euclid.hpp"
+#include "wbt-translator/apsp.hpp"
 #include "wbt-translator/webots_parser.hpp"
 #include <tcp/client.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <optional>
 
 const std::filesystem::path dynamic_conf = "dynamic_config.json";
@@ -47,6 +49,11 @@ const std::filesystem::path static_conf = "static_config.json";
 #define STATIONS "stations"
 #define END_STATIONS "end_stations"
 #define VIAS "vias"
+
+#define ORDER_LOG_DELIM ";"
+#define ORDER_LOG_HEADER                                                                           \
+    "receive time" ORDER_LOG_DELIM "completion time" ORDER_LOG_DELIM                               \
+    "completion duration" ORDER_LOG_DELIM "stations in order"
 
 constexpr int UPDATE_INTERVAL_MS = 1000;
 
@@ -94,7 +101,7 @@ class Orchestrator {
     void request_order();
     std::vector<int> receive_order();
 
-    void get_new_order();
+    std::optional<std::vector<int>> get_new_order();
 
     void write_static_config();
     void write_dynamic_config();
@@ -105,10 +112,12 @@ class Orchestrator {
     void main_loop();
 
     void add_waypoint_matrix(const AST &ast);
-    void add_station_matrix(const AST &ast);
+    void add_next_waypoint_matrix(const AST &ast, const apsp_result &result);
+    void add_station_matrix(const AST &ast, const apsp_result &result);
     void dump_waypoint_info(const AST &ast);
 
   private:
+    // communication stuff
     const int id;
     const Options options;
     config::Config static_config;
@@ -127,36 +136,56 @@ class Orchestrator {
 
     // dynamic state information
     void communicate_state();
-    robot::Info current_state;
-    robot::InfoMap robot_info;
+    communication::Info current_state;
+    communication::InfoMap robot_info;
+    size_t last_num_robots = 0;
     robot::ControllerState controller_state;
 
+    // location relative to the waypoint graph
     std::optional<scheduling::Action> get_next_waypoint();
     scheduling::Action current_waypoint;
     scheduling::Action next_waypoint;
     int next_station;
 
+    // schedulers
     scheduling::StationScheduler station_scheduler;
     scheduling::WaypointScheduler waypoint_scheduler;
     scheduling::EtaExtractor eta_extractor;
-
     std::shared_ptr<AsyncStationSubscriber> station_subscriber;
     std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
     std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
+    void start_eta_calculation();
 
-    void do_next_action();
+    void dump_order(const std::vector<int> &order, std::ostream &os)
+    {
+        auto it = order.begin(), e = order.end();
+        while (it != e) {
+            os << *it++;
+            if (it != e) {
+                os << ",";
+            }
+        }
+    }
+
+    // actions and order information
+    bool do_next_action();
     void set_station_visited(int station);
     std::vector<int> order;
-    int order_rec_time;
+    std::vector<int> last_order;
+    int order_begun_time = -1;
+    bool ending_last_order = false;
+    bool final_order = false;
+    std::ofstream order_log;
+    void log_order_completion();
 
     // visited waypoints since last station we were at.
     std::vector<int> visited_waypoints;
 
     bool running;
 
-    double current_time = 0;
-    double eta_start_time = 0;
-    double hold_until = 0;
+    int current_time = 0;
+    int eta_start_time = 0;
+    int hold_until = 0;
 
     int last_update_time;
 
@@ -165,7 +194,7 @@ class Orchestrator {
     {
         return get_closest_waypoint([](auto &&) { return true; });
     }
-    void prepend_next_waypoint_to_schedule();
+    void prepend_waypoint_to_schedule(scheduling::Action act);
 
     void clear_visited_waypoints();
 
@@ -190,6 +219,8 @@ class Orchestrator {
     {
         return ast.nodes.at(waypoint_id).waypointType == WaypointType::eStation;
     }
+
+    double dist_to_next_waypoint();
 };
 } // namespace robot
 #endif

@@ -30,6 +30,7 @@ target_link_libraries(scheduling
     pthread
     stdc++fs
     jsoncpp_lib
+    util
 )
 #install(FILES DESTINATION bin)
 

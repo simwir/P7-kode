@@ -125,8 +125,9 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
             else {
                 throw tcp::ReceiveException(errno);
             }
-        } else if (bytes == 0) {
-            //Connection closed.
+        }
+        else if (bytes == 0) {
+            // Connection closed.
             throw tcp::ConnectionClosedException();
         }
 

@@ -61,6 +61,7 @@ add_subdirectory(scheduling)
 add_subdirectory(tcp)
 add_subdirectory(robot)
 add_subdirectory(order)
+add_subdirectory(util)
 
 # Executables
 add_subdirectory(tests)

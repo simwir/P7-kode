@@ -16,36 +16,7 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef TCP_HPP
-#define TCP_HPP
 
-#include <tcp/server.hpp>
-
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
-
-namespace webots_server {
-
-enum class MessageType { get_state, set_destination, done, not_understood };
-
-struct Message {
-    std::string payload;
-    MessageType type;
-};
-
-class Server {
-  public:
-    Server(std::string id);
-    ~Server();
-    std::optional<Message> get_message();
-    void send_message(const Message &);
-
-  private:
-    tcp::Server server;
-    std::string robot_id;
-    std::shared_ptr<tcp::Connection> client;
-};
-} // namespace webots_server
-#endif
+/*
+*/
+E[<=200; 1000] (max: total)
