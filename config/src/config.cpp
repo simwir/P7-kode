@@ -181,6 +181,29 @@ std::vector<double> config::Config::get<std::vector<double>>(const std::string &
 }
 
 template <>
+std::vector<int> config::Config::get<std::vector<int>>(const std::string &key1,
+                                                             const std::string &key2)
+{
+    if (!json.isMember(key1)) {
+        throw config::InvalidKeyException{key1};
+    }
+
+    std::vector<int> result;
+    for (const auto &level1 : json[key1]) {
+        if (!level1.isObject()) {
+            throw config::InvalidValueException{"get<std::vector<int>>"};
+        }
+
+        if (!level1.isMember(key2)) {
+            throw config::InvalidKeyException{key2};
+        }
+        result.push_back(level1[key2].asInt());
+    }
+
+    return result;
+}
+
+template <>
 std::vector<std::vector<config::Action>>
 config::Config::get<std::vector<std::vector<config::Action>>>(const std::string &key1,
                                                               const std::string &key2)
