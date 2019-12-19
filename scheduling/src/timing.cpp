@@ -164,13 +164,13 @@ void station_iteration(int number_of_robots, std::ofstream& output, scheduling::
     int next_station = stations.at(station_distribution(generator));
 
     // Robot info map
-    std::vector<robot::Info> infos;
+    std::vector<communication::Info> infos;
     for (int i = 0; i < number_of_robots; i++) {
         std::vector<int> station_copy = stations;
         std::random_shuffle(station_copy.begin(), station_copy.end());
         station_copy.resize(std::max(1, station_distribution(generator)));
         double eta = eta_distribution(generator);
-        robot::Info info{i, {0,0},
+        communication::Info info{i, {0,0},
             station_copy,
             std::vector<scheduling::Action>{},
             std::optional<double>{eta}};
@@ -192,7 +192,7 @@ void station_iteration(int number_of_robots, std::ofstream& output, scheduling::
     station_copy.resize(recified_new_size);
 
     // Write dynamic
-    dynamic_config.set(ROBOT_INFO_MAP, robot::InfoMap{infos}.to_json());
+    dynamic_config.set(ROBOT_INFO_MAP, communication::InfoMap{infos}.to_json());
     dynamic_config.set(STATION_ETA, eta);
     dynamic_config.set(NEXT_STATION, next_station);
     dynamic_config.set(STATIONS_TO_VISIT, station_copy);
@@ -253,7 +253,7 @@ void waypoint_iteration(const std::vector<std::vector<double>>& matrix, int numb
     std::uniform_int_distribution<int> waypoints_distribution(0, waypoints.size() - 1);
     std::exponential_distribution<double> hold_distribution(3);
 
-    std::vector<robot::Info> infos;
+    std::vector<communication::Info> infos;
     for (int i = 0; i < number_of_robots; i++) {
         int number_of_actions = std::max(1, action_distribution(generator));
         std::vector<scheduling::Action> schedule;
@@ -296,7 +296,7 @@ void waypoint_iteration(const std::vector<std::vector<double>>& matrix, int numb
             }
         }
 
-        robot::Info info{i, {0,0},
+        communication::Info info{i, {0,0},
             std::vector<int>{},
             schedule, 0};
 
@@ -313,7 +313,7 @@ void waypoint_iteration(const std::vector<std::vector<double>>& matrix, int numb
     vias_copy.resize(num_visited);
 
    // Write dynamic
-   dynamic_config.set(ROBOT_INFO_MAP, robot::InfoMap{infos}.to_json());
+   dynamic_config.set(ROBOT_INFO_MAP, communication::InfoMap{infos}.to_json());
    dynamic_config.set(NEXT_STATION, next_station);
    dynamic_config.set(NEXT_WAYPOINT, next_waypoint);
    dynamic_config.set(VISITED_WAYPOINTS, vias_copy);
