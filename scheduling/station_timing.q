@@ -22,16 +22,14 @@
 /*
 
 */
-strategy plan = minE (total) [<= 1000] : <> Robot.Done
+strategy plan = minE (total) [<=200] : <> Robot.Done
 
 /*
 
 */
-simulate 1 [<= 1000] {\
-    Robot.initial_station, Robot.converted_cur(), Robot.converted_dest()\
-} under plan
+E[<=200; 1000] (max: total)
 
 /*
 
 */
-saveStrategy("station_strategy.json", plan)
+E[<=200; 1000] (max: total) under plan
