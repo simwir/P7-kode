@@ -61,7 +61,16 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
         const char *command = "verifyta";
 
         FileLock _{query_path};
-        int ret = execlp(command, command, model_path.c_str(), query_path.c_str(), nullptr);
+        int ret = execlp(command, command,
+            "--good-runs", "150",
+            "--total-runs", "300",
+            "--runs-pr-state", "75",
+            "--eval-runs", "75",
+            "--max-iterations", "20",
+            "--max-imitation", "5",
+            "--reset-no-better", "5",
+            "--max-reset-learning", "3",
+            model_path.c_str(), query_path.c_str(), nullptr);
 
         if (ret == -1) {
             throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) +
