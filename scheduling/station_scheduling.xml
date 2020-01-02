@@ -187,7 +187,7 @@ visited[id][cur_loc] = true</label>
 			<source ref="id2"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-136" y="-204">x &gt;= get_station_dist(cur_loc, dest)</label>
-			<label kind="synchronisation" x="-136" y="-187">arr[cur_loc][id]!</label>
+			<label kind="synchronisation" x="-136" y="-187">arr[dest][id]!</label>
 			<label kind="assignment" x="-136" y="-170">cur_loc = dest</label>
 			<nail x="-153" y="-246"/>
 		</transition>
