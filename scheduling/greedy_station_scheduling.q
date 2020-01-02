@@ -1,3 +1,5 @@
+//This file was generated from (Academic) UPPAAL 4.1.20-stratego-6 (rev. 0DC1FC6317AF6369), October 2019
+
 /*Copyright 2019 Anders Madsen, Emil Jørgensen Njor, Emil Stenderup Bækdahl, Frederik Baymler
  *Mathiesen, Nikolaj Jensen Ulrik, Simon Mejlby Virenfeldt
  *
@@ -16,36 +18,10 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef TCP_HPP
-#define TCP_HPP
 
-#include <tcp/server.hpp>
+/*
 
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
-
-namespace webots_server {
-
-enum class MessageType { get_state, set_destination, done, not_understood };
-
-struct Message {
-    std::string payload;
-    MessageType type;
-};
-
-class Server {
-  public:
-    Server(std::string id);
-    ~Server();
-    std::optional<Message> get_message();
-    void send_message(const Message &);
-
-  private:
-    tcp::Server server;
-    std::string robot_id;
-    std::shared_ptr<tcp::Connection> client;
-};
-} // namespace webots_server
-#endif
+*/
+simulate 1 [<= 200] {\
+    Robot.initial_station, Robot.converted_cur(), Robot.converted_dest()\
+}

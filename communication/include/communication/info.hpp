@@ -29,14 +29,7 @@
 #include <utility>
 #include <vector>
 
-namespace robot {
-
-struct InfoParseError : public std::exception {
-    std::string _what;
-    InfoParseError(const std::string &msg) : _what("InfoParseError:" + msg) {}
-
-    const char *what() const noexcept override { return _what.c_str(); }
-};
+namespace communication {
 
 class InvalidRobotInfo : public std::exception {
     std::string message;
@@ -48,20 +41,6 @@ class InvalidRobotInfo : public std::exception {
 
 struct Point {
     double x, y;
-};
-
-struct ControllerState {
-    Point position;
-    bool is_stopped;
-
-    ControllerState() = default;
-    ControllerState(double x, double y, bool is_stopped)
-        : position(Point{x, y}), is_stopped(is_stopped)
-    {
-    }
-    Json::Value to_json() const;
-    static ControllerState from_json(const Json::Value &json);
-    static ControllerState parse(const std::string &s);
 };
 
 struct Info {
@@ -87,9 +66,36 @@ class InfoMap {
     static InfoMap from_json(const Json::Value &json);
     size_t size() const noexcept { return robot_info.size(); }
 
+    bool try_erase(int id);
+
   private:
     std::map<int, Info> robot_info;
 };
+} // namespace communication
+
+namespace robot {
+
+struct ControllerState {
+    communication::Point position;
+    bool is_stopped;
+
+    ControllerState() = default;
+    ControllerState(double x, double y, bool is_stopped)
+        : position(communication::Point{x, y}), is_stopped(is_stopped)
+    {
+    }
+    Json::Value to_json() const;
+    static ControllerState from_json(const Json::Value &json);
+    static ControllerState parse(const std::string &s);
+};
+
+struct InfoParseError : public std::exception {
+    std::string _what;
+    InfoParseError(const std::string &msg) : _what("InfoParseError:" + msg) {}
+
+    const char *what() const noexcept override { return _what.c_str(); }
+};
+
 } // namespace robot
 
 #endif

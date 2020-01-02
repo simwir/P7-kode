@@ -22,12 +22,12 @@
 /*
 
 */
-strategy realistic = minE (total) [<=500] %¤STRATEGY_VAR_LIST¤% : <> Robot.Done
+strategy realistic = minE (total) [<=1000] %¤STRATEGY_VAR_LIST¤% : <> Robot.Done
 
 /*
 
 */
-simulate 1 [<= 100] {\
+simulate 1 [<= 1000] {\
     Robot.cur_waypoint, Robot.dest_waypoint, Robot.Holding\
 } under realistic
 

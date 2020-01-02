@@ -16,36 +16,29 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef TCP_HPP
-#define TCP_HPP
+#ifndef UTIL_FILELOCK
+#define UTIL_FILELOCK
 
-#include <tcp/server.hpp>
+#include <filesystem>
 
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
+const std::filesystem::path _suffix = ".lock";
 
-namespace webots_server {
+enum class lock_mode { shared, exclusive };
 
-enum class MessageType { get_state, set_destination, done, not_understood };
+bool is_locked(std::filesystem::path path);
 
-struct Message {
-    std::string payload;
-    MessageType type;
+struct CouldNotLockFile : std::runtime_error {
+    CouldNotLockFile(const std::string &s) : std::runtime_error(s) {}
 };
 
-class Server {
+class FileLock {
   public:
-    Server(std::string id);
-    ~Server();
-    std::optional<Message> get_message();
-    void send_message(const Message &);
+    FileLock(const std::filesystem::path &path, lock_mode mode = lock_mode::exclusive);
+    ~FileLock();
 
   private:
-    tcp::Server server;
-    std::string robot_id;
-    std::shared_ptr<tcp::Connection> client;
+    int fd;
+    std::filesystem::path held_path;
 };
-} // namespace webots_server
+
 #endif

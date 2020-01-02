@@ -37,7 +37,7 @@ distance_matrix::distance_matrix(const AST &ast)
             }
             else {
                 _data[_data.size() - 1].push_back(
-                    euclidean_distance(ast.nodes.at(i), ast.nodes.at(j)));
+                    euclidean_distance(ast.nodes.at(i), ast.nodes.at(j)) / MEASURED_ROBOT_SPEED);
             }
         }
     }

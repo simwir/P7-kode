@@ -37,7 +37,8 @@ class ConnectException : public std::exception {
     const char *what() const noexcept { return _what.c_str(); }
 };
 
-struct ConnectionClosedException : public std::exception {};
+struct ConnectionClosedException : public std::exception {
+};
 
 class SendException : public std::exception {
     std::string message;

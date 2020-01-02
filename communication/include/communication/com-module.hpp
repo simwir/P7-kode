@@ -60,7 +60,7 @@ class ComModule {
   private:
     tcp::Server server;
 
-    robot::InfoMap robot_info;
+    InfoMap robot_info;
 };
 
 } // namespace communication

@@ -49,6 +49,7 @@ double eta(int32_t robot);
 
 // Waypoint schedule related
 int32_t get_waypoint_dist(int32_t from, int32_t to);
+int32_t get_waypoint_next(int32_t from, int32_t to);
 void waypoint_visited(int32_t number_of_stations, int8_t *arr); // Length = number_of_stations
 void station_list(int32_t number_of_stations, int32_t *arr);    // Length = number_of_stations
 int32_t get_next_action_type(int32_t robot, int32_t step);

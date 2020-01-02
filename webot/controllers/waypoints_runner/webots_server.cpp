@@ -24,7 +24,7 @@
 #include "webots_server.hpp"
 
 const std::string PDS_PORT = "4444";
-const std::string PDS_ADDR = "172.22.0.151";
+const std::string PDS_ADDR = "127.0.0.1";
 
 using namespace webots_server;
 
@@ -56,6 +56,9 @@ std::optional<Message> webots_server::Server::get_message()
     if (split_pos == std::string::npos) {
         if (message == "get_state") {
             message_type = MessageType::get_state;
+        }
+        else if (message == "done") {
+            message_type = MessageType::done;
         }
         else {
             send_message(Message{message, MessageType::not_understood});
