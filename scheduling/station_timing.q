@@ -22,14 +22,14 @@
 /*
 
 */
-strategy plan = minE (total) [<=200] : <> Robot.Done
+strategy plan = minE (total) [<=1000] : <> Robot.Done
 
 /*
 
 */
-E[<=200; 1000] (max: total)
+E[<=1000; 1000] (max: total)
 
 /*
 
 */
-E[<=200; 1000] (max: total) under plan
+E[<=1000; 1000] (max: total) under plan
