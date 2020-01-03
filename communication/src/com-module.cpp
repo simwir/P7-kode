@@ -58,8 +58,9 @@ void ComModule::get_robot_info(std::shared_ptr<tcp::Connection> conn)
 
 void ComModule::put_robot_info(const std::string &robot_payload)
 {
+    std::cout << "Updating robot info: " << robot_payload << std::endl;
     std::scoped_lock<std::mutex> lock(mutex);
-    robot::Info info = robot::Info::from_json(robot_payload);
+    Info info = Info::from_json(robot_payload);
     robot_info[info.id] = info;
 }
 
@@ -101,6 +102,10 @@ void ComModule::parse_message(std::shared_ptr<tcp::Connection> conn)
         }
         catch (tcp::ReceiveException &e) {
             std::cerr << "ReceiveException" << e.what() << std::endl;
+            break;
+        }
+        catch (tcp::ConnectionClosedException &e) {
+            std::cerr << "Connection closed." << std::endl;
             break;
         }
     }

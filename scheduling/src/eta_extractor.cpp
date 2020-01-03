@@ -31,10 +31,13 @@ void EtaExtractor::start_worker()
                   << std::endl;
         return;
     }
+    std::cerr << "EtaExtractor: Starting ETA calculation." << std::endl;
     executor.execute([&](const std::string &res) {
+        std::cerr << "EtaExtractor: Received result. " << std::endl;
         std::regex eta_response{R"(.+= ([\d\.]+))"};
         std::smatch eta_value;
         if (std::regex_search(res, eta_value, eta_response)) {
+            std::cerr << "EtaExtractor: Notifying ETA " << eta_value[1] << std::endl;
             // index 0 is the whole string
             notify_subscribers(stod(eta_value[1]));
         }

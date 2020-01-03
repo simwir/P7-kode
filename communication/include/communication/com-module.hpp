@@ -19,7 +19,7 @@
 #ifndef COM_MODULE_HPP
 #define COM_MODULE_HPP
 
-#include "robot/info.hpp"
+#include "communication/info.hpp"
 #include "tcp/server.hpp"
 #include "util/json.hpp"
 #include <map>
@@ -60,7 +60,7 @@ class ComModule {
   private:
     tcp::Server server;
 
-    robot::InfoMap robot_info;
+    InfoMap robot_info;
 };
 
 } // namespace communication

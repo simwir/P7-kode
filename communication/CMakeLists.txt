@@ -19,13 +19,20 @@
 include_directories(${PROJECT_SOURCE_DIR}/communication/include)
 
 file(GLOB SOURCES "src/*.cpp")
+list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_CIR}/src/main.cpp)
 
-add_executable(com_module ${SOURCES})
-target_link_libraries(com_module
+add_library(libcom ${SOURCES})
+
+add_executable(com_module src/main.cpp)
+target_link_libraries(libcom
     pthread
     tcp
     jsoncpp_lib
-    librobot
+    scheduling
+)
+
+target_link_libraries(com_module
+    libcom
 )
 
 install(TARGETS com_module DESTINATION bin)

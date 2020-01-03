@@ -76,6 +76,8 @@ struct AST {
                                           " Could not be found");
         }
     }
+
+    size_t num_waypoints() const { return nodes.size(); }
 };
 
 class Parser {

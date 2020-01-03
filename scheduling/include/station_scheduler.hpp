@@ -31,7 +31,7 @@ namespace scheduling {
 
 class StationScheduleSubscriber : public std::enable_shared_from_this<StationScheduleSubscriber> {
   public:
-    virtual void newSchedule(const std::vector<int> &schedule) = 0;
+    virtual void new_schedule(const std::vector<int> &schedule) = 0;
     virtual ~StationScheduleSubscriber() {}
 };
 

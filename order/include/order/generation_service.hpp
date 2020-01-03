@@ -24,15 +24,19 @@
 #include "tcp/connection.hpp"
 #include "tcp/server.hpp"
 #include <memory>
+#include <mutex>
 
 namespace order {
 class GenerationService {
     tcp::Server server;
     std::shared_ptr<Generator> generator;
     void parse_message(std::shared_ptr<tcp::Connection> connection);
+    int max_order_count;
+    int order_count = 0;
+    std::mutex order_count_mutex;
 
   public:
-    GenerationService(int port, std::shared_ptr<Generator> generator);
+    GenerationService(int port, std::shared_ptr<Generator> generator, int max_order_count = -1);
     void start();
     int get_port();
 };

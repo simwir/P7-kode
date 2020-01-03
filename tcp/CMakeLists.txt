@@ -19,10 +19,11 @@
 include_directories(${PROJECT_SOURCE_DIR}/tcp/include)
 
 file(GLOB SOURCES "src/*.cpp")
+list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/auto_responder.cpp)
 
 add_library(tcp ${SOURCES})
 
-add_executable(auto-responder ${SOURCES})
+add_executable(auto-responder src/auto_responder.cpp)
 target_link_libraries(auto-responder
   tcp
   pthread
@@ -31,3 +32,5 @@ target_link_libraries(auto-responder
 target_link_libraries(tcp
     m # Math library for example
 )
+
+install(TARGETS auto-responder DESTINATION bin)

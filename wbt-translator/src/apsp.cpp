@@ -45,7 +45,7 @@ apsp_result all_pairs_shortest_path(const AST &ast)
     for (auto &[_, from] : ast.nodes) {
         for (auto adjId : from.adjlist) {
             Waypoint to = ast.nodes.at(adjId);
-            result.dist.at(from.id).at(adjId) = euclidean_distance(from, to);
+            result.dist.at(from.id).at(adjId) = euclidean_distance(from, to) / MEASURED_ROBOT_SPEED;
             result.next.at(from.id).at(adjId) = adjId;
         }
     }

@@ -28,7 +28,7 @@
 #include "waypoint_scheduler.hpp"
 
 class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscriber {
-    void newSchedule(const std::vector<scheduling::Action> &schedule) override
+    void new_schedule(const std::vector<scheduling::Action> &schedule) override
     {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new waypoint schedule at " << std::asctime(std::localtime(&result));
@@ -50,7 +50,7 @@ class LogWaypointScheduleSubscriber : public scheduling::WaypointScheduleSubscri
 };
 
 class LogStationScheduleSubscriber : public scheduling::StationScheduleSubscriber {
-    void newSchedule(const std::vector<int> &schedule) override
+    void new_schedule(const std::vector<int> &schedule) override
     {
         std::time_t result = std::time(nullptr);
         std::cout << "Got new station schedule at " << std::asctime(std::localtime(&result));
@@ -85,39 +85,40 @@ int main(int argc, char *argv[])
         query_path = working_path / bin_loc / "waypoint_scheduling.q";
     }
 
+    scheduling::StationScheduler scheduler{model_path, query_path};
+    auto log_subscriber = std::make_shared<LogStationScheduleSubscriber>();
+
     // Stations
-    scheduling::StationScheduler stationScheduler;
-    auto logStationSubscriber = std::make_shared<LogStationScheduleSubscriber>();
+    scheduling::StationScheduler station_scheduler;
+    auto log_station_subscriber = std::make_shared<LogStationScheduleSubscriber>();
 
     std::cout << "main: \tAdding station subscriber\n";
-    stationScheduler.add_subscriber(logStationSubscriber->shared_from_this());
+    station_scheduler.add_subscriber(log_station_subscriber->shared_from_this());
 
     std::cout << "main: \tStarting station scheduler\n";
-    stationScheduler.start();
+    station_scheduler.start();
 
-    // Waypoints
-    scheduling::WaypointScheduler waypointScheduler;
-    auto logWaypointSubscriber = std::make_shared<LogWaypointScheduleSubscriber>();
+    // Stations
+    scheduling::WaypointScheduler waypoint_scheduler;
+    auto log_waypoint_subscriber = std::make_shared<LogWaypointScheduleSubscriber>();
 
     std::cout << "main: \tAdding waypoint subscriber\n";
-    waypointScheduler.add_subscriber(logWaypointSubscriber->shared_from_this());
+    waypoint_scheduler.add_subscriber(log_waypoint_subscriber->shared_from_this());
 
     std::cout << "main: \tStarting waypoint scheduler\n";
-    waypointScheduler.start();
+    waypoint_scheduler.start();
 
-    scheduling::EtaExtractor etaExtractor;
-    auto etaLogger = std::make_shared<LogEtaSubscriber>();
-    etaExtractor.add_subscriber(etaLogger->shared_from_this());
+    scheduling::EtaExtractor eta_extractor;
+    auto eta_logger = std::make_shared<LogEtaSubscriber>();
+    eta_extractor.add_subscriber(eta_logger->shared_from_this());
 
     std::cout << "main: \tStarting ETA extractor";
-    etaExtractor.start();
-
-    // sleep(120);
+    eta_extractor.start();
 
     std::cout << "main: \tStopping schedulers\n";
-    stationScheduler.wait_for_result();
-    waypointScheduler.wait_for_result();
-    etaExtractor.wait_for_result();
+    station_scheduler.wait_for_result();
+    waypoint_scheduler.wait_for_result();
+    eta_extractor.wait_for_result();
 
     std::cout << "main: \treturning from main" << std::endl;
     return 0;

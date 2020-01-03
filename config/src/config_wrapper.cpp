@@ -40,7 +40,8 @@
         }                                                                                          \
     }
 
-Log _log{"libconfig.log"};
+// Log _log{"libconfig.log"};
+NullLog _log{};
 bool loaded = false;
 
 config::Config static_config;
@@ -393,6 +394,20 @@ int32_t get_waypoint_dist(int32_t from, int32_t to)
         _log << "get_waypoint_dist";
         _log << e.what();
         return -1; // -1 impies that there is no edge from -> to.
+    }
+}
+
+int32_t get_waypoint_next(int32_t from, int32_t to)
+{
+    load();
+    try {
+        static auto next = static_config.get<std::vector<std::vector<int>>>("next_waypoint_matrix");
+        return next.at(from).at(to);
+    }
+    catch (const std::exception &e) {
+        _log << "next_waypoint_matrix";
+        _log << e.what();
+        return -1; // -1 impies that there is no path from -> to.
     }
 }
 

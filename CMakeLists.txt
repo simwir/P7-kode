@@ -24,7 +24,7 @@ project(p7)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED)
-set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer -Wall")
+set(CMAKE_CXX_FLAGS "-g -fno-omit-frame-pointer ${CMAKE_CXX_FLAGS}")
 
 include(ExternalProject)
 
@@ -40,6 +40,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/lib/jsoncpp/include
     ${PROJECT_SOURCE_DIR}/tcp/include
     ${PROJECT_SOURCE_DIR}/robot/include
+    ${PROJECT_SOURCE_DIR}/communication/include
     ${PROJECT_SOURCE_DIR}/wbt-translator/include
     ${PROJECT_SOURCE_DIR}/scheduling/include
     ${PROJECT_SOURCE_DIR}/util/include
@@ -52,11 +53,15 @@ add_subdirectory(lib)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-add_subdirectory(tcp)
 add_subdirectory(config)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+
 add_subdirectory(scheduling)
+add_subdirectory(tcp)
 add_subdirectory(robot)
 add_subdirectory(order)
+add_subdirectory(util)
 
 # Executables
 add_subdirectory(tests)

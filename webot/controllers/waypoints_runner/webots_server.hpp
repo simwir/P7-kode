@@ -19,15 +19,16 @@
 #ifndef TCP_HPP
 #define TCP_HPP
 
+#include <tcp/server.hpp>
+
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
-#include "tcp/server.hpp"
-
 namespace webots_server {
 
-enum class MessageType { get_state, set_destination, not_understood };
+enum class MessageType { get_state, set_destination, done, not_understood };
 
 struct Message {
     std::string payload;
@@ -38,7 +39,7 @@ class Server {
   public:
     Server(std::string id);
     ~Server();
-    std::vector<Message> get_messages();
+    std::optional<Message> get_message();
     void send_message(const Message &);
 
   private:

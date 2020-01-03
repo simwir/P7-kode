@@ -22,67 +22,87 @@
 #include <mutex>
 #include <type_traits>
 
+#include "util/meta.hpp"
+
 /**
  * Wrapper class around a value that can be updated from elsewhere and be polled for
  * whether such updates have happened.
  */
-template <typename T, bool atomic = false>
-class _Pollable {
+template <typename T>
+class Pollable {
     T value;
     bool dirty = false;
-    // typename specifies that the expression does name a type, which cannot otherwise be inferred.
-    typename std::conditional<atomic, std::mutex, std::nullptr_t>::type mutex;
+    mutable std::mutex mutex;
 
   public:
-    _Pollable() = default;
-    _Pollable(T &&value) : value(value), dirty(false) {}
+    Pollable() = default;
+    Pollable(T &&value) : value(value), dirty(false) {}
 
-    bool is_dirty() const { return dirty; }
+    bool is_dirty() const
+    {
+        std::scoped_lock lock{mutex};
+        return dirty;
+    }
 
     void reset(T &&value)
     {
-        if constexpr (atomic) {
-            std::scoped_lock lock{mutex};
-        }
+        std::scoped_lock lock{mutex};
         dirty = true;
         this->value = value;
     }
 
     void reset(const T &value)
     {
-        if constexpr (atomic) {
-            std::scoped_lock lock{mutex};
-        }
+        std::scoped_lock lock{mutex};
         dirty = true;
         this->value = value;
     }
 
-    T get()
+    /**
+     * get the value contained in the pollable, leaving the dirty flag intact.
+     */
+    T get() const
     {
-        if constexpr (atomic) {
-            std::scoped_lock lock{mutex};
-        }
+        std::scoped_lock lock{mutex};
+        return value;
+    }
+
+    void pop()
+    {
+        static_assert(meta::is_container<T>::value, "cannot pop from non-container");
+        std::scoped_lock lock{mutex};
+        auto it = value.begin();
+        value.erase(it);
+    }
+
+    /**
+     * read the value from the pollable, clearing the dirty flag.
+     */
+    T read()
+    {
+        std::scoped_lock lock{mutex};
         dirty = false;
         return value;
     }
 
-    _Pollable<T> &operator=(const T &t)
+    void clean()
+    {
+        std::scoped_lock lock{mutex};
+        dirty = false;
+    }
+
+    Pollable<T> &operator=(const T &t)
     {
         reset(t);
         return *this;
     }
 
-    T operator*() { return get(); }
-    operator bool() const { return dirty; }
+    T operator*() const { return get(); }
+    operator bool() const { return is_dirty(); }
 };
 
 // Deduction guide
 template <typename T>
-_Pollable(T)->_Pollable<T>;
-
-template <typename T>
-using AtomicPollable = _Pollable<T, true>;
-template <typename T>
-using Pollable = _Pollable<T, false>;
+Pollable(T)->Pollable<T>;
 
 #endif

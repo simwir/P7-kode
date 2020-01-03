@@ -26,6 +26,9 @@
 
 #include "station_scheduler.hpp"
 
+#define TRACEME
+#include "trace.def"
+
 extern int errno;
 
 namespace scheduling {
@@ -43,12 +46,18 @@ void StationScheduler::start_worker()
 
     auto callback = [&](const std::string &result) {
         std::cerr << "StationScheduler: Parsing..." << std::endl;
-        std::vector<SimulationExpression> values =
-            parser.parse(result, 2); // We parse the result of the second formula
+        // The second formula contains the simulated trace to be used as schedule.
+        std::vector<SimulationExpression> values = parser.parse(result, 2);
 
         std::cerr << "StationScheduler: Composing..." << std::endl;
         std::vector<int> schedule = convert_result(values);
 
+        TRACE({
+            std::cerr << "StationScheduler: Schedule is: ";
+            for (auto i : schedule) {
+                std::cerr << i << ' ';
+            }
+        });
         std::cerr << "StationScheduler: Emitting..." << std::endl;
         notify_subscribers(schedule);
     };
@@ -89,7 +98,7 @@ void StationScheduler::notify_subscribers(const std::vector<int> &schedule)
 {
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {
-            sub->newSchedule(schedule);
+            sub->new_schedule(schedule);
         }
     }
 }

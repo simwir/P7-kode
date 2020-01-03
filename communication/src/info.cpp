@@ -16,7 +16,9 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "robot/info.hpp"
+#include "communication/info.hpp"
+#include "util/json.hpp"
+
 #include <map>
 #include <sstream>
 #include <string>
@@ -24,17 +26,58 @@
 #include <vector>
 
 namespace robot {
+ControllerState ControllerState::parse(const std::string &s)
+{
+    std::stringstream ss{s};
+    double x, y;
+    std::string state;
+    char sink;
+    ss >> x >> sink;
+    if (!ss || sink != ',') {
+        throw InfoParseError{"could not parse controller state from " + s};
+    }
+    ss >> y >> sink;
+    if (!ss || sink != ',') {
+        throw InfoParseError{"could not parse controller state from " + s};
+    }
+    ss >> state;
+    if (state == "holding") {
+        return ControllerState{x, y, true};
+    }
+    else if (state == "running") {
+        return ControllerState{x, y, false};
+    }
+    else {
+        throw InfoParseError{"invalid value for state: " + state};
+    }
+}
+ControllerState ControllerState::from_json(const Json::Value &json)
+{
+    return ControllerState{json["x"].asDouble(), json["y"].asDouble(), json["stopped"].asBool()};
+}
+
+Json::Value ControllerState::to_json() const
+{
+    Json::Value val{Json::objectValue};
+    val["x"] = position.x;
+    val["y"] = position.y;
+    val["stopped"] = is_stopped;
+    return val;
+}
+} // namespace robot
+
+namespace communication {
 Json::Value Info::to_json() const
 {
     Json::Value json;
 
     json["id"] = id;
-    json["eta"] = eta.has_value() ? eta.value() : Json::nullValue;
+    json["station_eta"] = eta.has_value() ? eta.value() : Json::nullValue;
     json["location"]["x"] = location.x;
     json["location"]["y"] = location.y;
     json["station_plan"] = Json::Value{Json::arrayValue};
 
-    for (const int &station : station_plan) {
+    for (int station : station_plan) {
         json["station_plan"].append(Json::Value{station});
     }
 
@@ -69,7 +112,7 @@ std::vector<int> get_field_as<std::vector<int>>(const Json::Value &json, const s
     }
 
     for (auto itr = json[field].begin(); itr != json[field].end(); itr++) {
-        vector.push_back(itr.key().asInt());
+        vector.push_back(itr->asInt());
     }
     return vector;
 }
@@ -96,9 +139,9 @@ get_field_as<std::vector<scheduling::Action>>(const Json::Value &json, const std
 }
 
 template <>
-robot::Point get_field_as<robot::Point>(const Json::Value &json, const std::string &field)
+Point get_field_as<Point>(const Json::Value &json, const std::string &field)
 {
-    return robot::Point{json[field]["x"].asDouble(), json[field]["y"].asDouble()};
+    return Point{json[field]["x"].asDouble(), json[field]["y"].asDouble()};
 }
 
 template <>
@@ -129,12 +172,12 @@ Info Info::from_json(const Json::Value &json)
     }
 
     int id = get_field_as<int>(json, "id");
-    auto location = get_field_as<robot::Point>(json, "location");
+    auto location = get_field_as<Point>(json, "location");
     auto station_plan = get_field_as<std::vector<int>>(json, "station_plan");
     auto waypoint_plan = get_field_as<std::vector<scheduling::Action>>(json, "waypoint_plan");
-    auto eta = get_field_as<std::optional<double>>(json, "eta");
+    auto eta = get_field_as<std::optional<double>>(json, "station_eta");
 
-    return robot::Info{id, location, station_plan, waypoint_plan, eta};
+    return Info{id, location, station_plan, waypoint_plan, eta};
 }
 
 InfoMap::InfoMap(const std::vector<Info> &infos)
@@ -183,4 +226,14 @@ InfoMap InfoMap::from_json(const Json::Value &json)
 
     return InfoMap{infos};
 }
-} // namespace robot
+
+bool InfoMap::try_erase(int id)
+{
+    if (auto it = robot_info.find(id); it != robot_info.end()) {
+        robot_info.erase(it);
+        return true;
+    }
+    return false;
+}
+
+} // namespace communication

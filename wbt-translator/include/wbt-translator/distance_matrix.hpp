@@ -24,6 +24,9 @@
 #include <string>
 #include <vector>
 
+// the measured speed of the webots robot in metres per second.
+constexpr double MEASURED_ROBOT_SPEED = 0.027;
+
 class distance_matrix {
   public:
     distance_matrix(const AST &ast);

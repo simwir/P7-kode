@@ -18,6 +18,7 @@
  */
 #include "robot.hpp"
 #include "geo/geo.hpp"
+#include "tcp/exception.hpp"
 #include "tcp/server.hpp"
 
 #include <algorithm>
@@ -64,7 +65,7 @@ int getRobotId(webots::Supervisor *robot)
 {
     auto self = robot->getSelf();
     if (self == nullptr) {
-        std::cerr << "robot->getSelf() returned 0. Please restart webots";
+        // std::cerr << "robot->getSelf() returned 0. Please restart webots";
         exit(1);
     }
     return self->getField("id")->getSFInt32();
@@ -72,7 +73,7 @@ int getRobotId(webots::Supervisor *robot)
 
 RobotController::RobotController(webots::Supervisor *robot)
     : time_step((int)robot->getBasicTimeStep()), robot(robot),
-      dfollowed(std::numeric_limits<double>::max())
+      server(std::to_string(getRobotId(robot))), dfollowed(std::numeric_limits<double>::max())
 {
     left_motor = robot->getMotor("left wheel motor");
     right_motor = robot->getMotor("right wheel motor");
@@ -89,6 +90,7 @@ RobotController::RobotController(webots::Supervisor *robot)
 
     lidar = {robot->getLidar("lidar")};
     lidar.enable(time_step);
+    robot->getLidar("lidar")->enablePointCloud();
     lidar_resolution = lidar.get_resolution();
     lidar_max_range = lidar.get_max_range();
     lidar_min_range = lidar.get_min_range();
@@ -119,7 +121,15 @@ void RobotController::update_sensor_values()
         const int index =
             lidar_resolution - 1 - (i - quarter + lidar_resolution) % lidar_resolution;
 
-        float dist = range_image[i];
+        std::vector<float> dists;
+
+        for (int j = 0; j < lidar_num_layers; j++) {
+            dists.push_back(range_image[j * lidar_resolution + i]);
+        }
+
+        std::vector<float>::iterator result = std::min_element(dists.begin(), dists.end());
+
+        float dist = *result;
         auto nextval = 1.01 * lidar_min_range <= dist && dist <= 0.99 * lidar_max_range
                            ? std::make_optional(dist)
                            : std::nullopt;
@@ -130,58 +140,77 @@ void RobotController::update_sensor_values()
 
 void RobotController::communicate()
 {
+    if (!communicating)
+        return;
+
     using namespace webots_server;
-    for (Message message : server.get_messages()) {
-        switch (message.type) {
-        case MessageType::get_state: {
-            auto response = std::to_string(position.x) + "," + std::to_string(position.y) + "," +
-                            (is_stopped ? "stopped" : "running");
-            server.send_message({response, MessageType::get_state});
-            break;
+    auto msg = server.get_message();
+    if (!msg)
+        return;
+    auto message = *msg;
+    switch (message.type) {
+    case MessageType::get_state: {
+        auto response = std::to_string(position.x) + "," + std::to_string(position.y) + "," +
+                        (is_stopped ? "holding" : "running");
+        server.send_message({response, MessageType::get_state});
+        break;
+    }
+    case MessageType::set_destination: {
+        size_t split_pos = message.payload.find(",");
+        if (split_pos == std::string::npos) {
+            server.send_message({message.payload, MessageType::not_understood});
+            return;
         }
-        case MessageType::set_destination: {
-            size_t split_pos = message.payload.find(",");
-            if (split_pos == std::string::npos) {
-                server.send_message({message.payload, MessageType::not_understood});
-                continue;
-            }
-            destination = {std::stod(message.payload.substr(0, split_pos)),
-                           std::stod(message.payload.substr(split_pos + 1))};
-            break;
-        }
-        default:
-            break;
-        }
+        set_goal({std::stod(message.payload.substr(0, split_pos)),
+                  std::stod(message.payload.substr(split_pos + 1))});
+        break;
+    }
+    case MessageType::done: {
+        set_goal({100, 100});
+    }
+    default:
+        break;
     }
 }
 
 void RobotController::run_simulation()
 {
-    set_goal(geo::GlobalPoint{-0.68, 0.79});
     while (robot->step(time_step) != -1) {
-        communicate();
-        if (first_iteration) {
-            first_iteration = false;
-            continue;
-        }
+        try {
+            update_sensor_values();
+            communicate();
+            if (first_iteration) {
+                first_iteration = false;
+                continue;
+            }
 
-        if (!has_goal) {
-            stop();
-            continue;
-        }
+            if (!has_goal) {
+                stop();
+                continue;
+            }
 
-        update_sensor_values();
+            if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
+                stop();
+                has_goal = false;
+                continue;
+            }
 
-        if (cur_dist2goal < DIST_TO_GOAL_THRESHOLD) {
-            stop();
-            continue;
+            if (phase == Phase::BoundaryFollowing) {
+                phase = boundary_following();
+            }
+            else {
+                phase = motion2goal();
+            }
         }
-
-        if (phase == Phase::BoundaryFollowing) {
-            phase = boundary_following();
+        catch (tcp::ConnectionClosedException &e) {
+            std::cerr << "Connection closed." << std::endl;
+            set_goal(geo::GlobalPoint{100, 100});
+            communicating = false;
         }
-        else {
-            phase = motion2goal();
+        catch (tcp::CloseException &e) {
+            std::cerr << "Connection closed." << std::endl;
+            set_goal(geo::GlobalPoint{100, 100});
+            communicating = false;
         }
     }
 }
@@ -195,7 +224,8 @@ Phase RobotController::motion2goal()
     int lidar_value_index = angle2index(angle2goal);
     std::optional<double> range2goal = lidar_range_values[lidar_value_index];
     if ((!range2goal.has_value() || cur_dist2goal < range2goal.value()) && clear()) {
-        std::cerr << "Towards goal: " << angle2goal << ", " << !range2goal.has_value() << std::endl;
+        // std::cerr << "Towards goal: " << angle2goal << ", " << !range2goal.has_value() <<
+        // std::endl;
         go_towards_angle(angle2goal);
 
         return Phase::Motion2Goal;
@@ -218,10 +248,10 @@ Phase RobotController::motion2goal()
     }
 
     if (geo::euclidean_dist(best_point, goal) > prev_dist2goal) {
-        std::cerr << "Changing phase to boundary following" << std::endl;
+        // std::cerr << "Changing phase to boundary following" << std::endl;
         dfollowed = std::numeric_limits<double>::max();
         update_dfollowed();
-        return Phase::BoundaryFollowing;
+        return Phase::Motion2Discontinuity;
     }
     else {
         go_to_discontinuity(best_point, dir);
@@ -233,8 +263,9 @@ Phase RobotController::motion2goal()
 void RobotController::go_to_discontinuity(geo::GlobalPoint point, DiscontinuityDirection dir)
 {
     geo::Angle angle = get_angle_to_point(point);
-    std::cerr << "Towards discontinuity: " << angle << ", " << (dir == DiscontinuityDirection::Left)
-              << std::endl;
+    // std::cerr << "Towards discontinuity: " << angle << ", " << (dir ==
+    // DiscontinuityDirection::Left)
+    //<< std::endl;
 
     const double dist = geo::euclidean_dist(position, point);
     const double rectified_remaining_dist = (1 - std::min(1.0, dist));
@@ -267,7 +298,7 @@ bool RobotController::clear()
 Phase RobotController::boundary_following()
 {
     if (dreach() + 0.05 < dfollowed) {
-        std::cerr << "Changing phase to motion to goal" << std::endl;
+        // std::cerr << "Changing phase to motion to goal" << std::endl;
         return Phase::Motion2Goal;
     }
 
@@ -370,20 +401,20 @@ void RobotController::go_towards_angle(const geo::Angle &angle)
     geo::Angle abs = geo::abs_angle(angle);
 
     if (angle.theta > PI / 10) {
-        std::cerr << "Turning left" << std::endl;
+        // std::cerr << "Turning left" << std::endl;
         do_left_turn();
     }
     else if (angle.theta < -PI / 10) {
-        std::cerr << "Turning right" << std::endl;
+        // std::cerr << "Turning right" << std::endl;
         do_right_turn();
     }
     else if (abs.theta < 0.5 * (PI / 180)) { // If we are off by less than 0.5 degrees, we will not
                                              // perform any correction
-        std::cerr << "Going straight ahead" << std::endl;
+        // std::cerr << "Going straight ahead" << std::endl;
         go_straight_ahead();
     }
     else {
-        std::cerr << "Going straight with adjustment" << std::endl;
+        // std::cerr << "Going straight with adjustment" << std::endl;
         go_adjusted_straight(angle);
     }
 }
@@ -400,6 +431,7 @@ void RobotController::go_straight_ahead()
 {
     left_motor->setVelocity(6);
     right_motor->setVelocity(6);
+    is_stopped = false;
     set_leds(Direction::Straight);
 }
 

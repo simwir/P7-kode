@@ -27,7 +27,12 @@
 // Other includes
 #include <iostream>
 #include <sstream>
+
+#include "util/file_lock.hpp"
 #include <uppaal_executor.hpp>
+
+#define TRACEME
+#include "trace.def"
 
 constexpr int PARENT_READ = 0;
 constexpr int CHILD_WRITE = 1;
@@ -55,42 +60,65 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
         const char *command = "verifyta";
 
+        FileLock _{query_path};
         int ret = execlp(command, command, model_path.c_str(), query_path.c_str(), nullptr);
 
         if (ret == -1) {
             throw SchedulingException("Could not start verifyta. errno: " + std::to_string(errno) +
                                       ".");
         }
-
-        child_pid = std::nullopt;
     }
     else {
-        child_pid = {pid};
+        reset_pid(pid);
         // Parent
         close(fd[CHILD_WRITE]);
         close(fd[CHILD_READ]);
         close(fd[PARENT_WRITE]);
 
         // Wait for completion
-        std::cout << "Waiting for completion...\n";
+        TRACE(std::cout << "Waiting for completion..." << std::endl);
+        if (worker_active) {
+            abort();
+        }
+        else {
+            wait_for_result();
+        }
         worker = std::thread([&, parent_read = fd[PARENT_READ], callback]() -> void {
             int status;
-            int res = waitpid(pid, &status, NO_FLAGS);
-            if (res == -1) {
-                std::cerr << "An error " << errno << " occured while waiting for process " << pid
-                          << std::endl;
+            int pid;
+            Holds _{worker_active};
+
+            {
+                ScopedLock get_pid{pid_lock};
+                if (!child_pid.has_value()) {
+                    TRACE(std::cerr << "Executor: Bailing out, child_pid has no value");
+                    return; // TODO better behaviour?
+                }
+                else {
+                    pid = child_pid.value();
+                }
             }
-            child_pid = std::nullopt;
-            std::cout << "Scheduling complete with status " << status << ".\n";
+
+            TRACE(std::cerr << "Executor: waiting on PID " << pid << std::endl);
+            int res = waitpid(pid, &status, NO_FLAGS);
+            TRACE(std::cerr << "Executor: done waiting on PID\n");
+            if (res == -1) {
+                TRACE(std::cerr << "ERROR: waitpid failed with errno " << errno << std::endl);
+                if (errno == ECHILD) {
+                    TRACE(std::cerr << "ERROR: ECHILD (no child processes) for PID " << pid
+                                    << std::endl);
+                }
+            }
+            reset_pid();
+            TRACE(std::cout << "Scheduling complete with status " << status << ".\n");
 
             if (WIFSIGNALED(status)) { // Is true if the pid was terminated by a signal
-                std::cerr << "was signaled" << std::endl;
-                child_pid = {};
+                TRACE(std::cerr << "was signaled" << std::endl);
                 return;
             }
 
             // Only do something if we actually did get a result
-            if (status != 0) {
+            if (!WIFEXITED(status) && !(WEXITSTATUS(status) == EXIT_SUCCESS)) {
                 // Cleanup after use
                 close(parent_read);
 
@@ -106,7 +134,7 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
                 ss.write(buffer, bytes);
             }
             if (errno == EAGAIN) {
-                std::cerr << "ERROR: verifyta did not provide any input" << std::endl;
+                TRACE(std::cerr << "ERROR: verifyta did not provide any input" << std::endl);
             }
 
             // Cleanup after use
@@ -119,27 +147,42 @@ void scheduling::UppaalExecutor::execute(std::function<void(const std::string &)
 
 bool scheduling::UppaalExecutor::abort()
 {
+    std::unique_lock lock{pid_lock};
     if (child_pid) {
         if (kill(*child_pid, SIGTERM) == 0) {
             child_pid = std::nullopt;
 
             // force join the thread to reset thread state.
+            lock.unlock();
             wait_for_result();
             return true;
         }
         else {
             // ESRCH = process not found. Treat this as a success.
-            if (0 && errno == ESRCH) {
+            if (errno == ESRCH) {
                 child_pid = std::nullopt;
+                lock.unlock();
+                wait_for_result();
                 return true;
             }
             else {
-                std::cerr << errno << std::endl;
+                TRACE(std::cerr << "WARNING: could not abort. errno: " << errno << std::endl);
 
                 return false;
             }
         }
     }
+    else {
+        // success
+        lock.unlock();
+        wait_for_result();
+        return true;
+    }
     // success
     return true;
+}
+
+scheduling::UppaalExecutor::~UppaalExecutor()
+{
+    abort();
 }

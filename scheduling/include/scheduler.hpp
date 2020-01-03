@@ -47,6 +47,15 @@ class Scheduler {
         start_worker();
     }
 
+    void maybe_start()
+    {
+        if (!running()) {
+            start();
+        }
+    }
+
+    bool running() const { return executor.running(); }
+
     void abort()
     {
         if (!executor.abort())

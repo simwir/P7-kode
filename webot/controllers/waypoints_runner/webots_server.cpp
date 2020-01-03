@@ -44,52 +44,44 @@ webots_server::Server::~Server()
     client.close();
 }
 
-std::vector<Message> webots_server::Server::get_messages()
+std::optional<Message> webots_server::Server::get_message()
 {
-    std::vector<std::string> raw_messages = client->receive();
-    std::vector<Message> messages;
-    for (const auto &raw_message : raw_messages) {
-        MessageType message_type;
-        size_t split_pos = raw_message.find(",");
-        // If no ',' found we assume this to be a command without an argument.
-        if (split_pos == std::string::npos) {
-            if (raw_message == "get_state") {
-                message_type = MessageType::get_state;
-            }
-            else {
-                send_message(Message{raw_message, MessageType::not_understood});
-                std::cerr << "Recieved message not understood: " << raw_message << std::endl;
-                continue;
-            }
+    auto msg = client->receive_nonblocking();
+    if (!msg)
+        return std::nullopt;
+    std::string message = *msg;
+    MessageType message_type;
+    size_t split_pos = message.find(",");
+    // If no ',' found we assume this to be a command without an argument.
+    if (split_pos == std::string::npos) {
+        if (message == "get_state") {
+            message_type = MessageType::get_state;
+        }
+        else if (message == "done") {
+            message_type = MessageType::done;
         }
         else {
-            std::string type = raw_message.substr(0, split_pos);
-            if (type == "set_destination") {
-                message_type = MessageType::set_destination;
-            }
-            else {
-                send_message(Message{raw_message, MessageType::not_understood});
-                std::cerr << "Recieved message not understood: " << raw_message << std::endl;
-                continue;
-            }
+            send_message(Message{message, MessageType::not_understood});
+            std::cerr << "Recieved message not understood: " << message << std::endl;
+            return std::nullopt;
         }
-        messages.push_back(Message{raw_message.substr(split_pos + 1), message_type});
     }
-    return messages;
+    else {
+        std::string type = message.substr(0, split_pos);
+        std::cout << message << std::endl;
+        if (type == "set_destination") {
+            message_type = MessageType::set_destination;
+        }
+        else {
+            send_message(Message{message, MessageType::not_understood});
+            std::cerr << "Recieved message not understood: " << message << std::endl;
+            return std::nullopt;
+        }
+    }
+    return Message{message.substr(split_pos + 1), message_type};
 }
 
 void webots_server::Server::send_message(const Message &message)
 {
-    std::string payload;
-    switch (message.type) {
-    case MessageType::get_state:
-        payload = "get_state," + message.payload;
-        break;
-    case MessageType::set_destination:
-        payload = "set_destination," + message.payload;
-        break;
-    case MessageType::not_understood:
-        payload = "not_understood," + message.payload;
-    }
-    client->send(payload);
+    client->send(message.payload);
 }

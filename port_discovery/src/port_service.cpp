@@ -50,14 +50,8 @@ port_discovery::Function parse_function(const std::string &function)
 void add_robot(int id, int port, std::map<int, int> &robot_map)
 {
     std::scoped_lock l{robot_map_lock};
-    auto search = robot_map.find(id);
-    if (search == robot_map.end()) {
-        robot_map.insert(std::make_pair(id, port));
-        std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
-    }
-    else {
-        throw port_discovery::IdAlreadyDefinedException(std::to_string(id));
-    }
+    robot_map[id] = port;
+    std::cout << "Robot added with id: " << id << " and port: " << port << std::endl;
 }
 
 void get_robot(int id, const std::map<int, int> &robot_map,

@@ -20,11 +20,13 @@
 #include "order/generation_service.hpp"
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <thread>
 
 namespace order {
-GenerationService::GenerationService(int port, std::shared_ptr<Generator> generator)
-    : server(port), generator(generator){};
+GenerationService::GenerationService(int port, std::shared_ptr<Generator> generator,
+                                     int max_order_count)
+    : server(port), generator(generator), max_order_count(max_order_count){};
 
 int GenerationService::get_port()
 {
@@ -36,7 +38,18 @@ void GenerationService::parse_message(std::shared_ptr<tcp::Connection> connectio
     std::string message = connection->receive_blocking();
 
     if (message == "get_order") {
+        std::unique_lock<std::mutex> lock{order_count_mutex};
+
+        if (max_order_count > -1 && order_count >= max_order_count) {
+            connection->send("no_orders");
+            return;
+        }
+
+        order_count++;
+        lock.unlock();
+
         Order order = generator->generate_order();
+        std::cout << "Giving order: " << order.to_json().toStyledString() << std::endl;
         connection->send(order.to_json().toStyledString());
     }
     else {
@@ -55,6 +68,10 @@ void GenerationService::start()
         }
         catch (tcp::AcceptException &error) {
             std::cerr << error.what() << std::endl;
+        }
+        catch (tcp::ConnectionClosedException &_) {
+            std::cout << "Connection closed." << std::endl;
+            break;
         }
     }
 }

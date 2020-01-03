@@ -27,12 +27,16 @@
 #include <tcp/exception.hpp>
 #include <tcp/server.hpp>
 
+extern int errno;
+
 tcp::Server::Server(int in_port, int backlog)
 {
     sockaddr_in server_address;
     socklen_t length = sizeof(sockaddr);
 
+    int option = 1;
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 
     std::memset(&server_address, 0, sizeof server_address);
     server_address.sin_family = AF_INET;
@@ -78,7 +82,7 @@ std::shared_ptr<tcp::Connection> tcp::Server::accept()
 void tcp::Server::close()
 {
     if (!open || ::close(socket_fd) == -1) {
-        throw tcp::CloseException();
+        throw tcp::CloseException{errno};
     }
 
     for (auto connection : clients) {
@@ -96,4 +100,4 @@ int tcp::Server::get_port()
 tcp::Server::~Server()
 {
     close();
-};
+}

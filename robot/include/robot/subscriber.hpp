@@ -16,56 +16,55 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef ROBOT_INFO_HPP
-#define ROBOT_INFO_HPP
+#ifndef MASTER_SUBSCRIBER_HPP
+#define MASTER_SUBSCRIBER_HPP
 
-#include "util/json.hpp"
+#include "eta_extractor.hpp"
+#include "station_scheduler.hpp"
+#include "util/pollable.hpp"
 #include "waypoint_scheduler.hpp"
 
-#include <map>
-#include <string>
-#include <utility>
+#include <iostream>
+#include <mutex>
 #include <vector>
 
 namespace robot {
-
-class InvalidRobotInfo : public std::exception {
-    std::string message;
+class AsyncStationSubscriber : public scheduling::StationScheduleSubscriber,
+                               public Pollable<std::vector<int>> {
+    std::mutex mutex;
 
   public:
-    InvalidRobotInfo(const std::string &in_message) : message(in_message) {}
-    const char *what() const noexcept override { return message.c_str(); }
-};
-
-struct Point {
-    double x, y;
-};
-
-struct Info {
-    int id;
-    Point location;
-    std::vector<int> station_plan;
-    std::vector<scheduling::Action> waypoint_plan;
-    std::optional<double> eta;
-
-    Json::Value to_json() const;
-    static Info from_json(const std::string &json);
-    static Info from_json(const Json::Value &json);
-};
-
-class InfoMap {
-  public:
-    InfoMap() = default;
-    InfoMap(const std::vector<Info> &infos);
-    Json::Value to_json() const;
-    Info &operator[](int index);
-    const Info &operator[](int index) const;
-    static InfoMap from_json(const std::string &json);
-    static InfoMap from_json(const Json::Value &json);
+    AsyncStationSubscriber(std::vector<int> station_ids) : station_ids(station_ids) {}
 
   private:
-    std::map<int, Info> robot_info;
+    const std::vector<int> station_ids;
+
+    void new_schedule(const std::vector<int> &schedule) override
+    {
+        std::scoped_lock _{mutex};
+        reset(schedule);
+    }
 };
+
+class AsyncWaypointSubscriber : public scheduling::WaypointScheduleSubscriber,
+                                public Pollable<std::vector<scheduling::Action>> {
+  public:
+    AsyncWaypointSubscriber(std::vector<int> waypoint_ids) : waypoint_ids(waypoint_ids) {}
+
+  private:
+    std::mutex mutex;
+    void new_schedule(const std::vector<scheduling::Action> &schedule) override
+    {
+        std::scoped_lock _{mutex};
+        reset(schedule);
+    }
+    const std::vector<int> waypoint_ids;
+};
+
+class AsyncEtaSubscriber : public scheduling::EtaSubscriber, public Pollable<double> {
+    void new_eta(const double eta) override { reset(eta); }
+};
+
 } // namespace robot
 
 #endif

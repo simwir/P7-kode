@@ -19,9 +19,13 @@
 #ifndef RECEIVE_EXCEPTION_HPP
 #define RECEIVE_EXCEPTION_HPP
 
+#include <string>
+
 namespace tcp {
 struct CloseException : std::exception {
-    const char *what() const noexcept { return "Could not close"; }
+    const char *what() const noexcept { return message.c_str(); }
+    std::string message;
+    CloseException(int _errno) : message("Could not close. Errno: " + std::to_string(_errno)) {}
 };
 
 class MessageException : public std::exception {

@@ -29,14 +29,13 @@ target_link_libraries(scheduling
     pthread
     stdc++fs
     jsoncpp_lib
+    util
 )
 #install(FILES DESTINATION bin)
 
 configure_file(waypoint_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/waypoint_scheduling.xml COPYONLY)
-configure_file(waypoint_scheduling.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/waypoint_scheduling.q COPYONLY)
 configure_file(station_scheduling.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_scheduling.xml COPYONLY)
 configure_file(station_scheduling.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/station_scheduling.q COPYONLY)
-configure_file(get_eta.q ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/get_eta.q COPYONLY)
 
 add_executable(test_scheduler src/main.cpp)
 target_link_libraries(test_scheduler

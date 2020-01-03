@@ -146,7 +146,8 @@ int main(int argc, char **argv)
             std::cerr << "Could not open the template file: " << template_path << std::endl;
             exit(1);
         }
-        instantiate_query_template(parser, template_file, std::cout);
+        instantiate_query_template(parser.number_of_robots, ast.num_waypoints(), template_file,
+                                   std::cout);
         template_file.close();
     }
 }

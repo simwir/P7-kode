@@ -18,18 +18,34 @@ RectangleArena {
   floorTileSize 0.2 0.2
 }
 Elisa3 {
-  hidden position_0_0 7850.118521567295
-  hidden position_0_1 6879.608767432613
-  hidden linearVelocity_0 -0.018509671902406426 0.00023440260493799996 -0.012093440231340707
-  hidden angularVelocity_0 0.006666760307719385 3.0154138395639016 0.009404956593856092
-  hidden rotation_2 0 0 -1 3.839444036806234
-  hidden linearVelocity_2 0.03267515892472193 1.4053998020572718e-05 0.020351161091043905
-  hidden angularVelocity_2 4.687941501746795 3.075831863479149 -6.943043413445141
-  hidden rotation_3 0 0 1 3.3104629586247802
-  hidden linearVelocity_3 -0.06818438286260933 0.00045870566099494406 -0.04664361530691391
-  hidden angularVelocity_3 -10.120840453120078 3.2829895245961636 14.83910352857399
-  translation 0.4064282375587366 -7.18454361653062e-06 -1.06383774366156
-  rotation -0.018738741606693848 0.9998128884371628 -0.004800799718298 2.6276163683271223
+  translation -0.788809 -9.999999999999999e-06 1.134261
+  rotation 7.5511099997413215e-06 -0.999999999965743 3.3904399998838536e-06 0.662722
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.04 0
+          rotationStep 0.261799
+          fieldOfView 6.28328
+          numberOfLayers 1
+          maxRange 0.5
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 1
 }
 OilBarrel {
   translation -0.44999999999999996 0.19999999999999998 0.49
@@ -207,5 +223,6 @@ Waypoint {
   size 0.05 0.05 0.05
 }
 Robot {
+  rotationStep 0.261799
   controller "Wall_clock"
 }

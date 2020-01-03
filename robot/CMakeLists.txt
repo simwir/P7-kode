@@ -29,6 +29,7 @@ target_link_libraries(librobot
   config
   jsoncpp_lib
   scheduling
+  libcom
 )
 
 add_executable(robot src/main.cpp)

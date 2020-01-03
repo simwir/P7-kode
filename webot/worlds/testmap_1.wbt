@@ -6,8 +6,9 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 1 0 0 4.71238898038469
-  position 0.0002448707952233075 6.2573624305534645 2.272301533312027e-06
+  orientation 0.9994307089233986 0.02621209141562377 0.021241099888931705 4.920581856771787
+  position 0.2048103837823024 6.610204306315949 1.4767303266583434
+  followOrientation TRUE
 }
 TexturedBackground {
 }
@@ -17,35 +18,165 @@ RectangleArena {
   floorSize 2.5 2.5
   floorTileSize 0.2 0.2
 }
-Elisa3 {  
-  translation -0.270445 -9.853e-06 0.0800296  
-  rotation 7.5511099997413215e-06 -0.999999999965743 3.3904399998838536e-06 0.662722  
-  controller "waypoints_runner" 
-  supervisor TRUE 
-  extensionSlot [ 
-    Group { 
-      children [  
-        Lidar { 
-          translation 0 0.04 0  
-          rotationStep 0.261799 
-          fieldOfView 6.28328 
-          numberOfLayers 1  
-          maxRange 0.5  
-        } 
-        GPS { 
-          translation 0.02 0.03 0 
-          name "gps1" 
-          rotationStep 0.261799 
-        } 
-        GPS { 
-          translation -0.02 0.03 0  
-          name "gps2" 
-          rotationStep 0.261799 
-        } 
-      ] 
-    } 
-  ] 
-  id 1  
+DEF Arne Elisa3 {
+  translation 1.121395 0.028151 -1.0408549999999999
+  rotation -0.018288226325868642 0.9998264304207123 0.003556657142633552 -2.757412291297369
+  name "Elisa-3(1)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.032 0
+          rotationStep 0.261799
+          tiltAngle -0.02
+          fieldOfView 6.28328
+          numberOfLayers 10
+          maxRange 0.2
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 1
+}
+DEF Brian Elisa3 {
+  translation -0.8890469999999999 0.0629 1.021818
+  rotation 0.018288778668389207 0.9998264457124051 -0.0035495110815076157 -2.758235749119288
+  name "Elisa-3(2)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.032 0
+          rotationStep 0.261799
+          tiltAngle -0.02
+          fieldOfView 6.28328
+          numberOfLayers 10
+          maxRange 0.2
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 2
+}
+DEF Carsten Elisa3 {
+  translation 1.169708 -0.023295 -0.075311
+  rotation 0.018632692025412945 0.9998176826973196 -0.004174224915818677 -2.711450928382439
+  name "Elisa-3(3)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.032 0
+          rotationStep 0.261799
+          tiltAngle -0.02
+          fieldOfView 6.28328
+          numberOfLayers 10
+          maxRange 0.2
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 3
+}
+DEF Egner Elisa3 {
+  translation 1.1402129718062355 -1.251240948289302e-05 1.2054290064093196
+  rotation -0.018294206642847102 0.9998263069325946 0.0035606135479549516 -2.7571827813297882
+  name "Elisa-3(4)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.032 0
+          rotationStep 0.261799
+          tiltAngle -0.02
+          fieldOfView 6.28328
+          numberOfLayers 10
+          maxRange 0.2
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 4
+}
+DEF Frans Elisa3 {
+  translation -0.320698 0.020101 -0.804267
+  rotation 0.018288459193695348 0.9998247056121532 -0.004011272602485349 -2.7098651538877703
+  name "Elisa-3(5)"
+  controller "waypoints_runner"
+  supervisor TRUE
+  extensionSlot [
+    Group {
+      children [
+        Lidar {
+          translation 0 0.032 0
+          rotationStep 0.261799
+          tiltAngle -0.02
+          fieldOfView 6.28328
+          numberOfLayers 10
+          maxRange 0.2
+        }
+        GPS {
+          translation 0.02 0.03 0
+          name "gps1"
+          rotationStep 0.261799
+        }
+        GPS {
+          translation -0.02 0.03 0
+          name "gps2"
+          rotationStep 0.261799
+        }
+      ]
+    }
+  ]
+  id 5
 }
 OilBarrel {
   translation -0.44999999999999996 0.19999999999999998 0.49
@@ -70,7 +201,7 @@ DEF Station_2 Station {
 DEF Station_3 Station {
   translation -0.19 0.2 0.48
   name "wooden box(2)"
-  adjList "20,13,24,11"
+  adjList "20,16,24,11"
   id 3
 }
 DEF Station_4 Station {
@@ -106,7 +237,7 @@ DEF Station_8 Station {
 DEF Endpoint_9 Endpoint {
   translation 0.62 0.2 1.17
   name "Endpoint(1)"
-  adjList "21,20,10"
+  adjList "21,20,10,19"
   id 9
 }
 DEF Waypoint_13 Waypoint {
@@ -134,8 +265,8 @@ DEF Waypoint_15 Waypoint {
 }
 DEF Waypoint_16 Waypoint {
   id 16
-  adjList "13,14,15,20,19,3"
-  translation 0 0.09999999999999999 0.49
+  adjList "3,24,15,20"
+  translation 0 0.1 0.49
   boxColor 0 1 0
   name "waypoint(3)"
   size 0.05 0.05 0.05
@@ -175,7 +306,7 @@ DEF Waypoint_21 Waypoint {
 DEF Waypoint_22 Waypoint {
   id 22
   adjList "2,23,12,13,6"
-  translation -0.82 0.09999999999999999 -0.97
+  translation -0.82 0.1 -0.97
   boxColor 0 1 0
   name "waypoint(8)"
   size 0.05 0.05 0.05
@@ -231,7 +362,7 @@ DEF Waypoint_12 Waypoint {
 DEF Waypoint_24 Waypoint {
   id 24
   adjList "16,3,11,14,8,7,15"
-  translation 0 0.09999999999999999 0.01
+  translation 0 0.1 0.01
   boxColor 0 1 0
   name "waypoint(15)"
   size 0.05 0.05 0.05

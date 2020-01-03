@@ -30,6 +30,13 @@
 
 constexpr int BUFFER_SIZE = 256;
 
+//#define TRACEME
+#ifdef TRACEME
+#define TRACE(a) (a)
+#else
+#define TRACE(a)
+#endif
+
 ssize_t tcp::Connection::send(const std::string &message, int flags)
 {
     if (!ready) {
@@ -43,6 +50,8 @@ ssize_t tcp::Connection::send(const std::string &message, int flags)
     std::string prepped_message = "#|" + message + "|#";
 
     ssize_t bytes = ::send(fd, prepped_message.c_str(), prepped_message.length(), flags);
+
+    TRACE(std::cout << "Sending: " << message << std::endl);
 
     if (bytes == -1) {
         throw tcp::SendException(message);
@@ -59,11 +68,13 @@ std::optional<std::string> tcp::Connection::parse_message()
     end_pos = obuffer.find("|#");
 
     if (end_pos != std::string::npos) {
-        if (start_pos != 0) {
+        // end sequence without matching start
+        if (start_pos == std::string::npos) {
             throw tcp::MalformedMessageException(obuffer);
         }
-        message = obuffer.substr(start_pos + 2, end_pos - 2);
-        obuffer.erase(start_pos, end_pos + 2);
+        message = obuffer.substr(start_pos + 2, end_pos - start_pos - 2);
+        // anything between a previous end sequence and new start sequence can simply be discarded.
+        obuffer.erase(0, end_pos + 2);
         return std::optional{message};
     }
     else {
@@ -95,6 +106,7 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
 
     auto message = parse_message();
     if (message) {
+        TRACE(std::cout << "Recieved: " << message.value() << std::endl);
         return message;
     }
 
@@ -114,11 +126,17 @@ std::optional<std::string> tcp::Connection::receive(bool blocking)
                 throw tcp::ReceiveException(errno);
             }
         }
+        else if (bytes == 0) {
+            // Connection closed.
+            throw tcp::ConnectionClosedException();
+        }
 
         obuffer.append(buffer, bytes);
         message = parse_message();
         // repeat if received message was incomplete.
     } while (!message);
+
+    TRACE(std::cout << "Recieved: " << message.value() << std::endl);
 
     return message;
 }
@@ -141,14 +159,38 @@ void tcp::Connection::close()
     }
 
     if (::close(fd) == -1) {
-        throw tcp::CloseException();
+        throw tcp::CloseException(errno);
     };
 
     open = false;
+}
+
+std::string tcp::Connection::atomic_blocking_request(const std::string &msg, int flags)
+{
+    std::scoped_lock _{con_lock};
+    send(msg, flags);
+    return receive_blocking();
 }
 
 tcp::Connection::~Connection()
 {
     if (open)
         close();
+}
+
+void tcp::validate_port_format(const std::string &port)
+{
+    try {
+        // assert that we can parse the port into an int.
+        int port_id = std::stoi(port);
+        if (port_id < 0) {
+            throw tcp::InvalidPortFormat{port};
+        }
+    }
+    catch (std::invalid_argument &) {
+        throw tcp::InvalidPortFormat{port};
+    }
+    catch (std::out_of_range &) {
+        throw tcp::InvalidPortFormat{port};
+    }
 }

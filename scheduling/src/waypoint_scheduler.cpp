@@ -17,6 +17,7 @@
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <algorithm>
+#include <cassert>
 #include <exception>
 #include <iostream>
 #include <queue>
@@ -24,6 +25,9 @@
 #include <utility>
 
 #include <waypoint_scheduler.hpp>
+
+#define TRACEME
+#include "trace.def"
 
 extern int errno;
 
@@ -68,12 +72,18 @@ void scheduling::WaypointScheduler::start_worker()
     std::cerr << "WaypointScheduler: Executing..." << std::endl;
     executor.execute([&](const std::string &result) {
         std::cerr << "WaypointScheduler: Parsing..." << std::endl;
-        std::vector<scheduling::SimulationExpression> values =
-            parser.parse(result, 2); // We parse the result of the second formula
+        // The second formula contains the simulated trace.
+        std::vector<scheduling::SimulationExpression> values = parser.parse(result, 2);
 
         std::cerr << "WaypointScheduler: Composing..." << std::endl;
         std::vector<scheduling::Action> schedule = convert_result(values);
 
+        TRACE({
+            std::cerr << "WaypointScheduler: Schedule is ";
+            for (auto i : schedule) {
+                std::cerr << i << " ";
+            }
+        });
         std::cerr << "WaypointScheduler: Emitting..." << std::endl;
         notify_subscribers(schedule);
     });
@@ -96,6 +106,7 @@ std::vector<scheduling::Action> scheduling::WaypointScheduler::convert_result(
     scheduling::TimeValuePair last_cur = cur_waypoint.front();
     dest_waypoint.pop();
     scheduling::TimeValuePair last_dest = dest_waypoint.front();
+    assert(dest_waypoint.front().value == -1);
     dest_waypoint.pop();
     hold.pop();
 
@@ -147,7 +158,13 @@ void scheduling::WaypointScheduler::notify_subscribers(
 {
     for (auto subscriber : subscribers) {
         if (auto sub = subscriber.lock()) {
-            sub->newSchedule(schedule);
+            sub->new_schedule(schedule);
         }
     }
+}
+
+std::ostream &scheduling::operator<<(std::ostream &os, const scheduling::Action &action)
+{
+    return os << (action.type == scheduling::ActionType::Hold ? "hold" : "wayp") << ' '
+              << action.value;
 }

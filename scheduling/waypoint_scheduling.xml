@@ -122,7 +122,8 @@ int passing_time() {
 			<label kind="guard" x="-161" y="144">num_in_queue &gt; 1 &amp;&amp;
 x &gt;= passing_time()</label>
 			<label kind="synchronisation" x="-161" y="178">go[front()]!</label>
-			<label kind="assignment" x="-161" y="195">dequeue()</label>
+			<label kind="assignment" x="-161" y="195">dequeue(), 
+x = 0</label>
 			<nail x="-161" y="144"/>
 			<nail x="-25" y="144"/>
 		</transition>

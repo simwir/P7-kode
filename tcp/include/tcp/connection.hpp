@@ -20,12 +20,25 @@
 #define TCP_CONNECTION_HPP
 
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
 
 namespace tcp {
+
+class ConnectException : public std::exception {
+    std::string _what;
+
+  public:
+    ConnectException(const std::string &msg) : _what("ConnectException: " + msg) {}
+
+    const char *what() const noexcept { return _what.c_str(); }
+};
+
+struct ConnectionClosedException : public std::exception {
+};
 
 class SendException : public std::exception {
     std::string message;
@@ -61,6 +74,17 @@ struct MalformedMessageException : public std::exception {
     const char *what() const noexcept { return message.c_str(); }
 };
 
+class InvalidPortFormat : public std::exception {
+    std::string message;
+
+  public:
+    InvalidPortFormat(const std::string &message) : message(message) {}
+
+    const char *what() const noexcept { return message.c_str(); }
+};
+
+void validate_port_format(const std::string &port);
+
 class Connection : public std::enable_shared_from_this<Connection> {
   public:
     Connection(int fd) : fd(fd) { ready = true; }
@@ -70,6 +94,8 @@ class Connection : public std::enable_shared_from_this<Connection> {
     std::string receive_blocking();
     ssize_t send(const std::string &message, int flags = 0);
     void close();
+
+    std::string atomic_blocking_request(const std::string &message, int flags = 0);
 
     bool closed();
 
@@ -83,6 +109,7 @@ class Connection : public std::enable_shared_from_this<Connection> {
     std::string obuffer;
     bool open = true;
     bool ready;
+    std::mutex con_lock;
 
     friend class Server;
 };

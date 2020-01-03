@@ -16,15 +16,51 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #ifndef ORCHESTRATOR_HPP
 #define ORCHESTRATOR_HPP
 
-#include <filesystem>
-
+#include "communication/info.hpp"
 #include "config/config.hpp"
-#include "info.hpp"
+#include "robot/clock.hpp"
+#include "robot/options.hpp"
+#include "robot/subscriber.hpp"
+#include "scheduling.hpp"
+#include "util/euclid.hpp"
+#include "wbt-translator/apsp.hpp"
 #include "wbt-translator/webots_parser.hpp"
 #include <tcp/client.hpp>
+
+#include <filesystem>
+#include <fstream>
+#include <optional>
+
+const std::filesystem::path dynamic_conf = "dynamic_config.json";
+const std::filesystem::path static_conf = "static_config.json";
+
+#define NEXT_WAYPOINT "next_waypoint"
+#define NEXT_STATION "next_station"
+#define ROBOT_INFO_MAP "robot_info_map"
+#define SELF_STATE "self_state"
+#define STATION_ETA "station_eta"
+#define VISITED_STATIONS "visited_stations"
+#define VISITED_WAYPOINTS "visited_waypoints"
+
+#define STATIONS "stations"
+#define END_STATIONS "end_stations"
+#define VIAS "vias"
+
+#define ORDER_LOG_DELIM ";"
+#define ORDER_LOG_HEADER                                                                           \
+    "receive time" ORDER_LOG_DELIM "completion time" ORDER_LOG_DELIM                               \
+    "completion duration" ORDER_LOG_DELIM "stations in order"
+
+constexpr int UPDATE_INTERVAL_MS = 1000;
+
+// constant parameters for the UPPAAL model.
+constexpr int STATION_DELAY = 6;    // time the robots remain at each station
+constexpr int WAYPOINT_DELAY = 3;   // time the robots remain at each waypoint
+constexpr double UNCERTAINTY = 1.1; // statistical uncertainty on all times.
 
 namespace robot {
 class RecievedMessageException : public std::exception {
@@ -48,26 +84,143 @@ class CannotOpenFileException : public std::exception {
 
 class Orchestrator {
   public:
-    Orchestrator(const std::string &robot_host, const std::string &broadcast_host, int robot_id,
-                 std::istream &world_file);
-    void load_webots_to_config(const std::filesystem::path &input_file);
-    void request_broadcast_info();
-    void send_robot_info(int robot_id, const Info &robot_info);
-    std::string recv_broadcast_info();
+    Orchestrator(int robot_id, std::istream &world_file, Options options);
+    void load_webots_to_config();
+    void get_dynamic_state();
+    void update_dynamic_state();
 
-    void write_static_config(const std::filesystem::path &path);
-    void write_dynamic_config(const std::filesystem::path &path);
+    // communication module functions
+    void send_robot_info();
+    // get information about other robots.
+    void request_robot_info();
+    std::string receive_robot_info();
 
-  private:
-    void add_waypoint_matrix(const AST &ast, int waypoint_count);
-    void add_station_matrix(const AST &ast, int waypoint_count);
+    void request_controller_info();
+    std::string receive_controller_info();
+
+    void request_order();
+    std::vector<int> receive_order();
+
+    std::optional<std::vector<int>> get_new_order();
+
+    void write_static_config();
+    void write_dynamic_config();
+    void create_query_file();
+
+    void set_robot_destination(int);
+
+    void main_loop();
+
+    void add_waypoint_matrix(const AST &ast);
+    void add_next_waypoint_matrix(const AST &ast, const apsp_result &result);
+    void add_station_matrix(const AST &ast, const apsp_result &result);
     void dump_waypoint_info(const AST &ast);
 
+  private:
+    // communication stuff
+    const int id;
+    const Options options;
     config::Config static_config;
     config::Config dynamic_config;
-    std::unique_ptr<tcp::Client> webot_client;
-    tcp::Client broadcast_client;
+    std::unique_ptr<tcp::Client> robot_client;
+    std::unique_ptr<robot::Clock> clock_client;
+    tcp::Client com_module;
+
+    // static state information.
     Parser webots_parser;
+    AST ast;
+    std::vector<int> stations;
+    std::vector<int> end_stations;
+    std::vector<int> vias;
+    std::vector<int> waypoints;
+
+    // dynamic state information
+    void communicate_state();
+    communication::Info current_state;
+    communication::InfoMap robot_info;
+    size_t last_num_robots = 0;
+    robot::ControllerState controller_state;
+
+    // location relative to the waypoint graph
+    std::optional<scheduling::Action> get_next_waypoint();
+    scheduling::Action current_waypoint;
+    scheduling::Action next_waypoint;
+    int next_station;
+
+    // schedulers
+    scheduling::StationScheduler station_scheduler;
+    scheduling::WaypointScheduler waypoint_scheduler;
+    scheduling::EtaExtractor eta_extractor;
+    std::shared_ptr<AsyncStationSubscriber> station_subscriber;
+    std::shared_ptr<AsyncWaypointSubscriber> waypoint_subscriber;
+    std::shared_ptr<AsyncEtaSubscriber> eta_subscriber;
+    void start_eta_calculation();
+
+    void dump_order(const std::vector<int> &order, std::ostream &os)
+    {
+        auto it = order.begin(), e = order.end();
+        while (it != e) {
+            os << *it++;
+            if (it != e) {
+                os << ",";
+            }
+        }
+    }
+
+    // actions and order information
+    bool do_next_action();
+    void set_station_visited(int station);
+    std::vector<int> order;
+    std::vector<int> last_order;
+    int order_begun_time = -1;
+    bool ending_last_order = false;
+    bool final_order = false;
+    std::ofstream order_log;
+    void log_order_completion();
+
+    // visited waypoints since last station we were at.
+    std::vector<int> visited_waypoints;
+
+    bool running;
+
+    int current_time = 0;
+    int eta_start_time = 0;
+    int hold_until = 0;
+
+    int last_update_time;
+
+    int get_closest_waypoint(std::function<bool(Waypoint)> pred);
+    int get_closest_waypoint()
+    {
+        return get_closest_waypoint([](auto &&) { return true; });
+    }
+    void prepend_waypoint_to_schedule(scheduling::Action act);
+
+    void clear_visited_waypoints();
+
+    void create_new_station_schedule();
+
+    bool is_station(scheduling::Action act)
+    {
+        return act.type == scheduling::ActionType::Waypoint && is_station(act.value);
+    }
+
+    bool is_end_station(scheduling::Action act)
+    {
+        return act.type == scheduling::ActionType::Waypoint && is_end_station(act.value);
+    }
+
+    bool is_end_station(int waypoint_id)
+    {
+        return ast.nodes.at(waypoint_id).waypointType == WaypointType::eEndPoint;
+    }
+
+    bool is_station(int waypoint_id)
+    {
+        return ast.nodes.at(waypoint_id).waypointType == WaypointType::eStation;
+    }
+
+    double dist_to_next_waypoint();
 };
 } // namespace robot
 #endif
